@@ -13,7 +13,7 @@ body {
     background-color: #ffffff;
 }
 
-/* Header */
+/* ================= HEADER ================= */
 .header {
     background-color: #12245c;
     padding: 10px 20px;
@@ -27,7 +27,7 @@ body {
     width: 100%;
 }
 
-/* Menu */
+/* Burger Menu */
 .burger {
     background: none;
     border: none;
@@ -35,26 +35,36 @@ body {
     font-size: 16px;
     cursor: pointer;
     font-weight: bold;
-    margin-left: auto; 
+    margin-left: auto;
     display: flex;
     align-items: center;
     white-space: nowrap;
 }
 
-/* Logo Section */
+/* ================= LOGO SECTION ================= */
 .logo-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 0;              /* divider handles spacing */
-    flex-wrap: nowrap;  /* IMPORTANT for dividers */
+    flex-wrap: nowrap;
     margin-top: 40px;
 }
 
+/* Clickable wrapper */
+.logo-link {
+    display: inline-block;
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Logo box */
 .logo-box {
-    position: relative; /* REQUIRED for ::after */
+    position: relative;
+    z-index: 1;
     text-align: center;
-    padding: 0 100px;    /* SPACE for vertical bar */
+    padding: 0 80px;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .logo-box img {
@@ -69,6 +79,12 @@ body {
     font-weight: bold;
 }
 
+/* Hover effect */
+.logo-link:hover .logo-box {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
 /* Vertical divider */
 .logo-box:not(:last-child)::after {
     content: "";
@@ -78,9 +94,38 @@ body {
     height: 200%;
     width: 2px;
     background-color: black;
+    pointer-events: none; /* CRITICAL: do not block clicks */
 }
 
-/* Overlay */
+/* ================= MAIN CONTENT ================= */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 15px;
+    text-align: center;
+}
+
+.main h2 {
+    margin-bottom: 25px;
+    color: #12245c;
+}
+
+/* ================= FOOTER ================= */
+.footer {
+    background-color: #12245c;
+    color: white;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* ================= OVERLAY ================= */
 .overlay {
     position: fixed;
     inset: 0;
@@ -91,7 +136,12 @@ body {
     z-index: 10;
 }
 
-/* Sidebar */
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ================= SIDEBAR ================= */
 .sidebar {
     position: fixed;
     top: 0;
@@ -103,6 +153,10 @@ body {
     padding: 20px;
     transition: right 0.3s ease;
     z-index: 11;
+}
+
+.sidebar.active {
+    right: 0;
 }
 
 .sidebar nav {
@@ -131,80 +185,27 @@ body {
     float: right;
 }
 
-/* Active Status */
-.sidebar.active {
-    right: 0;
-}
-
-.overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Main Content */
-.main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 30px 15px;
-    text-align: center;
-}
-
-.main h2 {
-    margin-bottom: 25px;
-    color: #12245c;
-}
-
-/* Footer */
-.footer {
-    background-color: #12245c;
-    color: white;
-    height: 40px;
-
-    display: flex;
-    justify-content: center; /* horizontal */
-    align-items: center;     /* vertical */
-
-    font-size: 12px;
-    text-align: center;
-}
-
-/* Mobile Responsive */
+/* ================= MOBILE ================= */
 @media (max-width: 600px) {
 
-.header-content {
-    flex-direction: column;
-    text-align: center;
-}
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
 
-.logo {
-     width: 40px;
-}
+    .header h1 {
+        font-size: 16px;
+    }
 
-.header h1 {
-     font-size: 16px;
-}
+    .logo-container {
+        flex-wrap: wrap;
+    }
 
-.main h2 {
-    font-size: 18px;
-}
+    .logo-box {
+        padding: 20px 0;
+    }
 
-.login-box {
-    padding: 15px;
-}
-
-.login-box label {
-    font-size: 13px;
-}
-
-.login-box input {
-    font-size: 14px;
-    padding: 12px;
-}
-
-.login-box button {
-    font-size: 15px;
-}
+    .logo-box:not(:last-child)::after {
+        display: none;
+    }
 }
