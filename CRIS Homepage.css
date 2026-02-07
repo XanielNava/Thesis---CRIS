@@ -83,6 +83,11 @@ body {
 .logo-link:hover .logo-box {
     transform: translateY(-5px) scale(1.05);
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+    background-color: gray;
+}
+
+.logo-link:hover img {
+    filter: brightness(1.15);
 }
 
 /* Vertical divider */
@@ -134,11 +139,13 @@ body {
     visibility: hidden;
     transition: 0.3s;
     z-index: 10;
+    pointer-events: none;
 }
 
 .overlay.active {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
 }
 
 /* ================= SIDEBAR ================= */
