@@ -83,7 +83,7 @@ body {
 .logo-link:hover .logo-box {
     transform: translateY(-5px) scale(1.05);
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
-    background-color: gray;
+    background-color: lightgray;
 }
 
 .logo-link:hover img {
