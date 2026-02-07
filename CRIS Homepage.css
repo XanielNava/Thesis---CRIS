@@ -41,6 +41,45 @@ body {
     white-space: nowrap;
 }
 
+/* Logo Section */
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0;              /* divider handles spacing */
+    flex-wrap: nowrap;  /* IMPORTANT for dividers */
+    margin-top: 40px;
+}
+
+.logo-box {
+    position: relative; /* REQUIRED for ::after */
+    text-align: center;
+    padding: 0 100px;    /* SPACE for vertical bar */
+}
+
+.logo-box img {
+    width: 200px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.logo-box p {
+    font-size: 20px;
+    color: #000;
+    font-weight: bold;
+}
+
+/* Vertical divider */
+.logo-box:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: -50%;
+    height: 200%;
+    width: 2px;
+    background-color: black;
+}
+
 /* Overlay */
 .overlay {
     position: fixed;
@@ -120,8 +159,16 @@ body {
 
 /* Footer */
 .footer {
-    height: 40px;
     background-color: #12245c;
+    color: white;
+    height: 40px;
+
+    display: flex;
+    justify-content: center; /* horizontal */
+    align-items: center;     /* vertical */
+
+    font-size: 12px;
+    text-align: center;
 }
 
 /* Mobile Responsive */
