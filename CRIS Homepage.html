@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="CRIS Homepage.css">
+</head>
+
+<body>
+<!-- Header -->
+     <header class="header">
+        <div class="header-content">
+            <h1>Community-Centric Rabies Intelligence System</h1>
+            <button class="burger" onclick="openMenu()">☰ Menu</button>
+        </div>
+     </header>
+
+    <!-- Overlay -->
+     <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+    <!-- Sidebar -->
+     <aside class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="closeMenu()">✕</button>
+
+        <nav>
+            <a href="#">Home</a>
+            <a href="CRIS Login.html">Admin Access Portal</a>
+            <a href="CRIS Reports.html">Reports</a>
+            <a href="About CRIS.html">About CRIS</a>
+        </nav>
+     </aside> 
+
+    <!-- Footer -->
+     <footer class="footer"></footer>
+
+     <script src="CRIS Login.js"></script>
+</body>
+</html>

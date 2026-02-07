@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Access Portal</title>
+    <link rel="stylesheet" href="CRIS Login.css">
+</head>
+
+<body>
+    <!-- Header -->
+     <header class="header">
+        <div class="header-content">
+            <img src="images/CRIS logo login.png" alt="CRIS logo" class="logo">
+            <h1>CRIS: Community-Centric Rabies Intelligence System</h1>
+
+            <button class="burger" onclick="openMenu()">☰ Menu</button>
+        </div>
+     </header>
+
+    <!-- Overlay -->
+     <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+    <!-- Sidebar -->
+     <aside class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="closeMenu()">✕</button>
+
+        <nav>
+            <a href="CRIS Homepage.html">Home</a>
+            <a href="#">Admin Access Portal</a>
+            <a href="CRIS Reports.html">Reports</a>
+            <a href="About CRIS.html">About CRIS</a>
+        </nav>
+     </aside> 
+
+    <!-- Main Content -->
+     <main class="main">
+        <h2> ADMIN ACCESS PORTAL</h2>
+
+        <div class="login-box">
+            <label>Email</label>
+            <input type="email" placeholder="Enter Email">
+
+            <label>Password</label>
+            <input type="password" placeholder="Enter Password">
+
+            <button>Sign In</button>
+
+            <a href="#" class="forgot">Forgot Password?</a>
+        </div>
+     </main>     
+
+    <!-- Footer -->
+     <footer class="footer"></footer>
+
+    <script src="CRIS Login.js"></script>
+</body>
+</html>

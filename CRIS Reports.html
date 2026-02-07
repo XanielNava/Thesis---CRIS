@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report</title>
+    <link rel="stylesheet" href="CRIS Reports.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <button class="burger" onclick="openMenu()">☰ Menu</button>
+        </div>
+    </header>
+
+    <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="closeMenu()">✕</button>
+        <nav>
+            <a href="CRIS Homepage.html">Home</a>
+            <a href="CRIS Login.html">Admin Access Portal</a>
+            <a href="#">Reports</a>
+            <a href="About CRIS.html">About CRIS</a>
+        </nav>
+    </aside> 
+
+    <main class="content-area">
+        <div class="contact-card">
+            <h1 class="form-header">Report Animal Bite</h1>
+            <hr class="form-divider">
+            
+            <form id="contactForm" class="grid-form">
+                <div class="input-group">
+                    <label>First Name</label>
+                    <input type="text" name="firstName">
+                </div>
+                <div class="input-group">
+                    <label>Last Name <span class="required">*</span></label>
+                    <input type="text" name="lastName" required>
+                </div>
+
+                <div class="input-group">
+                    <label>E-mail</label>
+                    <input type="email" name="email">
+                </div>
+                <div class="input-group">
+                    <label>Business Phone</label>
+                    <input type="tel" name="phone">
+                </div>
+
+                <div class="input-group">
+                    <label>Company Name <span class="required">*</span></label>
+                    <input type="text" name="company" required>
+                </div>
+                <div class="input-group">
+                    <label>Job Title</label>
+                    <input type="text" name="jobTitle">
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Street 1</label>
+                    <input type="text" name="street">
+                </div>
+
+                <div class="input-group">
+                    <label>City</label>
+                    <input type="text" name="city">
+                </div>
+                <div class="input-group">
+                    <label>State/Province</label>
+                    <input type="text" name="state">
+                </div>
+
+                <div class="input-group">
+                    <label>ZIP/Postal Code</label>
+                    <input type="text" name="zip">
+                </div>
+                <div class="input-group">
+                    <label>Country/Region</label>
+                    <input type="text" name="country">
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Topic <span class="required">*</span></label>
+                    <input type="text" name="topic" required>
+                </div>
+                
+                <div class="form-footer full-width">
+                    <button type="submit" class="submit-btn">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer"></footer>
+
+    <script src="CRIS Login.js"></script></body>
+</html>
