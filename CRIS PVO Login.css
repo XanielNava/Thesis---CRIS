@@ -133,6 +133,26 @@ body {
     border-radius: 6px;
     text-align: left;
 }
+.logo-link {
+    display: block;  
+    margin: 0 auto 20px auto; 
+    text-decoration: none;
+    width: 150px; 
+}
+
+.login-logo {
+  display: block;
+  margin: 0 auto 20px auto;
+  width: 150px;
+  transition: all 0.3s ease;  
+  border: none;
+}
+
+.logo-link:hover .login-logo {
+  transform: scale(1.1) translateY(-3px);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
 
 /* Input Fields */
 .login-box label {
