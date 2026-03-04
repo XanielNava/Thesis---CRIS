@@ -199,21 +199,30 @@ select:focus {
     font-size: 13px;
 }
 
-/* Button */
-.login-box button {
+.button {
+    display: block;  
     width: 100%;
     padding: 12px;
-    background-color: #2fb6ad;
-    border: none;
+    margin-top: 15px;
+
+    background-color: #2fa89a;
     color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.25s ease;
+    text-align: center;
+    text-decoration: none;
+
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+
+    transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
-.login-box button:hover {
-    background-color: #239a93;
+.button:hover {
+    background-color: #258f84;
+}
+
+.button:active {
+    transform: scale(0.98);
 }
 
 /* Forgot Password */
