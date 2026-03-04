@@ -1,0 +1,221 @@
+:root {
+    --sidebar-bg: #1a234e;
+    --main-bg: #19b2a6;
+    --card-bg: #ffffff;
+    --active-tab: #b6e3df;
+    --text-dark: #333;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: var(--main-bg);
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Logo */
+.logo-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+.logo-image a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 200px;
+    background-color: var(--sidebar-bg);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 10px;
+}
+
+.logo-section {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 11px;
+}
+
+.logo-circle {
+    width: 50px;
+    height: 50px;
+    border: 2px solid white;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.menu {
+    flex-grow: 1;
+}
+
+.menu-item {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 8px;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--active-tab);
+    color: var(--sidebar-bg);
+    font-weight: bold;
+    cursor: pointer;
+    text-align: left;
+    font-size: 12px;
+}
+
+.menu-item:hover {
+    background-color: #6f8f8d
+}
+
+.menu-item.active {
+    background-color: #f0f0f0;
+}
+
+.footer-nav {
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 20px;
+}
+
+/* Main Content Styling */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.user-profile-top {
+    background: white;
+    padding: 5px 15px;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    color: #333;
+    font-size: 10px;
+}
+
+.profile-icon {
+    width: 30px;
+    height: 30px;
+    background: #ccc;
+    border-radius: 50%;
+    margin-left: 10px;
+}
+
+.welcome-bar {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    border-bottom: 1px solid white;
+    margin-bottom: 20px;
+}
+
+.avatar-circle {
+    width: 35px;
+    height: 35px;
+    background: white;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+/* Content Grid Layout */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 20px;
+}
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.metric-card {
+    text-align: center;
+}
+
+.metric-card h3 {
+    font-size: 12px;
+    margin: 0 0 10px;
+    color: #555;
+}
+
+.metric-card .value {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.full-width {
+    height: 250px;
+    margin-bottom: 20px;
+}
+
+/* Calendar Styling */
+.calendar-card {
+    background: white;
+    border-radius: 8px;
+    height: 400px;
+    overflow: hidden;
+}
+
+.calendar-header {
+    background: #f8f8f8;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.calendar-days {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 5px;
+}
+
+.day {
+    text-align: center;
+    font-size: 12px;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.day span { font-size: 10px; color: #888; }
+
+.day.active {
+    background: var(--sidebar-bg);
+    color: white;
+}
