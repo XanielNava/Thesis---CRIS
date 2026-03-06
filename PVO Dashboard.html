@@ -26,8 +26,15 @@
             
             <div class="footer-nav">
                 <button class="menu-item alt">Settings</button>
-                <button class="menu-item alt">Logout</button>
+                <button id="logout-btn" class="menu-item alt">Logout</button>
             </div>
+            <script>
+                document.getElementById('logout-btn').addEventListener('click', function() {
+                    // Logout functionality can be implemented here
+                    window.location.href = "CRIS Homepage.html";
+                    alert('Your logging out...'); // Placeholder for logout action
+                });
+            </script>
         </aside>
 
         <main class="main-content">
