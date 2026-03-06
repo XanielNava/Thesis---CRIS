@@ -1,0 +1,199 @@
+:root{
+--sidebar:#1a2b5c;
+--main:#18b4a6;
+--card:#ffffff;
+}
+
+body{
+margin:0;
+font-family:Arial, sans-serif;
+background:var(--main);
+}
+
+.container{
+display:flex;
+height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+width:210px;
+background:var(--sidebar);
+color:white;
+display:flex;
+flex-direction:column;
+padding:15px;
+}
+
+.logo{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:25px;
+font-size:11px;
+}
+
+.logo img{
+width:40px;
+height:40px;
+}
+
+.menu{
+flex:1;
+}
+
+.menu a{
+display:block;
+background:#d7f1ee;
+margin-bottom:10px;
+padding:8px;
+border-radius:4px;
+font-size:12px;
+text-decoration:none;
+color:#000;
+font-weight:bold;
+}
+
+.menu a:hover{
+background:#a7d8d3;
+}
+
+.menu a.active{
+background:white;
+}
+
+.footer-nav{
+margin-top:auto;
+}
+
+.footer-nav a{
+display:block;
+background:#d7f1ee;
+margin-top:8px;
+padding:8px;
+border-radius:4px;
+font-size:12px;
+text-decoration:none;
+color:black;
+}
+
+/* MAIN CONTENT */
+
+.main{
+flex:1;
+padding:20px;
+}
+
+.page-title{
+color:white;
+font-size:28px;
+font-weight:bold;
+border-bottom:2px solid rgba(255,255,255,0.4);
+padding-bottom:5px;
+margin-bottom:15px;
+}
+
+/* CARD */
+
+.card{
+background:var(--card);
+border-radius:5px;
+padding:10px;
+height:85%;
+display:flex;
+flex-direction:column;
+}
+
+/* TOPBAR */
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
+}
+
+.search{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.search input{
+padding:5px;
+font-size:12px;
+}
+
+.add-btn{
+background:#1ea3a1;
+color:white;
+border:none;
+padding:6px 10px;
+font-size:12px;
+cursor:pointer;
+border-radius:3px;
+}
+
+.export{
+display:flex;
+gap:5px;
+}
+
+.export button{
+font-size:11px;
+padding:4px 6px;
+cursor:pointer;
+}
+
+/* TABLE */
+
+table{
+width:100%;
+border-collapse:collapse;
+font-size:12px;
+}
+
+th{
+text-align:left;
+border-bottom:1px solid #ccc;
+padding:6px;
+}
+
+td{
+padding:6px;
+}
+
+/* STATUS BADGES */
+
+.badge{
+padding:3px 6px;
+border-radius:3px;
+color:white;
+font-size:11px;
+font-weight:bold;
+}
+
+.vaccinated{
+background:#21c43c;
+}
+
+.positive{
+background:#ff2c2c;
+}
+
+/* PAGINATION */
+
+.pagination{
+margin-top:auto;
+display:flex;
+justify-content:flex-end;
+gap:5px;
+padding-top:10px;
+}
+
+.pagination button{
+padding:3px 6px;
+font-size:11px;
+cursor:pointer;
+}

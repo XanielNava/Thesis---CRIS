@@ -25,12 +25,6 @@ body {
     margin-bottom: 10px;
 }
 
-.logo-image a {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
 /* Sidebar Styling */
 .sidebar {
     width: 200px;
@@ -61,30 +55,36 @@ body {
 
 .menu {
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
+/* FIXED MENU ITEMS */
 .menu-item {
+    display: block;              /* important for <a> */
     width: 100%;
     padding: 10px;
     margin-bottom: 8px;
-    border: none;
     border-radius: 4px;
     background-color: var(--active-tab);
     color: var(--sidebar-bg);
     font-weight: bold;
-    cursor: pointer;
     text-align: left;
     font-size: 12px;
+    text-decoration: none;      /* remove underline */
+    box-sizing: border-box;
+    transition: background 0.2s;
 }
 
 .menu-item:hover {
-    background-color: #6f8f8d
+    background-color: #6f8f8d;
 }
 
 .menu-item.active {
     background-color: #f0f0f0;
 }
 
+/* Footer Navigation */
 .footer-nav {
     border-top: 1px solid rgba(255,255,255,0.2);
     padding-top: 20px;
@@ -213,7 +213,10 @@ body {
     border-radius: 4px;
 }
 
-.day span { font-size: 10px; color: #888; }
+.day span {
+    font-size: 10px;
+    color: #888;
+}
 
 .day.active {
     background: var(--sidebar-bg);
