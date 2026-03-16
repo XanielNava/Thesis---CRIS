@@ -164,11 +164,12 @@ body {
 
 .login-box input {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 4px;
-    border: 1px solid #cfcfcf;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    height: 40px;
+    padding: 12px 25px;
+    background-color: #ffffff;
+    border: 1.5px solid #cfcfcf;
+    border-radius: 8px;
+    font-size: large;
 }
 
 .login-box input:hover {
@@ -219,35 +220,15 @@ select:focus {
     font-size: 13px;
 }
 
-/* .button {
-    display: block;        
-    width: 100%;
-    padding: 12px;
-    margin-top: 15px;
-
-    background-color: #2fa89a; 
-    color: white;
-    text-align: center;
-    text-decoration: none;
-
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-
-    transition: background-color 0.3s ease, transform 0.1s ease;
-} */
  .button {
-    display: inline-block;  /* CHANGED: was 'block' */
-    width: auto;           /* CHANGED: was '100%' */
-    padding: 12px;
+    background-color: #2fb6ad;
+    color: rgb(255, 255, 255);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    cursor: pointer;
     margin-top: 15px;
-    background-color: #2fa89a; 
-    color: white;
-    text-align: center;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 20px;
     transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
@@ -259,6 +240,12 @@ select:focus {
 
 .button:active {
     transform: scale(0.98);
+}
+.button-container {
+    display: flex;
+    gap: 100px;        /* Gap between buttons */
+    justify-content: space-between;  /* Pushes them to edges */
+    /* OR use justify-content: center; to center them together */
 }
 
 /* Forgot Password */
