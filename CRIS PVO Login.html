@@ -1,79 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Access Portal</title>
     <link rel="stylesheet" href="CRIS PVO Login.css">
     <link rel="icon" href="images/CRIS icon.jpg" type="image/x-icon">
-    <script src="Menu.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
 </head>
 
 <body>
     <!-- Header -->
-     <header class="header">
+    <header class="header">
         <div class="header-content">
             <img src="images/CRIS logo login.png" alt="CRIS logo" class="logo">
             <h1>CRIS: Community-Centric Rabies Intelligence System</h1>
-
             <button class="burger" onclick="openMenu()">☰ Menu</button>
         </div>
-     </header>
+    </header>
 
     <!-- Overlay -->
-     <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+    <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
     <!-- Sidebar -->
-     <aside class="sidebar" id="sidebar">
+    <aside class="sidebar" id="sidebar">
         <button class="close-btn" onclick="closeMenu()">✕</button>
-
         <nav>
             <a href="CRIS Homepage.html">Home</a>
             <a href="#">Admin Access Portal</a>
             <a href="CRIS Reports.html">Reports</a>
             <a href="About CRIS.html">About CRIS</a>
         </nav>
-     </aside> 
+    </aside>
 
     <!-- Main Content -->
-     <main class="main">
+    <main class="main">
         <h2>PVO ADMIN ACCESS PORTAL</h2>
 
         <div class="login-box">
-             <a href="index.html" class="logo-link">
+            <a href="index.html" class="logo-link">
                 <img src="images/pvo-logo.png" alt="PVO logo" class="login-logo">
             </a>
-            <label>Email</label>
-            <input type="email" placeholder="Enter Email">
 
-            <label>Password</label>
-            <input type="password" placeholder="Enter Password">
+            <form id="loginForm">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter Email" required>
 
-            <label>Designation</label>
-            <select name="designation">
-                <option value="admin">Administrator</option>
-                <option value="vet">Veterinary Officer</option>
-                <option value="health">Health Officer</option>
-            </select>
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter Password" required>
 
-            <div class="button-container">
-                <button class="button" onclick="window.location.href='index.html'">Back</button>
-                <button class="button" onclick="window.location.href='PVO Dashboard.html'">Login</button>
-            </div>
-            
-       <div class="auth-links">
-        <a href="CRIS Signup.html" class="signup">Create Account</a>
-        <a href="#" class="forgot">Forgot Password?</a>
+                <label for="designation">Designation</label>
+                <select id="designation" name="designation" required>
+                    <option value="">Select Designation</option>
+                    <option value="Administrator">Administrator</option>
+                    <option value="Veterinary Officer">Veterinary Officer</option>
+                    <option value="Health Officer">Health Officer</option>
+                </select>
+
+                <div class="button-container">
+                    <button type="button" id="backBtn" onclick="window.location.href='index.html'">Back</button>
+                    <button type="submit" id="loginBtn">Login</button>
+                </div>
+
+                <div class="auth-links">
+                    <a href="CRIS Signup.html" class="signup">Create Account</a>
+                    <a href="#" class="forgot">Forgot Password?</a>
+                </div>
+            </form>
         </div>
 
         <script type="module" src="PVO Login.js"></script>
-     </main>     
+    </main>
 
     <!-- Footer -->
-     <footer class="footer"></footer>
-
+    <footer class="footer"></footer>
 </body>
 </html>

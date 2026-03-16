@@ -1,6 +1,7 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getFirestore, collection, addDoc }from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
   authDomain: "cris-database-da989.firebaseapp.com",
@@ -13,72 +14,75 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
 document.getElementById("regButton").addEventListener("click", getAllInputs);
 
- function getAllInputs(regForm) {
-                    const lastName = document.getElementById("lastName").value;
-                    const firstName = document.getElementById("firstName").value;
-                    const middleInitial = document.getElementById("middleInitial").value;
-                    const suffix = document.getElementById("suffix").value;
-                    const email = document.getElementById("email").value;
-                    const password = document.getElementById("password").value;
-                    const confirmPassword = document.getElementById("confirmPassword").value;
-                    const address = document.getElementById("address").value;
-                    const contactNumber = document.getElementById("contactNumber").value;
-                    const dateOfBirth = document.getElementById("dateOfBirth").value;
-                    const designation = document.getElementById("designation").value;
-                    
-                    // console.log("Last Name:", lastName);
-                    // console.log("First Name:", firstName);
-                    // console.log("middleInitial:", middleInitial);
-                    // console.log("Suffix:", suffix);
-                    // console.log("Email:", email);
-                    // console.log("Password:", password);
-                    // console.log("Confirm Password:", confirmPassword);
-                    // console.log("Address:", address);
-                    // console.log("Contact Number:", contactNumber);
-                    // console.log("Date of Birth:", dateOfBirth);
-                    // console.log("Position:", position);
-                  
-                    if (password !== confirmPassword) {
-                        alert("Passwords do not match. Please try again.");
-                        return;
-                    }
-                    if (password.length < 8) {
-                        alert("Password must be at least 8 characters long. Please try again.");
-                        return;
-                    }
-                    if (
-                        lastName === "" || firstName === "" || middleInitial === "" || email === "" ||password === "" || confirmPassword === ""|| address === "" || contactNumber === "" || dateOfBirth === "" || designation === ""
-                    
-                    ) {
-                        alert("Please fill in all the required fields.");
-                        return;   
-                    }
-                    else {
-                        alert("Registration successful!");
-                        // Here you can add code to submit the form data to your server or database
-                    }
+async function getAllInputs() {
+    const lastName = document.getElementById("lastName").value;
+    const firstName = document.getElementById("firstName").value;
+    const middleInitial = document.getElementById("middleInitial").value;
+    const suffix = document.getElementById("suffix").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const address = document.getElementById("address").value;
+    const contactNumber = document.getElementById("contactNumber").value;
+    const dateOfBirth = document.getElementById("dateOfBirth").value;
+    const designation = document.getElementById("designation").value;
+    
+    // Validation
+    if (password !== confirmPassword) {
+        alert("Passwords do not match. Please try again.");
+        return;
+    }
+    if (password.length < 8) {
+        alert("Password must be at least 8 characters long.");
+        return;
+    }
+    if (!lastName || !firstName || !email || !password || !address || !contactNumber || !dateOfBirth || !designation) {
+        alert("Please fill in all required fields.");
+        return;
+    }
 
-                    const userData = {
-                        lastName, firstName, middleInitial, suffix, email, password, confirmPassword, address, contactNumber, dateOfBirth, designation,
-                        registrationDate: new Date().toISOString()
-                    };
+    try {
+        // Show loading
+        document.getElementById("regButton").textContent = "Creating Account...";
+        
+        // 1. CREATE USER IN FIREBASE AUTH
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        console.log("User created in Auth:", user.uid);
 
-                    console.log("User Data:", userData);
+        // 2. SAVE PROFILE TO FIRESTORE (using user UID)
+        const userData = {
+            uid: user.uid,
+            email: email,
+            lastName, firstName, middleInitial, suffix, 
+            address, contactNumber, dateOfBirth, designation,
+            registrationDate: new Date().toISOString(),
+            // NEVER store password in Firestore
+        };
 
-                    const usersCollection = collection(db, "users");
-                    addDoc(usersCollection, userData)
-                        .then((docRef) => {
-                            console.log("Document written with ID: ", docRef.id);
-                            window.location.href = "CRIS PVO Login.html";
-                        })
-                        .catch((error) => {
-                            console.error("Error adding document: ", error);
-                        });
+        // Save to Firestore 'users' collection
+        await setDoc(doc(db, "users", user.uid), userData);
+        console.log("User profile saved to Firestore");
 
-                        
-                }   
+        alert("Registration successful! Redirecting to login...");
+        window.location.href = "CRIS PVO Login.html";
 
+    } catch (error) {
+        console.error("Registration error:", error.code, error.message);
+        
+        if (error.code === 'auth/email-already-in-use') {
+            alert("Email already registered. Please use a different email or login.");
+        } else if (error.code === 'auth/weak-password') {
+            alert("Password is too weak. Use at least 8 characters.");
+        } else {
+            alert("Registration failed: " + error.message);
+        }
+    } finally {
+        document.getElementById("regButton").textContent = "Register";
+    }
+}

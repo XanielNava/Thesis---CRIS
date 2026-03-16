@@ -220,7 +220,7 @@ select:focus {
     font-size: 13px;
 }
 
- .button {
+ #loginBtn, #backBtn {
     background-color: #2fb6ad;
     color: rgb(255, 255, 255);
     border: none;
@@ -228,17 +228,20 @@ select:focus {
     border-radius: 10px;
     cursor: pointer;
     margin-top: 15px;
-    font-size: 20px;
+    font-family: "Lato", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: large;
     transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
 
 /* Hover */
-.button:hover {
+#loginBtn:hover, #backBtn:hover {
     background-color: #258f84;
 }
 
-.button:active {
+#loginBtn:active, #backBtn:active {
     transform: scale(0.98);
 }
 .button-container {
@@ -327,5 +330,12 @@ select:focus {
 
 .signup:hover {
     text-decoration: underline;
+}
+
+label {
+    font-family: "Lato", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: large;
 }
 
