@@ -171,7 +171,7 @@ body {
     }
 }
 
-#lastName, #firstName, #email, #password, #confirmPassword, #address, #contactNumber, #dateOfBirth, #position {
+#lastName, #firstName, #email, #password, #confirmPassword, #address, #contactNumber, #dateOfBirth, #designation {
     display: inline;
     width: 258px;
     height: 45px;

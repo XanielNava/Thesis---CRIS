@@ -28,7 +28,7 @@ document.getElementById("regButton").addEventListener("click", getAllInputs);
                     const address = document.getElementById("address").value;
                     const contactNumber = document.getElementById("contactNumber").value;
                     const dateOfBirth = document.getElementById("dateOfBirth").value;
-                    const position = document.getElementById("position").value;
+                    const designation = document.getElementById("designation").value;
                     
                     // console.log("Last Name:", lastName);
                     // console.log("First Name:", firstName);
@@ -51,7 +51,7 @@ document.getElementById("regButton").addEventListener("click", getAllInputs);
                         return;
                     }
                     if (
-                        lastName === "" || firstName === "" || middleInitial === "" || email === "" ||password === "" || confirmPassword === ""|| address === "" || contactNumber === "" || dateOfBirth === "" || position === ""
+                        lastName === "" || firstName === "" || middleInitial === "" || email === "" ||password === "" || confirmPassword === ""|| address === "" || contactNumber === "" || dateOfBirth === "" || designation === ""
                     
                     ) {
                         alert("Please fill in all the required fields.");
@@ -63,7 +63,7 @@ document.getElementById("regButton").addEventListener("click", getAllInputs);
                     }
 
                     const userData = {
-                        lastName, firstName, middleInitial, suffix, email, password, confirmPassword, address, contactNumber, dateOfBirth, position,
+                        lastName, firstName, middleInitial, suffix, email, password, confirmPassword, address, contactNumber, dateOfBirth, designation,
                         registrationDate: new Date().toISOString()
                     };
 
