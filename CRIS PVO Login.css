@@ -57,7 +57,7 @@ body {
     z-index: 10;
 }
 
-/* Sidebar */
+    /* Sidebar */
 .sidebar {
     position: fixed;
     top: 0;
@@ -318,3 +318,27 @@ select:focus {
     font-size: 15px;
 }
 }
+
+.auth-links {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    gap: 10px;
+}
+
+.auth-links a {
+    margin: 0 !important;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.signup {
+    color: #12245c;
+    text-decoration: none;
+}
+
+.signup:hover {
+    text-decoration: underline;
+}
+

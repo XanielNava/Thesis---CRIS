@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="CRIS Homepage.css">
+    <link rel="icon" href="images/CRIS icon.jpg" type="image/x-icon">
+</head>
+
+<body>
+<!-- Header -->
+     <header class="header">
+        <div class="header-content">
+            <h1>Community-Centric Rabies Intelligence System</h1>
+            <button class="burger" onclick="openMenu()">☰ Menu</button>
+        </div>
+     </header>
+
+<!-- Header -->
+ <main class="main">
+    <div class="logo-container">
+
+        <!-- PROVINCIAL HEALTH OFFICE -->
+        <a href="CRIS PHO Login.html" class="logo-link">
+            <div class="logo-box">
+                <img src="images/pho-logo.png" alt="Provincial Health Office">
+                <p>Provincial Health Office</p>
+            </div>
+        </a>
+
+        <!-- PROVINCIAL VETERINARY OFFICE -->
+        <a href="CRIS PVO Login.html" class="logo-link">
+            <div class="logo-box">
+                <img src="images/pvo-logo.png" alt="Provincial Veterinary Office">
+                <p>Provincial Veterinary Office</p>
+            </div>
+        </a>
+    </div>
+ </main>
+
+    <!-- Overlay -->
+     <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+    <!-- Sidebar -->
+     <aside class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="closeMenu()">✕</button>
+
+        <nav>
+            <a href="#">Home</a>
+            <a href="CRIS Login.html">Admin Access Portal</a>
+            <a href="CRIS Reports.html">Reports</a>
+            <a href="About CRIS.html">About CRIS</a>
+        </nav>
+     </aside> 
+
+    <!-- Footer -->
+     <footer class="footer">
+        <p>© Copyright 2027 Community-Centric Rabies Intelligence System (CRIS) – Pinnacle Technologies, Inc. All Rights Reserved </p>
+     </footer>
+
+     <script src="CRIS javascript.js"></script>
+</body>
+</html>
