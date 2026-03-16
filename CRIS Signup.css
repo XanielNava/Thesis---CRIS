@@ -120,9 +120,8 @@ body {
     font-size: 28px;
 }
 
-/* Form Containers */
-.login-box,
-.boxbox {
+/* Login Box (kept for PVO logo container) */
+.login-box {
     background-color: #bfe9e6;
     width: 100%;
     max-width: 600px;
@@ -150,96 +149,6 @@ body {
     filter: brightness(1.1);
 }
 
-/* Form Grid Layout */
-.form-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-.form-group {
-    flex: 1;
-}
-
-.form-group.full-width {
-    flex: none;
-    width: 100%;
-}
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #12245c;
-    font-size: 14px;
-}
-
-input,
-textarea,
-select {
-    width: 100%;
-    padding: 12px 14px;
-    margin-bottom: 20px;
-    border-radius: 6px;
-    border: 1.5px solid #cfcfcf;
-    font-size: 15px;
-    transition: all 0.3s ease;
-    font-family: inherit;
-    background: #fff;
-    box-sizing: border-box;
-}
-
-input:hover,
-textarea:hover,
-select:hover {
-    border-color: #239a93;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-    outline: none;
-    border-color: #2fa89a;
-    box-shadow: 0 0 0 3px rgba(47, 168, 154, 0.2);
-}
-
-input::placeholder {
-    color: #6f8f8d;
-}
-
-textarea {
-    resize: vertical;
-}
-
-select {
-    cursor: pointer;
-    background: white;
-}
-
-.button {
-    display: inline-block;
-    padding: 14px 24px;
-    background-color: #2fa89a;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-    margin: 5px;
-}
-
-.button:hover {
-    background-color: #258f84;
-    transform: translateY(-1px);
-}
-
-.button:active {
-    transform: scale(0.98);
-}
-
 /* Footer */
 .footer {
     height: 40px;
@@ -256,19 +165,65 @@ select {
     .logo { width: 50px; }
     .header-content h1 { font-size: 16px; }
     .main h2 { font-size: 22px; }
-    .login-box,
-    .boxbox { 
+    .login-box { 
         padding: 20px;
         margin: 10px;
     }
-    .form-row {
-        flex-direction: column;
-        gap: 0;
-    }
-    .button {
-        display: block;
-        width: 100%;
-        text-align: center;
-        margin: 10px 0;
-    }
+}
+
+#lastName, #firstName, #email, #password, #confirmPassword, #address, #contactNumber, #dateOfBirth, #position {
+    display: inline;
+    width: 258px;
+    height: 40px;
+    padding: 12px 25px;
+    background-color: #ffffff;
+    border: 1.5px solid #cfcfcf;
+    margin: 5px;
+    border-radius: 8px;
+    font-size: large;
+}
+
+#middleInitial, #suffix {
+    width: 122px;
+    height: 40px;
+    padding: 12px 25px;
+    background-color: #ffffff;
+    border: 1.5px solid #cfcfcf;
+    margin: 5px;
+    border-radius: 8px;
+    font-size: large;
+}
+
+#regButton, #backButton {
+    margin: 5px;
+    background-color: #2fb6ad;
+    color: rgb(255, 255, 255);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 15px;
+    font-size: 20px;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+#backButton:hover {
+    background-color: #258f84;
+}
+
+#regButton:hover {
+    background-color: #258f84;
+}
+
+#regButton:active {
+    transform: scale(0.98);
+}
+#backButton:active {
+    transform: scale(0.98);
+}
+.button-container {
+    display: flex;
+    gap: 15px;        /* Gap between buttons */
+    justify-content: space-between;  /* Pushes them to edges */
+    /* OR use justify-content: center; to center them together */
 }
