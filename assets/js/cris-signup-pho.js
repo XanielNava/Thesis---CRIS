@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -13,9 +13,9 @@ const firebaseConfig = {
   measurementId: "G-0X99BH7GW4"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const pho = initializeApp(firebaseConfig);
+const auth = getAuth(pho);
+const db = getFirestore(pho);
 
 document.getElementById("regButton").addEventListener("click", getAllInputs);
 
@@ -66,7 +66,7 @@ async function getAllInputs() {
         };
 
         // Save to Firestore 'users' collection
-        await setDoc(doc(db, "users", user.uid), userData);
+        await setDoc(doc(db, "pho-users", user.uid), userData);
         console.log("User profile saved to Firestore");
 
         alert("Registration successful! Redirecting to login...");
