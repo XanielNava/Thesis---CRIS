@@ -37,9 +37,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     
     // Redirect based on role
     if (designation === 'admin') {
-      window.location.href = 'admin-dashboard.html';
+      window.location.href = '../src/admin-dashboard.html';
     } else {
-      window.location.href = 'PVO Dashboard.html';
+      window.location.href = '../src/pvo-dashboard.html';
     }
     
   } catch (error) {

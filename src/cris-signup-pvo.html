@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personnel Registration - CRIS</title>
-    <link rel="stylesheet" href="CRIS Signup.css">
-    <link rel="icon" href="images/CRIS icon.jpg" type="image/x-icon">
-    <script src="Menu.js"></script>
+    <link rel="stylesheet" href="../assets/css/cris-signup.css">
+    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
+    <script src="../assets/js/Menu.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
@@ -41,7 +41,7 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <img src="images/CRIS logo login.png" alt="CRIS logo" class="logo">
+            <img src="../assets/images/logo-login.png" alt="CRIS logo" class="logo">
             <h1>Personnel Registration</h1>
             <button class="burger" onclick="openMenu()">☰ Menu</button>
         </div>
@@ -54,10 +54,10 @@
     <aside class="sidebar" id="sidebar">
         <button class="close-btn" onclick="closeMenu()">✕</button>
         <nav>
-            <a href="CRIS Homepage.html">Home</a>
-            <a href="#">Admin Access Portal</a>
-            <a href="CRIS Reports.html">Reports</a>
-            <a href="About CRIS.html">About CRIS</a>
+            <a href="../index.html">Home</a>
+            <a href="../src/pvo-login.html">Admin Access Portal</a>
+            <a href="../src/cris-reports.html">Reports</a>
+            <a href="../src/about-cris.html">About CRIS</a>
         </nav>
     </aside> 
 
@@ -66,8 +66,8 @@
         <h2>Personnel Registration</h2>
 
         <div class="login-box">
-            <a href="index.html" class="logo-link">
-                <img src="images/pvo-logo.png" alt="PVO logo" class="login-logo">
+            <a href="../index.html" class="logo-link">
+                <img src="../assets/images/pvo-logo.png" alt="PVO logo" class="login-logo">
             </a>
              <div class="container">
             <form id="regForm">
@@ -89,10 +89,10 @@
                 </select>
             </form>
             <div class="button-container">
-                <button id="backButton" type="back" onclick="window.location.href='CRIS PVO Login.html'">Back</button>
+                <button id="backButton" type="back" onclick="window.location.href='../src/pvo-login.html'">Back</button>
                 <button id="regButton" type="submit">Sign up</button>
             </div>
-            <script type="module" src="CRIS Signup.js"></script>
+            <script type="module" src="../assets/js/cris-signup.js"></script>
             
         </div>
         </div>

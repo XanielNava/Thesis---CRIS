@@ -1,0 +1,163 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    background-color: #ffffff;
+}
+
+/* Header */
+.header {
+    background-color: #12245c;
+    padding: 10px 20px;
+    color: white;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+/* Menu */
+.burger {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: auto; 
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+    z-index: 10;
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -280px;
+    width: 280px;
+    height: 100%;
+    background: #0e1a2b;
+    color: white;
+    padding: 20px;
+    transition: right 0.3s ease;
+    z-index: 11;
+}
+
+.sidebar nav {
+    margin-top: 50px;
+}
+
+.sidebar nav a {
+    display: block;
+    padding: 15px 0;
+    color: #cfcfcf;
+    text-decoration: none;
+    border-bottom: 1px solid #1f2f4a;
+}
+
+.sidebar nav a:hover {
+    color: #ffffff;
+}
+
+/* Close Button */
+.close-btn {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 22px;
+    cursor: pointer;
+    float: right;
+}
+
+/* Active Status */
+.sidebar.active {
+    right: 0;
+}
+
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Main Content */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 15px;
+    text-align: center;
+}
+
+.main h2 {
+    margin-bottom: 25px;
+    color: #12245c;
+}
+
+/* Footer */
+.footer {
+    height: 40px;
+    background-color: #12245c;
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+
+.header-content {
+    flex-direction: column;
+    text-align: center;
+}
+
+.logo {
+     width: 40px;
+}
+
+.header h1 {
+     font-size: 16px;
+}
+
+.main h2 {
+    font-size: 18px;
+}
+
+.login-box {
+    padding: 15px;
+}
+
+.login-box label {
+    font-size: 13px;
+}
+
+.login-box input {
+    font-size: 14px;
+    padding: 12px;
+}
+
+.login-box button {
+    font-size: 15px;
+}
+}

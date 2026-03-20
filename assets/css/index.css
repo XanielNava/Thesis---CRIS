@@ -1,0 +1,218 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    background-color: #ffffff;
+}
+
+/* ================= HEADER ================= */
+.header {
+    background-color: #12245c;
+    padding: 10px 20px;
+    color: white;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+/* Burger Menu */
+.burger {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+/* ================= LOGO SECTION ================= */
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    margin-top: 40px;
+}
+
+/* Clickable wrapper */
+.logo-link {
+    display: inline-block;
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Logo box */
+.logo-box {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 0 80px;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.logo-box img {
+    width: 200px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.logo-box p {
+    font-size: 20px;
+    color: #000;
+    font-weight: bold;
+}
+
+/* Hover effect */
+.logo-link:hover .logo-box {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+    background-color: lightgray;
+}
+
+.logo-link:hover img {
+    filter: brightness(1.15);
+}
+
+/* Vertical divider */
+.logo-box:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: -50%;
+    height: 200%;
+    width: 2px;
+    background-color: black;
+    pointer-events: none; /* CRITICAL: do not block clicks */
+}
+
+/* ================= MAIN CONTENT ================= */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 15px;
+    text-align: center;
+}
+
+.main h2 {
+    margin-bottom: 25px;
+    color: #12245c;
+}
+
+/* ================= FOOTER ================= */
+.footer {
+    background-color: #12245c;
+    color: white;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* ================= OVERLAY ================= */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -280px;
+    width: 280px;
+    height: 100%;
+    background: #0e1a2b;
+    color: white;
+    padding: 20px;
+    transition: right 0.3s ease;
+    z-index: 11;
+}
+
+.sidebar.active {
+    right: 0;
+}
+
+.sidebar nav {
+    margin-top: 50px;
+}
+
+.sidebar nav a {
+    display: block;
+    padding: 15px 0;
+    color: #cfcfcf;
+    text-decoration: none;
+    border-bottom: 1px solid #1f2f4a;
+}
+
+.sidebar nav a:hover {
+    color: #ffffff;
+}
+
+/* Close Button */
+.close-btn {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 22px;
+    cursor: pointer;
+    float: right;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 600px) {
+
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .header h1 {
+        font-size: 16px;
+    }
+
+    .logo-container {
+        flex-wrap: wrap;
+    }
+
+    .logo-box {
+        padding: 20px 0;
+    }
+
+    .logo-box:not(:last-child)::after {
+        display: none;
+    }
+}

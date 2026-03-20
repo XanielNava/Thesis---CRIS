@@ -4,29 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRIS Dashboard</title>
-    <link rel="stylesheet" href="PVO Dashboard.css">
+    <link rel="stylesheet" href="../assets/css/pvo-dashboard.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
 </head>
 <body>
     <div class="container">
         <aside class="sidebar">
             <div class="logo-section">
-                <img src="images/CRIS logo login.png" alt="PVO Logo" class="logo-image">
+                <img src="../assets/images/logo-login.png" alt="PVO Logo" class="logo-image">
                 <p>Community-Centric<br>Rabies Intelligence<br>System</p>
             </div>
 
             <nav class="menu">
                 <button class="menu-item active">Dashboard</button>
-                <button class="menu-item">Animal Bite Cases</button>
-                <button class="menu-item">Heatmap</button>
-                <button class="menu-item">Statistics</button>
-                <button class="menu-item">Messages</button>
-                <button class="menu-item">Inventory</button>
-                <button class="menu-item">Reports</button>
+                <button class="menu-item" onclick="window.location.href='pvo-animal-bite-cases.html'">Animal Bite Cases</button>
+                <button class="menu-item" onclick="window.location.href='../assets/html/PVO Heatmap.html'">Heatmap</button>
+                <button class="menu-item" onclick="window.location.href='../assets/html/PVO Statistics.html'">Statistics</button>
+                <button class="menu-item" onclick="window.location.href='../assets/html/PVO Messages.html'">Messages</button>
+                <button class="menu-item" onclick="window.location.href='../assets/html/PVO Inventory.html'">Inventory</button>
+                <button class="menu-item" onclick="window.location.href='../assets/html/PVO Reports.html'">Reports</button>
             </nav>
-            
             <div class="footer-nav">
                 <button class="menu-item alt">Settings</button>
                 <button id="logout-btn" class="menu-item alt">Logout</button>
@@ -34,7 +35,7 @@
             <script>
                 document.getElementById('logout-btn').addEventListener('click', function() {
                     // Logout functionality can be implemented here
-                    window.location.href = "index.html";
+                    window.location.href = "../index.html";
                     alert('Your logging out...'); // Placeholder for logout action
                 });
             </script>

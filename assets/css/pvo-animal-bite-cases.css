@@ -1,0 +1,332 @@
+:root {
+    --sidebar: #1a2b5c;
+    --main: #18b4a6;
+    --card: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--main);
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 210px;
+    background: var(--sidebar);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.logo img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.menu {
+    flex: 1;
+}
+
+.menu a {
+    display: block;
+    background: #d7f1ee;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-decoration: none;
+    color: #000;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.menu a:hover {
+    background: #a7d8d3;
+}
+
+.menu a.active {
+    background: white;
+    color: var(--sidebar);
+}
+
+/* MAIN CONTENT */
+.main {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.page-title {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    border-bottom: 2px solid rgba(255,255,255,0.4);
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+/* CARD */
+.card {
+    background: var(--card);
+    border-radius: 5px;
+    padding: 10px;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* TOPBAR */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search input {
+    padding: 5px 10px;
+    font-size: 12px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+#add-btn {
+    background: #1ea3a1;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.3s;
+}
+
+#add-btn:hover {
+    background: #197b77;
+}
+
+.export {
+    display: flex;
+    gap: 5px;
+}
+
+.export button {
+    font-size: 11px;
+    padding: 4px 6px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 3px;
+}
+
+/* TABLE */
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+th {
+    text-align: left;
+    border-bottom: 2px solid #eee;
+    padding: 12px 6px;
+    background: #f8f9fa;
+    font-weight: bold;
+}
+
+td {
+    padding: 12px 6px;
+    border-bottom: 1px solid #eee;
+}
+
+/* FIXED STATUS BADGES - Following your exact style */
+.status-badge, .badge {
+    padding: 3px 6px !important;
+    border-radius: 3px !important;
+    color: white !important;
+    font-size: 11px !important;
+    font-weight: bold !important;
+    display: inline-block;
+}
+
+.vaccinated {
+    background: #21c43c;
+}
+
+.positive {
+    background: #ff2c2c;
+}
+
+.pending {
+    background: #ffc107;
+    color: #000 !important;
+}
+
+.not-vaccinated {
+    background: #fd7e14;
+    color: #000 !important;
+}
+
+.negative {
+    background: #28a745;
+}
+
+.unknown {
+    background: #6c757d;
+}
+
+/* Hover effect */
+tr:hover {
+    background: #f8f9fa;
+}
+
+/* PAGINATION */
+.pagination {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.pagination button {
+    padding: 6px 12px;
+    font-size: 11px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 3px;
+}
+
+/* MODAL */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-modal {
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    font-weight: bold;
+}
+
+.close-modal:hover {
+    color: #000;
+}
+
+#caseForm {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#caseForm input, 
+#caseForm select, 
+#caseForm textarea {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    width: 100%;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.modal-buttons button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    flex: 1;
+}
+
+.cancel-btn {
+    background: #6c757d;
+    color: white;
+}
+
+#submitCaseBtn {
+    background: #28a745;
+    color: white;
+}
+
+@media (max-width: 600px) {
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+    
+    .sidebar {
+        width: 180px;
+    }
+}
