@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - Interactive Heatmap</title>
+    <link rel="stylesheet" href="../assets/css/pvo-heat-map.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence<br>System</p>
+            </div>
+
+            <nav class="menu">
+                <button class="menu-item" onclick="window.location.href='pvo-dashboard.html'">Dashboard</button>
+                <button class="menu-item" onclick="window.location.href='pvo-animal-bite-cases.html'">Animal Bite Cases</button>
+                <button class="menu-item active">Heatmap</button>
+                <button class="menu-item">Statistics</button>
+                <button class="menu-item">Messages</button>
+                <button class="menu-item">Inventory</button>
+                <button class="menu-item">Reports</button>
+            </nav>
+            <div class="footer-nav">
+                <button class="menu-item alt">Settings</button>
+                <button id="logout-btn" class="menu-item alt" onclick="window.location.href='pvo-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Map Area -->
+        <main class="map-wrapper">
+            
+            <!-- Centered Map Container -->
+            <div class="map-canvas">
+                <img src="../assets/images/iloilo_province_map.qgz.png" alt="Iloilo Map" class="centered-map-img">
+            </div>
+
+            <!-- Floating Heatmap Controls -->
+            <!-- <aside class="heatmap-overlay">
+                <header class="overlay-header">
+                    <h2>Heatmap Controls</h2>
+                    <div class="close-btn">&#x2715;</div>
+                </header>
+                
+                <div class="search-container">
+                    <input type="text" placeholder="Search Barangay...">
+                </div>
+
+                <div class="filter-row">
+                    <div class="filter-box">
+                        <label>Show me:</label>
+                        <select>
+                            <option>Confirmed Rabies</option>
+                            <option>Stray Incidents</option>
+                        </select>
+                    </div>
+                    <div class="filter-box">
+                        <label>Sort by:</label>
+                        <select>
+                            <option>Intensity</option>
+                            <option>Date</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="location-list">
+                    <h3>Critical Locations</h3>
+                    <div class="location-item">
+                        <div class="loc-dot red"></div>
+                        <div class="loc-details">
+                            <strong>Brgy. Alijis</strong>
+                            <span>Intensity: 85 | Observation</span>
+                        </div>
+                    </div>
+                    <div class="location-item active">
+                        <div class="loc-dot orange"></div>
+                        <div class="loc-details">
+                            <strong>Brgy. Tangub</strong>
+                            <span>Intensity: 92 | Critical</span>
+                        </div>
+                    </div>
+                </div>
+            </aside> -->
+        </main>
+    </div>
+</body>
+</html>
