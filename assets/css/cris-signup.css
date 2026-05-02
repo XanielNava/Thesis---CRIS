@@ -1,8 +1,18 @@
+/* CRIS SUNSET PALETTE */
+:root {
+    --sunset-orange: #EA6113;
+    --sunset-gold: #F88F22;
+    --sunset-yellow: #FBB931;
+    --sunset-cream: #FFE3B3;
+    --text-dark: #412110;
+    --sidebar-bg: #1a234e;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: 'Lato', Arial, sans-serif;
 }
 
 body {
@@ -10,14 +20,15 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
-    background-color: #ffffff;
+    background-color: #FFFAF0; /* Warm off-white */
 }
 
 /* Header */
 .header {
-    background-color: #12245c;
+    background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
     padding: 10px 20px;
     color: white;
+    box-shadow: 0 4px 12px rgba(234, 97, 19, 0.2);
 }
 
 .header-content {
@@ -31,6 +42,7 @@ body {
     margin: 0;
     font-size: 18px;
     flex: 1;
+    letter-spacing: 0.5px;
 }
 
 .logo {
@@ -38,27 +50,24 @@ body {
 }
 
 .burger {
-    background: none;
-    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     color: white;
-    font-size: 16px;
+    font-size: 14px;
+    padding: 8px 15px;
+    border-radius: 20px;
     cursor: pointer;
     font-weight: bold;
     margin-left: auto;
     display: flex;
     align-items: center;
     white-space: nowrap;
+    transition: 0.3s;
 }
 
-/* Overlay */
-.overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    opacity: 0;
-    visibility: hidden;
-    transition: 0.3s;
-    z-index: 10;
+.burger:hover {
+    background: var(--sunset-cream);
+    color: var(--sunset-orange);
 }
 
 /* Sidebar */
@@ -68,7 +77,7 @@ body {
     right: -280px;
     width: 280px;
     height: 100%;
-    background: #0e1a2b;
+    background: var(--sidebar-bg);
     color: white;
     padding: 20px;
     transition: right 0.3s ease;
@@ -84,17 +93,17 @@ body {
     padding: 15px 0;
     color: #cfcfcf;
     text-decoration: none;
-    border-bottom: 1px solid #1f2f4a;
+    border-bottom: 1px solid rgba(234, 97, 19, 0.3);
 }
 
 .sidebar nav a:hover {
-    color: #ffffff;
+    color: var(--sunset-yellow);
 }
 
 .close-btn {
     background: none;
     border: none;
-    color: #aaa;
+    color: var(--sunset-cream);
     font-size: 22px;
     cursor: pointer;
     float: right;
@@ -116,19 +125,20 @@ body {
 
 .main h2 {
     margin-bottom: 25px;
-    color: #12245c;
+    color: var(--text-dark);
     font-size: 28px;
+    letter-spacing: 1px;
 }
 
-/* Login Box (kept for PVO logo container) */
+/* Registration Box with Sunset Cream */
 .login-box {
-    background-color: #bfe9e6;
+    background-color: var(--sunset-cream);
     width: 100%;
     max-width: 600px;
     padding: 30px;
-    border-radius: 8px;
+    border-radius: 15px;
     text-align: left;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(234, 97, 19, 0.1);
 }
 
 .logo-link {
@@ -144,106 +154,102 @@ body {
     transition: all 0.3s ease;
 }
 
-.logo-link:hover .login-logo {
-    transform: scale(1.05);
-    filter: brightness(1.1);
-}
-
-/* Footer */
-.footer {
-    height: 40px;
-    background-color: #12245c;
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 10px;
-    }
-    .logo { width: 50px; }
-    .header-content h1 { font-size: 16px; }
-    .main h2 { font-size: 22px; }
-    .login-box { 
-        padding: 20px;
-        margin: 10px;
-    }
-}
-
+/* Form Inputs - Maintaining Structure */
 #lastName, #firstName, #email, #password, #confirmPassword, #address, #contactNumber, #dateOfBirth, #designation {
-    display: inline;
+    display: inline-block;
     width: 258px;
     height: 45px;
-    padding: 12px 25px;
+    padding: 12px 15px;
     background-color: #ffffff;
-    border: 1.5px solid #cfcfcf;
+    border: 1.5px solid rgba(65, 33, 16, 0.1);
     margin: 5px;
     border-radius: 8px;
     font-family: "Lato", sans-serif;
     font-weight: 700;
-    font-style: normal;
-    font-size: large;
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s;
 }
 
 #suffix {
     width: 150px;
     height: 45px;
-    padding: 12px 25px;
+    padding: 12px 15px;
     background-color: #ffffff;
-    border: 1.5px solid #cfcfcf;
+    border: 1.5px solid rgba(65, 33, 16, 0.1);
     margin: 5px;
     border-radius: 8px;
     font-family: "Lato", sans-serif;
     font-weight: 700;
-    font-style: normal;
-    font-size: large;
+    font-size: 14px;
+    outline: none;
 }
 
 #middleInitial { 
     width: 94px;
     height: 45px;
-    padding: 20px;
+    padding: 12px;
     background-color: #ffffff;
-    border: 1.5px solid #cfcfcf;
+    border: 1.5px solid rgba(65, 33, 16, 0.1);
     margin: 5px;
     border-radius: 8px;
     font-family: "Lato", sans-serif;
     font-weight: 700;
-    font-style: normal;
-    font-size: large;
+    font-size: 14px;
+    outline: none;
 }
 
+input:focus, select:focus {
+    border-color: var(--sunset-orange);
+    box-shadow: 0 0 0 3px rgba(234, 97, 19, 0.1);
+}
+
+/* Buttons */
 #regButton, #backButton {
     margin: 5px;
-    background-color: #2fb6ad;
-    color: rgb(255, 255, 255);
+    background-color: var(--sunset-orange);
+    color: white;
     border: none;
     padding: 12px 25px;
     border-radius: 10px;
     cursor: pointer;
     margin-top: 15px;
-    font-size: 20px;
-    transition: background-color 0.3s ease, transform 0.1s ease;
+    font-weight: 700;
+    font-size: 18px;
+    transition: 0.3s;
 }
 
-#backButton:hover {
-    background-color: #258f84;
+#backButton {
+    background-color: #ffffff;
+    color: var(--text-dark);
+    border: 1.5px solid rgba(65, 33, 16, 0.1);
 }
 
 #regButton:hover {
-    background-color: #258f84;
+    background-color: var(--text-dark);
 }
 
-#regButton:active {
-    transform: scale(0.98);
+#backButton:hover {
+    background-color: #f5f5f5;
 }
-#backButton:active {
-    transform: scale(0.98);
-}
+
 .button-container {
     display: flex;
-    gap: 15px;        /* Gap between buttons */
-    justify-content: space-between;  /* Pushes them to edges */
-    /* OR use justify-content: center; to center them together */
+    gap: 15px;
+    justify-content: space-between;
+}
+
+/* Footer */
+.footer {
+    height: 40px;
+    background-color: var(--text-dark);
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 600px) {
+    .login-box { width: 95%; margin: 10px; padding: 20px; }
+    #lastName, #firstName, #email, #password, #confirmPassword, #address, #contactNumber, #dateOfBirth, #designation, #suffix, #middleInitial {
+        width: 100%;
+        margin: 5px 0;
+    }
 }

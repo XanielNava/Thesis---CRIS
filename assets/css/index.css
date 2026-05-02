@@ -135,53 +135,100 @@ body {
 }
 
 /* ================= SIDEBAR ================= */
+/* ================= SIDEBAR (ALIGNED WITH CRIS BRAND) ================= */
 .sidebar {
     position: fixed;
     top: 0;
-    right: -300px;
+    right: -300px; /* Hidden state */
     width: 300px;
-    height: 100%;
-    background-color: var(--text-dark); 
-    padding: 20px 0; 
-    transition: right 0.3s ease;
+    height: 100vh;
+    background-color: var(--sidebar-bg); /* Deep Navy Blue */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px; /* Spacing for capsule buttons */
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
     box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    box-sizing: border-box;
 }
 
 .sidebar.active {
     right: 0;
 }
 
+/* Close Button Styling */
 .close-btn {
     background: none;
     border: none;
     color: var(--sunset-cream);
-    font-size: 24px;
+    font-size: 28px;
     cursor: pointer;
-    margin: 0 20px 20px auto; 
-    display: block;
+    align-self: flex-end; /* Pushes button to top right */
+    margin-bottom: 25px;
+    transition: transform 0.2s;
 }
 
+.close-btn:hover {
+    transform: scale(1.1);
+    color: white;
+}
+
+/* Scrollable Navigation Area */
+/* ================= SIDEBAR (SOLID COLOR FIX) ================= */
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 300px;
+    height: 100vh;
+    /* This ensures the sidebar is solid and blocks the content behind it */
+    background-color: #1a234e !important; 
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2000; /* Increased to ensure it stays above all other elements */
+    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    box-sizing: border-box;
+}
+
+.sidebar.active {
+    right: 0;
+}
+
+/* Ensure Nav container doesn't have transparency issues */
 .sidebar nav {
-    margin-top: 10px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+    background: transparent; /* Background is already solid from the parent .sidebar */
 }
 
+/* Capsule buttons matching CRIS style */
 .sidebar nav a {
     display: block;
-    padding: 18px 25px; 
+    padding: 14px 22px;
+    background-color: rgba(255, 255, 255, 0.08); 
     color: white;
     text-decoration: none;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
-    border-bottom: 1px solid rgba(234, 97, 19, 0.3); 
-    transition: background 0.3s;
+    border-radius: 10px;
+    transition: all 0.3s ease;
 }
 
 .sidebar nav a:hover {
-    background-color: rgba(251, 185, 49, 0.1); 
-    color: var(--sunset-yellow);
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #FBB931; /* Sunset Yellow */
+    transform: translateX(5px);
 }
 
-.sidebar nav a:last-child {
-    border-bottom: none;
+.sidebar nav a.active {
+    background-color: #FFFFFF !important;
+    color: #1a234e !important;
+    font-weight: 700;
 }

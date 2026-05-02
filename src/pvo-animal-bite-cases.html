@@ -1,217 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Animal Bite Cases</title>
-
-<link rel="stylesheet" href="../assets/css/pvo-animal-bite-cases.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - Animal Bite Cases</title>
+    <link rel="stylesheet" href="../assets/css/pvo-animal-bite-cases.css">
+    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 </head>
-
 <body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PVO MODULE</div>
+            </div>
 
-<div class="container">
+            <nav class="menu">
+                <a href="pvo-dashboard.html" class="menu-item">Dashboard</a>
+                <a href="#" class="menu-item active">Animal Bite Cases</a>
+                <a href="pvo-heat-map.html" class="menu-item">Heatmap</a>
+                <a href="#" class="menu-item">Statistics</a>
+                <a href="#" class="menu-item">Messages</a>
+                <a href="#" class="menu-item">Inventory</a>
+                <a href="#" class="menu-item">Reports</a>
+            </nav>
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
+            <div class="footer-nav">
+                <a href="#" class="menu-item alt">Settings</a>
+                <a href="#" class="menu-item alt logout">Logout</a>
+            </div>
+        </aside>
 
-<div class="logo">
-<img src="../assets/images/logo-login.png">
-<span>
-Community-Centric<br>
-Rabies Intelligence<br>
-System
-</span>
-</div>
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <header class="header">
+                <h1>ANIMAL BITE CASES</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Xaniel Marios Angelo B. Nava</strong><br>
+                        <span>Administrator</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
 
-<nav class="menu">
-<a href="pvo-dashboard.html">Dashboard</a>
-<a href="#" class="active">Animal Bite Cases</a>
-<a href="#">Heatmap</a>
-<a href="#">Statistics</a>
-<a href="#">Messages</a>
-<a href="#">Inventory</a>
-<a href="#">Reports</a>
-</nav>
+            <div class="card">
+                <div class="topbar">
+                    <div class="search-section">
+                        <div class="search-input">
+                            <label>Search:</label>
+                            <input type="text" placeholder="Search case ID or name...">
+                        </div>
+                        <button onclick="openCaseModal()" id="add-btn">+ New Case</button>
+                    </div>
 
-<div class="footer-nav">
-<a href="#">Settings</a>
-<a href="#">Logout</a>
-</div>
+                    <div class="export">
+                        <button>CSV</button>
+                        <button>Excel</button>
+                        <button>PDF</button>
+                        <button>Print</button>
+                    </div>
+                </div>
 
-</aside>
+                <div class="table-container">
+                    <table id="casesTable">
+                        <thead>
+                            <tr>
+                                <th>Case ID</th>
+                                <th>Municipality</th>
+                                <th>Barangay</th>
+                                <th>Animal Type</th>
+                                <th>Vaccination Status</th>
+                                <th>Lab Results</th>
+                                <th>Name of Victim</th>
+                                <th>Age</th>
+                            </tr>
+                        </thead>
+                        <tbody id="casesTableBody">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
 
-
-<!-- MAIN CONTENT -->
-<main class="main">
-<div class="page-title">ANIMAL BITE CASES</div>
-<div class="card">
-<div class="topbar">
-
-<div class="search">
-<label>Search:</label>
-<input type="text">
-<!-- <button id="add-btn">+ ADD NEW CASE</button> -->
-<!-- Add New Case Modal -->
-<div id="caseModal" class="modal-overlay">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Add New Rabies Case</h3>
-      <span class="close-modal" onclick="closeCaseModal()">&times;</span>
+                <div class="pagination">
+                    <button>Previous</button>
+                    <button class="active">1</button>
+                    <button>2</button>
+                    <button>Next</button>
+                </div>
+            </div>
+        </main>
     </div>
-    
-    <form id="caseForm">
-   <form id="caseForm">
-    <input type="text" id="caseId" placeholder="Case ID" required>
-    <input type="text" id="municipality" placeholder="Municipality" required>
-    <input type="text" id="barangay" placeholder="Barangay" required>
-    <input type="text" id="animalType" placeholder="Animal Type (Dog/Cat/Other)" required>
-    
-    <select id="vaccinationStatus" required>
-        <option value="">Vaccination Status</option>
-        <option value="Vaccinated">Vaccinated</option>
-        <option value="Not Vaccinated">Not Vaccinated</option>
-        <option value="Unknown">Unknown</option>
-    </select>
-    
-    <select id="clinicalLabResults" required>
-        <option value="">Clinical Lab Results</option>
-        <option value="Positive">Positive</option>
-        <option value="Negative">Negative</option>
-    </select>
-    
-    <input type="text" id="victimName" placeholder="Name of Victim" required>
-    <input type="number" id="victimAge" placeholder="Age" min="0" max="120" required>
 
-    <div class="modal-buttons">
-        <button type="button" onclick="closeCaseModal()">Cancel</button>
-        <button type="submit" id="submitCaseBtn">Add Case</button>
-      </div>
-    </form>
-  </div>
-</div>
-    
-</form>
+    <!-- Modal remains functional -->
+    <div id="caseModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Rabies Case</h3>
+                <span class="close-modal" onclick="closeCaseModal()">&times;</span>
+            </div>
+            <form id="caseForm">
+                <input type="text" id="caseId" placeholder="Case ID" required>
+                <input type="text" id="municipality" placeholder="Municipality" required>
+                <input type="text" id="barangay" placeholder="Barangay" required>
+                <input type="text" id="animalType" placeholder="Animal Type (Dog/Cat/Other)" required>
+                <select id="vaccinationStatus" required>
+                    <option value="">Vaccination Status</option>
+                    <option value="Vaccinated">Vaccinated</option>
+                    <option value="Not Vaccinated">Not Vaccinated</option>
+                    <option value="Unknown">Unknown</option>
+                </select>
+                <select id="clinicalLabResults" required>
+                    <option value="">Clinical Lab Results</option>
+                    <option value="Positive">Positive</option>
+                    <option value="Negative">Negative</option>
+                </select>
+                <input type="text" id="victimName" placeholder="Name of Victim" required>
+                <input type="number" id="victimAge" placeholder="Age" min="0" required>
+                <div class="modal-buttons">
+                    <button type="button" class="cancel-btn" onclick="closeCaseModal()">Cancel</button>
+                    <button type="submit" id="submitCaseBtn">Add Case</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-      
-      
-
-<!-- Button to open modal (add to your page) -->
-<button onclick="openCaseModal()" id="add-btn">+ New Case</button>
-
-
-
-<script type="module" src="../assets/js/abc.js"></script>
-
-</div>
-<script></script>
-<div class="export">
-<button>CSV</button>
-<button>Excel</button>
-<button>PDF</button>
-<button>Print</button>
-</div>
-
-</div>
-
-<table>
-
-<table id="casesTable">
-    <thead>
-        <tr>
-            <th>Case ID</th>
-            <th>Municipality</th>
-            <th>Barangay</th>
-            <th>Animal Type</th>
-            <th>Vaccination Status of Animal</th>
-            <th>Clinical Lab Results</th>
-            <th>Name of Victim</th>
-            <th>Age</th>
-        </tr>
-    </thead>
-    <tbody id="casesTableBody"></tbody>
-</table>
-
-
-<!-- <tbody>
-
-<tr>
-<td>2025-01</td>
-<td>Pavia</td>
-<td>Ungka II</td>
-<td>Cat</td>
-<td><span class="badge vaccinated">Vaccinated</span></td>
-<td><span class="badge positive">Positive</span></td>
-<td>Xaniel Marios Angelo B. Nava</td>
-<td>21</td>
-</tr>
-
-<tr>
-<td>2025-02</td>
-<td>Pavia</td>
-<td>Ungka II</td>
-<td>Cat</td>
-<td><span class="badge vaccinated">Vaccinated</span></td>
-<td><span class="badge positive">Negative</span></td>
-<td>Charmaine H. Cachila</td>
-<td>21</td>
-</tr>
-
-<tr>
-<td>2025-03</td>
-<td>Jaro</td>
-<td>Balabago</td>
-<td>Dog</td>
-<td><span class="badge vaccinated">Vaccinated</span></td>
-<td><span class="badge positive">Positive</span></td>
-<td>Kirk Johnray C. Menez</td>
-<td>21</td>
-</tr>
-
-<tr>
-<td>2025-04</td>
-<td>La Paz</td>
-<td>Libertad</td>
-<td>Dog</td>
-<td><span class="badge vaccinated">Vaccinated</span></td>
-<td><span class="badge positive">Positive</span></td>
-<td>Reynalen Leigh G. Alenzuela</td>
-<td>21</td>
-</tr>
-
-<tr>
-<td>2025-05</td>
-<td>La Paz</td>
-<td>Libertad</td>
-<td>Cat</td>
-<td><span class="badge vaccinated">Vaccinated</span></td>
-<td><span class="badge positive">Positive</span></td>
-<td>Jay Andre O. Sasi</td>
-<td>21</td>
-</tr>
-
-</tbody> -->
-
-</table>
-
-<div class="pagination">
-<button>Previous</button>
-<button>1</button>
-<button>2</button>
-<button>3</button>
-<button>4</button>
-<button>5</button>
-<button>6</button>
-<button>7</button>
-<button>Next</button>
-</div>
-
-</div>
-
-</main>
-
-</div>
-
+    <script type="module" src="../assets/js/abc.js"></script>
 </body>
 </html>

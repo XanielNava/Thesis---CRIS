@@ -1,99 +1,125 @@
+/* CRIS SUNSET PALETTE VARIABLES */
 :root {
-    --sidebar-bg: #1a234e;
-    --main-bg: #19b2a6;
-    --card-bg: #ffffff;
-    --active-tab: #b6e3df;
-    --text-dark: #333;
+    --sunset-orange: #EA6113;
+    --sunset-gold: #F88F22;
+    --sunset-yellow: #FBB931;
+    --sunset-cream: #FFE3B3;
+    --text-dark: #412110;
+    --sidebar-bg: #1a234e; /* Deep Navy Blue */
+    --main-bg: #FFFAF0; /* Warm off-white */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Lato', Arial, sans-serif;
 }
 
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
     background-color: var(--main-bg);
+    color: var(--text-dark);
 }
 
 .container {
     display: flex;
     height: 100vh;
+    overflow: hidden;
 }
 
-/* Logo */
-.logo-image {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-bottom: 10px;
-}
-
-.logo-image a {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-/* Sidebar Styling */
+/* ================= SIDEBAR (CAPSULE BUTTON DESIGN) ================= */
 .sidebar {
-    width: 200px;
+    width: 250px;
     background-color: var(--sidebar-bg);
     color: white;
     display: flex;
     flex-direction: column;
-    padding: 20px 10px;
+    padding: 20px 15px; /* Side padding creates the button margins */
+    flex-shrink: 0;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
 }
 
 .logo-section {
     text-align: center;
-    margin-bottom: 30px;
-    font-size: 11px;
+    margin-bottom: 25px;
 }
 
-.logo-circle {
-    width: 50px;
-    height: 50px;
-    border: 2px solid white;
+.logo-image {
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     margin: 0 auto 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: white;
+    display: block;
+}
+
+.role-badge {
+    background-color: var(--sunset-yellow);
+    color: var(--text-dark);
+    font-size: 10px;
     font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 20px;
+    text-transform: uppercase;
 }
 
 .menu {
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Vertical spacing between capsule buttons */
 }
 
+/* Capsule Button Base Style */
 .menu-item {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 8px;
-    border: none;
-    border-radius: 4px;
-    background-color: var(--active-tab);
-    color: var(--sidebar-bg);
-    font-weight: bold;
+    padding: 12px 20px;
+    background-color: rgba(255, 255, 255, 0.1); /* Transparent blue/white */
+    color: white;
+    font-weight: 500;
     cursor: pointer;
     text-align: left;
-    font-size: 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px; /* Rounded corners for capsule look */
+    transition: all 0.3s ease;
 }
 
 .menu-item:hover {
-    background-color: #6f8f8d
+    background-color: rgba(255, 255, 255, 0.2);
+    padding-left: 25px;
 }
 
+/* Active State: Solid White with Navy Text */
 .menu-item.active {
-    background-color: #f0f0f0;
+    background-color: #FFFFFF !important;
+    color: var(--sidebar-bg) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .footer-nav {
-    border-top: 1px solid rgba(255,255,255,0.2);
-    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
 }
 
-/* Main Content Styling */
+/* Settings and Logout Buttons */
+.menu-item.alt {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+#logout-btn {
+    background-color: rgba(65, 40, 55, 0.8); /* Dark muted maroon as per reference */
+    color: white;
+}
+
+/* ================= MAIN CONTENT & HEADER ================= */
 .main-content {
     flex-grow: 1;
-    padding: 20px;
+    padding: 25px;
     overflow-y: auto;
 }
 
@@ -101,121 +127,198 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+    padding: 15px 25px;
+    border-radius: 12px;
     color: white;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(234, 97, 19, 0.2);
 }
 
 .user-profile-top {
-    background: white;
-    padding: 5px 15px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 15px;
     border-radius: 25px;
     display: flex;
     align-items: center;
-    color: #333;
-    font-size: 10px;
+    font-size: 11px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .profile-icon {
     width: 30px;
     height: 30px;
-    background: #ccc;
+    background: var(--sunset-cream);
     border-radius: 50%;
     margin-left: 10px;
 }
 
+/* ================= GRID & METRIC CARDS ================= */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 25px;
+}
+
 .welcome-bar {
-    background: rgba(255,255,255,0.1);
-    color: white;
+    background: white;
     padding: 15px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     font-weight: bold;
-    border-bottom: 1px solid white;
-    margin-bottom: 20px;
+    color: var(--text-dark);
+    margin-bottom: 25px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .avatar-circle {
     width: 35px;
     height: 35px;
-    background: white;
+    background: var(--sunset-cream);
     border-radius: 50%;
     margin-right: 15px;
-}
-
-/* Content Grid Layout */
-.content-grid {
-    display: grid;
-    grid-template-columns: 1fr 200px;
-    gap: 20px;
 }
 
 .metrics {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 15px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .card {
     background: white;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.metric-card {
-    text-align: center;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
 .metric-card h3 {
-    font-size: 12px;
-    margin: 0 0 10px;
-    color: #555;
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 10px;
 }
 
 .metric-card .value {
-    font-size: 24px;
-    font-weight: bold;
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--sunset-orange);
 }
 
-.full-width {
-    height: 250px;
-    margin-bottom: 20px;
-}
+.full-width { height: 250px; }
 
-/* Calendar Styling */
-.calendar-card {
-    background: white;
-    border-radius: 8px;
-    height: 400px;
-    overflow: hidden;
-}
-
+/* ================= CALENDAR & ALERTS ================= */
 .calendar-header {
-    background: #f8f8f8;
-    padding: 10px;
-    text-align: center;
     font-weight: bold;
-    font-size: 12px;
-    border-bottom: 1px solid #ddd;
+    padding-bottom: 15px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
 }
 
 .calendar-days {
     display: flex;
-    justify-content: space-around;
-    padding: 10px 5px;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
 .day {
     text-align: center;
     font-size: 12px;
-    padding: 5px;
-    border-radius: 4px;
+    padding: 8px 5px;
+    border-radius: 6px;
 }
 
-.day span { font-size: 10px; color: #888; }
-
 .day.active {
-    background: var(--sidebar-bg);
+    background: var(--sunset-orange);
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(234, 97, 19, 0.3);
+}
+
+.compliance-box {
+    background: var(--sunset-cream);
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+.compliance-box strong { display: block; margin-bottom: 5px; }
+
+/* ================= SIDEBAR (SCROLLABLE) ================= */
+.sidebar {
+    width: 280px; 
+    background-color: var(--sidebar-bg);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px; 
+    flex-shrink: 0;
+    height: 100vh; /* Lock to viewport height */
+    box-sizing: border-box;
+}
+
+/* This wrapper allows the main menu to scroll while the footer stays put */
+.menu {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto; /* ENABLE SCROLLING HERE */
+    padding-right: 5px; /* Space for the scrollbar so it doesn't touch buttons */
+    margin-bottom: 20px;
+}
+
+/* Custom Scrollbar Styling for a cleaner look */
+.menu::-webkit-scrollbar {
+    width: 5px;
+}
+
+.menu::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.menu::-webkit-scrollbar-thumb {
+    background: var(--sunset-gold);
+    border-radius: 10px;
+}
+
+/* Footer Nav: Stays at the bottom */
+.footer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0; /* Prevents footer from shrinking when menu scrolls */
+}
+
+.menu-item {
+    width: 100%;
+    padding: 14px 22px; 
+    background-color: rgba(255, 255, 255, 0.08); 
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+    border: none;
+    border-radius: 10px; 
+    transition: all 0.3s ease;
+    display: block;
+}
+
+/* Active State */
+.menu-item.active {
+    background-color: #FFFFFF !important;
+    color: var(--sidebar-bg) !important;
+    font-weight: 700;
+}
+
+/* Logout Styling */
+#logout-btn {
+    background-color: rgba(80, 45, 60, 0.85); 
     color: white;
 }

@@ -1,8 +1,10 @@
 :root {
-    --sidebar-bg: #1a234e;
-    --main-bg: #19b2a6;
-    --active-tab: #b6e3df;
-    --text-white: #ffffff;
+    --sunset-orange: #EA6113;
+    --sunset-gold: #F88F22;
+    --sunset-yellow: #FBB931;
+    --sunset-cream: #FFE3B3;
+    --text-dark: #412110;
+    --sidebar-bg: #1a234e; /* Deep Navy Blue */
 }
 
 body, html {
@@ -11,7 +13,7 @@ body, html {
     font-family: 'Lato', sans-serif;
     height: 100vh;
     overflow: hidden;
-    background-color: white;
+    background-color: #FFFAF0; /* Warm off-white */
 }
 
 .app-container {
@@ -20,53 +22,132 @@ body, html {
     height: 100vh;
 }
 
-/* Sidebar */
+/* ================= SIDEBAR (MATCHING DASHBOARD) ================= */
 .sidebar {
-    width: 200px;
+    width: 250px;
     background-color: var(--sidebar-bg);
     color: white;
     display: flex;
     flex-direction: column;
-    padding: 20px 10px;
+    padding: 20px 15px;
     flex-shrink: 0;
-    z-index: 100; /* Sidebar always on top */
+    z-index: 100;
 }
 
 .logo-section {
     text-align: center;
-    margin-bottom: 30px;
-    font-size: 11px;
+    margin-bottom: 25px;
 }
 
 .logo-image {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    margin-bottom: 10px;
+    margin: 0 auto 10px;
+    background: white;
+    display: block;
+}
+
+.role-badge {
+    background-color: var(--sunset-yellow);
+    color: var(--text-dark);
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.menu {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+}
+/* ================= SIDEBAR (CLEAN SCROLL) ================= */
+.sidebar {
+    width: 280px; 
+    background-color: var(--sidebar-bg);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px; 
+    flex-shrink: 0;
+    height: 100vh; /* Lock to viewport height */
+    box-sizing: border-box;
+}
+
+/* This wrapper allows the main menu to scroll while the footer stays put */
+.menu {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto; /* ENABLE SCROLLING HERE */
+    padding-right: 5px; /* Space for the scrollbar so it doesn't touch buttons */
+    margin-bottom: 20px;
+}
+
+/* Custom Scrollbar Styling for a cleaner look */
+.menu::-webkit-scrollbar {
+    width: 5px;
+}
+
+.menu::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.menu::-webkit-scrollbar-thumb {
+    background: var(--sunset-gold);
+    border-radius: 10px;
+}
+
+/* Footer Nav: Stays at the bottom */
+.footer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0; /* Prevents footer from shrinking when menu scrolls */
 }
 
 .menu-item {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 8px;
-    border: none;
-    border-radius: 4px;
-    background-color: var(--active-tab);
-    color: var(--sidebar-bg);
-    font-weight: bold;
+    padding: 14px 22px; 
+    background-color: rgba(255, 255, 255, 0.08); 
+    color: white;
+    font-weight: 500;
     cursor: pointer;
     text-align: left;
-    font-size: 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 10px; 
+    transition: all 0.3s ease;
+    display: block;
 }
 
-.menu-item.active { background-color: #f0f0f0; }
-.menu-item.alt { background-color: rgba(255,255,255,0.1); color: white; margin-top: 5px; }
+/* Active State */
+.menu-item.active {
+    background-color: #FFFFFF !important;
+    color: var(--sidebar-bg) !important;
+    font-weight: 700;
+}
 
-/* Map Area Layout */
+/* Logout Styling */
+#logout-btn {
+    background-color: rgba(80, 45, 60, 0.85); 
+    color: white;
+}
+
+/* ================= MAP AREA LAYOUT ================= */
 .map-wrapper {
     flex-grow: 1;
     position: relative;
-    background-color: #ffffff;
+    background-color: #FFFAF0;
     overflow: hidden;
 }
 
@@ -74,8 +155,8 @@ body, html {
     width: 100%;
     height: 100%;
     display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center;     /* Center vertically */
+    justify-content: center;
+    align-items: center;
     z-index: 1;
 }
 
@@ -85,7 +166,7 @@ body, html {
     object-fit: contain;
 }
 
-/* Heatmap Overlay (Floating Sidebar) */
+/* The overlay remains styled in case you re-enable it */
 .heatmap-overlay {
     position: absolute;
     top: 25px;
@@ -97,73 +178,4 @@ body, html {
     color: white;
     z-index: 10;
     box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    max-height: calc(100vh - 50px);
-    overflow-y: auto;
 }
-
-.overlay-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.overlay-header h2 { font-size: 16px; margin: 0; }
-.close-btn { cursor: pointer; font-size: 20px; opacity: 0.7; }
-
-.search-container input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    background: rgba(255,255,255,0.1);
-    color: white;
-    box-sizing: border-box;
-    margin-bottom: 15px;
-}
-
-.filter-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.filter-box { flex: 1; }
-.filter-box label { display: block; font-size: 10px; opacity: 0.6; margin-bottom: 4px; }
-.filter-box select { 
-    width: 100%;
-    background: transparent; 
-    color: white; 
-    border: 1px solid rgba(255,255,255,0.2); 
-    border-radius: 4px;
-    font-size: 11px;
-    padding: 4px;
-}
-
-.location-list h3 { font-size: 13px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
-
-.location-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    background: rgba(255,255,255,0.05);
-}
-
-.location-item.active { background: var(--main-bg); }
-
-.loc-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 12px;
-    flex-shrink: 0;
-}
-
-.loc-dot.red { background: #ff4d4d; box-shadow: 0 0 8px #ff4d4d; }
-.loc-dot.orange { background: #ffa500; }
-
-.loc-details strong { display: block; font-size: 12px; }
-.loc-details span { font-size: 10px; opacity: 0.8; }
