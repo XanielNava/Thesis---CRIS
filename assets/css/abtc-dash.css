@@ -1,0 +1,72 @@
+/* Custom ABTC/LGU Additions */
+
+.role-badge {
+    background: #19b2a6;
+    color: white;
+    font-weight: bold;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+/* Red alert for low stock */
+.danger-zone .value {
+    color: #d9534f;
+}
+
+/* Internal Dashboard Table */
+.card-title {
+    border-bottom: 1px solid #eeeeee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+
+.dashboard-table th {
+    background-color: #f8f8f8;
+    padding: 10px;
+    color: #777;
+    font-weight: 600;
+}
+
+.dashboard-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+/* Badges for Dose Stages */
+.badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.badge.yellow { background-color: #fff9c4; color: #fbc02d; }
+.badge.green { background-color: #c8e6c9; color: #388e3c; }
+
+/* Alert Section in Calendar */
+.alert-section {
+    padding: 15px;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.alert-section p {
+    margin: 8px 0;
+    padding-left: 10px;
+    border-left: 2px solid var(--sidebar-bg);
+}
