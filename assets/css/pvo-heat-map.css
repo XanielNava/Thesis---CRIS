@@ -1,10 +1,16 @@
+/* CRIS SUNSET PALETTE VARIABLES */
 :root {
     --sunset-orange: #EA6113;
     --sunset-gold: #F88F22;
     --sunset-yellow: #FBB931;
     --sunset-cream: #FFE3B3;
     --text-dark: #412110;
-    --sidebar-bg: #1a234e; /* Deep Navy Blue */
+    --sidebar-bg: #1a234e;
+    --main-bg: #FFFAF0;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 body, html {
@@ -13,7 +19,7 @@ body, html {
     font-family: 'Lato', sans-serif;
     height: 100vh;
     overflow: hidden;
-    background-color: #FFFAF0; /* Warm off-white */
+    background-color: var(--main-bg);
 }
 
 .app-container {
@@ -22,41 +28,32 @@ body, html {
     height: 100vh;
 }
 
-/* ================= SIDEBAR (MATCHING DASHBOARD) ================= */
+/* ================= UNIVERSAL SIDEBAR ================= */
 .sidebar {
-    width: 250px;
+    width: 280px;
+    height: 100vh;
     background-color: var(--sidebar-bg);
     color: white;
     display: flex;
     flex-direction: column;
-    padding: 20px 15px;
+    padding: 30px 20px;
     flex-shrink: 0;
-    z-index: 100;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
-.logo-section {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.logo-image {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin: 0 auto 10px;
-    background: white;
-    display: block;
-}
+.logo-section { text-align: center; margin-bottom: 25px; flex-shrink: 0; }
+.logo-image { width: 100px; height: auto; margin: 0 auto 10px; display: block; object-fit: contain; }
+.logo-section p { font-size: 11px; line-height: 1.4; margin-bottom: 12px; }
 
 .role-badge {
-    background-color: var(--sunset-yellow);
+    background: var(--sunset-yellow);
     color: var(--text-dark);
     font-size: 10px;
     font-weight: bold;
-    padding: 4px 12px;
+    padding: 5px 12px;
     border-radius: 4px;
-    display: inline-block;
-    margin-bottom: 20px;
     text-transform: uppercase;
 }
 
@@ -64,90 +61,99 @@ body, html {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    overflow-y: auto;
-}
-/* ================= SIDEBAR (CLEAN SCROLL) ================= */
-.sidebar {
-    width: 280px; 
-    background-color: var(--sidebar-bg);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    padding: 30px 20px; 
-    flex-shrink: 0;
-    height: 100vh; /* Lock to viewport height */
-    box-sizing: border-box;
-}
-
-/* This wrapper allows the main menu to scroll while the footer stays put */
-.menu {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
     gap: 12px;
-    overflow-y: auto; /* ENABLE SCROLLING HERE */
-    padding-right: 5px; /* Space for the scrollbar so it doesn't touch buttons */
+    overflow-y: auto;
     margin-bottom: 20px;
+    padding-right: 5px;
 }
 
-/* Custom Scrollbar Styling for a cleaner look */
-.menu::-webkit-scrollbar {
-    width: 5px;
-}
-
-.menu::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.menu::-webkit-scrollbar-thumb {
-    background: var(--sunset-gold);
+.menu-item {
+    width: 100%;
+    padding: 14px 22px;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    font-size: 14px;
     border-radius: 10px;
+    transition: var(--transition);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
 }
 
-/* Footer Nav: Stays at the bottom */
+.menu-item:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+    color: var(--sunset-yellow);
+}
+
+.menu-item.active {
+    background: #FFFFFF !important;
+    color: var(--sidebar-bg) !important;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 .footer-nav {
     display: flex;
     flex-direction: column;
     gap: 12px;
     padding-top: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    flex-shrink: 0; /* Prevents footer from shrinking when menu scrolls */
 }
 
-.menu-item {
-    width: 100%;
-    padding: 14px 22px; 
-    background-color: rgba(255, 255, 255, 0.08); 
+.logout { background: rgba(80, 45, 60, 0.85) !important; }
+.logout:hover { background: rgba(110, 40, 55, 1) !important; }
+
+/* Scrollbar Sidebar */
+.menu::-webkit-scrollbar { width: 5px; }
+.menu::-webkit-scrollbar-thumb { background: var(--sunset-gold); border-radius: 10px; }
+
+/* ================= MAIN CONTENT AREA ================= */
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+    padding: 15px 25px;
+    border-radius: 12px;
     color: white;
-    font-weight: 500;
-    cursor: pointer;
-    text-align: left;
-    font-size: 14px;
-    border: none;
-    border-radius: 10px; 
-    transition: all 0.3s ease;
-    display: block;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(234, 97, 19, 0.2);
 }
 
-/* Active State */
-.menu-item.active {
-    background-color: #FFFFFF !important;
-    color: var(--sidebar-bg) !important;
-    font-weight: 700;
+.user-profile-top {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 15px;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Logout Styling */
-#logout-btn {
-    background-color: rgba(80, 45, 60, 0.85); 
-    color: white;
+.profile-icon {
+    width: 30px;
+    height: 30px;
+    background: var(--sunset-cream);
+    border-radius: 50%;
+    margin-left: 10px;
 }
 
 /* ================= MAP AREA LAYOUT ================= */
 .map-wrapper {
     flex-grow: 1;
     position: relative;
-    background-color: #FFFAF0;
+    border-radius: 15px;
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     overflow: hidden;
 }
 
@@ -157,7 +163,6 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1;
 }
 
 .centered-map-img {
@@ -166,16 +171,15 @@ body, html {
     object-fit: contain;
 }
 
-/* The overlay remains styled in case you re-enable it */
 .heatmap-overlay {
     position: absolute;
-    top: 25px;
-    left: 25px;
-    width: 300px;
-    background-color: rgba(26, 35, 78, 0.95);
-    border-radius: 15px;
-    padding: 20px;
+    top: 20px;
+    right: 20px; /* Changed to right for better standard dashboard UI balance */
+    width: 250px;
+    background-color: rgba(26, 35, 78, 0.9);
+    border-radius: 12px;
+    padding: 15px;
     color: white;
     z-index: 10;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }

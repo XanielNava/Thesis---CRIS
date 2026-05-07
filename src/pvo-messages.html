@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - Messages</title>
+    <link rel="stylesheet" href="../assets/css/pvo-dashboard.css">
+    <link rel="stylesheet" href="../assets/css/pvo-messages.css">
+    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- UNIVERSAL SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PVO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="pvo-dash.html" class="menu-item">Dashboard</a>
+                <a href="pvo-animal-bite-cases.html" class="menu-item">Animal Bite Cases</a>
+                <a href="pvo-heat-map.html" class="menu-item">Heatmap</a>
+                <a href="pvo-statistics.html" class="menu-item">Statistics</a>
+                <a href="#" class="menu-item active">Messages</a>
+                <a href="#" class="menu-item">Inventory</a>
+                <a href="#" class="menu-item">Reports</a>
+            </nav>
+
+            <div class="footer-nav">
+                <a href="#" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="header">
+                <h1>MESSAGES</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Xaniel Marios Angelo B. Nava</strong><br>
+                        <span>Administrator</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <section class="content-body">
+                <div class="messaging-container card">
+                    <!-- Inbox Sidebar -->
+                    <div class="inbox-sidebar">
+                        <div class="inbox-search">
+                            <input type="text" placeholder="Search conversations...">
+                        </div>
+                        <div class="conversation-list">
+                            <div class="convo-item active">
+                                <div class="convo-avatar"></div>
+                                <div class="convo-details">
+                                    <strong>Dr. Elena Cruz</strong>
+                                    <p>Vaccination report attached...</p>
+                                </div>
+                                <span class="time">10:45 AM</span>
+                            </div>
+                            <div class="convo-item">
+                                <div class="convo-avatar"></div>
+                                <div class="convo-details">
+                                    <strong>Iloilo City MAO</strong>
+                                    <p>New case alert in Brgy. Molo</p>
+                                </div>
+                                <span class="time">9:30 AM</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Window -->
+                    <div class="chat-window">
+                        <div class="chat-header">
+                            <h3>Dr. Elena Cruz</h3>
+                            <span>Last active: 5 mins ago</span>
+                        </div>
+                        <div class="chat-messages">
+                            <div class="message received">
+                                <p>Good morning, Xaniel. I've uploaded the monthly rabies vaccination data for the central district.</p>
+                                <span class="msg-time">10:42 AM</span>
+                            </div>
+                            <div class="message sent">
+                                <p>Received. Thank you, Doctor. I'll update the dashboard stats immediately.</p>
+                                <span class="msg-time">10:45 AM</span>
+                            </div>
+                        </div>
+                        <div class="chat-input-area">
+                            <input type="text" placeholder="Type your message here...">
+                            <button id="send-btn">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

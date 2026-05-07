@@ -10,7 +10,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- SIDEBAR -->
+        <!-- UNIVERSAL SIDEBAR -->
         <aside class="sidebar">
             <div class="logo-section">
                 <img src="../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
@@ -19,8 +19,8 @@
             </div>
 
             <nav class="menu">
-                <a href="pvo-dashboard.html" class="menu-item">Dashboard</a>
-                <a href="#" class="menu-item active">Animal Bite Cases</a>
+                <a href="pvo-dash.html" class="menu-item">Dashboard</a>
+                <a href="pvo-animal-bite-cases.html" class="menu-item active">Animal Bite Cases</a>
                 <a href="pvo-heat-map.html" class="menu-item">Heatmap</a>
                 <a href="#" class="menu-item">Statistics</a>
                 <a href="#" class="menu-item">Messages</a>
@@ -30,7 +30,7 @@
 
             <div class="footer-nav">
                 <a href="#" class="menu-item alt">Settings</a>
-                <a href="#" class="menu-item alt logout">Logout</a>
+                <button id="logout-btn" class="menu-item alt logout">Logout</button>
             </div>
         </aside>
 
@@ -47,21 +47,21 @@
                 </div>
             </header>
 
-            <div class="card">
+            <section class="card">
                 <div class="topbar">
                     <div class="search-section">
                         <div class="search-input">
-                            <label>Search:</label>
-                            <input type="text" placeholder="Search case ID or name...">
+                            <label for="caseSearch">Search:</label>
+                            <input type="text" id="caseSearch" placeholder="Search case ID or name...">
                         </div>
                         <button onclick="openCaseModal()" id="add-btn">+ New Case</button>
                     </div>
 
-                    <div class="export">
-                        <button>CSV</button>
-                        <button>Excel</button>
-                        <button>PDF</button>
-                        <button>Print</button>
+                    <div class="export-buttons">
+                        <button class="btn-export">CSV</button>
+                        <button class="btn-export">Excel</button>
+                        <button class="btn-export">PDF</button>
+                        <button class="btn-export">Print</button>
                     </div>
                 </div>
 
@@ -85,17 +85,17 @@
                     </table>
                 </div>
 
-                <div class="pagination">
+                <nav class="pagination">
                     <button>Previous</button>
                     <button class="active">1</button>
                     <button>2</button>
                     <button>Next</button>
-                </div>
-            </div>
+                </nav>
+            </section>
         </main>
     </div>
 
-    <!-- Modal remains functional -->
+    <!-- Modal -->
     <div id="caseModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -108,13 +108,13 @@
                 <input type="text" id="barangay" placeholder="Barangay" required>
                 <input type="text" id="animalType" placeholder="Animal Type (Dog/Cat/Other)" required>
                 <select id="vaccinationStatus" required>
-                    <option value="">Vaccination Status</option>
+                    <option value="" disabled selected>Vaccination Status</option>
                     <option value="Vaccinated">Vaccinated</option>
                     <option value="Not Vaccinated">Not Vaccinated</option>
                     <option value="Unknown">Unknown</option>
                 </select>
                 <select id="clinicalLabResults" required>
-                    <option value="">Clinical Lab Results</option>
+                    <option value="" disabled selected>Clinical Lab Results</option>
                     <option value="Positive">Positive</option>
                     <option value="Negative">Negative</option>
                 </select>

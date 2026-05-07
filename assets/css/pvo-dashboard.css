@@ -5,38 +5,39 @@
     --sunset-yellow: #FBB931;
     --sunset-cream: #FFE3B3;
     --text-dark: #412110;
-    --sidebar-bg: #1a234e; /* Deep Navy Blue */
-    --main-bg: #FFFAF0; /* Warm off-white */
+    --sidebar-bg: #1a234e;
+    --main-bg: #FFFAF0;
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Lato', Arial, sans-serif;
 }
 
 body {
     background-color: var(--main-bg);
     color: var(--text-dark);
+    font-family: 'Lato', Arial, sans-serif;
+    overflow: hidden;
 }
 
 .container {
     display: flex;
     height: 100vh;
-    overflow: hidden;
 }
 
-/* ================= SIDEBAR (CAPSULE BUTTON DESIGN) ================= */
+/* ================= SIDEBAR ================= */
 .sidebar {
-    width: 250px;
+    width: 280px;
     background-color: var(--sidebar-bg);
     color: white;
     display: flex;
     flex-direction: column;
-    padding: 20px 15px; /* Side padding creates the button margins */
+    padding: 30px 20px;
     flex-shrink: 0;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
 }
 
 .logo-section {
@@ -45,12 +46,17 @@ body {
 }
 
 .logo-image {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
+    width: 100px;
+    height: auto;
     margin: 0 auto 10px;
-    background: white;
     display: block;
+    object-fit: contain;
+}
+
+.logo-section p {
+    font-size: 11px;
+    line-height: 1.4;
+    margin-bottom: 12px;
 }
 
 .role-badge {
@@ -58,10 +64,8 @@ body {
     color: var(--text-dark);
     font-size: 10px;
     font-weight: bold;
-    padding: 4px 12px;
+    padding: 5px 12px;
     border-radius: 4px;
-    display: inline-block;
-    margin-bottom: 20px;
     text-transform: uppercase;
 }
 
@@ -69,54 +73,56 @@ body {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Vertical spacing between capsule buttons */
+    gap: 12px;
+    overflow-y: auto;
+    padding-right: 8px;
+    margin-bottom: 20px;
 }
 
-/* Capsule Button Base Style */
 .menu-item {
     width: 100%;
-    padding: 12px 20px;
-    background-color: rgba(255, 255, 255, 0.1); /* Transparent blue/white */
+    padding: 14px 22px;
+    background-color: rgba(255, 255, 255, 0.08);
     color: white;
     font-weight: 500;
-    cursor: pointer;
-    text-align: left;
     font-size: 14px;
+    border-radius: 10px;
+    transition: var(--transition-smooth);
+    text-decoration: none;
+    display: block;
     border: none;
-    border-radius: 8px; /* Rounded corners for capsule look */
-    transition: all 0.3s ease;
+    cursor: pointer;
 }
 
-.menu-item:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    padding-left: 25px;
+.menu-item:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+    color: var(--sunset-yellow);
 }
 
-/* Active State: Solid White with Navy Text */
 .menu-item.active {
     background-color: #FFFFFF !important;
     color: var(--sidebar-bg) !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .footer-nav {
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: auto;
+    gap: 12px;
 }
 
-/* Settings and Logout Buttons */
-.menu-item.alt {
-    background-color: rgba(255, 255, 255, 0.1);
-}
+.logout { background-color: rgba(80, 45, 60, 0.85) !important; }
+.logout:hover { background-color: rgba(110, 40, 55, 1) !important; }
 
-#logout-btn {
-    background-color: rgba(65, 40, 55, 0.8); /* Dark muted maroon as per reference */
-    color: white;
-}
+/* CUSTOM SCROLLBAR */
+.menu::-webkit-scrollbar { width: 5px; }
+.menu::-webkit-scrollbar-thumb { background: var(--sunset-gold); border-radius: 10px; }
 
-/* ================= MAIN CONTENT & HEADER ================= */
+/* ================= MAIN CONTENT ================= */
 .main-content {
     flex-grow: 1;
     padding: 25px;
@@ -145,15 +151,14 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.profile-icon {
-    width: 30px;
-    height: 30px;
+.profile-icon, .avatar-circle {
     background: var(--sunset-cream);
     border-radius: 50%;
-    margin-left: 10px;
 }
 
-/* ================= GRID & METRIC CARDS ================= */
+.profile-icon { width: 30px; height: 30px; margin-left: 10px; }
+.avatar-circle { width: 35px; height: 35px; margin-right: 15px; }
+
 .content-grid {
     display: grid;
     grid-template-columns: 1fr 280px;
@@ -167,17 +172,8 @@ body {
     display: flex;
     align-items: center;
     font-weight: bold;
-    color: var(--text-dark);
     margin-bottom: 25px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-.avatar-circle {
-    width: 35px;
-    height: 35px;
-    background: var(--sunset-cream);
-    border-radius: 50%;
-    margin-right: 15px;
 }
 
 .metrics {
@@ -207,9 +203,10 @@ body {
     color: var(--sunset-orange);
 }
 
-.full-width { height: 250px; }
+.metric-card.empty { background: transparent; box-shadow: none; }
+.full-width { min-height: 250px; }
 
-/* ================= CALENDAR & ALERTS ================= */
+/* Calendar & Alerts */
 .calendar-header {
     font-weight: bold;
     padding-bottom: 15px;
@@ -246,79 +243,3 @@ body {
 }
 
 .compliance-box strong { display: block; margin-bottom: 5px; }
-
-/* ================= SIDEBAR (SCROLLABLE) ================= */
-.sidebar {
-    width: 280px; 
-    background-color: var(--sidebar-bg);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    padding: 30px 20px; 
-    flex-shrink: 0;
-    height: 100vh; /* Lock to viewport height */
-    box-sizing: border-box;
-}
-
-/* This wrapper allows the main menu to scroll while the footer stays put */
-.menu {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    overflow-y: auto; /* ENABLE SCROLLING HERE */
-    padding-right: 5px; /* Space for the scrollbar so it doesn't touch buttons */
-    margin-bottom: 20px;
-}
-
-/* Custom Scrollbar Styling for a cleaner look */
-.menu::-webkit-scrollbar {
-    width: 5px;
-}
-
-.menu::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.menu::-webkit-scrollbar-thumb {
-    background: var(--sunset-gold);
-    border-radius: 10px;
-}
-
-/* Footer Nav: Stays at the bottom */
-.footer-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    flex-shrink: 0; /* Prevents footer from shrinking when menu scrolls */
-}
-
-.menu-item {
-    width: 100%;
-    padding: 14px 22px; 
-    background-color: rgba(255, 255, 255, 0.08); 
-    color: white;
-    font-weight: 500;
-    cursor: pointer;
-    text-align: left;
-    font-size: 14px;
-    border: none;
-    border-radius: 10px; 
-    transition: all 0.3s ease;
-    display: block;
-}
-
-/* Active State */
-.menu-item.active {
-    background-color: #FFFFFF !important;
-    color: var(--sidebar-bg) !important;
-    font-weight: 700;
-}
-
-/* Logout Styling */
-#logout-btn {
-    background-color: rgba(80, 45, 60, 0.85); 
-    color: white;
-}

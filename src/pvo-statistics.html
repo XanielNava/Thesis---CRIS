@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRIS Statistics - PVO</title>
-    <link rel="stylesheet" href="../assets/css/pvo-heat-map.css">
+    <link rel="stylesheet" href="../assets/css/pvo-dashboard.css">
     <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="app-container">
+    <div class="container">
         <!-- UNIVERSAL SIDEBAR -->
         <aside class="sidebar">
             <div class="logo-section">
@@ -23,11 +23,11 @@
             <nav class="menu">
                 <a href="pvo-dash.html" class="menu-item">Dashboard</a>
                 <a href="pvo-animal-bite-cases.html" class="menu-item">Animal Bite Cases</a>
-                <a href="pvo-heat-map.html" class="menu-item active">Heatmap</a>
-                <a href="pvo-statistics.html" class="menu-item">Statistics</a>
+                <a href="pvo-heat-map.html" class="menu-item">Heatmap</a>
+                <a href="pvo-statistics.html" class="menu-item active">Statistics</a>
                 <a href="#" class="menu-item">Messages</a>
                 <a href="#" class="menu-item">Inventory</a>
-                <href href="#" class="menu-item">Reports</href>
+                <a href="#" class="menu-item">Reports</a>
             </nav>
 
             <div class="footer-nav">
@@ -39,7 +39,7 @@
         <!-- Main Content Area -->
         <main class="main-content">
             <header class="header">
-                <h1>HEATMAP / STATISTICS</h1>
+                <h1>STATISTICS & ANALYTICS</h1>
                 <div class="user-profile-top">
                     <div class="profile-info">
                         <strong>Xaniel Marios Angelo B. Nava</strong><br>
@@ -49,18 +49,40 @@
                 </div>
             </header>
 
-            <div class="map-wrapper">
-                <div class="map-canvas">
-                    <!-- Example Map Image Placeholder -->
-                    <img src="../assets/images/iloilo_province_map.qgz.png" alt="Heatmap" class="centered-map-img">
+            <section class="stats-grid">
+                <!-- Case Trends Card -->
+                <div class="card">
+                    <h3>Monthly Rabies Trends</h3>
+                    <div class="chart-placeholder">
+                        <p>Chart Visualization Placeholder</p>
+                    </div>
                 </div>
-                
-                <!-- Optional Overlay -->
-                <div class="heatmap-overlay">
-                    <h3>Legend</h3>
-                    <p>Statistics and density data visualization.</p>
+
+                <!-- Data Table Card -->
+                <div class="card">
+                    <h3>Recent Case Summary</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Region</th>
+                                    <th>Total Cases</th>
+                                    <th>Vaccination Rate</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>District I</td>
+                                    <td>42</td>
+                                    <td>88%</td>
+                                    <td><span class="badge vaccinated">High Coverage</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            </section>
         </main>
     </div>
 </body>

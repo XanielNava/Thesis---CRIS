@@ -6,6 +6,7 @@
     --text-dark: #412110;
     --sidebar-bg: #1a234e;
     --main-bg: #FFFAF0;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,33 +16,12 @@ body {
     background: var(--main-bg);
     height: 100vh;
     overflow: hidden;
+    color: var(--text-dark);
 }
 
-.app-container { display: flex; height: 100vh; }
+.app-container { display: flex; height: 100vh; width: 100%; }
 
-/* SIDEBAR - CAPSULE STYLE */
-:root {
-    --sunset-orange: #EA6113;
-    --sunset-gold: #F88F22;
-    --sunset-yellow: #FBB931;
-    --sunset-cream: #FFE3B3;
-    --text-dark: #412110;
-    --sidebar-bg: #1a234e;
-    --main-bg: #FFFAF0;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    font-family: 'Lato', sans-serif;
-    background: var(--main-bg);
-    height: 100vh;
-    overflow: hidden;
-}
-
-.app-container { display: flex; height: 100vh; }
-
-/* ================= OPTIMIZED SIDEBAR ================= */
+/* ================= SIDEBAR ================= */
 .sidebar {
     width: 280px;
     height: 100vh;
@@ -51,115 +31,84 @@ body {
     flex-direction: column;
     padding: 30px 20px;
     flex-shrink: 0;
-    box-sizing: border-box;
     position: sticky;
     top: 0;
+    z-index: 1000;
 }
 
-/* 2. Logo & Identity Section */
-.logo-section {
-    text-align: center;
-    margin-bottom: 30px;
-    flex-shrink: 0;
-}
-
-.logo-image {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin: 0 auto 10px;
-    display: block;
-    object-fit: cover;
-}
+.logo-section { text-align: center; margin-bottom: 25px; flex-shrink: 0; }
+.logo-image { width: 100px; height: auto; margin: 0 auto 10px; display: block; object-fit: contain; }
+.logo-section p { font-size: 11px; line-height: 1.4; margin-bottom: 12px; }
 
 .role-badge {
-    background-color: var(--sunset-yellow);
+    background: var(--sunset-yellow);
     color: var(--text-dark);
     font-size: 10px;
     font-weight: bold;
-    padding: 4px 10px;
+    padding: 5px 12px;
     border-radius: 4px;
-    display: inline-block;
     text-transform: uppercase;
 }
 
-/* 3. Scrollable Navigation Area */
 .menu {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     gap: 12px;
     overflow-y: auto;
-    overflow-x: hidden; /* Strict fix for bottom scrollbar */
-    padding-right: 8px; /* Buffer for scrollbar */
     margin-bottom: 20px;
+    padding-right: 5px;
 }
 
-/* 4. Navigation Buttons */
 .menu-item {
     width: 100%;
     padding: 14px 22px;
-    background-color: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.08);
     color: white;
-    font-weight: 500;
-    cursor: pointer;
-    text-align: left;
     font-size: 14px;
-    border: none;
     border-radius: 10px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: block;
-    box-sizing: border-box; /* Prevents button width overflow */
+    transition: var(--transition);
     text-decoration: none;
+    border: none;
+    cursor: pointer;
 }
 
 .menu-item:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.15);
     transform: translateX(4px);
+    color: var(--sunset-yellow);
 }
 
 .menu-item.active {
-    background-color: #FFFFFF !important;
+    background: #FFFFFF !important;
     color: var(--sidebar-bg) !important;
     font-weight: 700;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* 5. Fixed Footer Section */
 .footer-nav {
     display: flex;
     flex-direction: column;
     gap: 12px;
     padding-top: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    flex-shrink: 0;
 }
 
-#logout-btn {
-    background-color: rgba(80, 45, 60, 0.85);
-    color: white;
-}
+.logout { background: rgba(80, 45, 60, 0.85) !important; }
+.logout:hover { background: rgba(110, 40, 55, 1) !important; }
 
-#logout-btn:hover {
-    background-color: rgba(100, 50, 70, 1);
-}
+/* Scrollbar Sidebar */
+.menu::-webkit-scrollbar { width: 5px; }
+.menu::-webkit-scrollbar-thumb { background: var(--sunset-gold); border-radius: 10px; }
 
-/* 6. Optimized Scrollbar */
-.menu::-webkit-scrollbar {
-    width: 5px;
+/* ================= MAIN CONTENT ================= */
+.main-content {
+    flex: 1;
+    padding: 25px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
-
-.menu::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.menu::-webkit-scrollbar-thumb {
-    background: var(--sunset-gold);
-    border-radius: 10px;
-}
-
-/* ================= MAIN CONTENT & CARDS ================= */
-.main-content { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; }
 
 .header {
     display: flex;
@@ -173,65 +122,74 @@ body {
     box-shadow: 0 4px 15px rgba(234, 97, 19, 0.2);
 }
 
-.user-profile-top { background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 25px; display: flex; align-items: center; font-size: 11px; }
-.profile-icon { width: 32px; height: 32px; background: var(--sunset-cream); border-radius: 50%; margin-left: 10px; }
-
-.card { background: white; border-radius: 15px; padding: 25px; flex: 1; display: flex; flex-direction: column; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-
-/* ... Rest of your existing table and modal styles ... */
-
-/* MAIN CONTENT */
-.main-content { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; }
-
-.header {
+.user-profile-top {
+    background: rgba(255,255,255,0.15);
+    padding: 8px 15px;
+    border-radius: 25px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
-    padding: 18px 30px;
-    border-radius: 15px;
-    color: white;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 15px rgba(234, 97, 19, 0.2);
+    font-size: 11px;
 }
 
-.user-profile-top { background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 25px; display: flex; align-items: center; font-size: 11px; }
 .profile-icon { width: 32px; height: 32px; background: var(--sunset-cream); border-radius: 50%; margin-left: 10px; }
 
-/* CARD & TABLE */
-.card { background: white; border-radius: 15px; padding: 25px; flex: 1; display: flex; flex-direction: column; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+/* DATA CARD */
+.card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
 
 .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .search-section { display: flex; align-items: center; gap: 20px; }
-.search-input { display: flex; align-items: center; gap: 10px; }
-.search-input input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+.search-input { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.search-input input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; }
 
-#add-btn { background: var(--sunset-orange); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+#add-btn {
+    background: var(--sunset-orange);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
 #add-btn:hover { background: var(--text-dark); }
 
-.export button { padding: 6px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; font-size: 12px; cursor: pointer; margin-left: 5px; }
+.btn-export { padding: 6px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; font-size: 12px; cursor: pointer; margin-left: 5px; }
 
+/* TABLE */
 .table-container { flex: 1; overflow-y: auto; border: 1px solid #f0f0f0; border-radius: 10px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { background: #f8f9fa; padding: 15px; text-align: left; font-weight: bold; border-bottom: 2px solid #eee; position: sticky; top: 0; }
 td { padding: 15px; border-bottom: 1px solid #eee; }
-
-/* BADGES */
-.badge { padding: 4px 8px; border-radius: 4px; color: white; font-size: 11px; font-weight: bold; display: inline-block; }
-.vaccinated { background: #28a745; }
-.positive { background: #dc3545; }
-.negative { background: #17a2b8; }
 
 /* PAGINATION */
 .pagination { display: flex; justify-content: flex-end; gap: 8px; padding-top: 20px; }
 .pagination button { padding: 8px 15px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; }
 .pagination button.active { background: var(--sunset-orange); color: white; border-color: var(--sunset-orange); }
 
-/* MODAL STYLING */
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
-.modal-content { background: white; border-radius: 15px; width: 450px; padding: 30px; }
+/* MODAL */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content { background: white; border-radius: 15px; width: 100%; max-width: 450px; padding: 30px; }
 .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-#caseForm input, #caseForm select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; }
+.close-modal { cursor: pointer; font-size: 24px; }
+
+#caseForm input, #caseForm select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; }
 .modal-buttons { display: flex; gap: 10px; }
 .cancel-btn { flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; }
 #submitCaseBtn { flex: 1; padding: 12px; background: var(--sunset-orange); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
