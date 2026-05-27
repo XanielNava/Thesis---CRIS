@@ -1,4 +1,5 @@
 // PVO Login.js - CDN VERSION (Works in any browser)
+
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -20,58 +21,105 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 
-// ✅ Read the user's REAL designation from Firestore
+// ✅ Get user designation from Firestore
 async function getUserDesignation(uid) {
-  const userDocRef = doc(db, "users", uid); // change path to your own, e.g., "pvo_users/{uid}"
+
+  const userDocRef = doc(db, "pho-users", uid);
+
   const userDocSnap = await getDoc(userDocRef);
 
   if (!userDocSnap.exists()) {
-    throw new Error("The username, password, or designation is incorrect.");
+    throw new Error("User record not found.");
   }
 
   const data = userDocSnap.data();
-  return data.designation; // this is the designation they chose during signup
+
+  console.log("Firestore User Data:", data);
+
+  // ✅ Check if designation exists
+  if (!data.designation) {
+    throw new Error("Designation field is missing in Firestore.");
+  }
+
+  return data.designation;
 }
 
 
-// Login form handler
+// ✅ Login Form Handler
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
+
   e.preventDefault();
 
-  const email = document.getElementById("email").value;
+  const email = document.getElementById("email").value.trim();
+
   const password = document.getElementById("password").value;
-  const loginDesignation = document.getElementById("designation").value; // what they picked now
+
+  const loginDesignation =
+    document.getElementById("designation")
+    .value
+    .trim()
+    .toLowerCase();
 
   try {
+
     document.getElementById('loginBtn').textContent = 'Logging in...';
 
-    // 1. Sign in
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    // ✅ Firebase Login
+    const userCredential =
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
     const user = userCredential.user;
 
-    // 2. Get the role they originally set during signup
-    const dbDesignation = await getUserDesignation(user.uid);
+    console.log("Logged in user UID:", user.uid);
 
-    // 3. ❌ BLOCK if login designation is wrong
+    // ✅ Get Firestore designation
+    const dbDesignationRaw =
+      await getUserDesignation(user.uid);
+
+    const dbDesignation =
+      dbDesignationRaw
+      .trim()
+      .toLowerCase();
+
+    console.log("Selected Designation:", loginDesignation);
+    console.log("Database Designation:", dbDesignation);
+
+    // ❌ Block wrong designation
     if (loginDesignation !== dbDesignation) {
-      throw new Error("The username, password, or designation is incorrect.");
+
+      throw new Error(
+        "The username, password, or designation is incorrect."
+      );
     }
 
-    // 4. ✅ Store that correct designation (only if it matches)
-    localStorage.setItem('userDesignation', loginDesignation);
+    // ✅ Save session
+    localStorage.setItem(
+      'userDesignation',
+      dbDesignationRaw
+    );
 
-    // 5. Redirect based on role (you can customize this)
-    if (loginDesignation === 'Administrator') {
-      window.location.href = '../src/pho-dashboard.html';
-    } else {
-      // Veterinary Officer, Health Officer, etc.
-      window.location.href = '../src/pho-dashboard.html';
-    }
+    // ✅ Redirect
+    window.location.href = '../src/pho-dash.html';
 
-  } catch (error) {
-    console.error('Login error:', error.code, error.message);
-    alert('Login failed: ' + error.message);
-  } finally {
-    document.getElementById('loginBtn').textContent = 'Login';
   }
+  catch (error) {
+
+    console.error("Full Login Error:", error);
+
+    alert(
+      'Login failed: ' +
+      (error.message || 'Unknown error')
+    );
+
+  }
+  finally {
+
+    document.getElementById('loginBtn').textContent = 'Login';
+
+  }
+
 });

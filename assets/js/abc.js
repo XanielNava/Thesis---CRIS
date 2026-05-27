@@ -1,4 +1,4 @@
-// ABC.js - Complete PVO Animal Bite Cases Dashboard (FIXED)
+// ABC.js - Complete PVO Animal Bite Cases Dashboard (Nested Schema Fixed)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -30,7 +30,7 @@ window.closeCaseModal = function() {
 // Load cases from Firestore
 async function loadCases() {
     try {
-        const q = query(collection(db, 'cases'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'bite_reports'), orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
         const cases = [];
         
@@ -42,14 +42,14 @@ async function loadCases() {
         });
         
         displayCases(cases);
-        console.log(`${cases.length} cases loaded from Firestore`);
+        console.log(`${cases.length} reports loaded from bite_reports collection`);
     } catch (error) {
         console.error('Error loading cases:', error);
         displayCases([]); // Show empty table on error
     }
 }
 
-// FIXED: Clean table display with proper formatting
+// Clean table display mapped perfectly to nested maps
 function displayCases(cases) {
     const tbody = document.querySelector('#casesTableBody');
     if (!tbody) {
@@ -67,15 +67,15 @@ function displayCases(cases) {
     cases.slice(0, 50).forEach((caseData) => { // Limit to 50 for performance
         const row = document.createElement('tr');
         
-        // Clean data extraction - handles missing fields
-        const caseId = caseData.caseId || caseData.id?.slice(0,8) || 'N/A';
-        const municipality = caseData.municipality || 'N/A';
-        const barangay = caseData.barangay || 'N/A';
-        const animalType = caseData.animalType || 'N/A';
-        const vaccinationStatus = caseData.vaccinationStatus || 'Unknown';
-        const clinicalLabResults = caseData.clinicalLabResults || 'Pending';
-        const victimName = caseData.victimName || 'N/A';
-        const victimAge = caseData.victimAge || 'N/A';
+        // Accurate deep path data extraction from Firestore layout
+        const caseId = caseData.id?.slice(0, 8) || caseData.caseId || 'N/A';
+        const municipality = caseData.incident?.municipality || caseData.municipality || 'N/A';
+        const barangay = caseData.incident?.barangay || caseData.barangay || 'N/A';
+        const animalType = caseData.animal?.species || caseData.animalType || 'N/A';
+        const vaccinationStatus = caseData.medical?.patientVaccinationStatus || caseData.vaccinationStatus || 'Unknown';
+        const clinicalLabResults = caseData.status || caseData.clinicalLabResults || 'Pending';
+        const victimName = caseData.patient?.fullName || caseData.victimName || 'N/A';
+        const victimAge = caseData.patient?.age || caseData.victimAge || 'N/A';
         
         row.innerHTML = `
             <td style="font-weight: 600;">${caseId}</td>
@@ -95,7 +95,7 @@ function displayCases(cases) {
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('PVO Dashboard loaded');
     
-    // Form submission
+    // Form submission 
     const caseForm = document.getElementById('caseForm');
     if (caseForm) {
         caseForm.addEventListener('submit', async function(e) {
@@ -105,26 +105,38 @@ document.addEventListener('DOMContentLoaded', async function() {
             submitBtn.textContent = 'Adding...';
             submitBtn.disabled = true;
             
+            // Constructs payload using the new nested layout structure
             const caseData = {
-                caseId: document.getElementById('caseId').value,
-                municipality: document.getElementById('municipality').value,
-                barangay: document.getElementById('barangay').value,
-                animalType: document.getElementById('animalType').value,
-                vaccinationStatus: document.getElementById('vaccinationStatus').value,
-                clinicalLabResults: document.getElementById('clinicalLabResults').value,
-                victimName: document.getElementById('victimName').value,
-                victimAge: parseInt(document.getElementById('victimAge').value),
-                createdAt: new Date().toISOString(),
+                userId: document.getElementById('caseId').value, // Maps ID string
+                incident: {
+                    municipality: document.getElementById('municipality').value,
+                    barangay: document.getElementById('barangay').value,
+                    date: new Date().toISOString().slice(0,10)
+                },
+                animal: {
+                    species: document.getElementById('animalType').value,
+                    vaccinationStatus: 'Unknown' // Default fallback configuration
+                },
+                medical: {
+                    patientVaccinationStatus: document.getElementById('vaccinationStatus').value
+                },
+                patient: {
+                    fullName: document.getElementById('victimName').value,
+                    age: parseInt(document.getElementById('victimAge').value) || 0,
+                    municipality: document.getElementById('municipality').value,
+                    barangay: document.getElementById('barangay').value
+                },
+                createdAt: new Date(), // Saves as native Firestore timestamp format
                 status: 'pending',
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date()
             };
             
             try {
-                const docRef = await addDoc(collection(db, 'cases'), caseData);
-                console.log('Case saved:', docRef.id);
-                alert(`✅ Case ${caseData.caseId} added for ${caseData.victimName}`);
+                const docRef = await addDoc(collection(db, 'bite_reports'), caseData);
+                console.log('Case saved to bite_reports:', docRef.id);
+                alert(`✅ Case added for ${caseData.patient.fullName}`);
                 closeCaseModal();
-                await loadCases(); // Refresh table
+                await loadCases(); // Refresh UI Table
             } catch (error) {
                 console.error('Error:', error);
                 alert('❌ Failed: ' + error.message);
@@ -145,19 +157,19 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
     
-    // Search
-    const searchInput = document.getElementById('searchInput');
+    // Search Feature Connection
+    const searchInput = document.getElementById('caseSearch') || document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
             filterCases(e.target.value);
         });
     }
     
-    // Auto-load cases
+    // Auto-load cases on startup
     await loadCases();
 });
 
-// Search cases
+// Search table rows locally
 function filterCases(searchTerm) {
     const rows = document.querySelectorAll('#casesTableBody tr');
     const term = searchTerm.toLowerCase();
@@ -168,10 +180,10 @@ function filterCases(searchTerm) {
     });
 }
 
-// Export CSV
+// Export CSV Function (Targeting nested maps + Firestore Timestamp format safety fix)
 window.exportCases = async function() {
     try {
-        const q = query(collection(db, 'cases'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'bite_reports'), orderBy('createdAt', 'desc'));
         const snapshot = await getDocs(q);
         const cases = [];
         
@@ -180,21 +192,34 @@ window.exportCases = async function() {
         });
         
         const csv = [
-            ['Case ID','Municipality','Barangay','Animal','Vaccine','Lab','Victim','Age','Date'],
-            ...cases.map(c => [
-                c.caseId || '',
-                `"${c.municipality || ''}"`,
-                `"${c.barangay || ''}"`,
-                c.animalType || '',
-                c.vaccinationStatus || '',
-                c.clinicalLabResults || '',
-                `"${c.victimName || ''}"`,
-                c.victimAge || '',
-                c.createdAt || ''
-            ].join(','))
+            // 1. Headers (Labels for the columns)
+            ['userId', 'incident.municipality', 'incident.barangay', 'animal.species', 'medical.patientVaccinationStatus', 'status', 'patient.fullName', 'patient.age', 'createdAt'],
+            
+            // 2. Data rows mapping
+            ...cases.map(c => {
+                // Safely convert complex Firebase Timestamp Objects into basic strings
+                let formattedDate = '';
+                if (c.createdAt) {
+                    formattedDate = typeof c.createdAt.toDate === 'function' 
+                        ? c.createdAt.toDate().toISOString() 
+                        : String(c.createdAt);
+                }
+
+                return [
+                    c.userId || c.caseId || c.id || '',
+                    `"${c.incident?.municipality || c.municipality || ''}"`,
+                    `"${c.incident?.barangay || c.barangay || ''}"`,
+                    c.animal?.species || c.animalType || '',
+                    c.medical?.patientVaccinationStatus || c.vaccinationStatus || '',
+                    c.status || c.clinicalLabResults || '',
+                    `"${c.patient?.fullName || c.victimName || ''}"`,
+                    c.patient?.age || c.patient?.victimAge || c.victimAge || '',
+                    formattedDate
+                ].join(',');
+            })
         ].join('\n');
         
-        const blob = new Blob([csv], { type: 'text/csv' });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -202,6 +227,7 @@ window.exportCases = async function() {
         a.click();
         URL.revokeObjectURL(url);
     } catch (error) {
+        console.error("Export operation broken: ", error);
         alert('Export failed: ' + error.message);
     }
 }

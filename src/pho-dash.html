@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRIS Dashboard - PVO</title>
+    <title>CRIS Dashboard - PHO</title>
     <link rel="stylesheet" href="../assets/css/pvo-dashboard.css">
     <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,22 +17,18 @@
             <div class="logo-section">
                 <img src="../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
                 <p>Community-Centric<br>Rabies Intelligence System</p>
-                <div class="role-badge">PVO MODULE</div>
+                <div class="role-badge">PHO MODULE</div>
             </div>
 
             <nav class="menu">
-                <a href="pvo-dash.html" class="menu-item active">Dashboard</a>
-                <a href="pvo-animal-bite-cases.html" class="menu-item">Animal Bite Cases</a>
-                <a href="pvo-heat-map.html" class="menu-item">Heatmap</a>
-                <!-- <a href="pvo-statistics.html" class="menu-item">Statistics</a>
-                <a href="pvo-messages.html" class="menu-item">Messages</a>
-                <a href="pvo-inventory.html" class="menu-item">Inventory</a>
-                <a href="pvo-reports.html" class="menu-item">Reports</a> -->
+                <a href="pho-dash.html" class="menu-item active">Dashboard</a>
+                <a href="pho-animal-bite-cases.html" class="menu-item">Animal Bite Incidents</a>
+                <a href="pho-heat-map.html" class="menu-item">Heatmap</a>
             </nav>
 
             <div class="footer-nav">
                 <a href="#" class="menu-item alt">Settings</a>
-                <button id="logout-btn" class="menu-item alt logout" onclick="window.location.href='pvo-login.html'">Logout</button>
+                <button id="logout-btn" class="menu-item alt logout" onclick="window.location.href='pho-login.html'">Logout</button>
             </div>
         </aside>
 
@@ -53,28 +49,44 @@
                 <section class="left-column">
                     <div class="welcome-bar">
                         <div class="avatar-circle"></div>
-                        <span>Hello, Xaniel Marios Angelo B. Nava</span>
+                        <h2 id="userDisplay">Welcome Back!</h2>
                     </div>
 
                     <div class="metrics">
                         <div class="card metric-card">
-                            <h3>Animal Population</h3>
-                            <p class="value">356,330</p>
+                            <h3>Vaccinated Patients</h3>
+                            <p class="value"></p>
                         </div>
-                        <div class="card metric-card">
-                            <h3>Animal Bite Cases</h3>
+                        <!-- <div class="card metric-card">
+                            <h3></h3>
                             <p class="value">0</p>
-                        </div>
+                        </div> -->
+                        <!-- CHANGED: Linked directly to Firebase Snapshot for bite_reports count -->
                         <div class="card metric-card">
-                            <h3>Human Rabies Deaths</h3>
-                            <p class="value">0</p>
+                            <h3>Total Bite Reports</h3>
+                            <p class="value" id="totalBiteCasesCount">Loading...</p>
                         </div>
                         <div class="metric-card empty"></div>
                     </div>
 
                     <div class="card full-width">
-                        <h3 class="card-title">No. of Cases for the month of December</h3>
-                        <!-- Placeholder for statistical chart -->
+                        <iframe title="CRIS Line Chart" aria-label="Line chart" id="datawrapper-chart-SWxfu" src="https://datawrapper.dwcdn.net/SWxfu/2/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="396" data-external="1"></iframe>
+                        <script type="text/javascript">
+                            (function(){
+                                window.addEventListener("message", function(e){
+                                    if(e.data["datawrapper-height"] !== void 0){
+                                        var t = document.querySelectorAll("iframe");
+                                        for(var n in e.data["datawrapper-height"]) {
+                                            for(var r=0, i; i=t[r]; r++) {
+                                                if(i.contentWindow === e.source){
+                                                    i.style.height = e.data["datawrapper-height"][n] + "px";
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            })();
+                        </script>
                     </div>
                 </section>
 
@@ -92,7 +104,7 @@
                         <div class="calendar-body">
                             <div class="compliance-box">
                                 <strong>PVO Alerts</strong>
-                                <p>No new rabies cases reported today.</p>
+                                <p id="alert-status-text">Fetching latest data...</p>
                             </div>
                         </div>
                     </div>
@@ -100,5 +112,9 @@
             </div>
         </main>
     </div>
+
+    <!-- NEW: Firestore Real-Time Query Script Integration -->
+    <script type="module" src="../assets/js/pho-dash.js"></script>
+    
 </body>
 </html>

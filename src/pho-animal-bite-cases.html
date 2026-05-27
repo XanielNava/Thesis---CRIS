@@ -15,13 +15,13 @@
             <div class="logo-section">
                 <img src="../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
                 <p>Community-Centric<br>Rabies Intelligence System</p>
-                <div class="role-badge">PVO MODULE</div>
+                <div class="role-badge">PHO MODULE</div>
             </div>
 
             <nav class="menu">
-                <a href="pvo-dash.html" class="menu-item">Dashboard</a>
-                <a href="pvo-animal-bite-cases.html" class="menu-item active">Animal Bite Cases</a>
-                <a href="pvo-heat-map.html" class="menu-item">Heatmap</a>
+                <a href="pho-dash.html" class="menu-item">Dashboard</a>
+                <a href="pho-animal-bite-cases.html" class="menu-item active">Animal Bite Cases</a>
+                <a href="pho-heat-map.html" class="menu-item">Heatmap</a>
                 <!-- <a href="#" class="menu-item">Statistics</a>
                 <a href="#" class="menu-item">Messages</a>
                 <a href="#" class="menu-item">Inventory</a>
@@ -30,7 +30,7 @@
 
             <div class="footer-nav">
                 <a href="#" class="menu-item alt">Settings</a>
-                <button id="logout-btn" class="menu-item alt logout" onclick="window.location.href='pvo-login.html'">Logout</button>
+                <button id="logout-btn" class="menu-item alt logout" onclick="window.location.href='pho-login.html'">Logout</button>
             </div>
         </aside>
 
@@ -54,6 +54,7 @@
                             <label for="caseSearch">Search:</label>
                             <input type="text" id="caseSearch" placeholder="Search case ID or name...">
                         </div>
+                        <button onclick="openCaseModal()" id="add-btn">+ New Case</button>
                     </div>
 
                     <div class="export-buttons">

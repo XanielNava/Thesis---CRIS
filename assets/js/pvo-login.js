@@ -22,7 +22,7 @@ const db = getFirestore(app);
 
 // ✅ Read the user's REAL designation from Firestore
 async function getUserDesignation(uid) {
-  const userDocRef = doc(db, "users", uid); // change path to your own, e.g., "pvo_users/{uid}"
+  const userDocRef = doc(db, "pvo-users", uid); // change path to your own, e.g., "pvo_users/{uid}"
   const userDocSnap = await getDoc(userDocRef);
 
   if (!userDocSnap.exists()) {
@@ -62,10 +62,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     // 5. Redirect based on role (you can customize this)
     if (loginDesignation === 'Administrator') {
-      window.location.href = '../src/pvo-dashboard.html';
+      window.location.href = '../src/pvo-dash.html';
     } else {
       // Veterinary Officer, Health Officer, etc.
-      window.location.href = '../src/pvo-dashboard.html';
+      window.location.href = '../src/pvo-dash.html';
     }
 
   } catch (error) {
