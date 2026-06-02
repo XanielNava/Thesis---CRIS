@@ -1,4 +1,4 @@
-readme_content = """# Community-Centric Rabies Intelligence System (CRIS)
+# Community-Centric Rabies Intelligence System (CRIS)
 
 ## 📌 Project Overview
 The **Community-Centric Rabies Intelligence System (CRIS)** is a specialized, web-based geospatial and enterprise intelligence platform custom-designed for the **Provincial Veterinary Office (PVO)**. Engineered to bridge the gap between community-level incident reporting and provincial-level veterinary oversight, CRIS serves as a centralized operational dashboard for real-time rabies tracking, vaccine distribution logistics, and spatial density mapping.
