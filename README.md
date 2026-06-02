@@ -1,4 +1,3 @@
-# Define the content for the professional README.md file for the CRIS system.
 readme_content = """# Community-Centric Rabies Intelligence System (CRIS)
 
 ## 📌 Project Overview
