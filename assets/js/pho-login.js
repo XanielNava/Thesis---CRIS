@@ -1,7 +1,8 @@
-// PHO Login.js - CDN VERSION (Works in any browser)
+// PVO Login.js - CDN VERSION (Works in any browser)
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -17,46 +18,108 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
+
+
+// ✅ Get user designation from Firestore
+async function getUserDesignation(uid) {
+
+  const userDocRef = doc(db, "pho-users", uid);
+
+  const userDocSnap = await getDoc(userDocRef);
+
+  if (!userDocSnap.exists()) {
+    throw new Error("User record not found.");
+  }
+
+  const data = userDocSnap.data();
+
+  console.log("Firestore User Data:", data);
+
+  // ✅ Check if designation exists
+  if (!data.designation) {
+    throw new Error("Designation field is missing in Firestore.");
+  }
+
+  return data.designation;
+}
+
 
 // ✅ Login Form Handler
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
+
   e.preventDefault();
 
   const email = document.getElementById("email").value.trim();
+
   const password = document.getElementById("password").value;
 
+  const loginDesignation =
+    document.getElementById("designation")
+    .value
+    .trim()
+    .toLowerCase();
+
   try {
+
     document.getElementById('loginBtn').textContent = 'Logging in...';
 
-    // ✅ Firebase Login using only Email and Password
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    // ✅ Firebase Login
+    const userCredential =
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
     const user = userCredential.user;
+
     console.log("Logged in user UID:", user.uid);
 
-    // ✅ Redirect safely to dashboard directly after successful authentication
-    window.location.href = 'pho-dash.html';
+    // ✅ Get Firestore designation
+    const dbDesignationRaw =
+      await getUserDesignation(user.uid);
 
-  } catch (error) {
-    console.error("Full Login Error:", error);
-    
-    // Clean up Firebase error messages for cleaner client presentation
-    let clientErrorMessage = error.message;
-    if (
-      error.code === 'auth/invalid-credential' || 
-      error.code === 'auth/user-not-found' || 
-      error.code === 'auth/wrong-password'
-    ) {
-      clientErrorMessage = "The email address or password you entered is incorrect.";
+    const dbDesignation =
+      dbDesignationRaw
+      .trim()
+      .toLowerCase();
+
+    console.log("Selected Designation:", loginDesignation);
+    console.log("Database Designation:", dbDesignation);
+
+    // ❌ Block wrong designation
+    if (loginDesignation !== dbDesignation) {
+
+      throw new Error(
+        "The username, password, or designation is incorrect."
+      );
     }
 
-    alert('Login failed: ' + clientErrorMessage);
+    // ✅ Save session
+    localStorage.setItem(
+      'userDesignation',
+      dbDesignationRaw
+    );
 
-  } finally {
-    document.getElementById('loginBtn').textContent = 'Login';
+    // ✅ Redirect
+    window.location.href = '../src/pho-dash.html';
+
   }
+  catch (error) {
+
+    console.error("Full Login Error:", error);
+
+    alert(
+      'Login failed: ' +
+      (error.message || 'Unknown error')
+    );
+
+  }
+  finally {
+
+    document.getElementById('loginBtn').textContent = 'Login';
+
+  }
+
 });
