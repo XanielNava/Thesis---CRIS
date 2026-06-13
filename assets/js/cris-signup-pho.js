@@ -70,7 +70,7 @@ async function getAllInputs() {
         console.log("User profile saved to Firestore");
 
         alert("Registration successful! Redirecting to login...");
-        window.location.href = "../src/pho-login.html";
+        window.location.href = "src\pho\pho-login.html";
 
     } catch (error) {
         console.error("Registration error:", error.code, error.message);

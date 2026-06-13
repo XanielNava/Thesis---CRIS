@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - Dose Calendar</title>
+    <link rel="stylesheet" href="../../assets/css/abtc-dc.css">
+    <link rel="stylesheet" href="../../assets/css/dose-calendar.css">
+    <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">ABTC MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="abtc-dashboard.html" class="menu-item">Dashboard</a>
+                <a href="abtc-reg.html" class="menu-item">Patient Registry</a>
+                <a href="abtc-dc.html" class="menu-item active">Dose Calendar</a>
+                <!-- <a href="#" class="menu-item">Vaccine Stock</a>
+                <a href="#" class="menu-item">Messages</a>
+                <a href="#" class="menu-item">Reports</a>
+            </nav> -->
+            <div class="footer-nav">
+                <a href="#" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>DOSE CALENDAR</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Dr. Maria Dela Cruz</strong><br>
+                        <span>Personnel</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <div class="calendar-container">
+                <div class="calendar-controls">
+                    <div class="nav-controls">
+                        <button class="btn-nav-calendar" id="prevMonthBtn">&laquo;</button>
+                        <button class="btn-today" id="todayBtn">today</button>
+                        <button class="btn-nav-calendar" id="nextMonthBtn">&raquo;</button>
+                    </div>
+                    <h2 class="current-month" id="monthYearDisplay">January 2026</h2>
+                    <div class="view-controls">
+                        <button class="view-btn active">month</button>
+                        <button class="view-btn">week</button>
+                        <button class="view-btn">day</button>
+                        <button class="view-btn">list</button>
+                    </div>
+                </div>
+
+                <div class="card calendar-card-main">
+                    <div class="calendar-grid">
+                        <div class="calendar-row-header">
+                            <div class="day-header">Sun</div>
+                            <div class="day-header">Mon</div>
+                            <div class="day-header">Tue</div>
+                            <div class="day-header">Wed</div>
+                            <div class="day-header">Thu</div>
+                            <div class="day-header">Fri</div>
+                            <div class="day-header">Sat</div>
+                        </div>
+                        <div id="calendarDaysBody"></div>
+                    </div>
+                </div>
+
+                <div class="card upcoming-doses-card">
+                    <h3 class="card-title">Upcoming Doses - Next 7 Days</h3>
+                    <div class="doses-list">
+                        <div class="dose-item">
+                            <div class="dose-info">
+                                <div class="patient-name">Juan Antonio Santos</div>
+                                <div class="dose-detail">
+                                    <span class="dose-number">Dose 2 of 5</span>
+                                    <span class="dose-type">Dog Bite - Category III</span>
+                                </div>
+                            </div>
+                            <div class="dose-meta">
+                                <div class="dose-date">January 5, 2026</div>
+                                <span class="badge badge-due">Due Today</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="card stat-card">
+                        <div class="stat-content">
+                            <h4>Total Scheduled Doses</h4>
+                            <div class="stat-value">24</div>
+                            <p class="stat-label">This Month</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-content">
+                            <h4>Completed Doses</h4>
+                            <div class="stat-value">18</div>
+                            <p class="stat-label">This Month</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-content">
+                            <h4>Due This Week</h4>
+                            <div class="stat-value">6</div>
+                            <p class="stat-label">Doses</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-content">
+                            <h4>Overdue Doses</h4>
+                            <div class="stat-value">2</div>
+                            <p class="stat-label">Action Needed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../assets/js/dose-calendar.js"></script>
+</body>
+</html>
