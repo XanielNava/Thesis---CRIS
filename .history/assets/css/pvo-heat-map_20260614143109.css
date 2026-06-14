@@ -225,7 +225,7 @@ body, html {
     display: grid;
     grid-template-columns: 4fr 1fr;
     gap: 20px;
-    height: 550px; /* Forces explicit pixel box rendering block */
+    height: 550px; /* Forces explicit workspace height */
     min-height: 450px;
     margin-bottom: 20px;
 }
@@ -236,73 +236,51 @@ body, html {
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 5px 18px rgba(0,0,0,.08);
-    height: 100%;
+    height: 100%; /* Forces wrapper to fill grid height */
     width: 100%;
 }
 
 #map {
-    width: 100% !important;
-    height: 550px !important; /* Force a flat pixel value instead of percentages */
-    min-height: 550px !important;
-    background-color: #e0e0e0; /* Fallback gray background */
+    width: 100%;
+    height: 100%;
+    min-height: 100%; /* Guarantees Leaflet gets visible pixels immediately */
+    background: #f7f5ef; /* Fallback background color */
 }
 
 .heatmap-overlay {
     position: absolute;
-    bottom: 15px;
-    left: 15px;
-    background: rgba(255, 255, 255, 0.92); /* Slightly transparent white */
-    backdrop-filter: blur(4px); /* Modern blur effect */
-    padding: 10px 14px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    top: 20px;
+    right: 20px;
+    width: 240px;
+    background: rgba(26,35,78,.95);
+    color: white;
+    padding: 18px;
+    border-radius: 12px;
     z-index: 1000;
-    max-width: 200px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    pointer-events: none; /* Prevents blocking map interactions */
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 25px rgba(0,0,0,.25);
 }
 
-.heatmap-overlay h3 {
-    margin: 0 0 6px 0;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #555;
-    font-weight: 700;
-}
-
-/* Remove the aggressive hr divider */
-.heatmap-overlay hr {
-    display: none; 
-}
+.heatmap-overlay h3 { margin: 0 0 10px 0; font-size: 18px; }
+.heatmap-overlay hr { border: none; border-top: 1px solid rgba(255,255,255,.2); margin-bottom: 15px; }
 
 .legend-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    color: #444;
-    margin-bottom: 4px;
-    font-weight: 500;
+    margin-bottom: 12px;
+    font-size: 14px;
 }
 
-.legend-item:last-child {
-    margin-bottom: 0;
-}
-
-/* Transformed large boxes into subtle circular indicators */
 .legend-box {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    border-radius: 4px;
 }
 
-/* Clean matching color tokens */
-.bite-color { background-color: #EA6113; }
-.human-color { background-color: #B71C1C; }
-.animal-color { background-color: #1565C0; }
+.bite-color { background: #EA6113; }
+.human-color { background: #B71C1C; }
+.animal-color { background: #1565C0; }
 
 /* ================= TOP MUNICIPALITIES SIDE PANEL ================= */
 .side-panel {
