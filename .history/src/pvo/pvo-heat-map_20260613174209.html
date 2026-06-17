@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CRIS | Heatmap Dashboard</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../../assets/css/pvo-heat-map.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Leaflet -->
+
+    <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- ========================= -->
+    <!-- SIDEBAR -->
+    <!-- ========================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo-section">
+
+            <img src="../../assets/images/logo-login.png"
+                class="logo-image">
+
+            <p>
+
+                Community-Centric
+
+                <br>
+
+                Rabies Intelligence System
+
+            </p>
+
+            <div class="role-badge">
+
+                PVO MODULE
+
+            </div>
+
+        </div>
+
+        <nav class="menu">
+
+            <a href="pvo-dash.html" class="menu-item">
+
+                Dashboard
+
+            </a>
+
+            <a href="pvo-animal-bite-cases.html"
+                class="menu-item">
+
+                Animal Bite Cases
+
+            </a>
+
+            <a href="pvo-heat-map.html"
+                class="menu-item active">
+
+                Heatmap
+
+            </a>
+
+        </nav>
+
+        <div class="footer-nav">
+
+            <a href="#" class="menu-item alt">
+
+                Settings
+
+            </a>
+
+            <button
+
+                onclick="window.location.href='pvo-login.html'"
+
+                class="menu-item logout">
+
+                Logout
+
+            </button>
+
+        </div>
+
+    </aside>
+
+    <!-- ========================= -->
+    <!-- MAIN CONTENT -->
+    <!-- ========================= -->
+
+    <main class="main-content">
+
+        <!-- HEADER -->
+
+        <div class="header">
+
+            <div>
+
+                <h1>
+
+                    HEATMAP ANALYTICS
+
+                </h1>
+
+                <p>
+
+                    Community-Centric Rabies Intelligence System
+
+                </p>
+
+            </div>
+
+            <div class="profile-card">
+
+                <strong>
+
+                    Provincial Veterinary Office
+
+                </strong>
+
+                <span>
+
+                    Administrator
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- ========================= -->
+        <!-- FILTERS -->
+        <!-- ========================= -->
+
+        <div class="filter-section">
+
+            <div>
+
+                <label>
+
+                    Upload Excel Dataset
+
+                </label>
+
+                <input
+
+                    type="file"
+
+                    id="excelFile"
+
+                    accept=".xlsx,.xls,.csv">
+
+            </div>
+
+            <div>
+
+                <label>
+
+                    Year
+
+                </label>
+
+                <select id="yearFilter">
+
+                    <option value="All">
+
+                        All Years
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div>
+
+                <label>
+
+                    Municipality
+
+                </label>
+
+                <select id="municipalityFilter">
+
+                    <option value="All">
+
+                        All Municipalities
+
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <!-- ========================= -->
+        <!-- STATISTICS -->
+        <!-- ========================= -->
+
+        <div class="stats-grid">
+
+            <div class="stat-card bite">
+
+                <h2 id="biteTotal">
+
+                    0
+
+                </h2>
+
+                <p>
+
+                    Animal Bite Cases
+
+                </p>
+
+            </div>
+
+            <div class="stat-card human">
+
+                <h2 id="humanTotal">
+
+                    0
+
+                </h2>
+
+                <p>
+
+                    Human Rabies Deaths
+
+                </p>
+
+            </div>
+
+            <div class="stat-card animal">
+
+                <h2 id="animalTotal">
+
+                    0
+
+                </h2>
+
+                <p>
+
+                    Animal Rabies Deaths
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- ========================= -->
+        <!-- MAP -->
+        <!-- ========================= -->
+
+        <div class="map-container">
+
+            <div id="map"></div>
+
+            <!-- LEGEND -->
+
+            <div class="legend">
+
+                <h3>
+
+                    Heatmap Legend
+
+                </h3>
+
+                <div>
+
+                    <span class="legend-orange"></span>
+
+                    Animal Bite Cases
+
+                </div>
+
+                <div>
+
+                    <span class="legend-red"></span>
+
+                    Human Rabies Deaths
+
+                </div>
+
+                <div>
+
+                    <span class="legend-blue"></span>
+
+                    Animal Rabies Deaths
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<!-- ========================= -->
+<!-- LIBRARIES -->
+<!-- ========================= -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<!-- JS -->
+
+<script src="../../assets/js/pvo-heat-map.js"></script>
+
+</body>
+
+</html>

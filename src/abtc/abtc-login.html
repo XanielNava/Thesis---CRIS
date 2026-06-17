@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Access Portal</title>
-    <link rel="stylesheet" href="../../assets/css/login.css">
-    <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
-    <script src="../../assets/js/menu.js"></script>
+    <link rel="stylesheet" href="../assets/css/login.css">
+    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
+    <script src="../assets/js/menu.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <img src="../../assets/images/logo-login.png" alt="CRIS logo" class="logo">
+            <img src="../assets/images/logo-login.png" alt="CRIS logo" class="logo">
             <h1>CRIS: Community-Centric Rabies Intelligence System</h1>
             <button class="burger" onclick="openMenu()">☰ Menu</button>
         </div>
@@ -42,20 +42,28 @@
 
         <div class="login-box">
             <a href="../index.html" class="logo-link">
-                <img src="../../assets/images/abtc-logo.png" alt="PVO logo" class="login-logo">
+                <img src="../assets/images/abtc-logo.png" alt="PVO logo" class="login-logo">
             </a>
 
             <form id="loginForm">
-                <label for="email">Facility</label>
+                <label for="email">Email</label>
                 <input type="email" id="email" placeholder="Enter Email" required>
 
                 <label for="password">Password</label>
                 <input type="password" id="password" placeholder="Enter Password" required>
 
+                <label for="designation">Designation</label>
+                <select id="designation" name="designation" required>
+                    <option value="">Select Designation</option>
+                    <option value="Administrator">Administrator</option>
+                    <option value="Veterinary Officer">Veterinary Officer</option>
+                    <option value="Health Officer">Health Officer</option>
+                </select>
+
                 <div class="button-container">
                     <button type="button" id="backBtn" onclick="window.location.href='../../index.html'">Back</button>
                     <!-- <button type="submit" id="loginBtn">Login</button> -->
-                     <button type="submit" id="loginBtn" onclick="window.location.href='abtc-dash.html'">Login</button>
+                     <button type="submit" id="loginBtn" onclick="window.location.href='../src/abtc-dash.html'">Login</button>
                 </div>
 
                 <div class="auth-links">
