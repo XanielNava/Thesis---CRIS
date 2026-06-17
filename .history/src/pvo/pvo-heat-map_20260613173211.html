@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS Statistics - PVO</title>
+    <link rel="stylesheet" href="../../assets/css/pvo-heat-map.css">
+    <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- UNIVERSAL SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PVO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="pvo-dash.html" class="menu-item">Dashboard</a>
+                <a href="pvo-animal-bite-cases.html" class="menu-item">Animal Bite Cases</a>
+                <a href="pvo-heat-map.html" class="menu-item active">Heatmap</a>
+                <!-- <a href="pvo-statistics.html" class="menu-item">Statistics</a>
+                <a href="#" class="menu-item">Messages</a>
+                <a href="#" class="menu-item">Inventory</a>
+                <href href="#" class="menu-item">Reports</href> -->
+            </nav>
+
+            <div class="footer-nav">
+                <a href="#" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout" onclick="window.location.href='pvo-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="header">
+                <h1>HEATMAP / STATISTICS</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Xaniel Marios Angelo B. Nava</strong><br>
+                        <span>Administrator</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <div class="map-wrapper">
+                <div class="map-canvas">
+                    <iframe 
+  title="CRIS Heatmaps / Statistics" 
+  aria-label="Choropleth map" 
+  id="datawrapper-chart-B8MVt" 
+  src="https://datawrapper.dwcdn.net/B8MVt/1/" 
+  scrolling="yes" 
+  frameborder="0" 
+  style="width: 100%; height: 85vh; max-height: 100%; border: none; overflow: auto;" 
+  data-external="1">
+<iframe title="CRIS Heatmaps / Statistics ]" aria-label="Choropleth map" id="datawrapper-chart-B8MVt" src="https://datawrapper.dwcdn.net/B8MVt/7/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="597" data-external="1"></iframe><script type="text/javascript">(function(){function e(){window.addEventListener(`message`,function(e){if(e.data[`datawrapper-height`]!==void 0){var t=document.querySelectorAll(`iframe`);for(var n in e.data[`datawrapper-height`])for(var r=0,i;i=t[r];r++)if(i.contentWindow===e.source){var a=e.data[`datawrapper-height`][n]+`px`;i.style.height=a}}})}e()})();</script>    </div>
+                
+                <!-- Optional Overlay -->
+                <div class="heatmap-overlay">
+                    <h3>Legend</h3>
+                    <p>Statistics and density data visualization.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

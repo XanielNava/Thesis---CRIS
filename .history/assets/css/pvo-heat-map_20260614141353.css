@@ -1,0 +1,273 @@
+/* CRIS SUNSET PALETTE VARIABLES */
+:root {
+    --sunset-orange: #EA6113;
+    --sunset-gold: #F88F22;
+    --sunset-yellow: #FBB931;
+    --sunset-cream: #FFE3B3;
+    --text-dark: #412110;
+    --sidebar-bg: #1a234e;
+    --main-bg: #FFFAF0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Lato', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--main-bg);
+}
+
+.app-container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+/* ================= UNIVERSAL SIDEBAR ================= */
+.sidebar {
+    width: 280px;
+    height: 100vh;
+    background-color: var(--sidebar-bg);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo-section { text-align: center; margin-bottom: 25px; flex-shrink: 0; }
+.logo-image { width: 100px; height: auto; margin: 0 auto 10px; display: block; object-fit: contain; }
+.logo-section p { font-size: 11px; line-height: 1.4; margin-bottom: 12px; }
+
+.role-badge {
+    background: var(--sunset-yellow);
+    color: var(--text-dark);
+    font-size: 10px;
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.menu {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding-right: 5px;
+}
+
+.menu-item {
+    width: 100%;
+    padding: 14px 22px;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    font-size: 14px;
+    border-radius: 10px;
+    transition: var(--transition);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.menu-item:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+    color: var(--sunset-yellow);
+}
+
+.menu-item.active {
+    background: #FFFFFF !important;
+    color: var(--sidebar-bg) !important;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.footer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logout { background: rgba(80, 45, 60, 0.85) !important; }
+.logout:hover { background: rgba(110, 40, 55, 1) !important; }
+
+/* Scrollbar Sidebar */
+.menu::-webkit-scrollbar { width: 5px; }
+.menu::-webkit-scrollbar-thumb { background: var(--sunset-gold); border-radius: 10px; }
+
+/* ================= MAIN CONTENT AREA ================= */
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+    padding: 15px 25px;
+    border-radius: 12px;
+    color: white;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(234, 97, 19, 0.2);
+}
+
+.user-profile-top {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 15px;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.profile-icon {
+    width: 30px;
+    height: 30px;
+    background: var(--sunset-cream);
+    border-radius: 50%;
+    margin-left: 10px;
+}
+
+/* ================= MAP AREA LAYOUT ================= */
+.map-wrapper {
+    flex-grow: 1;
+    position: relative;
+    border-radius: 15px;
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.map-canvas {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.centered-map-img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+.heatmap-overlay {
+    position: absolute;
+    top: 20px;
+    right: 20px; /* Changed to right for better standard dashboard UI balance */
+    width: 250px;
+    background-color: rgba(26, 35, 78, 0.9);
+    border-radius: 12px;
+    padding: 15px;
+    color: white;
+    z-index: 10;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+/*  PART 2 - HEATMAP DASHBOARD SPECIFIC STYLES */
+
+/* =====================================================
+   HEATMAP DASHBOARD
+===================================================== */
+
+/* Toolbar */
+
+* ================= TOOLBAR & TIMELINE FIXES ================= */
+.heatmap-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    flex-shrink: 0;
+}
+
+.toolbar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.toolbar-group label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+/* Custom Styled Upload Button */
+.upload-btn {
+    background-color: var(--sunset-orange) !important;
+    color: white !important;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s ease;
+}
+
+.upload-btn:hover {
+    background-color: var(--sunset-gold) !important;
+}
+
+.toolbar-group select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+    color: var(--text-dark);
+    min-width: 150px;
+}
+
+/* Fix main dashboard sizing conflicts */
+.statistics-container {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.dashboard-map {
+    display: flex;
+    gap: 20px;
+    flex-grow: 1;
+    height: 100%;
+    min-height: 0; /* Prevents flex box container blowout */
+}
+
+.map-wrapper {
+    flex-grow: 1;
+    position: relative;
+    height: 100%;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+}
