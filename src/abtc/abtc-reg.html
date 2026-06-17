@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - Patient Registry</title>
+    <link rel="stylesheet" href="../../assets/css/abtc-reg.css">
+    <link rel="stylesheet" href="../../assets/css/patient-registry.css">
+    <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">ABTC MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="abtc-dash.html" class="menu-item">Dashboard</a>
+                <a href="abtc-reg.html" class="menu-item active">Patient Registry</a>
+                <a href="abtc-dc.html" class="menu-item">Dose Calendar</a>
+                <!-- <a href="#" class="menu-item">Vaccine Stock</a>
+                <a href="#" class="menu-item">Messages</a>
+                <a href="#" class="menu-item">Reports</a> -->
+            </nav>
+            <div class="footer-nav">
+                <a href="#" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>PATIENT REGISTRY</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Dr. Maria Dela Cruz</strong><br>
+                        <span>Personnel</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <div class="registry-container">
+                <div class="registry-tabs">
+                    <button class="tab-btn active" id="tabExistingBtn">Search Existing Records</button>
+                    <button class="tab-btn" id="tabNewPatientBtn">+ Register New Patient</button>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <input type="text" id="searchInput" placeholder="Search by Patient Name or ID..." class="search-input">
+                        <select id="statusFilter" class="filter-select">
+                            <option value="">All Statuses</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                        <select id="exposureFilter" class="filter-select">
+                            <option value="">All Exposure Types</option>
+                            <option value="Dog Bite">Dog Bite</option>
+                            <option value="Cat Bite">Cat Bite</option>
+                            <option value="Bat Exposure">Bat Exposure</option>
+                        </select>
+                        <button class="btn-primary" id="applyFiltersBtn">Apply Filter</button>
+                        <button class="btn-secondary" id="resetFiltersBtn">Reset</button>
+                    </div>
+                </div>
+
+                <div class="card patient-table-card">
+                    <div class="table-container">
+                        <table class="patient-registry-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient ID</th>
+                                    <th>Name</th>
+                                    <th>Age</th>
+                                    <th>Exposure Type</th>
+                                    <th>Category</th>
+                                    <th>Registration Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patientTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination">
+                        <button class="pagination-btn">&laquo; Previous</button>
+                        <span class="pagination-info" id="paginationInfo">Showing 0 patients</span>
+                        <button class="pagination-btn">Next &raquo;</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="patientModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>New Patient Registration Form</h2>
+                <span class="close-modal" id="closeModalBtn">&times;</span>
+            </div>
+            
+            <form id="newPatientForm">
+                <div class="form-section">
+                    <h3>1. Patient Demographics</h3>
+                    <div class="form-row">
+                        <input type="text" id="patientName" placeholder="Full Patient Name" required>
+                        <input type="number" id="patientAge" placeholder="Age" min="0" max="120" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="text" id="patientContact" placeholder="Contact Number" required>
+                        <input type="text" id="patientAddress" placeholder="Home Address" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>2. Incident & Exposure Details</h3>
+                    <div class="form-row">
+                        <select id="patientExposureType" required>
+                            <option value="">Select Exposure Type</option>
+                            <option value="Dog Bite">Dog Bite</option>
+                            <option value="Cat Bite">Cat Bite</option>
+                            <option value="Bat Exposure">Bat Exposure</option>
+                            <option value="Other">Other Scratch/Lick</option>
+                        </select>
+                        <select id="patientCategory" required>
+                            <option value="">Select Exposure Category</option>
+                            <option value="Category I">Category I (Mild / Intact Skin)</option>
+                            <option value="Category II">Category II (Minor Scratch / No Blood)</option>
+                            <option value="Category III">Category III (Transdermal Bite / Blood)</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <input type="date" id="incidentDate" required title="Incident Date">
+                        <input type="text" id="incidentLocation" placeholder="Location of Incident (Barangay/Municipality)" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>3. Initial Treatment Administered</h3>
+                    <div class="form-row">
+                        <select id="treatmentGiven" required>
+                            <option value="">Initial Vaccine Administered?</option>
+                            <option value="Yes - Dose 1">Yes - Initiated Day 0 Dose</option>
+                            <option value="No / Deferred">No / Deferred Treatment</option>
+                        </select>
+                        <input type="text" id="clinicNotes" placeholder="Clinical notes/observations...">
+                    </div>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="cancel-btn" id="cancelModalBtn">Cancel Process</button>
+                    <button type="submit" id="submitPatientBtn">Complete Registration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../../assets/js/abtc-reg.js"></script>
+</body>
+</html>
