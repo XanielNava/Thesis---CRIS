@@ -61,7 +61,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     }
 
     // 3. ✅ Redirect directly to the dashboard module layout view
-    window.location.href = 'abtc-reg.html';
+    window.location.href = 'abtc-dash.html';
 
   } catch (error) {
     console.error('Login error:', error.code, error.message);

@@ -19,8 +19,8 @@
 
             <nav class="menu">
                 <a href="abtc-dash.html" class="menu-item-link"><button class="menu-item">Dashboard</button></a>
-                <a href="abtc-registry.html" class="menu-item-link"><button class="menu-item active">Patient Registry</button></a>
-                <a href="abtc-calendar.html" class="menu-item-link"><button class="menu-item">Dose Calendar</button></a>
+                <a href="abtc-reg.html" class="menu-item-link"><button class="menu-item active">Patient Registry</button></a>
+                <a href="abtc-report.html" class="menu-item-link"><button class="menu-item">Dose Calendar</button></a>
             </nav>
             <div class="footer-nav">
                 <button class="menu-item alt">Settings</button>
@@ -30,7 +30,7 @@
 
         <main class="main-content">
             <header class="header">
-                <h1>PATIENT REGISTRY</h1>
+                <h1 id="dashboardTitle"></h1>
                 <div class="user-profile-top">
                     <div class="profile-info">
                         <strong>Dr. Maria Dela Cruz</strong><br>
@@ -44,7 +44,28 @@
                 <div class="left-column full-width-override">
                     
                     <div class="action-bar-registry">
-                        <input type="text" id="searchRegistryInput" placeholder="Search by case number or name...">
+                        <input type="text" id="searchRegistryInput" placeholder="Search by patient name...">
+                        
+                        <select id="filterExposureType" class="registry-dropdown-filter">
+                            <option value="">All Exposure Types</option>
+                            <option value="Dog Bite">Dog Bite</option>
+                            <option value="Cat Bite">Cat Bite</option>
+                            <option value="Dog Scratch">Dog Scratch</option>
+                            <option value="Cat Scratch">Cat Scratch</option>
+                        </select>
+
+                        <select id="filterBiteCategory" class="registry-dropdown-filter">
+                            <option value="">All Categories</option>
+                            <option value="Category I">Category I</option>
+                            <option value="Category II">Category II</option>
+                            <option value="Category III">Category III</option>
+                        </select>
+                        
+                        <div class="csv-upload-wrapper">
+                            <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+                            <label for="csvFileInput" class="btn-secondary-action">📁 Import CSV Bulk Records</label>
+                        </div>
+
                         <button id="openPatientModalBtn" class="btn-primary-action">+ Add New Patient</button>
                     </div>
 
@@ -59,6 +80,7 @@
                                         <th>Exposure Type</th>
                                         <th>Bite Category</th>
                                         <th>Date Registered</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="patientRegistryTableBody">
@@ -77,7 +99,6 @@
             <span class="close-modal-trigger">&times;</span>
             <h2>Register New Exposure Case</h2>
             <form id="patientRegistrationForm">
-                
                 <label for="patientNameInput">Patient Full Name:</label>
                 <input type="text" id="patientNameInput" placeholder="e.g., Juan Dela Cruz" required>
 
@@ -99,6 +120,36 @@
                 </select>
 
                 <button type="submit" class="btn-submit-form">Save Patient Document Securely</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="editPatientModal" class="modal">
+        <div class="modal-content">
+            <span class="close-edit-modal-trigger">&times;</span>
+            <h2>Edit Patient Document</h2>
+            <form id="editPatientForm">
+                <input type="hidden" id="editPatientId">
+                
+                <label for="editPatientNameInput">Patient Full Name:</label>
+                <input type="text" id="editPatientNameInput" required>
+
+                <label for="editExposureTypeSelect">Type of Exposure:</label>
+                <select id="editExposureTypeSelect" required>
+                    <option value="Dog Bite">Dog Bite</option>
+                    <option value="Cat Bite">Cat Bite</option>
+                    <option value="Dog Scratch">Dog Scratch</option>
+                    <option value="Cat Scratch">Cat Scratch</option>
+                </select>
+
+                <label for="editBiteCategorySelect">Bite Classification Category:</label>
+                <select id="editBiteCategorySelect" required>
+                    <option value="Category I">Category I (Mild Exposure)</option>
+                    <option value="Category II">Category II (Minor Scratch/Lick)</option>
+                    <option value="Category III">Category III (Deep transdermal puncture)</option>
+                </select>
+
+                <button type="submit" class="btn-submit-form">Save Updates Securely</button>
             </form>
         </div>
     </div>
