@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - Patient Registry</title>
+    <link rel="stylesheet" href="../../assets/css/abtc-reg.css">
+    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo-section" style="height: 174.78px;">
+                <img src="../../assets/images/logo-login.png" alt="Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence<br>System</p>
+                <div class="role-badge">ABTC MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="abtc-dash.html" class="menu-item-link"><button class="menu-item">Dashboard</button></a>
+                <a href="abtc-registry.html" class="menu-item-link"><button class="menu-item active">Patient Registry</button></a>
+                <a href="abtc-calendar.html" class="menu-item-link"><button class="menu-item">Dose Calendar</button></a>
+            </nav>
+            <div class="footer-nav">
+                <button class="menu-item alt">Settings</button>
+                <button id="logout-btn" class="menu-item alt">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>PATIENT REGISTRY</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Dr. Maria Dela Cruz</strong><br>
+                        <span>Personnel</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <div class="content-grid single-layout">
+                <div class="left-column full-width-override">
+                    
+                    <div class="action-bar-registry">
+                        <input type="text" id="searchRegistryInput" placeholder="Search by case number or name...">
+                        <button id="openPatientModalBtn" class="btn-primary-action">+ Add New Patient</button>
+                    </div>
+
+                    <div class="card full-width">
+                        <h3 class="card-title">Registered Exposure Cases</h3>
+                        <div class="table-container">
+                            <table class="dashboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>Case ID</th>
+                                        <th>Patient Name</th>
+                                        <th>Exposure Type</th>
+                                        <th>Bite Category</th>
+                                        <th>Date Registered</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="patientRegistryTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="patientFormModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal-trigger">&times;</span>
+            <h2>Register New Exposure Case</h2>
+            <form id="patientRegistrationForm">
+                
+                <label for="patientNameInput">Patient Full Name:</label>
+                <input type="text" id="patientNameInput" placeholder="e.g., Juan Dela Cruz" required>
+
+                <label for="exposureTypeSelect">Type of Exposure:</label>
+                <select id="exposureTypeSelect" required>
+                    <option value="">Select Exposure Type</option>
+                    <option value="Dog Bite">Dog Bite</option>
+                    <option value="Cat Bite">Cat Bite</option>
+                    <option value="Dog Scratch">Dog Scratch</option>
+                    <option value="Cat Scratch">Cat Scratch</option>
+                </select>
+
+                <label for="biteCategorySelect">Bite Classification Category:</label>
+                <select id="biteCategorySelect" required>
+                    <option value="">Select Category</option>
+                    <option value="Category I">Category I (Mild Exposure)</option>
+                    <option value="Category II">Category II (Minor Scratch/Lick)</option>
+                    <option value="Category III">Category III (Deep transdermal puncture)</option>
+                </select>
+
+                <button type="submit" class="btn-submit-form">Save Patient Document Securely</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="../../assets/js/abtc-reg.js"></script>
+</body>
+</html>
