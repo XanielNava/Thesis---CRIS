@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABTC Reports</title>
+
+
+<link rel="stylesheet" href="admin.css">
+
+
+</head>
+<body>
+
+<div class="container">
+
+
+<aside class="sidebar">
+    <h2>ABTC Admin</h2>
+
+    <ul>
+        <li><a href="admin-dash.html">Dashboard</a></li>
+        <li><a href="admin-faci.html">Facilities</a></li>
+        <li><a href="admin-reports.html">Reports</a></li>
+        <li><a href="admin.html" class="logout-btn">← Back to Login</a></li>
+    </ul>
+</aside>
+
+<main class="content">
+
+    <div class="page-header">
+        <h1>Reports & Complaints</h1>
+    </div>
+
+    <div class="report-summary">
+
+        <div class="card">
+            <h3>Total Reports</h3>
+            <p id="totalReports">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Pending</h3>
+            <p id="pendingReports">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Resolved</h3>
+            <p id="resolvedReports">0</p>
+        </div>
+
+    </div>
+
+    <br>
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Report ID</th>
+                    <th>Facility</th>
+                    <th>Module</th>
+                    <th>Issue</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+
+            <tbody id="reportsTable">
+
+                <tr>
+                    <td>RPT-001</td>
+                    <td>ABC Corporation</td>
+                    <td>Clinic Module</td>
+                    <td>Unable to save records</td>
+
+                    <td>
+                        <span class="status pending">
+                            Pending
+                        </span>
+                    </td>
+
+                    <td>June 18, 2026</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</main>
+```
+
+</div>
+
+<script type="module" src="js/reports.js"></script>
+
+</body>
+</html>

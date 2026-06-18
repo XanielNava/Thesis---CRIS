@@ -1,0 +1,212 @@
+/**
+ * CRIS Heatmap Dashboard Handler Engine
+ */
+
+// 1. MAP INITIALIZATION CONFIGURATIONS
+const map = L.map("map", { zoomControl: true }).setView([10.90, 122.60], 9);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap Contributors"
+}).addTo(map);
+
+// Global State Containers
+let excelData = [];
+let biteHeatLayer = null;
+let humanHeatLayer = null;
+let animalHeatLayer = null;
+let markerGroup = L.layerGroup().addTo(map);
+
+// Node DOM Selectors
+const uploadInput = document.getElementById("excelFile");
+const yearFilter = document.getElementById("yearFilter");
+const municipalityFilter = document.getElementById("municipalityFilter");
+const layerFilter = document.getElementById("layerFilter");
+
+const biteTotal = document.getElementById("biteTotal");
+const humanTotal = document.getElementById("humanTotal");
+const animalTotal = document.getElementById("animalTotal");
+
+// 2. EXCEL SOURCE UPLOADER LISTENER 
+uploadInput.addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (!file) {
+        alert("Please select an Excel file.");
+        return;
+    }
+    readExcel(file);
+});
+
+function readExcel(file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        
+        // Parse SheetJS Data Array Structure
+        excelData = XLSX.utils.sheet_to_json(worksheet);
+
+        cleanHeaders();
+        populateYearFilter();
+        populateMunicipalityFilter();
+        refreshMap();
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// Strip out trailing headers white-space parsing anomalies
+function cleanHeaders() {
+    excelData = excelData.map(function (row) {
+        const newRow = {};
+        Object.keys(row).forEach(function (key) {
+            newRow[key.trim()] = row[key];
+        });
+        return newRow;
+    });
+}
+
+// 3. UI FILTERS MANAGEMENT POPULATION
+function populateYearFilter() {
+    yearFilter.innerHTML = '<option value="All">All Years</option>';
+    const years = [...new Set(excelData.map(item => item.Year))].filter(Boolean).sort();
+    
+    years.forEach(year => {
+        const option = document.createElement("option");
+        option.value = year;
+        option.textContent = year;
+        yearFilter.appendChild(option);
+    });
+}
+
+function populateMunicipalityFilter() {
+    municipalityFilter.innerHTML = '<option value="All">All Municipalities</option>';
+    const municipalities = [...new Set(excelData.map(item => item.Municipality))].filter(Boolean).sort();
+    
+    municipalities.forEach(muni => {
+        const option = document.createElement("option");
+        option.value = muni;
+        option.textContent = muni;
+        municipalityFilter.appendChild(option);
+    });
+}
+
+// Node Event Triggers
+yearFilter.addEventListener("change", refreshMap);
+municipalityFilter.addEventListener("change", refreshMap);
+layerFilter.addEventListener("change", refreshMap);
+
+function getFilteredData() {
+    let filtered = excelData;
+    if (yearFilter.value !== "All") {
+        filtered = filtered.filter(item => String(item.Year) === yearFilter.value);
+    }
+    if (municipalityFilter.value !== "All") {
+        filtered = filtered.filter(item => item.Municipality === municipalityFilter.value);
+    }
+    return filtered;
+}
+
+// 4. STATISTICAL RENDERS
+function updateStatistics(data) {
+    let bite = 0, human = 0, animal = 0;
+    
+    data.forEach(row => {
+        bite += Number(row["Animal Bite Cases"]) || 0;
+        human += Number(row["Human Rabies Deaths"]) || 0;
+        animal += Number(row["Animal Rabies Deaths"]) || 0;
+    });
+
+    biteTotal.textContent = bite.toLocaleString();
+    humanTotal.textContent = human.toLocaleString();
+    animalTotal.textContent = animal.toLocaleString();
+}
+
+function refreshMap() {
+    const filteredData = getFilteredData();
+    updateStatistics(filteredData);
+    updateTopMunicipalities(filteredData);
+    drawHeatmap(filteredData);
+}
+
+// 5. GEOSPATIAL VECTOR MAP LAYERING ENGINE
+function drawHeatmap(data) {
+    // Clear previously instantiated layers
+    if (biteHeatLayer) map.removeLayer(biteHeatLayer);
+    if (humanHeatLayer) map.removeLayer(humanHeatLayer);
+    if (animalHeatLayer) map.removeLayer(animalHeatLayer);
+    markerGroup.clearLayers();
+
+    let bitePoints = [], humanPoints = [], animalPoints = [], bounds = [];
+
+    data.forEach(row => {
+        const lat = Number(row.Latitude);
+        const lng = Number(row.Longitude);
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        bounds.push([lat, lng]);
+        const bite = Number(row["Animal Bite Cases"]) || 0;
+        const human = Number(row["Human Rabies Deaths"]) || 0;
+        const animal = Number(row["Animal Rabies Deaths"]) || 0;
+
+        // Populate coordinate strings along with intensity evaluations
+        bitePoints.push([lat, lng, Math.max(bite / 100, 0.25)]);
+        humanPoints.push([lat, lng, Math.max(human / 20, 0.25)]);
+        animalPoints.push([lat, lng, Math.max(animal / 50, 0.25)]);
+
+        // Setup Leaflet interactive vector points
+        const marker = L.circleMarker([lat, lng], {
+            radius: 7,
+            fillColor: "#EA6113",
+            color: "#ffffff",
+            weight: 2,
+            fillOpacity: 1
+        });
+
+        marker.bindPopup(
+            `<b>${row.Municipality || 'Unknown'}</b><br><br>` +
+            `<b>Year:</b> ${row.Year || 'N/A'}<br>` +
+            `<b>Animal Bite Cases:</b> ${bite}<br>` +
+            `<b>Human Rabies Deaths:</b> ${human}<br>` +
+            `<b>Animal Rabies Deaths:</b> ${animal}`
+        );
+        markerGroup.addLayer(marker);
+    });
+
+    // Initialize individual heatmap visual matrixes
+    biteHeatLayer = L.heatLayer(bitePoints, { radius: 65, blur: 35, maxZoom: 14, minOpacity: .65, gradient: { 0.2: "#FFE082", 0.5: "#FF9800", 0.8: "#EA6113", 1: "#8C2F00" } });
+    humanHeatLayer = L.heatLayer(humanPoints, { radius: 65, blur: 35, maxZoom: 14, minOpacity: .70, gradient: { 0.2: "#FFCDD2", 0.5: "#E53935", 0.8: "#B71C1C", 1: "#5D0000" } });
+    animalHeatLayer = L.heatLayer(animalPoints, { radius: 65, blur: 35, maxZoom: 14, minOpacity: .70, gradient: { 0.2: "#BBDEFB", 0.5: "#42A5F5", 0.8: "#1565C0", 1: "#002171" } });
+
+    // Inject matching choice matrix to map canvas wrapper
+    const selectedLayer = layerFilter.value;
+    if (selectedLayer === "bite") biteHeatLayer.addTo(map);
+    if (selectedLayer === "human") humanHeatLayer.addTo(map);
+    if (selectedLayer === "animal") animalHeatLayer.addTo(map);
+
+    // Auto view framing adjustment calculation
+    if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+    }
+}
+
+// 6. RANKING ENGINE PANEL DATA EXTRACTOR
+function updateTopMunicipalities(data) {
+    const panel = document.getElementById("topMunicipalities");
+    if (!panel) return;
+    panel.innerHTML = "";
+
+    // Array duplication execution to keep dataset mutable state protected
+    let sorted = [...data];
+    sorted.sort((a, b) => (Number(b["Animal Bite Cases"]) || 0) - (Number(a["Animal Bite Cases"]) || 0));
+
+    // Slice top 5 nodes and append down to panel hierarchy layout
+    sorted.slice(0, 5).forEach(row => {
+        if (!row.Municipality) return;
+        const div = document.createElement("div");
+        div.className = "top-item";
+        div.innerHTML = `<span>${row.Municipality}</span><strong>${row["Animal Bite Cases"] || 0}</strong>`;
+        panel.appendChild(div);
+    });
+}

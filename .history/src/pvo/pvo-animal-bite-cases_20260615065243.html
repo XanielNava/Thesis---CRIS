@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - Animal Bite Cases</title>
+    <link rel="stylesheet" href="../../assets/css/pvo-animal-bite-cases.css">
+    <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- UNIVERSAL SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PVO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="pvo-dash.html" class="menu-item">Dashboard</a>
+                <a href="pvo-animal-bite-cases.html" class="menu-item active">Animal Bite Cases</a>
+                <a href="pvo-heat-map.html" class="menu-item">Heatmap</a>
+                <!-- <a href="#" class="menu-item">Statistics</a>
+                <a href="#" class="menu-item">Messages</a>
+                <a href="#" class="menu-item">Inventory</a>
+                <a href="#" class="menu-item">Reports</a> -->
+            </nav>
+
+            <div class="footer-nav">
+                <a href="#" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout" onclick="window.location.href='pvo-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <header class="header">
+                <h1>ANIMAL BITE CASES</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Xaniel Marios Angelo B. Nava</strong><br>
+                        <span>Administrator</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <section class="card">
+                <div class="topbar">
+                    <div class="search-section">
+                        <div class="search-input">
+                            <label for="caseSearch">Search:</label>
+                            <input type="text" id="caseSearch" placeholder="Search case ID or name...">
+                        </div>
+                    </div>
+
+                    <div class="export-buttons">
+                        <button class="btn-export">CSV</button>
+                        <button class="btn-export">Excel</button>
+                        <button class="btn-export">PDF</button>
+                        <button class="btn-export">Print</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="casesTable">
+                        <thead>
+                            <tr>
+                                <th>Case ID</th>
+                                <th>Municipality</th>
+                                <th>Barangay</th>
+                                <th>Animal Type</th>
+                                <th>Vaccination Status</th>
+                                <th>Lab Results</th>
+                                <th>Name of Victim</th>
+                                <th>Age</th>
+                            </tr>
+                        </thead>
+                        <tbody id="casesTableBody">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav class="pagination">
+                    <button>Previous</button>
+                    <button class="active">1</button>
+                    <button>2</button>
+                    <button>Next</button>
+                </nav>
+            </section>
+        </main>
+    </div>
+    <script type="module" src="../assets/js/abc.js"></script>
+</body>
+</html>
