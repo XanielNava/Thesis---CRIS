@@ -1,57 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Facilities</title>
-
-<link rel="stylesheet" href="admin.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facilities</title>
+    <link rel="stylesheet" href="admin.css">
 </head>
 <body>
 
 <div class="container">
-
     <aside class="sidebar">
-
-        <h2>ABTC</h2>
-
+        <h2>ABTC Admin</h2>
         <ul>
             <li><a href="admin-dash.html">Dashboard</a></li>
             <li><a href="admin-faci.html">Facilities</a></li>
             <li><a href="admin-reports.html">Reports</a></li>
+            <li><a href="admin.html" class="logout-btn">← Back to Login</a></li>
         </ul>
-
     </aside>
 
     <main class="content">
-
         <h1>Facility Management</h1>
 
-        <button id="registerFacilityBtn">
-            Register Facility
-        </button>
+        <button id="registerFacilityBtn">Register Facility</button>
 
         <table>
-
             <thead>
                 <tr>
                     <th>Company</th>
                     <th>Email</th>
                     <th>Status</th>
-                </tr>
+                    <th>Actions</th> </tr>
             </thead>
-
-            <tbody id="facilityTable">
-            </tbody>
-
+            <tbody id="facilityTable"></tbody>
         </table>
-
     </main>
-
 </div>
 
-<script type="module" src="js/facilities.js"></script>
+<div id="facilityModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Register Facility</h2>
+        <form id="facilityForm">
+            <input type="text" id="facilityName" placeholder="Facility Name" required>
+            <input type="email" id="facilityEmail" placeholder="Email" required>
+            <input type="password" id="facilityPassword" placeholder="Password" required>
+            <select id="facilityType" required>
+                <option value="">Select Facility Type</option>
+                <option value="Clinic">Clinic</option>
+                <option value="Front Desk">Front Desk</option>
+            </select>
+            <button type="submit">Create Account</button>
+        </form>
+    </div>
+</div>
 
+<div id="editFacilityModal" class="modal">
+    <div class="modal-content">
+        <span class="close-edit">&times;</span>
+        <h2>Edit Facility Details</h2>
+        <form id="editFacilityForm">
+            <input type="hidden" id="editFacilityId">
+            
+            <label for="editFacilityName">Facility Name:</label>
+            <input type="text" id="editFacilityName" required>
+
+            <label for="editFacilityType">Facility Type:</label>
+            <select id="editFacilityType" required>
+                <option value="Clinic">Clinic</option>
+                <option value="Front Desk">Front Desk</option>
+            </select>
+
+            <button type="submit" class="btn-save">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<script type="module" src="admin-firebase.js"></script>
 </body>
 </html>

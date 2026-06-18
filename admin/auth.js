@@ -49,28 +49,3 @@ signupBtn.addEventListener("click", async()=>{
 
 });
 }
-
-const loginBtn =
-document.getElementById("loginBtn");
-
-if(loginBtn){
-
-loginBtn.addEventListener("click", async()=>{
-
-    const email =
-    document.getElementById("email").value;
-
-    const password =
-    document.getElementById("password").value;
-
-    await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-    );
-
-    window.location.href =
-    "dashboard.html";
-
-});
-}
