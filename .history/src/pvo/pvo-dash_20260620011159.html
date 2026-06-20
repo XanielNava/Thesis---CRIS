@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS Dashboard - PVO</title>
+
+    <link rel="stylesheet" href="../../assets/css/pvo-dashboard.css">
+    <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,400;0,700;0,900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- UNIVERSAL SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PVO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="pvo-dash.html" class="menu-item active">Dashboard</a>
+                <a href="pvo-animal-bite-cases.html" class="menu-item">Animal Bite Cases</a>
+                <a href="pvo-heat-map.html" class="menu-item">Heatmap</a>
+                <!-- <a href="pvo-statistics.html" class="menu-item">Statistics</a>
+                <a href="pvo-messages.html" class="menu-item">Messages</a>
+                <a href="pvo-inventory.html" class="menu-item">Inventory</a>
+                <a href="pvo-reports.html" class="menu-item">Reports</a> -->
+            </nav>
+
+            <div class="footer-nav">
+                <a href="#" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout" onclick="window.location.href='pvo-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="header">
+                <h1>PVO DASHBOARD</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Xaniel Marios Angelo B. Nava</strong><br>
+                        <span>Administrator</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <section class="left-column">
+                    <div class="welcome-bar">
+                        <div class="avatar-circle"></div>
+                        <span>Hello, Xaniel Marios Angelo B. Nava</span>
+                    </div>
+
+                    <div class="metrics">
+                        <div class="card metric-card">
+                            <h3>Animal Population</h3>
+                            <p class="value">356,330</p>
+                        </div>
+                        <div class="card metric-card">
+                            <h3>Animal Bite Cases</h3>
+                            <p class="value">0</p>
+                        </div>
+                        <div class="card metric-card">
+                            <h3>Human Rabies Deaths</h3>
+                            <p class="value">0</p>
+                        </div>
+                        <div class="metric-card empty"></div>
+                    </div>
+
+                    <div class="card full-width">
+                        <h3 class="card-title">No. of Cases for the month of December</h3>
+                        <!-- Placeholder for statistical chart -->
+                    </div>
+                </section>
+
+                <!-- Right Column Calendar -->
+                <aside class="right-column">
+                    <div class="card calendar-card">
+                        <div class="calendar-header" id="calendarHeader">Today</div>
+                        <div class="calendar-days" id="calendarDays"></div>
+                        <div class="calendar-body">
+                            <div class="compliance-box">
+                                <strong>PVO Alerts</strong>
+                                <p>No new rabies cases reported today.</p>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+<script>
+function updateCalendar(){
+    const today = new Date();
+    const options = {
+        weekday:"long",
+        year:"numeric",
+        month:"long",
+        day:"numeric"
+    };
+
+    document.getElementById("calendarHeader").textContent =
+        "Today, " + today.toLocaleDateString("en-US", options);
+    const calendarDays = document.getElementById("calendarDays");
+    calendarDays.innerHTML = "";
+
+    const weekNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    for(let i=-2;i<=2;i++){
+        const date = new Date(today);
+        date.setDate(today.getDate()+i);
+        const div = document.createElement("div");
+        div.className = "day";
+        if(i===0){
+            div.classList.add("active");
+        }
+        div.innerHTML = `
+            <div class="day-number">${date.getDate()}</div>
+            <div class="day-name">${weekNames[date.getDay()]}</div>
+        `;
+        calendarDays.appendChild(div);
+    }
+}
+updateCalendar();
+
+/* Refresh automatically at midnight */
+
+setInterval(updateCalendar,60000);
+</script>
+
+    </body>
+</html>

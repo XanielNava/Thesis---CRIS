@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS Statistics - PVO</title>
+    
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/pvo-heat-map.css">
+    
+    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PVO MODULE</div>
+            </div>
+            <nav class="menu">
+                <a href="pvo-dash.html" class="menu-item">Dashboard</a>
+                <a href="pvo-animal-bite-cases.html" class="menu-item">Animal Bite Cases</a>
+                <a href="pvo-heat-map.html" class="menu-item active">Heatmap</a>
+            </nav>
+            <div class="footer-nav">
+                <a href="#" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout" onclick="window.location.href='pvo-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>HEATMAP / STATISTICS</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Xaniel Marios Angelo B. Nava</strong><br>
+                        <span>Administrator</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <div class="heatmap-toolbar">
+                <div class="toolbar-group">
+                    <label>Upload Dataset</label>
+                    <input type="file" id="excelFile" accept=".xlsx, .xls, .csv">
+                </div>
+                <div class="toolbar-group">
+                    <label>Year</label>
+                    <select id="yearFilter">
+                        <option value="All">All Years</option>
+                    </select>
+                </div>
+                <div class="toolbar-group">
+                    <label>Municipality</label>
+                    <select id="municipalityFilter">
+                        <option value="All">All Municipalities</option>
+                    </select>
+                </div>
+                <div class="toolbar-group">
+                    <label>Heatmap Layer</label>
+                    <select id="layerFilter">
+                        <option value="All">All Layers</option>
+                        <option value="bite">Animal Bite Cases</option>
+                        <option value="human">Human Rabies Deaths</option>
+                        <option value="animal">Animal Rabies Deaths</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="dashboard-map">
+                <div class="map-wrapper">
+                    <div id="map"></div>
+                    <div class="heatmap-overlay">
+                        <h3><bHeatmap Legend</h3>
+                        <div class="legend-item"><span class="legend-box bite-color"></span>Animal Bite Cases</div>
+                        <div class="legend-item"><span class="legend-box human-color"></span>Human Rabies Deaths</div>
+                        <div class="legend-item"><span class="legend-box animal-color"></span>Animal Rabies Deaths</div>
+                    </div>
+                </div>
+
+                <div class="side-panel">
+                    <h3>Top Municipalities</h3>
+                    <div id="topMunicipalities"></div>
+                </div>
+            </div>
+
+            <script src="../../assets/js/pvo-heat-map.js"></script>
+
+        </main>
+    </div>
+</body>
+</html>
