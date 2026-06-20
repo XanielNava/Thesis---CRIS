@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABTC Admin Login</title>
+
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div class="login-container">
+
+    <div class="login-card">
+        <h1>ABTC Management</h1>
+
+        <input type="email" id="email" placeholder="Email">
+
+        <input type="password" id="password" placeholder="Password">
+
+        <button id="loginBtn" onclick="window.location.href='admin-dash.html'">
+            Login
+        </button>
+        <button id="loginBtn" onclick="window.location.href='../index.html'">
+            Exit
+        </button>
+
+        <p>
+            No account?
+            <a href="admin-signup.html">Sign Up</a>
+        </p>
+    </div>
+
+</div>
+
+<script type="module" src="auth.js"></script>
+
+</body>
+</html>

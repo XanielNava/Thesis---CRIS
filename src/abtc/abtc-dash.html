@@ -5,37 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRIS - ABTC Dashboard</title>
     <!-- Linking your original CSS and the new Role CSS -->
-    <link rel="stylesheet" href="../../assets/css/pvo-dashboard.css">
-    <link rel="stylesheet" href="../../assets/css/roles.css">
+    <link rel="stylesheet" href="../../assets/css/abtc-dash.css">
     <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <script type="module" src="../../assets/js/abtc-dash.js"></script>
 </head>
 <body>
     <div class="container">
         <aside class="sidebar">
             <div class="logo-section">
-                <img src="../assets/images/logo-login.png" alt="Logo" class="logo-image">
+                <img src="../../assets/images/logo-login.png" alt="Logo" class="logo-image">
                 <p>Community-Centric<br>Rabies Intelligence<br>System</p>
                 <div class="role-badge">ABTC MODULE</div>
             </div>
 
             <nav class="menu">
-                <button class="menu-item active">Dashboard</button>
-                <button class="menu-item">Patient Registry</button>
-                <button class="menu-item">Dose Calendar</button>
-                <button class="menu-item">Vaccine Stock</button>
+                <a href="abtc-dash.html" button class="menu-item active">Dashboard</a>
+                <a href="abtc-reg.html"button class="menu-item">Patient Registry</a>
+                <a href="abtc-report.html"button class="menu-item">Dose Calendar</a>
+                <!-- <button class="menu-item">Vaccine Stock</button>
                 <button class="menu-item">Messages</button>
-                <button class="menu-item">Reports</button>
+                <button class="menu-item">Reports</button> -->
             </nav>
             <div class="footer-nav">
                 <button class="menu-item alt">Settings</button>
-                <button id="logout-btn" class="menu-item alt" onclick="window.location.href='../src/abtc-login.html'">Logout</button>
+                <button id="logout-btn" class="menu-item alt" onclick="window.location.href='abtc-login.html'">Logout</button>
             </div>
         </aside>
 
         <main class="main-content">
             <header class="header">
-                <h1>ABTC DASHBOARD</h1>
+                <h1 id="dashboardTitle"></h1>
                 <div class="user-profile-top">
                     <div class="profile-info">
                         <strong>Dr. Maria Dela Cruz</strong><br>
@@ -54,50 +54,23 @@
 
                     <div class="metrics">
                         <div class="card metric-card">
-                            <h3>Scheduled Doses Today</h3>
-                            <div class="value">24</div>
+                            <h3>Total Patients</h3>
+                            <div class="value" id="totalPatientsCount">0</div>
                         </div>
+                        
                         <div class="card metric-card">
-                            <h3>New Bite Cases</h3>
-                            <div class="value">08</div>
+                            <h3>Scheduled Today</h3>
+                            <div class="value">0</div>
                         </div>
+                        
                         <div class="card metric-card danger-zone">
-                            <h3>PEP Vials Level</h3>
+                            <h3>PEP Vials</h3>
                             <div class="value">12</div>
                         </div>
+                        
                         <div class="card metric-card">
                             <h3>Category III Cases</h3>
-                            <div class="value">05</div>
-                        </div>
-                    </div>
-
-                    <div class="card full-width">
-                        <h3 class="card-title">Injection Queue</h3>
-                        <div class="table-container">
-                            <table class="dashboard-table">
-                                <thead>
-                                    <tr>
-                                        <th>Patient</th>
-                                        <th>Exposure</th>
-                                        <th>Stage</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Juan Antonio</td>
-                                        <td>Cat Bite</td>
-                                        <td><span class="badge yellow">Day 3</span></td>
-                                        <td>Pending</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Elena Gomez</td>
-                                        <td>Dog Bite</td>
-                                        <td><span class="badge green">Day 7</span></td>
-                                        <td>Completed</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="value" id="categoryThreeCount">0</div>
                         </div>
                     </div>
                 </div>
