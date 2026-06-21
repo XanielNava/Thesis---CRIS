@@ -690,29 +690,25 @@ function updateTopMunicipalities(data){
 
         if(index===0){
 
-            medal="1.";
+            medal="1. ";
 
         }
 
         else if(index===1){
 
-            medal="2.";
+            medal="2. ";
 
         }
 
         else if(index===2){
 
-            medal="3.";
+            medal="3. ";
 
         }
 
         else if (index===3){
 
-            medal="4.";
-        }
-
-        else if (index===4){
-            medal="5.";
+            medal="4. ";
         }
 
         div.innerHTML=

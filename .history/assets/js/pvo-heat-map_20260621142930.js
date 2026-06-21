@@ -375,7 +375,7 @@ function generateCluster(lat, lng, cases, spread) {
     const totalPoints = Math.max(
         Math.round(cases / 10),
         1
-    );
+);
     for (let i = 0; i < totalPoints; i++) {
         // Gaussian-like distribution
         const angle = Math.random() * Math.PI * 2;
@@ -690,29 +690,20 @@ function updateTopMunicipalities(data){
 
         if(index===0){
 
-            medal="1.";
+            medal="🥇";
 
         }
 
         else if(index===1){
 
-            medal="2.";
+            medal="🥈";
 
         }
 
         else if(index===2){
 
-            medal="3.";
+            medal="🥉";
 
-        }
-
-        else if (index===3){
-
-            medal="4.";
-        }
-
-        else if (index===4){
-            medal="5.";
         }
 
         div.innerHTML=

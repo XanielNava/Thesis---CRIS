@@ -690,7 +690,7 @@ function updateTopMunicipalities(data){
 
         if(index===0){
 
-            medal="1.";
+            medal="1. ";
 
         }
 

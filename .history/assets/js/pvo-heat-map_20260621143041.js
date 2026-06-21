@@ -706,15 +706,6 @@ function updateTopMunicipalities(data){
 
         }
 
-        else if (index===3){
-
-            medal="4.";
-        }
-
-        else if (index===4){
-            medal="5.";
-        }
-
         div.innerHTML=
 
         "<span>"+
