@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initializeMap();
     initializeControls();
     
-    // Asynchronously loads and parses the background 'Iloilo-Population.xlsx' asset on mount
+    // Smoothly load the embedded population asset file asynchronously right on startup
     await loadPopulationData();
 });
 
@@ -67,63 +67,44 @@ function initializeControls() {
 }
 
 // ==========================================================
-// BACKGROUND FIXED ASSET ACQUISITION (PSA EXCEL INTEGRATION)
+// DATA ACQUISITION & STRUCTURAL BASELINES
 // ==========================================================
 
-async function loadPopulationData() {
+ loadPopulationData() {
     try {
-        // 1. Fetch your official PSA file directly from your static asset path
-        const response = await fetch("../../assets/data/Iloilo-Population.xlsx");
+        // 1. Fetch the embedded Excel file as a binary array buffer
+        const response = await fetch("../../assets/data/iloilo_population.xlsx");
         if (!response.ok) throw new Error(`HTTP network error! Status: ${response.status}`);
         
-        const arrayBuffer = await response.arrayBuffer();
+        const arrayBuffer = await responasync functionse.arrayBuffer();
         
-        // 2. Load the binary streaming workbook using SheetJS
+        // 2. Read the file content using the SheetJS library
         const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: "array" });
-        const firstSheetName = workbook.SheetNames[0]; // Targeted to 'Table 2-Iloilo'
+        const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         
-        // 3. Convert sheet to raw array matrices to easily handle the PSA layout format
-        const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        // 3. Convert to json rows
+        const rawPopulationData = XLSX.utils.sheet_to_json(worksheet);
         
-        const parsedPopulation = [];
-
-        // 4. Parse rows to isolate only Municipality total rows (skipping granular barangays)
-        rawRows.forEach(function(row) {
-            if (!row || row.length < 3) return;
-
-            const nameValue = String(row[0]).trim();
-            const totalPopulationValue = Number(row[2]); // Total population resides in column C (Index 2)
-
-            // PSA Structural Filter: Grabs rows where the name is in ALL CAPS
-            // while bypassing metadata rows like 'TABLE', 'PROVINCE', or empty values
-            if (
-                nameValue && 
-                nameValue !== "undefined" &&
-                nameValue === nameValue.toUpperCase() && 
-                !nameValue.includes("TABLE") && 
-                !nameValue.includes("PROVINCE") &&
-                !isNaN(totalPopulationValue)
-            ) {
-                // Strip out formatting elements (like asterisks or text prefixes like 'CITY OF ')
-                let cleanMuni = nameValue.replace(" *", "").trim();
-                if (cleanMuni.startsWith("CITY OF ")) {
-                    cleanMuni = cleanMuni.replace("CITY OF ", "").trim();
+        // 4. Normalize the headers so lookups remain structurally safe
+        populationData = rawPopulationData.map(function(row) {
+            const normalizedRow = {};
+            Object.keys(row).forEach(function(key) {
+                const cleanKey = key.trim().toLowerCase();
+                if (cleanKey === "municipality" || cleanKey === "municipalities") {
+                    normalizedRow.Municipality = row[key];
+                } else if (cleanKey === "year" || cleanKey === "years") {
+                    normalizedRow.Year = row[key];
+                } else if (cleanKey === "population" || cleanKey === "pop") {
+                    normalizedRow.Population = row[key];
                 }
-
-                parsedPopulation.push({
-                    Municipality: cleanMuni,
-                    Year: "2024", // Defined baseline from PSA census context date
-                    Population: totalPopulationValue
-                });
-            }
+            });
+            return normalizedRow;
         });
 
-        populationData = parsedPopulation;
-        console.log("PSA Population File 'Iloilo-Population.xlsx' processed cleanly:", populationData.length, "Municipalities/Cities indexed.");
-        
+        console.log("Population Excel asset synchronized & parsed successfully:", populationData.length, "records.");
     } catch (error) {
-        console.error("Critical Error: Static population Excel file failed to parse.", error);
+        console.error("Critical Error: Static population Excel file failed to load.", error);
     }
 }
 
@@ -131,22 +112,20 @@ async function loadPopulationData() {
 function getPopulation(municipality, year) {
     if (!populationData || populationData.length === 0) return 0;
     
-    // Clean string lookups to dodge mismatch quirks
-    let targetMuni = String(municipality).trim().toUpperCase();
-    if (targetMuni.startsWith("CITY OF ")) targetMuni = targetMuni.replace("CITY OF ", "").trim();
-    if (targetMuni.endsWith(" CITY")) targetMuni = targetMuni.replace(" CITY", "").trim();
+    const targetMuni = String(municipality).trim().toUpperCase();
+    const targetYear = String(year).trim();
 
     const record = populationData.find(function(item) {
-        return String(item.Municipality).trim().toUpperCase() === targetMuni;
+        return (
+            String(item.Municipality).trim().toUpperCase() === targetMuni &&
+            String(item.Year).trim() === targetYear
+        );
     });
 
     return record ? Number(record.Population) : 0;
 }
 
-// ==========================================================
-// USER MANIFEST / ACTIVE INCIDENT FILE HANDLERS
-// ==========================================================
-
+// Active Case Upload Registry Parser
 function uploadExcel(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -167,6 +146,7 @@ function uploadExcel(event) {
     reader.readAsArrayBuffer(file);
 }
 
+// Incident File Data Header Normalizer
 function normalizeHeaders() {
     excelData = excelData.map(function(row) {
         const newRow = {};
@@ -237,14 +217,15 @@ function updateStatistics(data) {
     let totalBites = 0;
     let totalHumanDeaths = 0;
 
+    // Track dynamic aggregated population sets safely
     const popTrackingSet = new Set();
 
     data.forEach(function(row) {
         totalBites += Number(row["Animal Bite Cases"]) || 0;
         totalHumanDeaths += Number(row["Human Rabies Deaths"]) || 0;
 
-        // Prevent mathematical replication compounding if data spans multiple data rows for the same entity
-        const trackingKey = `${String(row.Municipality).trim().toUpperCase()}`;
+        // Prevent mathematical duplication tracking if query returns rows over matched entities
+        const trackingKey = `${String(row.Municipality).trim().toUpperCase()}_${row.Year}`;
         if (!popTrackingSet.has(trackingKey)) {
             totalPopulation += getPopulation(row.Municipality, row.Year);
             popTrackingSet.add(trackingKey);
@@ -256,7 +237,7 @@ function updateStatistics(data) {
     const incidenceRate = totalPopulation > 0 ? (totalBites / totalPopulation) * 100000 : 0;
     const mortalityRate = totalPopulation > 0 ? (totalHumanDeaths / totalPopulation) * 100000 : 0;
 
-    // Interface node updates
+    // Direct UI updates
     const elPop = document.getElementById("humanPopulation");
     const elPrev = document.getElementById("prevalenceRate");
     const elInc = document.getElementById("incidentsRate");
@@ -264,10 +245,11 @@ function updateStatistics(data) {
 
     if (elPop) elPop.textContent = totalPopulation.toLocaleString();
     if (elPrev) elPrev.textContent = prevalenceRate.toFixed(2) + "%";
-    if (elInc) elInc.textContent = incidenceRate.toFixed(2); 
-    if (elMort) elMort.textContent = mortalityRate.toFixed(2); 
+    if (elInc) elInc.textContent = incidenceRate.toFixed(2); // Rendered per 100k population baseline
+    if (elMort) elMort.textContent = mortalityRate.toFixed(2); // Rendered per 100k population baseline
 }
 
+// Top 5 Municipalities Sorting Panel Matrix
 function updateTopMunicipalities(data) {
     const panel = document.getElementById("topMunicipalities");
     if (!panel) return;
@@ -293,7 +275,7 @@ function updateTopMunicipalities(data) {
         const lookupYear = item[1].year;
         const population = getPopulation(muniName, lookupYear);
         
-        // Formulate risk ranking criteria via localized standard prevalence rate per 100,000 individuals
+        // Calculate standard prevalence rates per 100,000 baseline individuals
         const prevalence = population > 0 ? (casesCount / population) * 100000 : 0;
 
         return {
@@ -358,12 +340,12 @@ function drawHeatmap(data) {
         const animalDeaths = Number(row["Animal Rabies Deaths"]) || 0;
         const population = getPopulation(row.Municipality, row.Year);
 
-        // Clustered point dispersion patterns
+        // Generate clustered points spatial layouts
         bitePoints.push(...generateCluster(lat, lng, biteCases, 0.020));
         humanPoints.push(...generateCluster(lat, lng, humanDeaths, 0.010));
         animalPoints.push(...generateCluster(lat, lng, animalDeaths, 0.015));
 
-        // Popups data mapping calculations
+        // Formulate localized epidemiological values for map popups
         const itemPrev = population > 0 ? (biteCases / population) * 100 : 0;
         const itemInc = population > 0 ? (biteCases / population) * 100000 : 0;
         const itemMort = population > 0 ? (humanDeaths / population) * 100000 : 0;
@@ -394,7 +376,7 @@ function drawHeatmap(data) {
         markerLayer.addLayer(marker);
     });
 
-    // Layer Color Profiles
+    // Layer Color Mappings
     biteHeatLayer = L.heatLayer(bitePoints, { radius: 28, blur: 18, maxZoom: 16, minOpacity: .45, gradient: { 0.20: "#FFE082", 0.50: "#FFB300", 0.75: "#EA6113", 1.00: "#8C2F00" } });
     humanHeatLayer = L.heatLayer(humanPoints, { radius: 24, blur: 16, maxZoom: 16, minOpacity: .45, gradient: { 0.20: "#FFCDD2", 0.50: "#EF5350", 0.75: "#C62828", 1.00: "#7F0000" } });
     animalHeatLayer = L.heatLayer(animalPoints, { radius: 24, blur: 16, maxZoom: 16, minOpacity: .45, gradient: { 0.20: "#BBDEFB", 0.50: "#42A5F5", 0.75: "#1565C0", 1.00: "#002171" } });
@@ -409,7 +391,7 @@ function drawHeatmap(data) {
     }
 }
 
-// Map Dynamic UI Refresher Debouncer
+// Safe Debouncer / Refresh Engine
 let redrawTimeout;
 function refreshMap() {
     if (excelData.length === 0) return;
@@ -423,7 +405,7 @@ function refreshMap() {
     }, 150);
 }
 
-// Dynamic window resize re-alignments
+// Structural Resizing Adjustments
 window.addEventListener("resize", function() {
     if (map) map.invalidateSize();
 });

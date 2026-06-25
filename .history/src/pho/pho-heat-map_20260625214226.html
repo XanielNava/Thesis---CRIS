@@ -74,40 +74,13 @@
                 <div class="toolbar-group">
                     <label>Heatmap Layer</label>
                     <select id="layerFilter">
+                        <option value="All">All Layers</option>
                         <option value="bite">Animal Bite Cases</option>
                         <option value="human">Human Rabies Deaths</option>
                         <option value="animal">Animal Rabies Deaths</option>
                     </select>
-                </div>
+                </div
             </div>
-
-             <!-- STATISTICS CONTAINER -->
-                    <div class="statistics-container">
-
-                        <!-- HUMAN POPULATION -->
-                        <div class="stat-card">
-                            <small>Human Population</small>
-                            <h2 id="humanPopulation">0</h2>
-                        </div>
-
-                        <!-- PREVALENCE RATE -->
-                        <div class="stat-card">
-                            <small>Prevalence Rate</small>
-                            <h2 id="prevalenceRate">0%</h2>
-                        </div>
-
-                        <!-- INCIDENTS RATE -->
-                        <div class="stat-card">
-                            <small>Incidents Rate</small>
-                            <h2 id="incidentsRate">0%</h2>
-                        </div>
-
-                        <!-- DEATH RATE -->
-                        <div class="stat-card">
-                            <small>Mortality Rate</small>
-                            <h2 id="mortalityRate">0%</h2>
-                        </div>
-                    </div>
 
             <!-- HEATMAP -->
             <div class="dashboard-map">
@@ -127,7 +100,9 @@
                     <div id="topMunicipalities"></div>
                 </div>
             </div>
+
             <script src="../../assets/js/pho-heat-map.js"></script>
+
         </main>
     </div>
 </body>

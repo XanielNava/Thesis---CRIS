@@ -74,6 +74,7 @@
                 <div class="toolbar-group">
                     <label>Heatmap Layer</label>
                     <select id="layerFilter">
+                        <option value="All">All Layers</option>
                         <option value="bite">Animal Bite Cases</option>
                         <option value="human">Human Rabies Deaths</option>
                         <option value="animal">Animal Rabies Deaths</option>
@@ -99,13 +100,7 @@
                         <!-- INCIDENTS RATE -->
                         <div class="stat-card">
                             <small>Incidents Rate</small>
-                            <h2 id="incidentsRate">0%</h2>
-                        </div>
-
-                        <!-- DEATH RATE -->
-                        <div class="stat-card">
-                            <small>Mortality Rate</small>
-                            <h2 id="mortalityRate">0%</h2>
+                            <h2 id="incidentsRate">0</h2>
                         </div>
                     </div>
 
@@ -127,7 +122,9 @@
                     <div id="topMunicipalities"></div>
                 </div>
             </div>
+
             <script src="../../assets/js/pho-heat-map.js"></script>
+
         </main>
     </div>
 </body>

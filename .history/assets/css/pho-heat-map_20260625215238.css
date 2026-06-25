@@ -195,12 +195,11 @@ body, html {
 
 .stat-card {
     background: white;
-    border-left: 8px solid var(--sunset-orange);
+    border-left: 100px solid var(--sunset-orange);
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0,0,0,.08);
     transition: .3s;
-    
 }
 
 .stat-card:hover {

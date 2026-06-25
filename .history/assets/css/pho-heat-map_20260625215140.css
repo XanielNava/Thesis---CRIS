@@ -197,10 +197,9 @@ body, html {
     background: white;
     border-left: 8px solid var(--sunset-orange);
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 100px;
     box-shadow: 0 5px 15px rgba(0,0,0,.08);
     transition: .3s;
-    
 }
 
 .stat-card:hover {
