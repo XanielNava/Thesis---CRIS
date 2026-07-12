@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Individual Treatment Record | Animal Bite Treatment Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../assets/css/itr.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-brand">
+    <i class="fa-solid fa-syringe"></i>
+    <div>
+      <h1>Animal Bite Treatment Center</h1>
+      <span>Individual Treatment Record</span>
+    </div>
+  </div>
+  <div class="topbar-meta">
+    <span class="doh-tag"><i class="fa-solid fa-shield-heart"></i> DOH Anti-Rabies Program</span>
+  </div>
+</header>
+
+<main class="page">
+  
+  <div class="page-actions">
+    <a href="abtc-reg.html" class="btn-back">
+      <i class="fa-solid fa-arrow-left-long"></i> Back to Registry
+    </a>
+  </div>
+
+  <form id="itrForm" novalidate>
+
+    <div class="record-strip">
+      <div class="field">
+        <label for="recordNo">ITR / Record No.</label>
+        <input type="text" id="recordNo" name="recordNo" placeholder="e.g., ABTC-2026-0001" readonly>
+      </div>
+      <div class="field">
+        <label for="exposureDate">Date of exposure</label>
+        <input type="date" id="exposureDate" name="exposureDate" required>
+      </div>
+      <div class="field">
+        <label for="consultDateTime">Date and time of consultation</label>
+        <input type="datetime-local" id="consultDateTime" name="consultDateTime" required>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="card-head">
+        <i class="fa-solid fa-user"></i>
+        <h2>Patient information</h2>
+      </div>
+      <div class="grid grid-2">
+        <div class="field">
+          <label for="fullName">Full name</label>
+          <input type="text" id="fullName" name="fullName" placeholder="Last name, First name, Middle name" required>
+        </div>
+        <div class="field">
+          <label for="age">Age</label>
+          <input type="number" id="age" name="age" min="0" max="120" placeholder="0" required>
+        </div>
+        <div class="field">
+          <label for="sex">Sex</label>
+          <select id="sex" name="sex" required>
+            <option value="" disabled selected>Select</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="contactNo">Contact number</label>
+          <input type="tel" id="contactNo" name="contactNo" placeholder="09xx xxx xxxx">
+        </div>
+        <div class="field span-2">
+          <label for="address">Address</label>
+          <input type="text" id="address" name="address" placeholder="House no., street, barangay, city">
+        </div>
+        <div class="field span-2">
+          <label for="physician">Attending physician / nurse</label>
+          <input type="text" id="physician" name="physician" placeholder="Name of attending physician or nurse">
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <i class="fa-solid fa-paw"></i>
+        <h2>Exposure and bite details</h2>
+      </div>
+      <div class="grid grid-2">
+        <div class="field span-2">
+          <label for="biteArea">Area of the bite</label>
+          <input type="text" id="biteArea" name="biteArea" placeholder="e.g., Right lower leg" required>
+        </div>
+        <div class="field">
+          <label for="animalType">Type of animal</label>
+          <select id="animalType" name="animalType" required>
+            <option value="" disabled selected>Select</option>
+            <option value="Dog">Dog</option>
+            <option value="Cat">Cat</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field" id="animalOtherWrap" hidden>
+          <label for="animalOther">Specify animal</label>
+          <input type="text" id="animalOther" name="animalOther" placeholder="Specify type of animal">
+        </div>
+        <div class="field">
+          <label>Was the animal caged?</label>
+          <div class="pill-group" data-name="animalCaged">
+            <button type="button" class="pill" data-value="Yes">Yes</button>
+            <button type="button" class="pill" data-value="No">No</button>
+            <button type="button" class="pill" data-value="Unknown">Unknown</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Category of exposure</label>
+          <div class="pill-group" data-name="exposureCategory">
+            <button type="button" class="pill" data-value="I">Category I</button>
+            <button type="button" class="pill" data-value="II">Category II</button>
+            <button type="button" class="pill" data-value="III">Category III</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Previously vaccinated?</label>
+          <div class="pill-group" data-name="priorVaccination">
+            <button type="button" class="pill" data-value="Yes">Yes</button>
+            <button type="button" class="pill" data-value="No">No</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="lastVaccDate">Date of last vaccination</label>
+          <input type="date" id="lastVaccDate" name="lastVaccDate">
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <i class="fa-solid fa-heart-pulse"></i>
+        <h2>Vital signs</h2>
+      </div>
+      <div class="grid grid-6">
+        <div class="field">
+          <label for="bp">Blood pressure</label>
+          <input type="text" id="bp" name="bp" placeholder="120/80">
+        </div>
+        <div class="field">
+          <label for="temp">Temperature (&deg;C)</label>
+          <input type="number" step="0.1" id="temp" name="temp" placeholder="36.5">
+        </div>
+        <div class="field">
+          <label for="pulse">Pulse rate (bpm)</label>
+          <input type="number" id="pulse" name="pulse" placeholder="80">
+        </div>
+        <div class="field">
+          <label for="resp">Resp. rate (cpm)</label>
+          <input type="number" id="resp" name="resp" placeholder="18">
+        </div>
+        <div class="field">
+          <label for="o2sat">O2 saturation (%)</label>
+          <input type="number" id="o2sat" name="o2sat" placeholder="98">
+        </div>
+        <div class="field">
+          <label for="weight">Weight (kg)</label>
+          <input type="number" step="0.1" id="weight" name="weight" placeholder="60">
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <i class="fa-solid fa-notes-medical"></i>
+        <h2>Medical history</h2>
+      </div>
+      <div class="grid grid-1">
+        <div class="field">
+          <label>Comorbidities / existing medical conditions</label>
+          <textarea id="comorbidities" name="comorbidities" rows="2" placeholder="e.g., Diabetes, hypertension, immunocompromised — leave blank if none"></textarea>
+        </div>
+        <div class="field">
+          <label for="allergies">Known allergies</label>
+          <input type="text" id="allergies" name="allergies" placeholder="e.g., None, or specify allergen">
+        </div>
+        <div class="field">
+          <label for="medications">Current medications</label>
+          <input type="text" id="medications" name="medications" placeholder="e.g., None, or list current medications">
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"> 
+        <i class="fa-solid fa-kit-medical"></i>
+        <h2>Management / treatment</h2>
+      </div>
+      <div class="grid grid-2">
+        <div class="field span-2">
+          <label for="woundCare">Wound care / initial management</label>
+          <textarea id="woundCare" name="woundCare" rows="2" placeholder="Describe washing, disinfection, wound closure, etc."></textarea>
+        </div>
+        <div class="field">
+          <label for="vaccineBrand">Vaccine given (brand / type)</label>
+          <input type="text" id="vaccineBrand" name="vaccineBrand" placeholder="e.g., PVRV / PCEC">
+        </div>
+        <div class="field">
+          <label for="route">Route</label>
+          <select id="route" name="route">
+            <option value="" disabled selected>Select</option>
+            <option value="Intramuscular">Intramuscular</option>
+            <option value="Intradermal">Intradermal</option>
+          </select>
+        </div>
+        <div class="field span-2">
+          <label for="immunoglobulin">Immunoglobulin given (if applicable)</label>
+          <input type="text" id="immunoglobulin" name="immunoglobulin" placeholder="Type and dose, or leave blank if not given">
+        </div>
+        <div class="field span-2">
+          <label>Vaccination schedule</label>
+          <div class="pill-group multi" data-name="vaccSchedule">
+            <button type="button" class="pill" data-value="Day 0">Day 0</button>
+            <button type="button" class="pill" data-value="Day 3">Day 3</button>
+            <button type="button" class="pill" data-value="Day 7">Day 7</button>
+            <button type="button" class="pill" data-value="Day 14">Day 14</button>
+            <button type="button" class="pill" data-value="Day 28">Day 28</button>
+          </div>
+        </div>
+        <div class="field span-2">
+          <label for="remarks">Other treatment / remarks</label>
+          <textarea id="remarks" name="remarks" rows="2" placeholder="Any additional notes"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <i class="fa-solid fa-camera"></i>
+        <h2>Photo documentation of wound</h2>
+      </div>
+      <p class="hint">Attach a photo of the wound as proof of assessment.</p>
+      <div class="upload-box" id="uploadBox">
+        <input type="file" id="woundPhoto" name="woundPhoto" accept="image/*" hidden>
+        <div id="uploadPrompt" class="upload-prompt">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <p>Click to upload or drag a photo here</p>
+          <span>PNG or JPG, up to 5MB</span>
+        </div>
+        <div id="uploadPreviewWrap" class="upload-preview-wrap" hidden>
+          <img id="uploadPreview" alt="Wound photo preview">
+          <button type="button" id="removePhoto" class="remove-photo"><i class="fa-solid fa-xmark"></i> Remove</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button type="button" class="btn btn-secondary" id="resetBtn"><i class="fa-solid fa-rotate-left"></i> Reset form</button>
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save treatment record</button>
+    </div>
+
+  </form>
+</main>
+
+<script src="../../assets/js/itr.js"></script>
+</body>
+</html>

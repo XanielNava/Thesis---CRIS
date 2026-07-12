@@ -365,24 +365,4 @@ body {
 }
 .btn-submit-form:hover { background-color: #d1520e; }
 
-/* ================= CSV BULK IMPORT COMPONENTS GRAPHICS ================= */
-.csv-upload-wrapper { display: inline-block; }
-.btn-secondary-action {
-    background-color: transparent;
-    color: var(--text-dark);
-    border: 2px dashed var(--sunset-gold);
-    padding: 10px 18px;
-    border-radius: 6px;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    transition: var(--transition-smooth);
-}
-.btn-secondary-action:hover {
-    background-color: var(--sunset-cream);
-    color: var(--sunset-orange);
-    border-color: var(--sunset-orange);
-}
 .menu-item-link { text-decoration: none; width: 100%; display: block; }
