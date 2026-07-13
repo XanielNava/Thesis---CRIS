@@ -7,7 +7,7 @@ const firebaseConfig = {
     authDomain: "cris-database-da989.firebaseapp.com",
     projectId: "cris-database-da989",
     storageBucket: "cris-database-da989.firebasestorage.app",
-    messagingSenderId: "627885439681",
+    messagingSenderId: "627885439681", 
     appId: "1:627885439681:web:3c657d64c0aad9b4913240"
 };
 
@@ -18,22 +18,13 @@ const db = getFirestore(app);
 /* --------------------
     Modal Interactive Action Elements Map
 -------------------- */
-const registerModal = document.getElementById("patientFormModal");
-const openRegisterModalBtn = document.getElementById("openPatientModalBtn");
-const closeRegisterModalBtn = document.querySelector(".close-modal-trigger");
-
 const editModal = document.getElementById("editPatientModal");
 const closeEditModalBtn = document.querySelector(".close-edit-modal-trigger");
 
-if (openRegisterModalBtn && registerModal && closeRegisterModalBtn) {
-    openRegisterModalBtn.addEventListener("click", () => { registerModal.style.display = "block"; });
-    closeRegisterModalBtn.addEventListener("click", () => { registerModal.style.display = "none"; });
-}
 if (closeEditModalBtn && editModal) {
     closeEditModalBtn.addEventListener("click", () => { editModal.style.display = "none"; });
 }
 window.addEventListener("click", (e) => {
-    if (e.target === registerModal) registerModal.style.display = "none";
     if (e.target === editModal) editModal.style.display = "none";
 });
 
@@ -41,7 +32,7 @@ window.addEventListener("click", (e) => {
     Authentication Listening Observer Handshaker Loop
 -------------------- */
 let activeFacilityUid = null;
-let allPatientsCache = []; // Client-side cache array to manage high-speed sorting filters cost-effectively
+let allPatientsCache = []; 
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -89,9 +80,8 @@ function listenToExclusivePatients(facilityUid) {
         where("facilityId", "==", facilityUid)
     );
 
-    // Continuous Sync pipeline
     onSnapshot(exclusiveQuery, (snapshot) => {
-        allPatientsCache = []; // Empty baseline parameters on incoming transactions delta
+        allPatientsCache = []; 
         
         snapshot.forEach((patientDoc) => {
             const data = patientDoc.data();
@@ -104,11 +94,9 @@ function listenToExclusivePatients(facilityUid) {
             });
         });
         
-        // Execute instant redraw
         applyFiltersAndRenderTable();
     });
 
-    // Native query interception triggers tracking input manipulations
     document.getElementById("searchRegistryInput").addEventListener("input", applyFiltersAndRenderTable);
     document.getElementById("filterExposureType").addEventListener("change", applyFiltersAndRenderTable);
     document.getElementById("filterBiteCategory").addEventListener("change", applyFiltersAndRenderTable);
@@ -127,7 +115,6 @@ function applyFiltersAndRenderTable() {
 
     let rows = "";
 
-    // Parse array bounds in memory instantly with zero read expenses
     const filteredPatients = allPatientsCache.filter(patient => {
         const matchesName = patient.name.toLowerCase().includes(searchQuery);
         const matchesExposure = selectedExposure === "" || patient.exposureType === selectedExposure;
@@ -206,7 +193,6 @@ if (regForm) {
 
             alert("Patient record captured successfully!");
             regForm.reset();
-            registerModal.style.display = "none";
         } catch (error) {
             console.error("Submission operational failure:", error);
             alert("Registration Error: " + error.message);
@@ -220,7 +206,6 @@ if (regForm) {
 const tableBodyContainer = document.getElementById("patientRegistryTableBody");
 if (tableBodyContainer) {
     tableBodyContainer.addEventListener("click", async (e) => {
-        // Edit Action Form Injection
         if (e.target.classList.contains("btn-enable")) {
             document.getElementById("editPatientId").value = e.target.getAttribute("data-id");
             document.getElementById("editPatientNameInput").value = e.target.getAttribute("data-name");
@@ -229,7 +214,6 @@ if (tableBodyContainer) {
             if (editModal) editModal.style.display = "block";
         }
 
-        // Delete Execution Pipeline
         if (e.target.classList.contains("btn-disable")) {
             const id = e.target.getAttribute("data-id");
             if (confirm(`Permanently wipe case entry profile "${id}"? This operation cannot be uncommitted.`)) {
@@ -242,7 +226,6 @@ if (tableBodyContainer) {
     });
 }
 
-// Processing Updates Save Changes Document Commit
 const editForm = document.getElementById("editPatientForm");
 if (editForm) {
     editForm.addEventListener("submit", async (e) => {
@@ -258,72 +241,6 @@ if (editForm) {
             alert("Patient record synchronized successfully!");
             if (editModal) editModal.style.display = "none";
         } catch (err) { alert("Synchronization error: " + err.message); }
-    });
-}
-
-/* --------------------
-    CRUD - BULK IMPORT: Multi-Row Async Ingestion Engine
--------------------- */
-const csvFileInput = document.getElementById("csvFileInput");
-if (csvFileInput) {
-    csvFileInput.addEventListener("change", async (e) => {
-        const file = e.target.files[0];
-        if (!file || !activeFacilityUid) return;
-
-        if (!confirm(`Process and bulk upload simulation arrays from "${file.name}"?`)) {
-            csvFileInput.value = ""; return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-            const lines = event.target.result.split(/\r?\n/);
-            if (lines.length <= 1) { alert("CSV target data source appears empty."); return; }
-
-            try {
-                const facilitySnapshot = await getDoc(doc(db, "facilities", activeFacilityUid));
-                const acronym = facilitySnapshot.data().acronym || "ABTC";
-                const counterDocRef = doc(db, "facility_counters", activeFacilityUid);
-
-                const counterSnapshot = await getDoc(counterDocRef);
-                let currentRunningSequence = counterSnapshot.data().currentSequence;
-                let successCount = 0;
-
-                for (let i = 1; i < lines.length; i++) {
-                    const rowData = lines[i].trim();
-                    if (!rowData) continue;
-
-                    const columns = rowData.split(",");
-                    if (columns.length < 3) continue;
-
-                    const patientName = columns[0].replace(/['"]+/g, '').trim();
-                    const exposureType = columns[1].replace(/['"]+/g, '').trim();
-                    const classification = columns[2].replace(/['"]+/g, '').trim();
-
-                    if (!patientName) continue;
-
-                    currentRunningSequence++;
-                    const paddedSequence = String(currentRunningSequence).padStart(3, '0');
-                    const customGeneratedId = `${acronym}-${paddedSequence}`;
-
-                    await setDoc(doc(db, "bite_cases", customGeneratedId), {
-                        patientId: customGeneratedId,
-                        facilityId: activeFacilityUid,
-                        name: patientName,
-                        exposureType: exposureType,
-                        classification: classification,
-                        createdAt: new Date()
-                    });
-                    successCount++;
-                }
-
-                if (successCount > 0) {
-                    await updateDoc(counterDocRef, { currentSequence: currentRunningSequence });
-                    alert(`Bulk import sequence finalized! Successfully ingested ${successCount} entries seamlessly.`);
-                }
-            } catch (err) { alert("CSV Ingestion compilation breakdown: " + err.message); }
-            finally { csvFileInput.value = ""; }
-        };
-        reader.readAsText(file);
     });
 }
 

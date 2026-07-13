@@ -1,0 +1,448 @@
+/* CRIS SUNSET PALETTE VARIABLES */
+:root {
+    --sunset-orange: #EA6113;
+    --sunset-gold: #F88F22;
+    --sunset-yellow: #FBB931;
+    --sunset-cream: #FFE3B3;
+    --text-dark: #412110;
+    --sidebar-bg: #1a234e;
+    --main-bg: #FFFAF0;
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --card-shadow: 0 2px 12px rgba(65, 33, 16, 0.06);
+    --card-hover-shadow: 0 8px 24px rgba(234, 97, 19, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Lato', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--main-bg);
+    color: var(--text-dark);
+}
+
+.app-container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+/* ================= UNIVERSAL SIDEBAR ================= */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background-color: var(--sidebar-bg);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo-section { 
+    text-align: center; 
+    margin-bottom: 24px; 
+    flex-shrink: 0; 
+}
+
+.logo-image { 
+    width: 90px; 
+    height: auto; 
+    margin: 0 auto 12px; 
+    display: block; 
+    object-fit: contain; 
+}
+
+.logo-section p { 
+    font-size: 11px; 
+    line-height: 1.4; 
+    margin: 0 0 12px 0; 
+    opacity: 0.8;
+}
+
+.role-badge {
+    background: var(--sunset-yellow);
+    color: var(--text-dark);
+    font-size: 10px;
+    font-weight: bold;
+    padding: 6px 14px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.menu {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    padding-right: 4px;
+}
+
+.menu-item {
+    width: 100%;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    border-radius: 8px;
+    transition: var(--transition);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+}
+
+.menu-item:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateX(4px);
+    color: white;
+}
+
+.menu-item.active {
+    background: #FFFFFF !important;
+    color: var(--sidebar-bg) !important;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+.footer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logout { background: rgba(239, 83, 80, 0.2) !important; color: #EF5350 !important; }
+.logout:hover { background: rgba(239, 83, 80, 0.35) !important; color: white !important; }
+
+.menu::-webkit-scrollbar { width: 4px; }
+.menu::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+
+/* ================= MAIN CONTENT AREA ================= */
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, var(--sunset-orange), var(--sunset-gold));
+    padding: 14px 24px;
+    border-radius: 12px;
+    color: white;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 14px rgba(234, 97, 19, 0.15);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.user-profile-top {
+    background: rgba(255, 255, 255, 0.18);
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(4px);
+}
+
+.profile-icon {
+    width: 24px;
+    height: 24px;
+    background: var(--sunset-cream);
+    border-radius: 50%;
+    margin-left: 8px;
+}
+
+/* ================= TOOLBAR ================= */
+.heatmap-toolbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.toolbar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.toolbar-group label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    opacity: 0.9;
+}
+
+.toolbar-group input,
+.toolbar-group select {
+    padding: 10px 14px;
+    border: 1px solid rgba(65, 33, 16, 0.1);
+    border-radius: 8px;
+    background: white;
+    min-width: 190px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.03);
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+    transition: var(--transition);
+}
+
+.toolbar-group input:focus,
+.toolbar-group select:focus {
+    outline: none;
+    border-color: var(--sunset-orange);
+    box-shadow: 0 0 0 3px rgba(234, 97, 19, 0.15);
+}
+
+/* ================= STATISTICS GRID CONTROLS ================= */
+/* UX FIX: Upgraded to 4 columns to perfectly display all cards on 1 clean row matching image_c7d9c4.png */
+.statistics-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: white;
+    border-left: 5px solid var(--sunset-orange);
+    padding: 14px 18px;
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+.stat-card small {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6d5c54;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+}
+
+.stat-card h2 {
+    margin: 0;
+    font-size: 26px; /* Optimized sizing ratio to balance out smaller padding boxes */
+    font-weight: 800;
+    color: var(--sunset-orange);
+    line-height: 1.2;
+}
+
+/* ================= INTERACTIVE WORKSPACE MAP ================= */
+.dashboard-map {
+    display: grid;
+    grid-template-columns: 3.8fr 1.2fr;
+    gap: 20px;
+    height: calc(100vh - 280px); /* Responsive viewport tracking layout engine */
+    min-height: 480px;
+    margin-bottom: 4px;
+}
+
+.map-wrapper {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    height: 100%;
+    width: 100%;
+}
+
+#map {
+    width: 100% !important;
+    height: 100% !important; 
+    background-color: #f4f1ea;
+}
+
+.heatmap-overlay {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 160px;
+    border: 1px solid rgba(65, 33, 16, 0.08);
+    pointer-events: none;
+}
+
+.heatmap-overlay h3 {
+    margin: 0 0 8px 0;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #666;
+    font-weight: 700;
+}
+
+.heatmap-overlay hr {
+    display: none; 
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.legend-item:last-child {
+    margin-bottom: 0;
+}
+
+.legend-box {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.bite-color { background-color: #EA6113; }
+.human-color { background-color: #B71C1C; }
+.animal-color { background-color: #1565C0; }
+
+/* ================= TOP MUNICIPALITIES SIDE PANEL ================= */
+.side-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 20px 16px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.side-panel h3 {
+    margin-top: 0;
+    margin-bottom: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--sidebar-bg);
+    flex-shrink: 0;
+}
+
+#topMunicipalities {
+    overflow-y: auto;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 2px;
+}
+
+.top-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: #FFF9F1;
+    border: 1px solid rgba(248, 143, 34, 0.08);
+    font-size: 13px;
+    transition: var(--transition);
+}
+
+.top-item:hover {
+    background: #FFF2DF;
+    border-color: rgba(248, 143, 34, 0.2);
+}
+
+.top-item span {
+    font-weight: 600;
+}
+
+.top-item strong {
+    color: var(--sunset-orange);
+    font-weight: 700;
+}
+
+/* LEAFLET CONTAINER MODIFICATIONS */
+.leaflet-container { background: #F7F5EF; }
+.leaflet-control-zoom { border: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; }
+.leaflet-control-zoom a { background: white !important; color: var(--sidebar-bg) !important; border: none !important; font-size: 16px !important; }
+.leaflet-popup-content-wrapper { border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+
+/* CUSTOM FORM CONTROLS */
+input[type=file]::file-selector-button {
+    background: var(--sunset-orange);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 8px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    transition: var(--transition);
+}
+input[type=file]::file-selector-button:hover { background: var(--sunset-gold); }
+
+/* SCROLLBAR REFINEMENTS */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(234, 97, 19, 0.3); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--sunset-orange); }
+
+/* RESPONSIVE LAYOUT */
+@media(max-width:1400px) {
+    .statistics-container { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .stat-card h2 { font-size: 22px; }
+}
+
+@media(max-width:960px) {
+    body, html { overflow-y: auto; height: auto; }
+    .app-container { flex-direction: column; height: auto; }
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .dashboard-map { grid-template-columns: 1fr; height: 500px; }
+    .side-panel { height: 350px; }
+    .statistics-container { grid-template-columns: 1fr; }
+    .heatmap-toolbar { flex-direction: column; align-items: stretch; }
+    .toolbar-group input, .toolbar-group select { width: 100%; }
+}
