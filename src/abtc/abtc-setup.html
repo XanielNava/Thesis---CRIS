@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - ABTC Facility Setup</title>
+    <link rel="stylesheet" href="../../assets/css/abtc-setup.css">
+    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/logo-login.png" alt="Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence<br>System</p>
+                <div class="role-badge">INITIALIZATION</div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>ABTC SYSTEM INITIALIZATION</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Workspace Setup</strong><br>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-grid single-layout">
+                <section class="card">
+                    <h3 class="card-title"><span class="icon">🏥</span> Add Animal Bite Treatment Center</h3>
+                    <p class="card-subtitle">Initialize and register a new workspace for your facility to begin tracking exposure records.</p>
+
+                    <form id="abtcSetupForm">
+                        
+                        <!-- SECTION 1: General Information -->
+                        <div class="form-section">
+                            <h4 class="section-divider">General Information</h4>
+                            <div class="field-group">
+                                <div class="field full">
+                                    <label for="abtcName">ABTC/ABC name *</label>
+                                    <input type="text" id="abtcName" placeholder="e.g. Mandaue City ABTC" required>
+                                </div>
+                                <div class="field">
+                                    <label for="abtcCode">ABTC/ABC Code / Acronym *</label>
+                                    <input type="text" id="abtcCode" placeholder="e.g. MCABC" required>
+                                </div>
+                                <div class="field">
+                                    <label for="abtcType">Facility Type *</label>
+                                    <select id="abtcType" required>
+                                        <option value="">Select Type</option>
+                                        <option>Public Hospital</option>
+                                        <option>Private Hospital</option>
+                                        <option>Barangay Health Station</option>
+                                        <option>Rural Health Unit</option>
+                                        <option>Health Center</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 2: Address Details -->
+                        <div class="form-section">
+                            <h4 class="section-divider">Address Details</h4>
+                            <div class="field-group">
+                                <div class="field">
+                                    <label for="abtcStreet">Street Address / Building No. *</label>
+                                    <input type="text" id="abtcStreet" placeholder="e.g. 123 Quezon St." required>
+                                </div>
+                                <div class="field">
+                                    <label for="abtcBarangay">Barangay *</label>
+                                    <input type="text" id="abtcBarangay" placeholder="e.g. Barangay Central" required>
+                                </div>
+                                <div class="field">
+                                    <label for="abtcCity">City / Municipality *</label>
+                                    <input type="text" id="abtcCity" placeholder="e.g. Mandaue City" required>
+                                </div>
+                                <div class="field">
+                                    <label for="abtcProvince">Province *</label>
+                                    <input type="text" id="abtcProvince" placeholder="e.g. Cebu" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 3: Contact Information -->
+                        <div class="form-section">
+                            <h4 class="section-divider">Contact Information</h4>
+                            <div class="field-group">
+                                <div class="field">
+                                    <label for="abtcContactPerson">Contact Person *</label>
+                                    <input type="text" id="abtcContactPerson" placeholder="e.g. Dr. Juan Dela Cruz" required>
+                                </div>
+                                <div class="field">
+                                    <label for="abtcPosition">Position</label>
+                                    <input type="text" id="abtcPosition" placeholder="e.g. Medical Officer">
+                                </div>
+                                <div class="field">
+                                    <label for="abtcPhone">Contact Number *</label>
+                                    <input type="tel" id="abtcPhone" placeholder="e.g. 0917 123 4567" required>
+                                </div>
+                                <div class="field">
+                                    <label for="abtcEmail">Facility Email Address *</label>
+                                    <input type="email" id="abtcEmail" placeholder="abtc@facility.gov.ph" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-cancel" onclick="window.location.href='abtc-login.html'">Cancel Setup</button>
+                            <button type="submit" class="btn-submit">Initialize Workspace</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="../../assets/js/abtc-setup.js"></script>
+</body>
+</html>
