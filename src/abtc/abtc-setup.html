@@ -40,11 +40,11 @@
                             <h4 class="section-divider">General Information</h4>
                             <div class="field-group">
                                 <div class="field full">
-                                    <label for="abtcName">ABTC/ABC name *</label>
+                                    <label for="abtcName">Facility name *</label>
                                     <input type="text" id="abtcName" placeholder="e.g. Mandaue City ABTC" required>
                                 </div>
                                 <div class="field">
-                                    <label for="abtcCode">ABTC/ABC Code / Acronym *</label>
+                                    <label for="abtcCode">Facility Code / Acronym *</label>
                                     <input type="text" id="abtcCode" placeholder="e.g. MCABC" required>
                                 </div>
                                 <div class="field">
@@ -106,7 +106,21 @@
                                 </div>
                             </div>
                         </div>
-
+<!-- Put this block right before the <div class="form-actions"> block in your abtcSetupForm -->
+<!-- SECTION 4: System Credentials -->
+                        <div class="form-section">
+                            <h4 class="section-divider">System Credentials</h4>
+                            <div class="field-group">
+                                <div class="field">
+                                    <label for="abtcPassword">Account Password *</label>
+                                    <input type="password" id="abtcPassword" placeholder="Create a master password (min 6 characters)" required>
+                                </div>
+                                <div class="field">
+                                    <label for="confirmAbtcPassword">Confirm Password *</label>
+                                    <input type="password" id="confirmAbtcPassword" placeholder="Re-enter your master password" required>
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-actions">
                             <button type="button" class="btn-cancel" onclick="window.location.href='abtc-login.html'">Cancel Setup</button>
                             <button type="submit" class="btn-submit">Initialize Workspace</button>

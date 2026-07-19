@@ -1,3 +1,5 @@
+// abtc-setup.js
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
@@ -17,7 +19,7 @@ const firebaseConfig = {
 // Initialize Firebase App & Services
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app); // This is your active Firestore connection reference!
+const db = getFirestore(app); 
 
 // Listen to Form Submission
 const setupForm = document.getElementById("abtcSetupForm");
@@ -26,7 +28,22 @@ if (setupForm) {
     setupForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        // 1. Grab all the field values from your partitioned setup form
+        // 1. Grab password fields from HTML instead of prompt boxes
+        const password = document.getElementById("abtcPassword").value;
+        const confirmPassword = document.getElementById("confirmAbtcPassword").value;
+
+        // Validation Checks
+        if (password !== confirmPassword) {
+            alert("Validation Error: Passwords do not match. Please verify and try again.");
+            return;
+        }
+
+        if (password.length < 6) {
+            alert("Validation Error: Password must be at least 6 characters long.");
+            return;
+        }
+
+        // Grab all other field values from your partitioned setup form
         const email = document.getElementById("abtcEmail").value.trim();
         const facilityName = document.getElementById("abtcName").value.trim();
         const acronym = document.getElementById("abtcCode").value.toUpperCase().trim();
@@ -41,11 +58,11 @@ if (setupForm) {
         const position = document.getElementById("abtcPosition").value.trim();
         const phone = document.getElementById("abtcPhone").value.trim();
 
-        // Ask user for password to register their official account
-        const password = prompt("Please set a secure account password for login:");
-        if (!password || password.length < 6) {
-            alert("Registration canceled. Password must be at least 6 characters long.");
-            return;
+        // Target the submit button to display visual loading indicators
+        const submitBtn = e.target.querySelector(".btn-submit") || e.target.querySelector("button[type='submit']");
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Initializing Workspace...";
         }
 
         try {
@@ -61,6 +78,7 @@ if (setupForm) {
                 facilityName: facilityName,
                 acronym: acronym,
                 facilityType: facilityType,
+                status: "Online", // Matching structural screenshots
                 address: {
                     street: street,
                     barangay: barangay,
@@ -87,7 +105,17 @@ if (setupForm) {
 
         } catch (error) {
             console.error("Critical initialization failure:", error);
-            alert("Setup Failed: " + error.message);
+            if (error.code === "auth/email-already-in-use") {
+                alert("Setup Failed: This email address is already registered.");
+            } else {
+                alert("Setup Failed: " + error.message);
+            }
+        } finally {
+            // Re-enable submit button if processing fails
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Initialize Workspace";
+            }
         }
     });
 }

@@ -1,12 +1,3 @@
-/* =========================================================
-   CRIS — Animal Bite Treatment Center (ABTC) — Settings Page
-   Stylesheet
-   Scope: main content area only. Sidebar / header styles are
-   assumed to already exist in the parent CRIS project and are
-   only lightly stubbed here so this file can be previewed
-   on its own.
-   ========================================================= */
-
 :root {
   --sidebar-bg: #1A234E;
   --orange-primary: #EA6113;
@@ -15,7 +6,6 @@
   --cream-bg: #FFFAF0;
   --dark-text: #412110;
 
-  /* aliases matching the real CRIS sidebar CSS variable names */
   --sunset-orange: #EA6113;
   --sunset-gold: #F88F22;
   --sunset-yellow: #FBB931;
@@ -46,10 +36,6 @@ body {
   overflow: hidden;
 }
 
-/* ---------------------------------------------------------
-   Layout shell + sidebar — copied from abtc-dash.css so this
-   page's sidebar matches the rest of CRIS exactly.
-   --------------------------------------------------------- */
 .container {
   display: flex;
   height: 100vh;
@@ -149,9 +135,6 @@ body {
   overflow-y: auto;
 }
 
-/* ---------------------------------------------------------
-   Settings main content (unchanged)
-   --------------------------------------------------------- */
 .settings-main {
   padding: 32px 36px 64px;
 }
@@ -173,19 +156,14 @@ body {
   font-size: 14.5px;
 }
 
+/* Flex-direction layout lets cards stretch natively across 100% of the viewport width */
 .settings-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 24px;
+  width: 100%;
 }
 
-.settings-grid .full-width {
-  grid-column: 1 / -1;
-}
-
-/* ---------------------------------------------------------
-   Card
-   --------------------------------------------------------- */
 .card {
   background: var(--card-bg);
   border-radius: var(--radius-lg);
@@ -193,6 +171,7 @@ body {
   box-shadow: var(--shadow-sm);
   padding: 24px 26px 28px;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
+  width: 100%;
 }
 
 .card:hover {
@@ -220,9 +199,6 @@ body {
   margin: 0 0 18px;
 }
 
-/* ---------------------------------------------------------
-   Form elements
-   --------------------------------------------------------- */
 .field-group {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -247,19 +223,10 @@ body {
   color: var(--dark-text);
 }
 
-.field .hint {
-  font-size: 11.5px;
-  color: var(--muted-text);
-  font-weight: 400;
-}
-
 .field input[type="text"],
-.field input[type="number"],
 .field input[type="email"],
 .field input[type="tel"],
-.field input[type="password"],
-.field select,
-.field textarea {
+.field input[type="password"] {
   border: 1px solid var(--input-border);
   background: var(--input-bg);
   border-radius: var(--radius-sm);
@@ -272,14 +239,7 @@ body {
   width: 100%;
 }
 
-.field textarea {
-  resize: vertical;
-  min-height: 64px;
-}
-
-.field input:focus,
-.field select:focus,
-.field textarea:focus {
+.field input:focus {
   border-color: var(--orange-primary);
   box-shadow: 0 0 0 3px rgba(234, 97, 19, 0.12);
 }
@@ -294,6 +254,7 @@ body {
   color: var(--muted-text);
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease;
+  display: block;
 }
 
 .file-upload:hover {
@@ -305,101 +266,6 @@ body {
   display: none;
 }
 
-/* Checkboxes */
-.checkbox-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.checkbox-row label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13.5px;
-  color: var(--dark-text);
-  cursor: pointer;
-}
-
-.checkbox-row input[type="checkbox"] {
-  accent-color: var(--orange-primary);
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-/* Toggle switches */
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid #FAF0E2;
-}
-
-.toggle-row:last-of-type {
-  border-bottom: none;
-}
-
-.toggle-row .toggle-label {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--dark-text);
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 42px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.switch .slider {
-  position: absolute;
-  cursor: pointer;
-  inset: 0;
-  background-color: #E7D9C6;
-  border-radius: 24px;
-  transition: background-color 0.25s ease;
-}
-
-.switch .slider::before {
-  content: "";
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  top: 3px;
-  background-color: #fff;
-  border-radius: 50%;
-  transition: transform 0.25s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-.switch input:checked + .slider {
-  background-color: var(--orange-primary);
-}
-
-.switch input:checked + .slider::before {
-  transform: translateX(18px);
-}
-
-.switch input:focus-visible + .slider {
-  outline: 2px solid var(--orange-secondary);
-  outline-offset: 2px;
-}
-
-/* ---------------------------------------------------------
-   Buttons
-   --------------------------------------------------------- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -426,20 +292,6 @@ body {
   box-shadow: 0 6px 16px rgba(234, 97, 19, 0.32);
 }
 
-.btn-secondary {
-  background: #FFF3E4;
-  color: var(--orange-primary);
-  border: 1px solid #F6D8B8;
-}
-
-.btn-secondary:hover {
-  background: #FCE7CC;
-}
-
-.btn-block {
-  width: 100%;
-}
-
 .card-actions {
   display: flex;
   gap: 10px;
@@ -447,54 +299,6 @@ body {
   flex-wrap: wrap;
 }
 
-/* Backup & Export action grid */
-.action-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.action-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  border: 1px solid var(--input-border);
-  background: var(--input-bg);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  cursor: pointer;
-  text-align: left;
-  font-family: inherit;
-  color: var(--dark-text);
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
-}
-
-.action-tile .icon {
-  font-size: 20px;
-}
-
-.action-tile .label {
-  font-size: 13.5px;
-  font-weight: 700;
-}
-
-.action-tile .desc {
-  font-size: 11.5px;
-  color: var(--muted-text);
-}
-
-.action-tile:hover {
-  border-color: var(--orange-secondary);
-  background: #FFF6EA;
-  transform: translateY(-2px);
-}
-
-.action-tile.danger:hover {
-  border-color: #E0733B;
-}
-
-/* About card */
 .about-body {
   font-size: 13.5px;
   line-height: 1.7;
@@ -528,36 +332,146 @@ body {
   margin-bottom: 3px;
 }
 
-/* ---------------------------------------------------------
-   Responsive
-   --------------------------------------------------------- */
-@media (max-width: 1080px) {
-  .settings-grid {
-    grid-template-columns: 1fr;
-  }
+/* ========================================================== */
+/* 📂 STYLESHEET MODULE EXTENSIONS                           */
+/* ========================================================== */
+
+.disabled-input {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
 }
 
+.space-bottom {
+  margin-bottom: 18px;
+}
+
+.personnel-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.personnel-form-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-subheading {
+  font-size: 14px;
+  color: var(--dark-text);
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.form-stack {
+  grid-template-columns: 1fr;
+  gap: 5px;
+}
+
+.btn-spacer {
+  margin-top: 10px;
+}
+
+.full-btn {
+  width: 100%;
+}
+
+.personnel-table-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.table-scroll-container {
+  background: #ffffff;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  max-height: 250px;
+  overflow-y: auto;
+  box-shadow: inset 0 2px 4px rgba(65, 33, 16, 0.02);
+}
+
+.roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.roster-table thead tr th {
+  background-color: var(--dark-text);
+  color: #ffffff;
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 12px;
+}
+
+.roster-table tbody tr td {
+  padding: 12px;
+  color: var(--dark-text);
+}
+
+.roster-table tbody tr {
+  border-bottom: 1px solid #FAF0E2;
+}
+
+.staff-name {
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+.staff-pos, 
+.staff-email {
+  color: var(--muted-text);
+}
+
+.staff-email {
+  font-family: monospace;
+}
+
+.remove-staff-btn {
+  background: none;
+  border: none;
+  color: var(--orange-primary);
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+  transition: color 0.2s ease;
+}
+
+.remove-staff-btn:hover {
+  color: var(--orange-secondary);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.about-institution {
+  margin: 10px 0 4px;
+}
+
+.dev-heading {
+  margin: 14px 0 4px;
+  font-weight: 700;
+}
+
+/* Custom Webkit scrollbar rules for roster layouts */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(65, 33, 16, 0.15);
+  border-radius: 10px;
+}
+
+/* Responsive breakpoint scaling loops */
 @media (max-width: 720px) {
-  .container {
-    flex-direction: column;
-    height: auto;
-  }
-  body {
-    overflow: auto;
-  }
-  .sidebar {
-    width: 100%;
-  }
-  .main-content {
-    overflow-y: visible;
-  }
-  .settings-main {
-    padding: 22px 16px 48px;
-  }
-  .field-group {
-    grid-template-columns: 1fr;
-  }
-  .action-grid {
-    grid-template-columns: 1fr;
-  }
+  .container { flex-direction: column; height: auto; }
+  body { overflow: auto; }
+  .sidebar { width: 100%; }
+  .settings-main { padding: 22px 16px 48px; }
+  .field-group { grid-template-columns: 1fr; }
 }
