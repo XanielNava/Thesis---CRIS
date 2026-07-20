@@ -1,6 +1,9 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+// abtc-dash.js - CDN Modular Version for the Operational Dashboard
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { 
+    getFirestore, doc, getDoc, collection, query, where, onSnapshot 
+} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -20,65 +23,115 @@ const db = getFirestore(app);
 -------------------- */
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        // 🌟 Scan Firestore for the logged-in facility's name and print it to the H1
-        await printFacilityNameInHeader(user.uid);
+        console.log("Active facility workspace session authenticated for UID:", user.uid);
         
-        // 🌟 Start monitoring live numbers for the dashboard metric cards
-        listenToLiveDashboardMetrics(user.uid);
+        try {
+            // 1. Read the user designation chosen on the profile selection screen
+            const userRole = localStorage.getItem("activeDesignation"); 
+            const currentPath = window.location.pathname;
+
+            console.log(`Current session role state: ${userRole} | Path: ${currentPath}`);
+
+            // 2. Enforce Redirection Guard Rails
+            if (!userRole) {
+                console.warn("No active designation role found. Routing back to profile picker.");
+                window.location.href = "abtc-profiles.html";
+                return;
+            }
+
+            if (userRole === "Nurse" && !currentPath.includes("patient-registry.html")) {
+                console.log("Redirecting nurse to Patient Registry terminal...");
+                window.location.href = "patient-registry.html";
+                return;
+            } else if (userRole === "Owner" && !currentPath.includes("abtc-dash.html")) {
+                console.log("Redirecting owner to main Operational Dashboard...");
+                window.location.href = "abtc-dash.html";
+                return;
+            }
+
+            // 3. Fetch Facility Meta Details to render page layouts dynamically
+            const facilityDocRef = doc(db, "facilities", user.uid);
+            const facilitySnapshot = await getDoc(facilityDocRef);
+
+            if (facilitySnapshot.exists()) {
+                const facilityData = facilitySnapshot.data();
+                
+                // 🎯 FIX: Prioritize direct database field data context over session fallbacks for the Owner role
+                const activeStaffMember = userRole === "Owner" 
+                    ? (facilityData.contactInfo?.contactPerson || "Facility Administrator")
+                    : (localStorage.getItem("activePersonnelName") || "Duty Nurse Personnel");
+                
+                // Dynamically check and inject the uploaded facility logo to the universal sidebar header
+                if (facilityData.logoData) {
+                    const sidebarLogo = document.getElementById("sidebarLogoPreview");
+                    if (sidebarLogo) {
+                        sidebarLogo.src = facilityData.logoData;
+                    }
+                }
+                
+                await renderUserAndFacilityHeader(facilityData, activeStaffMember, userRole);
+                listenToLiveDashboardMetrics(user.uid);
+            } else {
+                console.warn("Facility workspace metadata document missing from database mapping.");
+                const standardFallbackName = userRole === "Owner" ? "Facility Owner" : "Duty Nurse Personnel";
+                updateProfileUI(standardFallbackName, userRole === "Owner" ? "Administrator" : "Nurse Duty Staff");
+                listenToLiveDashboardMetrics(user.uid);
+            }
+
+        } catch (error) {
+            console.error("Auth routing engine failure:", error);
+        }
     } else {
-        // Kick out to login page if user isn't logged in
-        window.location.href = 'abtc-login.html';
+        handleLogoutRedirect();
     }
 });
 
 /* --------------------
-    Firestore Scanner & Header Printer
+    Profile & Header Renderer
 -------------------- */
-async function printFacilityNameInHeader(uid) {
+async function renderUserAndFacilityHeader(facilityData, displayName, userRole) {
     const titleElement = document.getElementById("dashboardTitle");
+    const name = facilityData.facilityName || "ABTC";
+    
+    if (titleElement) {
+        titleElement.innerText = `${name.toUpperCase()} DASHBOARD`;
+    }
+    
+    // Format presentation parameters
+    const mappedRoleTitle = userRole === "Owner" ? "Administrator / Owner" : "Nurse Duty Personnel";
+    updateProfileUI(displayName, mappedRoleTitle);
+}
 
-    // Safety check: stop if the H1 element is missing on the current page
-    if (!titleElement) return;
+function updateProfileUI(name, role) {
+    const profileContainer = document.getElementById("profileInfoText");
+    const welcomeBar = document.getElementById("welcomeBarText");
 
-    try {
-        // 🔎 Scan the "facilities" collection for a document matching the logged-in user's UID
-        const facilitySnapshot = await getDoc(doc(db, "facilities", uid));
-
-        if (facilitySnapshot.exists()) {
-            const data = facilitySnapshot.data();
-            const name = data.facilityName || "ABTC";
-            
-            // 🖨️ Print it directly inside your <h1> container in uppercase
-            titleElement.innerText = `${name.toUpperCase()} DASHBOARD`;
-        } else {
-            // Fallback text if the profile document doesn't exist in Firestore
-            titleElement.innerText = "ABTC DASHBOARD";
-        }
-    } catch (error) {
-        console.error("Firestore scanning failure:", error);
-        titleElement.innerText = "ABTC DASHBOARD";
+    if (profileContainer) {
+        profileContainer.innerHTML = `<strong>${name}</strong><br><span>${role}</span>`;
+    }
+    if (welcomeBar) {
+        // Obtains first name cleanly without slicing characters array layouts
+        const cleanFirstName = name.split(" ")[0];
+        welcomeBar.innerHTML = `<div class="avatar-circle"></div>Welcome back, ${cleanFirstName}`;
     }
 }
 
 /* --------------------
-    🌟 Dynamic Dashboard Metrics Counter Engine
+    Dynamic Dashboard Metrics Counter Engine
 -------------------- */
-function listenToLiveDashboardMetrics(facilityUid) {
+function listenToLiveDashboardMetrics(facilityId) {
     const patientsCounterEl = document.getElementById("totalPatientsCount");
     const catThreeCounterEl = document.getElementById("categoryThreeCount");
 
-    // Query to pull only records that belong to the logged-in facility's workspace
     const metricsQuery = query(
         collection(db, "bite_cases"),
-        where("facilityId", "==", facilityUid)
+        where("facilityId", "==", facilityId)
     );
 
-    // Active real-time multi-tenant snapshot listener
     onSnapshot(metricsQuery, (snapshot) => {
-        const totalPatientsCount = snapshot.size; // Counts total number of documents in query
+        const totalPatientsCount = snapshot.size;
         let totalCategoryThreeCount = 0;
 
-        // Loop through metrics data array to identify explicit Category III cases
         snapshot.forEach((patientDoc) => {
             const data = patientDoc.data();
             if (data.classification === "Category III") {
@@ -86,14 +139,21 @@ function listenToLiveDashboardMetrics(facilityUid) {
             }
         });
 
-        // 🖨️ Inject formatted two-digit counter values directly into your dashboard cards
         if (patientsCounterEl) {
             patientsCounterEl.innerText = String(totalPatientsCount).padStart(2, '0');
         }
         if (catThreeCounterEl) {
             catThreeCounterEl.innerText = String(totalCategoryThreeCount).padStart(2, '0');
         }
+    }, (error) => {
+        console.error("Real-time metrics stream failed:", error);
     });
+}
+
+function handleLogoutRedirect() {
+    localStorage.removeItem("activeDesignation");
+    localStorage.removeItem("activePersonnelName");
+    window.location.href = 'abtc-login.html';
 }
 
 /* --------------------
@@ -101,11 +161,12 @@ function listenToLiveDashboardMetrics(facilityUid) {
 -------------------- */
 const logoutBtn = document.getElementById("logout-btn");
 if (logoutBtn) {
-    logoutBtn.addEventListener("click", async () => {
+    logoutBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
         if (confirm("Are you sure you want to log out?")) {
             try {
                 await signOut(auth);
-                window.location.href = 'abtc-login.html';
+                handleLogoutRedirect();
             } catch (err) {
                 console.error("Sign-out failure:", err);
             }
