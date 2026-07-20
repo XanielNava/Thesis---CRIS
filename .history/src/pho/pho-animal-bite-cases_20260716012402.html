@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHO - Animal Bite Cases</title>
+
+    <link rel="stylesheet" href="../../assets/css/pho-animal-bite-cases.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PHO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="../pho/pho-dash.html" class="menu-item">Dashboard</a>
+                <a href="../pho/pho-animal-bite-cases.html" class="menu-item active">Animal Bite Cases</a>
+                <a href="../pho/pho-heat-map.html" class="menu-item">Heatmaps</a>
+            </nav>
+
+            <div class="footer-nav">
+                <a href="../../settings/html/settings.html" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout" onclick="window.location.href='../src/pho/pho-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>ANIMAL BITE CASES</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Xaniel Marios Angelo B. Nava</strong><br>
+                        <span>Administrator</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <section class="card">
+                <div class="topbar">
+                    <div class="search-section">
+                        <div class="controls-row">
+                            <div class="search-input">
+                                <span class="search-icon">🔍</span>
+                                <input type="text" id="caseSearch" placeholder="Search municipality or ABTC...">
+                            </div>
+                            
+                            <div class="selector-wrapper">
+                                <label for="rowsPerPageSelect">Rows:</label>
+                                <select id="rowsPerPageSelect" class="styled-select">
+                                    <option value="10">10</option>
+                                    <option value="20" selected>20</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-info">
+                            <span id="recordInfo">Showing 0 of 0 records</span>
+                        </div>
+                    </div>
+
+                    <div class="export-buttons">
+                        <button class="btn-export csv" id="csvBtn">
+                            <i class="fa-solid fa-file-csv"></i> CSV
+                        </button>
+                        <button class="btn-export excel" id="excelBtn">
+                            <i class="fa-solid fa-file-excel"></i> Excel
+                        </button>
+                        <button class="btn-export pdf" id="pdfBtn">
+                            <i class="fa-solid fa-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn-export print" id="printBtn">
+                            <i class="fa-solid fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="casesTable">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">ABTC</th>
+                                <th colspan="2">Sex</th>
+                                <th colspan="2">Age</th>
+                                <th colspan="3">Biting Animal</th>
+                                <th colspan="4">Human Bite Case</th>
+                                <th rowspan="2">HR</th>
+                                <th colspan="4">Post Exposure Treatment</th>
+                                <th colspan="3">Remarks</th>
+                            </tr>
+                            <tr>
+                                <th>Male</th>
+                                <th>Female</th>
+                                <th>&lt; 15</th>
+                                <th>&gt; 15</th>
+                                <th>Dog</th>
+                                <th>Cat</th>
+                                <th>Others</th>
+                                <th>Cat 1</th>
+                                <th>Cat 2</th>
+                                <th>Cat III (New)</th>
+                                <th>Cat III (Booster)</th>
+                                <th>TCV</th>
+                                <th>HRIG</th>
+                                <th>ERIG</th>
+                                <th>TOTAL</th>
+                                <th>Compl</th>
+                            </tr>
+                        </thead>
+                        <tbody id="casesTableBody">
+                            <tr>
+                                <td>Sample ABTC</td>
+                                <td>10</td>
+                                <td>5</td>
+                                <td>3</td>
+                                <td>12</td>
+                                <td>8</td>
+                                <td>4</td>
+                                <td>3</td>
+                                <td>7</td>
+                                <td>5</td>
+                                <td>2</td>
+                                <td>1</td>
+                                <td>10</td>
+                                <td>8</td>
+                                <td>2</td>
+                                <td>1</td>
+                                <td>11</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav class="pagination" id="pagination"></nav>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</body>
+
+</html>

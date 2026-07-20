@@ -1,0 +1,431 @@
+/* ==========================================================================
+   CRIS - PHO HEATMAP DASHBOARD STYLESHEET
+   Core Theme: Deep Navy (#1a234e), Accent Orange (#EA6113), Light Slate (#f4f6f9)
+   ========================================================================== */
+
+/* --- RESET & ROOT DEFAULTS --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Lato', sans-serif;
+}
+
+body {
+    background-color: #f4f6f9;
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* --- MAIN APP LAYOUT --- */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* --- SIDEBAR SYSTEM --- */
+.sidebar {
+    width: 260px;
+    background-color: #1a234e;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px 16px;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 100;
+}
+
+.logo-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo-image {
+    width: 65px;
+    height: auto;
+    margin-bottom: 12px;
+}
+
+.logo-section p {
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0.5px;
+    color: #e2e8f0;
+}
+
+.role-badge {
+    background-color: #EA6113;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 4px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 10px;
+    letter-spacing: 1px;
+}
+
+/* --- NAVIGATION LINKS --- */
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+    margin-top: 20px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: #a0aec0;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.menu-item:hover, .menu-item.active {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.menu-item.active {
+    border-left: 4px solid #EA6113;
+    padding-left: 12px;
+}
+
+/* --- SIDEBAR FOOTER --- */
+.footer-nav {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.menu-item.alt {
+    font-size: 13px;
+}
+
+.menu-item.logout {
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    text-align: left;
+}
+
+.menu-item.logout:hover {
+    color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* --- MAIN CONTENT WINDOW --- */
+.main-content {
+    margin-left: 260px; /* Offset the fixed sidebar */
+    flex-grow: 1;
+    padding: 30px;
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+/* --- HEADER MODULE --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 16px;
+}
+
+.header h1 {
+    font-size: 24px;
+    font-weight: 900;
+    color: #1a234e;
+    letter-spacing: 0.5px;
+}
+
+.user-profile-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-info {
+    text-align: right;
+    font-size: 13px;
+}
+
+.profile-info strong {
+    color: #1a234e;
+    font-weight: 700;
+}
+
+.profile-info span {
+    color: #718096;
+    font-size: 11px;
+}
+
+.profile-icon {
+    width: 38px;
+    height: 38px;
+    background-color: #1a234e;
+    border: 2px solid #EA6113;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- ADAPTED FILTERS & TOOLBAR --- */
+/* Designed for a neat, clean 3-column row since upload is moved out */
+.heatmap-toolbar {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 perfect columns */
+    gap: 20px;
+    align-items: end;
+}
+
+/* Fallback configuration in case you still keep the Upload Dataset on screen temporarily */
+.heatmap-toolbar:has(#excelFile) {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.toolbar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.toolbar-group label {
+    font-size: 11px;
+    font-weight: 900;
+    color: #1a234e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.toolbar-group select, .toolbar-group input[type="file"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #334155;
+    background-color: #ffffff;
+    outline: none;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.toolbar-group select:focus {
+    border-color: #1a234e;
+}
+
+/* --- EPIDEMIOLOGICAL METRIC CARDS --- */
+.statistics-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-top: 4px solid #1a234e;
+}
+
+/* Give the mortality / priority cards special highlighting */
+.stat-card:nth-child(2) { border-top-color: #FBB931; }
+.stat-card:nth-child(3) { border-top-color: #EA6113; }
+.stat-card:nth-child(4) { border-top-color: #ef4444; }
+
+.stat-card small {
+    font-size: 11px;
+    font-weight: 700;
+    color: #718096;
+    display: block;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.stat-card h2 {
+    font-size: 24px;
+    font-weight: 900;
+    color: #1a234e;
+}
+
+/* --- MAP & SIDE PANEL LAYOUT --- */
+.dashboard-map {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 20px;
+    min-height: 520px;
+}
+
+/* Map Wrapper & Map Container */
+.map-wrapper {
+    position: relative;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    min-height: 520px;
+    z-index: 1; /* Keep Leaflet below standard floating menus */
+}
+
+/* --- HEATMAP FLOATING LEGEND --- */
+.heatmap-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 14px;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000; /* Ensure legend floats on top of Leaflet */
+    border: 1px solid #e2e8f0;
+    min-width: 180px;
+}
+
+.heatmap-overlay h3 {
+    font-size: 12px;
+    font-weight: 900;
+    color: #1a234e;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: #4a5568;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.legend-item:last-child {
+    margin-bottom: 0;
+}
+
+.legend-box {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+/* Gradient Representation Colors */
+.bite-color { background-color: #EA6113; }
+.human-color { background-color: #ef4444; }
+.animal-color { background-color: #1a234e; }
+
+/* --- RIGHT SIDE RANKING PANEL --- */
+.side-panel {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-panel h3 {
+    font-size: 14px;
+    font-weight: 900;
+    color: #1a234e;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+}
+
+#topMunicipalities {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.top-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background-color: #f8fafc;
+    border-radius: 6px;
+    border-left: 3px solid #EA6113;
+    font-size: 13px;
+    transition: transform 0.15s ease-in-out;
+}
+
+.top-item:hover {
+    transform: translateX(4px);
+    background-color: #f1f5f9;
+}
+
+.top-item span {
+    font-weight: 700;
+    color: #334155;
+}
+
+.top-item strong {
+    color: #EA6113;
+    font-weight: 900;
+}
+
+/* --- MOBILE & RESPONSIVE FIXES --- */
+@media (max-width: 1024px) {
+    .statistics-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .dashboard-map {
+        grid-template-columns: 1fr;
+    }
+    .side-panel {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 70px;
+        padding: 16px 8px;
+    }
+    .logo-section p, .role-badge {
+        display: none;
+    }
+    .main-content {
+        margin-left: 70px;
+        padding: 20px;
+    }
+    .heatmap-toolbar {
+        grid-template-columns: 1fr !important;
+    }
+}

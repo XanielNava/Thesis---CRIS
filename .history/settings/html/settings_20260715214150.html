@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - Settings</title>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../settings/css/settings.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PHO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="../../src/pho/pho-dash.html" class="menu-item">Dashboard</a>
+                <a href="../../src/pho/pho-animal-bite-cases.html" class="menu-item">Animal Bite Cases</a>
+                <a href="../../src/pho/pho-heat-map.html" class="menu-item">Heatmap</a>
+            </nav>
+
+            <div class="footer-nav">
+                <a href="../../settings/html/settings.html" class="menu-item alt active">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout"
+                    onclick="window.location.href='pho-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <main class="main-content">
+                <!-- ================= SETTINGS HEADER ================= -->
+                <div class="settings-header">
+                    <div>
+                        <h1>System Settings</h1>
+                        <p>
+                            Configure the Community-Centric Rabies Intelligence System (CRIS)
+                            for the Provincial Health Office.
+                        </p>
+                    </div>
+
+                    <div class="system-status">
+                        <span class="status-dot"></span>
+                        System Online
+                    </div>
+                </div>
+
+                <!-- ================= GENERAL SETTINGS ================= -->
+                <section class="settings-card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-gear"></i>
+                        <div>
+                            <h2>General Settings</h2>
+                            <small>Basic configuration of the CRIS system.</small>
+                        </div>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="input-group">
+                            <label>System Name</label>
+                            <input type="text" id="systemName" value="Community-Centric Rabies Intelligence System">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Province</label>
+                            <select id="province">
+                                <option>Iloilo</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Reporting Year</label>
+                            <select id="reportYear">
+                                <option>2026</option>
+                                <option>2025</option>
+                                <option>2024</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Language</label>
+                            <select id="language">
+                                <option>English</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Time Zone</label>
+                            <input type="text" value="Asia/Manila" readonly>
+                        </div>
+
+                    </div>
+
+                    <div class="card-buttons">
+                        <button class="save-btn">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Save General Settings
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ================= APPEARANCE ================= -->
+                <section class="settings-card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-palette"></i>
+                        <div>
+                            <h2>Appearance</h2>
+                            <small>
+                                Customize the look and feel of the system.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="input-group">
+                            <label>Theme</label>
+                            <select id="theme">
+                                <option>Light</option>
+                                <option>Dark</option>
+                                <option>System Default</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Accent Color</label>
+                            <select id="accent">
+                                <option>Sunset Orange</option>
+                                <option>Blue</option>
+                                <option>Green</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Font Size</label>
+                            <select id="fontSize">
+                                <option>Small</option>
+                                <option selected>Medium</option>
+                                <option>Large</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Sidebar Mode</label>
+                            <select>
+                                <option>Expanded</option>
+                                <option>Collapsed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card-buttons">
+                        <button class="save-btn">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Save Appearance
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ================= DATA MANAGEMENT ================= -->
+                <section class="settings-card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-database"></i>
+                        <div>
+                            <h2>Data Management</h2>
+                            <small>
+                                Import, manage and monitor provincial rabies datasets.
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Current Dataset -->
+                    <div class="dataset-summary">
+                        <div class="dataset-card">
+                            <span class="summary-title">Current Dataset</span>
+                            <h3 id="currentDatasetName">
+                                No dataset uploaded
+                            </h3>
+                            <small id="currentDatasetDate">
+                                Upload your first provincial dataset.
+                            </small>
+                        </div>
+
+                        <div class="dataset-card">
+                            <span class="summary-title">Records</span>
+                            <h2 id="recordCount">0</h2>
+                            <small>Total imported records</small>
+                        </div>
+
+                        <div class="dataset-card">
+                            <span class="summary-title">Status</span>
+                            <h2 class="status-active">Ready</h2>
+                            <small>Waiting for upload</small>
+                        </div>
+                    </div>
+
+                    <!-- Upload Dataset -->
+                    <div class="upload-container">
+                        <h3>
+                            Upload Provincial Dataset
+                        </h3>
+                        <p>Supported formats:
+                            <strong>.xlsx</strong>,
+                            <strong>.xls</strong>,
+                            <strong>.csv</strong>
+                        </p>
+
+                        <label class="upload-box">
+                            <input type="file" id="datasetUpload" accept=".xlsx,.xls,.csv">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <h3>Select Dataset</h3>
+                            <p>Drag & Drop or Click to Browse</p>
+                        </label>
+                    </div>
+
+                    <!-- Import Options -->
+                    <div class="import-options">
+                        <h3>Import Options</h3>
+                        <label>
+                            <input type="radio" name="importType" checked>
+                            Merge with Existing Dataset
+                        </label>
+
+                        <label>
+                            <input type="radio" name="importType">
+                            Replace Existing Dataset
+                        </label>
+                    </div>
+
+                    <!-- Validation -->
+                    <div class="validation-panel">
+                        <h3>
+                            Validation Status
+                        </h3>
+                        <ul>
+                            <li>
+                                ⏳ Municipality Validation
+                            </li>
+
+                            <li>
+                                ⏳ Duplicate Record Check
+                            </li>
+
+                            <li>
+                                ⏳ Coordinate Validation
+                            </li>
+
+                            <li>
+                                ⏳ Missing Values Check
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Progress -->
+                    <div class="progress-section">
+                        <label>Import Progress</label>
+                        <progress id="uploadProgress" value="0" max="100"></progress>
+                        <span id="progressText">0%</span>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="card-buttons">
+                        <button class="secondary-btn">
+                            <i class="fa-solid fa-eye"></i>Preview Dataset
+                        </button>
+
+                        <button class="secondary-btn">
+                            <i class="fa-solid fa-trash"></i>Delete Dataset
+                        </button>
+
+                        <button class="save-btn">
+                            <i class="fa-solid fa-file-import"></i>Import Dataset
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ================= HEALTH FACILITY MANAGEMENT ================= -->
+                <section class="settings-card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-hospital"></i>
+                        <div>
+                            <h2>Health Facility Management</h2>
+                            <small>Manage Animal Bite Treatment Centers (ABTCs) and District Hospitals used by the heatmap.</small>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="dataset-summary">
+                        <div class="dataset-card">
+                            <span class="summary-title">Treatment Centers</span>
+                            <h2 id="facilityCount">0</h2>
+                            <small>Total Registered Facilities</small>
+                        </div>
+
+                        <div class="dataset-card">
+                            <span class="summary-title">ABTC</span>
+                            <h2 id="abtcCount">0</h2>
+                            <small>Animal Bite Treatment Centers</small>
+                        </div>
+
+                        <div class="dataset-card">
+                            <span class="summary-title">District Hospitals</span>
+                            <h2 id="districtCount">0</h2>
+                            <small>District Hospitals</small>
+                        </div>
+                    </div>
+
+                    <!-- Add Facility -->
+                    <div class="settings-grid">
+                        <div class="input-group">
+                            <label>Facility Name</label>
+                            <input type="text" id="facilityName" placeholder="e.g. Aleosan District Hospital">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Facility Type</label>
+                            <select id="facilityType">
+                                <option>Animal Bite Treatment Center</option>
+                                <option>District Hospital</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Municipality</label>
+                            <select id="facilityMunicipality">
+                                <option>Select Municipality</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Latitude</label>
+                            <input type="number" step="0.000001" id="facilityLatitude">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Longitude</label>
+                            <input type="number" step="0.000001" id="facilityLongitude">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Investigation Radius (Meters)</label>
+                            <input type="number" id="facilityRadius" value="3000">
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="card-buttons">
+                        <button class="secondary-btn">
+                            <i class="fa-solid fa-location-crosshairs"></i>Get Coordinates
+                        </button>
+
+                        <button class="secondary-btn">
+                            <i class="fa-solid fa-map-location-dot"></i>Preview on Map
+                        </button>
+
+                        <button class="save-btn">
+                            <i class="fa-solid fa-plus"></i>Save Facility
+                        </button>
+                    </div>
+
+                    <!-- Facility Table -->
+                    <div class="table-container">
+                        <table class="settings-table">
+                            <thead>
+                                <tr>
+                                    <th>Facility</th>
+                                    <th>Type</th>
+                                    <th>Municipality</th>
+                                    <th>Latitude</th>
+                                    <th>Longitude</th>
+                                    <th>Radius</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="facilityTableBody">
+                                <tr>
+                                    <td colspan="7" style="text-align:center">No facilities added yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ================= ACTIVITY HISTORY ================= -->
+                <section class="settings-card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <div>
+                            <h2>Activity History</h2>
+                            <small>Complete audit trail of all system activities.</small>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="dataset-summary">
+                        <div class="dataset-card">
+                            <span class="summary-title">Activities Today</span>
+                            <h2 id="todayActivities">0</h2>
+                        </div>
+
+                        <div class="dataset-card">
+                            <span class="summary-title">This Week</span>
+                            <h2 id="weekActivities">0</h2>
+                        </div>
+
+                        <div class="dataset-card">
+                            <span class="summary-title">Total Logs</span>
+                            <h2 id="totalActivities">0</h2>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="settings-grid">
+                        <div class="input-group">
+                            <label>User</label>
+                            <select id="historyUser">
+                                <option>All Users</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Activity Type</label>
+                            <select id="historyType">
+                                <option>All Activities</option>
+                                <option>Dataset</option>
+                                <option>Health Facility</option>
+                                <option>Settings</option>
+                                <option>User Management</option>
+                                <option>Backup</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Date</label>
+                            <input type="date" id="historyDate">
+                        </div>
+                    </div>
+
+                    <!-- Activity Table -->
+                    <div class="table-container">
+                        <table class="settings-table">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>User</th>
+                                    <th>Activity</th>
+                                    <th>Module</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="historyTable">
+                                <tr>
+                                    <td colspan="5" style="text-align:center;">No activity history available.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-buttons">
+                        <button class="secondary-btn">
+                            <i class="fa-solid fa-filter"></i>Apply Filters
+                        </button>
+
+                        <button class="secondary-btn">
+                            <i class="fa-solid fa-file-export"></i>Export History
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ================= USER MANAGEMENT ================= -->
+                <section class="settings-card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-users"></i>
+                        <div>
+                            <h2>User Management</h2>
+                            <small>Manage Provincial Health Office personnel who can access CRIS.</small>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="dataset-summary">
+                        <div class="dataset-card">
+                            <span class="summary-title">Total Users</span>
+                            <h2 id="totalUsers">0</h2>
+                        </div>
+
+                        <div class="dataset-card">
+                            <span class="summary-title">Active Users</span>
+                            <h2 id="activeUsers">0</h2>
+                        </div>
+
+                        <div class="dataset-card">
+                            <span class="summary-title">Administrators</span>
+                            <h2 id="adminUsers">0</h2>
+                        </div>
+                    </div>
+
+                    <!-- Add User -->
+                    <div class="settings-grid">
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" id="userFullName">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Email Address</label>
+                            <input type="email" id="userEmail">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Username</label>
+                            <input type="text" id="username">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" id="password">
+                        </div>
+
+                        <div class="input-group">
+                            <label>User Role</label>
+                            <select id="role">
+                                <option>Administrator</option>
+                                <option>PHO Officer</option>
+                                <option>Data Encoder</option>
+                                <option>Viewer</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Status</label>
+                            <select id="status">
+                                <option>Active</option>
+                                <option>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card-buttons">
+                        <button class="save-btn">
+                            <i class="fa-solid fa-user-plus"></i>Add User
+                        </button>
+                    </div>
+
+                    <!-- Users -->
+                    <div class="table-container">
+                        <table class="settings-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Last Login</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="userTable">
+                                <tr>
+                                    <td colspan="6" style="text-align:center">No users registered.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+                <!-- ================= HEATMAP CONFIGURATION ================= -->
+
+                <section class="settings-card">
+
+                    <div class="card-title">
+
+                        <i class="fa-solid fa-map-location-dot"></i>
+
+                        <div>
+
+                            <h2>Heatmap Configuration</h2>
+
+                            <small>
+
+                                Configure the behavior and appearance of the CRIS Heatmap.
+
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Summary -->
+
+                    <div class="dataset-summary">
+
+                        <div class="dataset-card">
+
+                            <span class="summary-title">
+
+                                Default Layer
+
+                            </span>
+
+                            <h3>
+
+                                Animal Bite Cases
+
+                            </h3>
+
+                        </div>
+
+                        <div class="dataset-card">
+
+                            <span class="summary-title">
+
+                                Investigation Radius
+
+                            </span>
+
+                            <h3>
+
+                                3 Kilometers
+
+                            </h3>
+
+                        </div>
+
+                        <div class="dataset-card">
+
+                            <span class="summary-title">
+
+                                Heatmap Status
+
+                            </span>
+
+                            <h3 class="status-active">
+
+                                Enabled
+
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="settings-grid">
+
+                        <div class="input-group">
+
+                            <label>Default Heatmap Layer</label>
+
+                            <select id="defaultLayer">
+
+                                <option>Animal Bite Cases</option>
+
+                                <option>Human Rabies Deaths</option>
+
+                                <option>Animal Rabies Deaths</option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <div class="input-group">
+
+                            <label>Default Investigation Radius</label>
+
+                            <input type="number" id="defaultRadius" value="3000">
+
+                        </div>
+
+
+
+                        <div class="input-group">
+
+                            <label>Heat Radius (Pixels)</label>
+
+                            <input type="number" id="heatRadius" value="10">
+
+                        </div>
+
+
+
+                        <div class="input-group">
+
+                            <label>Heat Blur</label>
+
+                            <input type="number" id="heatBlur" value="8">
+
+                        </div>
+
+
+
+                        <div class="input-group">
+
+                            <label>Maximum Zoom</label>
+
+                            <input type="number" id="maxZoom" value="18">
+
+                        </div>
+
+
+
+                        <div class="input-group">
+
+                            <label>Minimum Opacity</label>
+
+                            <input type="number" step="0.05" value="0.50">
+
+                        </div>
+
+                    </div>
+
+
+
+                    <hr>
+
+
+
+                    <h3>
+
+                        Investigation Settings
+
+                    </h3>
+
+
+
+                    <div class="toggle-row">
+
+                        <span class="toggle-label">
+
+                            Show Investigation Radius
+
+                        </span>
+
+                        <label class="switch">
+
+                            <input type="checkbox" checked>
+
+                            <span class="slider"></span>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <div class="toggle-row">
+
+                        <span class="toggle-label">
+
+                            Show Heatmap on Startup
+
+                        </span>
+
+                        <label class="switch">
+
+                            <input type="checkbox" checked>
+
+                            <span class="slider"></span>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <div class="toggle-row">
+
+                        <span class="toggle-label">
+
+                            Automatically Cluster Cases
+
+                        </span>
+
+                        <label class="switch">
+
+                            <input type="checkbox" checked>
+
+                            <span class="slider"></span>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <div class="toggle-row">
+
+                        <span class="toggle-label">
+
+                            Show Facility Markers
+
+                        </span>
+
+                        <label class="switch">
+
+                            <input type="checkbox" checked>
+
+                            <span class="slider"></span>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <div class="card-buttons">
+
+                        <button class="save-btn">
+
+                            <i class="fa-solid fa-floppy-disk"></i>
+
+                            Save Heatmap Settings
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+                <!-- ================= SYSTEM MAINTENANCE ================= -->
+
+                <section class="settings-card">
+
+                    <div class="card-title">
+
+                        <i class="fa-solid fa-server"></i>
+
+                        <div>
+
+                            <h2>System Maintenance</h2>
+
+                            <small>
+                                Monitor system health, manage backups, and maintain the CRIS database.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================= System Status ================= -->
+
+                    <div class="dataset-summary">
+
+                        <div class="dataset-card">
+
+                            <span class="summary-title">
+                                Database
+                            </span>
+
+                            <h2 class="status-active">
+                                Online
+                            </h2>
+
+                            <small>Cloud Firestore</small>
+
+                        </div>
+
+                        <div class="dataset-card">
+
+                            <span class="summary-title">
+                                Storage
+                            </span>
+
+                            <h2 id="storageUsed">
+                                0 MB
+                            </h2>
+
+                            <small>Firebase Storage</small>
+
+                        </div>
+
+                        <div class="dataset-card">
+
+                            <span class="summary-title">
+                                Last Backup
+                            </span>
+
+                            <h2 id="lastBackup">
+
+                                Never
+
+                            </h2>
+
+                            <small>Automatic Backup</small>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================= Backup ================= -->
+
+                    <div class="action-grid">
+
+                        <button class="action-tile">
+
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+
+                            <span class="label">
+
+                                Backup Database
+
+                            </span>
+
+                            <span class="desc">
+
+                                Create a complete backup of all records.
+
+                            </span>
+
+                        </button>
+
+                        <button class="action-tile">
+
+                            <i class="fa-solid fa-cloud-arrow-down"></i>
+
+                            <span class="label">
+
+                                Restore Backup
+
+                            </span>
+
+                            <span class="desc">
+
+                                Restore data from a previous backup.
+
+                            </span>
+
+                        </button>
+
+                        <button class="action-tile">
+
+                            <i class="fa-solid fa-file-export"></i>
+
+                            <span class="label">
+
+                                Export Reports
+
+                            </span>
+
+                            <span class="desc">
+
+                                Download reports in Excel or PDF.
+
+                            </span>
+
+                        </button>
+
+                        <button class="action-tile">
+
+                            <i class="fa-solid fa-file-import"></i>
+
+                            <span class="label">
+
+                                Import Backup
+
+                            </span>
+
+                            <span class="desc">
+
+                                Import an existing CRIS backup.
+
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ================= ABOUT CRIS ================= -->
+
+                <section class="settings-card">
+
+                    <div class="card-title">
+
+                        <i class="fa-solid fa-circle-info"></i>
+
+                        <div>
+
+                            <h2>About CRIS</h2>
+
+                            <small>
+
+                                Community-Centric Rabies Intelligence System
+
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                    <div class="about-container">
+
+                        <div class="about-logo">
+
+                            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
+
+                        </div>
+
+                        <div class="about-content">
+
+                            <h2>
+
+                                Community-Centric Rabies Intelligence System
+
+                            </h2>
+
+                            <p>
+
+                                CRIS is a web-based Provincial Rabies Surveillance
+                                and Decision Support System designed to assist the
+                                Provincial Health Office in monitoring animal bite
+                                cases, human rabies deaths, animal rabies deaths,
+                                epidemiological investigations, and hotspot analysis
+                                throughout Iloilo Province.
+
+                            </p>
+
+                            <table class="about-table">
+
+                                <tr>
+
+                                    <td><strong>Version</strong></td>
+
+                                    <td>Version 1.0</td>
+
+                                </tr>
+
+                                <tr>
+
+                                    <td><strong>Database</strong></td>
+
+                                    <td>Firebase Firestore</td>
+
+                                </tr>
+
+                                <tr>
+
+                                    <td><strong>Storage</strong></td>
+
+                                    <td>Firebase Storage</td>
+
+                                </tr>
+
+                                <tr>
+
+                                    <td><strong>Province</strong></td>
+
+                                    <td>Iloilo Province</td>
+
+                                </tr>
+
+                                <tr>
+
+                                    <td><strong>Developed For</strong></td>
+
+                                    <td>Provincial Health Office</td>
+
+                                </tr>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </main>
+    </div>
+
+    <script src="js/settings.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - Settings</title>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../settings/css/settings.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PHO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="../../src/pho/pho-dash.html" class="menu-item">Dashboard</a>
+                <a href="../../src/pho/pho-animal-bite-cases.html" class="menu-item">Animal Bite Cases</a>
+                <a href="../../src/pho/pho-heat-map.html" class="menu-item">Heatmap</a>
+            </nav>
+
+            <div class="footer-nav">
+                <a href="../../settings/html/settings.html" class="menu-item alt active">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout"
+                    onclick="window.location.href='pho-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+
+            <!-- =================================================
+         SETTINGS PAGE CONTENT (this is the reusable part)
+         ================================================= -->
+            <div class="settings-main">
+
+                <div class="settings-header">
+                    <h1>Settings</h1>
+                    <p>Manage your Animal Bite Treatment Center</p>
+                </div>
+
+                <div class="settings-grid">
+
+                    <!-- CARD 1: Facility Information -->
+                    <section class="card">
+                        <h2 class="card-title"><span class="icon">🏥</span> Facility Information</h2>
+                        <p class="card-subtitle">Details shown on records, printouts, and reports.</p>
+
+                        <div class="field-group">
+                            <div class="field">
+                                <label for="facilityName">Facility Name</label>
+                                <input type="text" id="facilityName" placeholder="e.g. Iloilo City ABTC">
+                            </div>
+                            <div class="field">
+                                <label for="facilityCode">Facility Code</label>
+                                <input type="text" id="facilityCode" placeholder="e.g. ABTC-0142">
+                            </div>
+                            <div class="field">
+                                <label for="province">Province</label>
+                                <input type="text" id="province" placeholder="e.g. Iloilo">
+                            </div>
+                            <div class="field">
+                                <label for="municipality">Municipality</label>
+                                <input type="text" id="municipality" placeholder="e.g. Iloilo City">
+                            </div>
+                            <div class="field full">
+                                <label for="address">Complete Address</label>
+                                <input type="text" id="address" placeholder="Street, Barangay, City, Province">
+                            </div>
+                            <div class="field">
+                                <label for="contactNumber">Contact Number</label>
+                                <input type="tel" id="contactNumber" placeholder="e.g. (033) 123 4567">
+                            </div>
+                            <div class="field">
+                                <label for="facilityEmail">Email Address</label>
+                                <input type="email" id="facilityEmail" placeholder="facility@doh.gov.ph">
+                            </div>
+                        </div>
+
+                        <div class="field full" style="margin-bottom:18px;">
+                            <label>Facility Logo</label>
+                            <label class="file-upload" for="facilityLogo">
+                                📤 Click to upload logo (PNG or JPG, max 2MB)
+                                <input type="file" id="facilityLogo" accept="image/png, image/jpeg">
+                            </label>
+                        </div>
+
+                        <div class="card-actions">
+                            <button type="button" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </section>
+
+                    <!-- CARD 2: Personnel Account -->
+                    <section class="card">
+                        <h2 class="card-title"><span class="icon">👤</span> Personnel Account</h2>
+                        <p class="card-subtitle">Your login credentials and profile details.</p>
+
+                        <div class="field-group">
+                            <div class="field">
+                                <label for="fullName">Full Name</label>
+                                <input type="text" id="fullName" placeholder="Juan Dela Cruz">
+                            </div>
+                            <div class="field">
+                                <label for="username">Username</label>
+                                <input type="text" id="username" placeholder="jdelacruz">
+                            </div>
+                            <div class="field">
+                                <label for="personnelEmail">Email</label>
+                                <input type="email" id="personnelEmail" placeholder="you@abtc.gov.ph">
+                            </div>
+                            <div class="field">
+                                <label for="position">Position</label>
+                                <input type="text" id="position" placeholder="e.g. Nurse, Physician, Encoder">
+                            </div>
+                            <div class="field">
+                                <label for="changePassword">Change Password</label>
+                                <input type="password" id="changePassword" placeholder="New password">
+                            </div>
+                            <div class="field">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" id="confirmPassword" placeholder="Re-enter new password">
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <button type="button" class="btn btn-primary">Update Account</button>
+                        </div>
+                    </section>
+
+                    <!-- CARD 3: ITR Template -->
+                    <section class="card full-width">
+                        <h2 class="card-title"><span class="icon">📄</span> ITR Template</h2>
+                        <p class="card-subtitle">Controls how the Individual Treatment Record is generated and printed.
+                        </p>
+
+                        <div class="field-group">
+                            <div class="field">
+                                <label for="currentTemplate">Current Template</label>
+                                <select id="currentTemplate">
+                                    <option>DOH Standard ITR (2023)</option>
+                                    <option>DOH Standard ITR (Legacy)</option>
+                                    <option>Custom Template</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="paperSize">Paper Size</label>
+                                <select id="paperSize">
+                                    <option>A4</option>
+                                    <option>Letter (8.5" x 11")</option>
+                                    <option>Legal</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="headerText">Header Text</label>
+                                <input type="text" id="headerText" placeholder="e.g. Republic of the Philippines">
+                            </div>
+                            <div class="field">
+                                <label for="footerText">Footer Text</label>
+                                <input type="text" id="footerText" placeholder="e.g. Generated via CRIS">
+                            </div>
+                        </div>
+
+                        <div class="toggle-row">
+                            <span class="toggle-label">Enable Facility Logo</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span class="toggle-label">Show Vital Signs</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span class="toggle-label">Show Medical History</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span class="toggle-label">Show Wound Photo</span>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span class="toggle-label">Show Physician Signature</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="card-actions" style="margin-top:18px;">
+                            <button type="button" class="btn btn-secondary">Preview</button>
+                            <button type="button" class="btn btn-secondary">Customize Template</button>
+                            <button type="button" class="btn btn-primary">Save Settings</button>
+                        </div>
+                    </section>
+
+                    <!-- CARD 4: Treatment & Vaccination -->
+                    <section class="card">
+                        <h2 class="card-title"><span class="icon">💉</span> Treatment &amp; Vaccination</h2>
+                        <p class="card-subtitle">Defaults applied to new treatment records.</p>
+
+                        <div class="field-group">
+                            <div class="field">
+                                <label for="defaultVaccine">Default Vaccine</label>
+                                <select id="defaultVaccine">
+                                    <option>Purified Vero Cell Rabies Vaccine (PVRV)</option>
+                                    <option>Purified Chick Embryo Cell Vaccine (PCEC)</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="route">Route</label>
+                                <select id="route">
+                                    <option>Intramuscular (IM)</option>
+                                    <option>Intradermal (ID)</option>
+                                </select>
+                            </div>
+                            <div class="field full">
+                                <label for="vaccineBrand">Default Vaccine Brand</label>
+                                <input type="text" id="vaccineBrand" placeholder="e.g. Verorab">
+                            </div>
+                        </div>
+
+                        <div class="field full" style="margin-bottom:10px;">
+                            <label>Vaccination Schedule</label>
+                            <div class="checkbox-row">
+                                <label><input type="checkbox" checked> Day 0</label>
+                                <label><input type="checkbox" checked> Day 3</label>
+                                <label><input type="checkbox" checked> Day 7</label>
+                                <label><input type="checkbox" checked> Day 14</label>
+                                <label><input type="checkbox"> Day 28</label>
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <button type="button" class="btn btn-primary">Save</button>
+                        </div>
+                    </section>
+
+                    <!-- CARD 5: Patient Registry -->
+                    <section class="card">
+                        <h2 class="card-title"><span class="icon">📋</span> Patient Registry</h2>
+                        <p class="card-subtitle">How new patient records and Case IDs are created.</p>
+
+                        <div class="field-group">
+                            <div class="field">
+                                <label for="caseIdPrefix">Case ID Prefix</label>
+                                <input type="text" id="caseIdPrefix" placeholder="e.g. ABTC-">
+                            </div>
+                            <div class="field">
+                                <label for="startingNumber">Starting Number</label>
+                                <input type="number" id="startingNumber" placeholder="e.g. 1001">
+                            </div>
+                        </div>
+
+                        <div class="toggle-row">
+                            <span class="toggle-label">Auto Generate Case IDs</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span class="toggle-label">Duplicate Patient Warning</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span class="toggle-label">Require Contact Number</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span class="toggle-label">Require Address</span>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="card-actions" style="margin-top:18px;">
+                            <button type="button" class="btn btn-primary">Save Registry</button>
+                        </div>
+                    </section>
+
+                    <!-- CARD 6: Dose Calendar -->
+                    <section class="card">
+                        <h2 class="card-title"><span class="icon">📅</span> Dose Calendar</h2>
+                        <p class="card-subtitle">Reminders for upcoming and missed vaccine doses.</p>
+
+                        <div class="field full">
+                            <label for="reminderDays">Reminder Days Before Appointment</label>
+                            <input type="number" id="reminderDays" placeholder="e.g. 2">
+                        </div>
+
+                        <div class="toggle-row">
+                            <span class="toggle-label">Missed Dose Alert</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span class="toggle-label">Email Reminder</span>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="card-actions" style="margin-top:18px;">
+                            <button type="button" class="btn btn-primary">Save</button>
+                        </div>
+                    </section>
+
+                    <!-- CARD 7: Backup & Export -->
+                    <section class="card">
+                        <h2 class="card-title"><span class="icon">💾</span> Backup &amp; Export</h2>
+                        <p class="card-subtitle">Placeholder actions — not yet connected to a backend.</p>
+
+                        <div class="action-grid">
+                            <button type="button" class="action-tile">
+                                <span class="icon">📤</span>
+                                <span class="label">Export Patient Registry</span>
+                                <span class="desc">Download all patient records as CSV</span>
+                            </button>
+                            <button type="button" class="action-tile">
+                                <span class="icon">📊</span>
+                                <span class="label">Export Reports</span>
+                                <span class="desc">Download treatment &amp; case reports</span>
+                            </button>
+                            <button type="button" class="action-tile">
+                                <span class="icon">🗄️</span>
+                                <span class="label">Backup Database</span>
+                                <span class="desc">Create a full system backup</span>
+                            </button>
+                            <button type="button" class="action-tile danger">
+                                <span class="icon">♻️</span>
+                                <span class="label">Restore Database</span>
+                                <span class="desc">Restore from a previous backup</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- CARD 8: About CRIS -->
+                    <section class="card full-width">
+                        <h2 class="card-title"><span class="icon">ℹ️</span> About CRIS</h2>
+
+                        <div class="about-body">
+                            <span class="system-name">Community-Centric Rabies Intelligence System</span>
+                            <span class="version-pill">Version 1.0</span>
+                            <p style="margin:10px 0 4px;">
+                                Central Philippine University<br>
+                                BS Information Technology
+                            </p>
+                            <p style="margin:14px 0 4px; font-weight:700;">Developed by:</p>
+                            <ul class="dev-list">
+                                <li>[Developer Name 1]</li>
+                                <li>[Developer Name 2]</li>
+                                <li>[Developer Name 3]</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/se"></script>
+</body>
+
+</html>

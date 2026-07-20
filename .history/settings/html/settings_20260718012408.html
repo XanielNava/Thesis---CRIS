@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - PHO Settings</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="stylesheet" href="../css/settings.css">
+</head>
+
+<body>
+    <!-- UNIVERSAL SIDE BAR -->
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PHO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="../../src/pho/pho-dash.html" class="menu-item">Dashboard</a>
+                <a href="../../src/pho/pho-animal-bite-cases.html" class="menu-item">Animal Bite Cases</a>
+                <a href="../../src/pho/pho-heat-map.html" class="menu-item">Heatmaps</a>
+            </nav>
+
+            <div class="footer-nav">
+                <a href="../../settings/html/settings.html" class="menu-item active alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout"
+                    onclick="window.location.href='../../src/pho/pho-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <!-- ================= MAIN DASHBOARD CONTENT ================= -->
+        <main class="main-content">
+
+            <!-- =================================================
+         SETTINGS PAGE CONTENT (Single Scrollable Page)
+         ================================================= -->
+            <div class="settings-main">
+
+                <div class="settings-header">
+                    <h1>Settings</h1>
+                    <p>Manage your Public Health Office Configuration</p>
+                </div>
+
+                <!-- ============================================
+                    1. GENERAL SETTINGS SECTION
+                    ============================================ -->
+                <div class="settings-section">
+                    <h2 class="section-title">⚙️ General Settings</h2>
+                    <p class="section-subtitle">Configure your PHO facility information and basic details</p>
+
+                    <div class="settings-grid">
+                        <!-- CARD 1: PHO Facility Information -->
+                        <section class="card">
+                            <h3 class="card-title"><span class="icon">🏥</span> Facility Information</h3>
+                            <p class="card-subtitle">Details displayed in reports and system records.</p>
+
+                            <div class="field-group">
+                                <div class="field">
+                                    <label for="phoName">PHO Name</label>
+                                    <input type="text" id="phoName" placeholder="e.g. Iloilo City Public Health Office">
+                                </div>
+                                <div class="field">
+                                    <label for="phoCode">PHO Code</label>
+                                    <input type="text" id="phoCode" placeholder="e.g. PHO-0142">
+                                </div>
+                                <div class="field">
+                                    <label for="province">Province</label>
+                                    <input type="text" id="province" placeholder="e.g. Iloilo">
+                                </div>
+                                <div class="field">
+                                    <label for="municipality">City/Municipality</label>
+                                    <input type="text" id="municipality" placeholder="e.g. Iloilo City">
+                                </div>
+                                <div class="field full">
+                                    <label for="address">Complete Address</label>
+                                    <input type="text" id="address" placeholder="Street, Barangay, City, Province">
+                                </div>
+                                <div class="field">
+                                    <label for="contactNumber">Contact Number</label>
+                                    <input type="tel" id="contactNumber" placeholder="e.g. (033) 123 4567">
+                                </div>
+                                <div class="field">
+                                    <label for="phoEmail">Email Address</label>
+                                    <input type="email" id="phoEmail" placeholder="pho@doh.gov.ph">
+                                </div>
+                            </div>
+
+                            <div class="field full" style="margin-bottom:18px;">
+                                <label>PHO Logo</label>
+                                <label class="file-upload" for="phoLogo">
+                                    📤 Click to upload logo (PNG or JPG, max 2MB)
+                                    <input type="file" id="phoLogo" accept="image/png, image/jpeg">
+                                </label>
+                            </div>
+
+                            <div class="card-actions">
+                                <button type="button" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </section>
+
+                        <!-- CARD 2: User Account Settings -->
+                        <section class="card">
+                            <h3 class="card-title"><span class="icon">👤</span> User Account</h3>
+                            <p class="card-subtitle">Manage your login credentials and profile.</p>
+
+                            <div class="field-group">
+                                <div class="field">
+                                    <label for="firstName">First Name</label>
+                                    <input type="text" id="firstName" placeholder="e.g. Juan Dela Cruz">
+                                </div>
+
+                                <div class="field">
+                                    <label for="middleName">Middle Name</label>
+                                    <input type="text" id="middleName" placeholder="e.g. Santos">
+                                </div>
+
+                                <div class="field">
+                                    <label for="lastName">Last Name</label>
+                                    <input type="text" id="lastName" placeholder="e.g. Dela Cruz">
+                                </div>
+
+                                <div class="field">
+                                    <label for="suffix">Suffix</label>
+                                    <input type="text" id="suffix" placeholder="e.g. Jr., Sr.">
+                                </div>
+
+                                <div class="field">
+                                    <label for="userEmail">Email Address</label>
+                                    <input type="email" id="userEmail" placeholder="you@pho.gov.ph">
+                                </div>
+
+                                <div class="field">
+                                    <label for="position">Position</label>
+                                    <input type="text" id="position" placeholder="e.g. PHO Director, Health Officer">
+                                </div>
+
+                                <div class="field">
+                                    <label for="changePassword">Change Password</label>
+                                    <input type="password" id="changePassword" placeholder="New password">
+                                </div>
+
+                                <div class="field">
+                                    <label for="confirmPassword">Confirm Password</label>
+                                    <input type="password" id="confirmPassword" placeholder="Re-enter new password">
+                                </div>
+                            </div>
+
+                            <div class="card-actions">
+                                <button type="button" class="btn btn-primary">Update Account</button>
+                            </div>
+                        </section>
+
+                        <!-- CARD 3: NOTIFICATION SETTINGS -->
+                        <!--<section class="card">
+                            <h3 class="card-title"><span class="icon">🔔</span> Notifications</h3>
+                            <p class="card-subtitle">Configure how you receive alerts and updates.</p>
+
+                            <div class="toggle-row">
+                                <span class="toggle-label">Email Notifications</span>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <span class="toggle-label">Case Alerts</span>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <span class="toggle-label">Outbreak Warnings</span>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <span class="toggle-label">System Updates</span>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="card-actions" style="margin-top:18px;">
+                                <button type="button" class="btn btn-primary">Save Preferences</button>
+                            </div>
+                        </section>-->
+                    </div>
+                </div>
+
+                <!-- ============================================
+                    2. UPLOAD DATASET SECTION
+                    ============================================ -->
+                <div class="settings-section">
+                    <h2 class="section-title">📤 Upload Dataset</h2>
+                    <p class="section-subtitle">Import case data, vaccination records, and manage Animal Bite Treatment
+                        Centers</p>
+
+                    <div class="settings-grid">
+                        <!-- CARD 4: Import Case Data -->
+                        <section class="card">
+                            <h3 class="card-title"><span class="icon">📋</span> Import Case Data</h3>
+                            <p class="card-subtitle">Upload Provincial Report of Animal/Rabies Cases</p>
+
+                            <div class="field full" style="margin-bottom:18px;">
+                                <label>Upload Case Data File</label>
+                                <label class="file-upload" for="caseDataFile">
+                                    📤 Click to upload (CSV, XLSX, max 10MB)
+                                    <input type="file" id="caseDataFile" accept=".csv, .xlsx, .xls">
+                                </label>
+                                <!--<p class="hint" style="margin-top:8px; font-size: 12px;">
+                                    Format: Case ID, Date, Patient Name, Age, Contact Number, Bite Details
+                                </p>-->
+                            </div>
+
+                            <div class="card-actions">
+                                <!--<button type="button" class="btn btn-secondary">Download Template</button>-->
+                                <button type="button" class="btn btn-primary">Upload & Process</button>
+                            </div>
+                        </section>
+
+                        <!-- CARD 5: Import Vaccination Data -->
+                        <section class="card">
+                            <h3 class="card-title"><span class="icon">💉</span> Import Iloilo Province Population
+                                Dataset</h3>
+                            <p class="card-subtitle">Upload Iloilo Province Population Data</p>
+
+                            <div class="field full" style="margin-bottom:18px;">
+                                <label>Upload Population File</label>
+                                <label class="file-upload" for="populationDataFile">
+                                    📤 Click to upload (CSV, XLSX, max 10MB)
+                                    <input type="file" id="populationDataFile" accept=".csv, .xlsx, .xls">
+                                </label>
+                                <!--<p class="hint" style="margin-top:8px; font-size: 12px;">
+                                    Format: Patient ID, Dose #, Date Administered, Vaccine Type, Healthcare Provider
+                                </p>-->
+                            </div>
+
+                            <div class="card-actions">
+                                <!-- <button type="button" class="btn btn-secondary">Download Template</button> -->
+                                <button type="button" class="btn btn-primary">Upload & Process</button>
+                            </div>
+                        </section>
+
+                        <!-- CARD 6: Add Animal Bite Treatment Center (NEW FORM-BASED) -->
+                        <!--<section class="card">
+                            <h3 class="card-title"><span class="icon">🏥</span> Add Animal Bite Treatment Center</h3>
+                            <p class="card-subtitle">Register a new Animal Bite Treatment Center under your PHO.</p>
+
+                            <div class="field-group">
+                                <div class="field full">
+                                    <label for="abtcName">ABTC Name *</label>
+                                    <input type="text" id="abtcName" placeholder="e.g. Iloilo City ABTC">
+                                </div>
+                                <div class="field">
+                                    <label for="abtcCode">ABTC Code *</label>
+                                    <input type="text" id="abtcCode" placeholder="e.g. ABTC-001">
+                                </div>
+                                <div class="field">
+                                    <label for="abtcType">Facility Type *</label>
+                                    <select id="abtcType">
+                                        <option value="">Select Type</option>
+                                        <option>Public Hospital</option>
+                                        <option>Private Hospital</option>
+                                        <option>Barangay Health Station</option>
+                                        <option>Rural Health Unit</option>
+                                        <option>Health Center</option>
+                                    </select>
+                                </div>
+
+                                <div class="field full">
+                                    <label for="abtcAddress">Complete Address *</label>
+                                    <input type="text" id="abtcAddress" placeholder="Street, Barangay, City, Province">
+                                </div>
+
+                                <div class="field">
+                                    <label for="abtcContactPerson">Contact Person *</label>
+                                    <input type="text" id="abtcContactPerson" placeholder="e.g. Dr. Juan Dela Cruz">
+                                </div>
+
+                                <div class="field">
+                                    <label for="abtcPosition">Position</label>
+                                    <input type="text" id="abtcPosition" placeholder="e.g. Medical Director">
+                                </div>
+
+                                <div class="field">
+                                    <label for="abtcPhone">Contact Number *</label>
+                                    <input type="tel" id="abtcPhone" placeholder="e.g. (033) 123 4567">
+                                </div>
+
+                                <div class="field">
+                                    <label for="abtcEmail">Email Address</label>
+                                    <input type="email" id="abtcEmail" placeholder="abtc@hospital.gov.ph">
+                                </div>
+
+                                <div class="field">
+                                    <label for="abtcCapacity">Bed Capacity</label>
+                                    <input type="number" id="abtcCapacity" placeholder="e.g. 50">
+                                </div>-->
+
+                                <!--<div class="field">
+                                    <label for="abtcStatus">Status *</label>
+                                    <select id="abtcStatus">
+                                        <option value="">Select Status</option>
+                                        <option selected>Active</option>
+                                        <option>Inactive</option>
+                                        <option>Under Review</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="toggle-row">
+                                <span class="toggle-label">24/7 Service Available</span>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <span class="toggle-label">Has Isolation Ward</span>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="card-actions">
+                                <button type="button" class="btn btn-secondary">Clear Form</button>
+                                <button type="button" class="btn btn-primary">Register ABTC</button>
+                            </div>
+                        </section>-->
+
+                        <!-- CARD 7: Upload Status & History -->
+                         <!-- <section class="card full-width">
+                           <h3 class="card-title"><span class="icon">📊</span> Recent Activities</h3>
+                            <p class="card-subtitle">View the status of your recent uploads and registrations.</p>
+
+                            <div class="upload-history">
+                                <div class="history-item success">
+                                    <span class="status-badge">✓ Success</span>
+                                    <span class="file-name">case_data_july2024.csv</span>
+                                    <span class="timestamp">Jul 15, 2024 - 2:30 PM</span>
+                                    <span class="records">245 records imported</span>
+                                </div>
+                                <div class="history-item success">
+                                    <span class="status-badge">✓ Success</span>
+                                    <span class="file-name">Iloilo City ABTC</span>
+                                    <span class="timestamp">Jul 14, 2024 - 10:15 AM</span>
+                                    <span class="records">ABTC Registered</span>
+                                </div>
+                                <div class="history-item success">
+                                    <span class="status-badge">✓ Success</span>
+                                    <span class="file-name">vaccination_records_june.xlsx</span>
+                                    <span class="timestamp">Jun 28, 2024 - 10:15 AM</span>
+                                    <span class="records">189 records imported</span>
+                                </div>
+                                <div class="history-item warning">
+                                    <span class="status-badge">⚠ Pending Review</span>
+                                    <span class="file-name">San Ricardo Health Center</span>
+                                    <span class="timestamp">Jul 12, 2024 - 3:45 PM</span>
+                                    <span class="records">Awaiting approval</span>
+                                </div>
+                            </div>
+
+                            <div class="card-actions" style="margin-top:18px;">
+                                <button type="button" class="btn btn-secondary">View All Activities</button>
+                            </div>
+                        </section>-->
+
+                        <!-- CARD 8: Registered ABTCs List -->
+                        <section class="card full-width">
+                            <h3 class="card-title"><span class="icon">🏘️</span> Registered Animal Bite Treatment
+                                Centers</h3>
+                            <p class="card-subtitle">All ABTCs linked to your PHO.</p>
+
+                            <div class="table-container">
+                                <table class="abtc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ABTC Name</th>
+                                            <th>Code</th>
+                                            <th>Type</th>
+                                            <th>Contact Person</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Iloilo City ABTC</td>
+                                            <td>ABTC-001</td>
+                                            <td>Public Hospital</td>
+                                            <td>Dr. Juan Dela Cruz</td>
+                                            <td><span class="badge success">Active</span></td>
+                                            <td>
+                                                <button class="action-btn edit" title="Edit">✏️</button>
+                                                <button class="action-btn delete" title="Delete">🗑️</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Oton Health Center</td>
+                                            <td>ABTC-002</td>
+                                            <td>Rural Health Unit</td>
+                                            <td>Nurse Maria Santos</td>
+                                            <td><span class="badge success">Active</span></td>
+                                            <td>
+                                                <button class="action-btn edit" title="Edit">✏️</button>
+                                                <button class="action-btn delete" title="Delete">🗑️</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>San Ricardo ABTC</td>
+                                            <td>ABTC-003</td>
+                                            <td>Barangay Health Station</td>
+                                            <td>Dr. Robert Santos</td>
+                                            <td><span class="badge warning">Under Review</span></td>
+                                            <td>
+                                                <button class="action-btn edit" title="Edit">✏️</button>
+                                                <button class="action-btn delete" title="Delete">🗑️</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="card-actions" style="margin-top:18px;">
+                                <button type="button" class="btn btn-secondary">Export List</button>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- ============================================
+                    3. HISTORY SECTION
+                    ============================================ -->
+                <div class="settings-section">
+                    <h2 class="section-title">📜 History</h2>
+                    <p class="section-subtitle">View audit logs and system activity</p>
+
+                    <div class="settings-grid">
+                        <!-- CARD 8: Activity Log -->
+                        <!--<section class="card full-width">
+                            <h3 class="card-title"><span class="icon">📋</span> Activity Log</h3>
+                            <p class="card-subtitle">All changes to settings and configuration.</p>
+
+                            <div class="log-container">
+                                <div class="log-entry">
+                                    <div class="log-time">Today, 2:45 PM</div>
+                                    <div class="log-action">Settings Updated</div>
+                                    <div class="log-details">User <strong>Juan Dela Cruz</strong> updated PHO contact
+                                        information</div>
+                                    <div class="log-user">By: juan.delacruz</div>
+                                </div>
+                                <div class="log-entry">
+                                    <div class="log-time">Yesterday, 10:20 AM</div>
+                                    <div class="log-action">Data Imported</div>
+                                    <div class="log-details">Case data file <strong>case_data_july2024.csv</strong>
+                                        processed successfully (245 records)</div>
+                                    <div class="log-user">By: maria.santos</div>
+                                </div>
+                                <div class="log-entry">
+                                    <div class="log-time">Jul 12, 2024</div>
+                                    <div class="log-action">User Added</div>
+                                    <div class="log-details">New user <strong>Dr. Robert Santos</strong> (Health
+                                        Officer) added to system</div>
+                                    <div class="log-user">By: admin</div>
+                                </div>
+                                <div class="log-entry">
+                                    <div class="log-time">Jul 10, 2024</div>
+                                    <div class="log-action">Settings Updated</div>
+                                    <div class="log-details">Notification preferences modified - Email alerts enabled
+                                        for outbreak warnings</div>
+                                    <div class="log-user">By: juan.delacruz</div>
+                                </div>
+                                <div class="log-entry">
+                                    <div class="log-time">Jul 8, 2024</div>
+                                    <div class="log-action">Data Exported</div>
+                                    <div class="log-details">Monthly summary report exported (June 2024 data)</div>
+                                    <div class="log-user">By: maria.santos</div>
+                                </div>
+                            </div>
+
+                            <div class="card-actions" style="margin-top:18px;">
+                                <button type="button" class="btn btn-secondary">Export Log</button>
+                                <button type="button" class="btn btn-secondary">Filter by Date</button>
+                            </div>
+                        </section>-->
+
+                        <!-- CARD 9: Data Import History -->
+                        <section class="card full-width">
+                            <h3 class="card-title"><span class="icon">📈</span> Import History</h3>
+                            <p class="card-subtitle">Track all your data uploads and synchronizations.</p>
+
+                            <div class="table-container">
+                                <!-- Inside your Upload History Card -->
+                                <div class="table-responsive">
+                                    <table class="history-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Date Uploaded</th>
+                                                <th>File Name</th>
+                                                <th>Records</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <!-- ADD THE ID HERE 👇 -->
+                                        <tbody id="uploadHistoryTableBody">
+                                            <!--<tr>
+                                                <td>07/16/2026</td>
+                                                <td>PHO_Bite_Cases_2025.xlsx</td>
+                                                <td>4,812</td>
+                                                <td><span class="badge success">Completed</span></td>
+                                            </tr>-->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!--<div class="card-actions" style="margin-top:18px;">
+                                <button type="button" class="btn btn-secondary">Download Details</button>
+                            </div>-->
+                        </section>
+                    </div>
+                </div>
+
+                <!-- ============================================
+                    4. APPEARANCE SECTION
+                    ============================================ -->
+                <!--<div class="settings-section">
+                    <h2 class="section-title">🎨 Appearance</h2>
+                    <p class="section-subtitle">Customize your interface and display preferences</p>
+
+                    <!--<div class="settings-grid">
+                        CARD 10: Theme & Display -->
+                        <section class="card">
+                            <h3 class="card-title"><span class="icon">🎨</span> Theme & Display</h3>
+                            <p class="card-subtitle">Choose your preferred color scheme and layout.</p>
+
+                            <div class="field-group">
+                                <div class="field full">
+                                    <label for="theme">Color Theme</label>
+                                    <select id="theme">
+                                        <option selected>Light Mode (Default)</option>
+                                        <option>Dark Mode</option>
+                                        <option>High Contrast</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="toggle-row">
+                                <span class="toggle-label">Compact View</span>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="toggle-row">
+                                <span class="toggle-label">Show Sidebar</span>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="toggle-row">
+                                <span class="toggle-label">Animations</span>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="card-actions" style="margin-top:18px;">
+                                <button type="button" class="btn btn-primary">Apply Theme</button>
+                            </div>
+                        </section>
+
+                        <!-- CARD 11: Language & Localization -->
+                        <section class="card">
+                            <h3 class="card-title"><span class="icon">🌐</span> Language & Region</h3>
+                            <p class="card-subtitle">Set your preferred language and date format.</p>
+
+                            <div class="field-group">
+                                <div class="field">
+                                    <label for="language">Language</label>
+                                    <select id="language">
+                                        <option selected>English</option>
+                                        <option>Filipino (Tagalog)</option>
+                                        <option>Ilocano</option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label for="dateFormat">Date Format</label>
+                                    <select id="dateFormat">
+                                        <option selected>MM/DD/YYYY</option>
+                                        <option>DD/MM/YYYY</option>
+                                        <option>YYYY-MM-DD</option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label for="timezone">Timezone</label>
+                                    <select id="timezone">
+                                        <option selected>Philippine Standard Time (UTC+8)</option>
+                                        <option>UTC+0</option>
+                                        <option>UTC+1</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="card-actions">
+                                <button type="button" class="btn btn-primary">Save Preferences</button>
+                            </div>
+                        </section>
+
+                        <!-- CARD 12: Report Templates -->
+                        <section class="card">
+                            <h3 class="card-title"><span class="icon">📄</span> Report Templates</h3>
+                            <p class="card-subtitle">Customize report generation and printing options.</p>
+
+                            <div class="field-group">
+                                <div class="field full">
+                                    <label for="reportTemplate">Default Report Template</label>
+                                    <select id="reportTemplate">
+                                        <option selected>PHO Standard Report (2024)</option>
+                                        <option>DOH Format</option>
+                                        <option>Detailed Analytics</option>
+                                        <option>Custom Template</option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label for="paperSize">Paper Size</label>
+                                    <select id="paperSize">
+                                        <option selected>A4</option>
+                                        <option>Letter (8.5" x 11")</option>
+                                        <option>Legal</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="toggle-row">
+                                <span class="toggle-label">Include PHO Logo</span>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <span class="toggle-label">Include Charts</span>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <span class="toggle-label">Include Summary Statistics</span>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="card-actions" style="margin-top:18px;">
+                                <button type="button" class="btn btn-secondary">Preview Report</button>
+                                <button type="button" class="btn btn-primary">Save Template</button>
+                            </div>
+                        </section>
+
+                        <!-- CARD 13: Dashboard Widgets -->
+                        <section class="card">
+                            <h3 class="card-title"><span class="icon">📊</span> Dashboard Widgets</h3>
+                            <p class="card-subtitle">Choose which widgets appear on your dashboard.</p>
+
+                            <div class="field full">
+                                <label>Visible Widgets</label>
+                                <div class="checkbox-row">
+                                    <label><input type="checkbox" checked> Case Summary</label>
+                                    <label><input type="checkbox" checked> Vaccination Progress</label>
+                                    <label><input type="checkbox" checked> Geographic Distribution</label>
+                                    <label><input type="checkbox"> Risk Assessment</label>
+                                    <label><input type="checkbox" checked> Recent Activities</label>
+                                    <label><input type="checkbox"> Upcoming Tasks</label>
+                                </div>
+                            </div>
+
+                            <div class="card-actions" style="margin-top:18px;">
+                                <button type="button" class="btn btn-primary">Save Dashboard</button>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="../js/settings-firebase.js"></script>
+    <script type="module" src="../js/iloilo-population.js"></script>
+    <script type="module" src="../js/settings.js"></script>
+</body>
+
+</html>
