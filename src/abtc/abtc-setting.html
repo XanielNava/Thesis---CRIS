@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings — CRIS | Animal Bite Treatment Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/abtc-setting.css">
+</head>
+<body>
+
+<div class="container">
+
+  <!-- =====================================================
+       CRIS UNIVERSAL SIDEBAR
+       ===================================================== -->
+  <aside class="sidebar">
+    <div class="logo-section">
+      <!-- 🎯 Added id="sidebarLogoPreview" to allow dynamic real-time logo updates -->
+      <img id="sidebarLogoPreview" src="../../assets/images/logo-login.png" alt="Logo" class="logo-image">
+      <p>Community-Centric<br>Rabies Intelligence<br>System</p>
+      <div class="role-badge">ABTC MODULE</div>
+    </div>
+
+    <nav class="menu">
+      <a href="abtc-dash.html" class="menu-item">Dashboard</a>
+    </nav>
+    
+    <div class="footer-nav">
+      <!-- Added formal link navigation split -->
+      <a href="abtc-users.html" class="menu-item alt">Personnel & Login History</a>
+      <a href="abtc-settings.html" class="menu-item alt active">Settings</a>
+      <button id="logout-btn" class="menu-item alt">Logout</button>
+    </div>
+  </aside>
+
+  <!-- =====================================================
+       MAIN INTERFACE AREA
+       ===================================================== -->
+  <main class="main-content">
+    <div class="settings-main">
+
+      <div class="settings-header">
+        <h1>Settings</h1>
+        <p>Manage your Animal Bite Treatment Center configurations</p>
+      </div>
+
+      <div class="settings-grid">
+
+        <!-- CARD 1: Facility Information -->
+        <section class="card full-width">
+          <h2 class="card-title"><span class="icon">🏥</span> Facility Information</h2>
+          <p class="card-subtitle">Details shown on records, printouts, and reports.</p>
+
+          <div class="field-group">
+            <div class="field">
+              <label for="facilityName">Facility Name</label>
+              <input type="text" id="facilityName" placeholder="e.g. Iloilo City ABTC">
+            </div>
+            <div class="field">
+              <label for="facilityCode">Facility Code</label>
+              <input type="text" id="facilityCode" placeholder="e.g. ABTC-0142">
+            </div>
+            
+            <!-- 👤 NEW FIELD: Facility Administrator / Contact Person Name -->
+            <div class="field">
+              <label for="adminName">Facility Administrator Name</label>
+              <input type="text" id="adminName" placeholder="e.g. Dr. Jane Doe">
+            </div>
+            
+            <div class="field">
+              <label for="contactNumber">Contact Number</label>
+              <input type="tel" id="contactNumber" placeholder="e.g. (033) 123 4567">
+            </div>
+            <div class="field">
+              <label for="facilityEmail">Email Address</label>
+              <input type="email" id="facilityEmail" placeholder="facility@doh.gov.ph" class="disabled-input" disabled>
+            </div>
+
+            <!-- 🗺️ Structured Address Details Layout -->
+            <div class="field">
+              <label for="streetAddress">Street Address / Building No. *</label>
+              <input type="text" id="streetAddress" placeholder="e.g. 123 Quezon St.">
+            </div>
+            <div class="field">
+              <label for="barangay">Barangay *</label>
+              <input type="text" id="barangay" placeholder="e.g. Barangay Central">
+            </div>
+            <div class="field">
+              <label for="municipality">City / Municipality *</label>
+              <input type="text" id="municipality" placeholder="e.g. Mandaue City">
+            </div>
+            <div class="field">
+              <label for="province">Province *</label>
+              <input type="text" id="province" placeholder="e.g. Cebu">
+            </div>
+
+            <!-- 🔑 Facility Credentials Management -->
+            <div class="field">
+              <label for="facilityPassword">Update Facility Password</label>
+              <input type="password" id="facilityPassword" placeholder="Enter new master password">
+            </div>
+            <div class="field">
+              <label for="confirmFacilityPassword">Confirm Facility Password</label>
+              <input type="password" id="confirmFacilityPassword" placeholder="Re-enter master password">
+            </div>
+          </div>
+
+          <div class="field full space-bottom" style="margin-top: 15px;">
+            <label>Facility Logo</label>
+            <label class="file-upload" for="facilityLogo">
+              📤 Click to upload logo (PNG or JPG, max 2MB)
+              <input type="file" id="facilityLogo" accept="image/png, image/jpeg">
+            </label>
+          </div>
+
+          <div class="card-actions">
+            <button type="button" id="saveFacilityBtn" class="btn btn-primary">Save Changes</button>
+          </div>
+        </section>
+
+        <!-- CARD 2: About CRIS Dashboard -->
+        <section class="card full-width">
+          <h2 class="card-title"><span class="icon">ℹ️</span> About CRIS</h2>
+          <div class="about-body">
+            <span class="system-name">Community-Centric Rabies Intelligence System</span>
+            <span class="version-pill">Version 1.0</span>
+            <p class="about-institution">
+              West Visayas State University<br>
+              BS Information Systems
+            </p>
+            <p class="dev-heading">Developed by:</p>
+            <ul class="dev-list">
+              <li>Kirk Johnray C. Meñez</li>
+              <li>Xaniel Marios Angelo B. Nava</li>
+            </ul>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module" src="../../assets/js/abtc-setting.js"></script>
+</body>
+</html>

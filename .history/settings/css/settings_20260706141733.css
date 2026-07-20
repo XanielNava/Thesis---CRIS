@@ -1,0 +1,11 @@
+/* CRIS SUNSET PALETTE VARIABLES */
+:root {
+    --sunset-orange: #EA6113;
+    --sunset-gold: #F88F22;
+    --sunset-yellow: #FBB931;
+    --sunset-cream: #FFE3B3;
+    --text-dark: #412110;
+    --sidebar-bg: #1a234e;
+    --main-bg: #FFFAF0;
+    --transition: all 0.3s ease;
+}

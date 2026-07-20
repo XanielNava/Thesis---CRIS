@@ -170,16 +170,6 @@ body {
     border-radius: 10px;
 }
 
-.close-btn {
-    background: none;
-    border: none;
-    color: var(--sunset-cream);
-    font-size: 22px;
-    cursor: pointer;
-    float: right;
-}
-
-.sidebar.active { right: 0; }
 .overlay.active { opacity: 1; visibility: visible; }
 
 /* Main Content */
@@ -243,6 +233,22 @@ input, select {
 input:focus, select:focus {
     border-color: var(--sunset-orange);
     box-shadow: 0 0 0 3px rgba(234, 97, 19, 0.1);
+}
+
+/* ========================================================== */
+/* DYNAMIC ANCHOR FOR SLIDE-DOWN ANIMATIONS                    */
+/* ========================================================== */
+.form-group-dynamic {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+/* Triggered via JS toggle class script operations */
+.form-group-dynamic.visible {
+    max-height: 100px; /* Expands open safely */
+    opacity: 1;
 }
 
 /* Buttons */
