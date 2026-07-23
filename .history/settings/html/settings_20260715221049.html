@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - PHO Settings</title>
+    <!-- FontAwesome for Dashboard Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Stylesheet LINK -->
+    <link rel="stylesheet" href="../css/settings.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PHO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="pho-dash.html" class="menu-item">Dashboard</a>
+                <a href="pho-animal-bite-cases.html" class="menu-item active">Animal Bite Cases</a>
+                <a href="pho-heat-map.html" class="menu-item">Heatmaps</a>
+            </nav>
+
+            <div class="footer-nav">
+                <a href="../../settings/html/settings.html" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout" onclick="window.location.href='pho-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <!-- ================= MAIN DASHBOARD CONTENT ================= -->
+        <main class="main-content">
+
+            <!-- ================= SETTINGS HEADER ================= -->
+            <header class="settings-header">
+                <div>
+                    <h1>System Settings</h1>
+                </div>
+            </header>
+
+            <!-- ================= NAVIGATION TABS ================= -->
+            <nav class="settings-tabs">
+                <button class="tab-link active" onclick="switchTab(event, 'general')">General</button>
+                <button class="tab-link" onclick="switchTab(event, 'data')">Data</button>
+                <button class="tab-link" onclick="switchTab(event, 'heatmap')">Heatmap</button>
+                <button class="tab-link" onclick="switchTab(event, 'security')">Security</button>
+                <button class="tab-link" onclick="switchTab(event, 'history')">History</button>
+                <button class="tab-link" onclick="switchTab(event, 'appearance')">Appearance</button>
+            </nav>
+
+            <!-- ================= GENERAL INFORMATION TAB ================= -->
+            <section id="general" class="settings-card tab-content active">
+                <div class="card-title">
+                    <i class="fa-solid fa-building-shield"></i>
+                    <div>
+                        <h2>General Information</h2>
+                        <small>Configure system identity and PHO details</small>
+                    </div>
+                </div>
+                <form class="settings-form" onsubmit="event.preventDefault();">
+                    <div class="form-group">
+                        <label for="pho-name">PHO Name</label>
+                        <input type="text" id="pho-name" value="Provincial Health Office" placeholder="Enter office name">
+                    </div>
+                    <div class="form-group">
+                        <label for="province">Province</label>
+                        <input type="text" id="province" value="Iloilo Province" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" id="address" placeholder="Enter PHO physical address">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contact">Contact Number</label>
+                            <input type="tel" id="contact" placeholder="e.g., +63 33...">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" placeholder="pho@iloilo.gov.ph">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </section>
+
+            <!-- ================= DATA MANAGEMENT TAB ================= -->
+            <section id="data" class="settings-card tab-content">
+                <div class="card-title">
+                    <i class="fa-solid fa-database"></i>
+                    <div>
+                        <h2>Data Management</h2>
+                        <small>Ingest surveillance data and manage ecosystem backups</small>
+                    </div>
+                </div>
+                
+                <div class="upload-zone-grid">
+                    <div class="upload-box">
+                        <i class="fa-solid fa-file-csv"></i>
+                        <span>Animal Bite Dataset</span>
+                        <input type="file" id="upload-bite-db" hidden>
+                        <label for="upload-bite-db" class="btn btn-outline">Choose File</label>
+                    </div>
+                    <div class="upload-box">
+                        <i class="fa-solid fa-users"></i>
+                        <span>Population Dataset</span>
+                        <input type="file" id="upload-pop-db" hidden>
+                        <label for="upload-pop-db" class="btn btn-outline">Choose File</label>
+                    </div>
+                    <div class="upload-box">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <span>Hospital Coordinates</span>
+                        <input type="file" id="upload-geo-db" hidden>
+                        <label for="upload-geo-db" class="btn btn-outline">Choose File</label>
+                    </div>
+                </div>
+                
+                <div class="meta-status-banner">
+                    <p><strong>Last Upload:</strong> July 15, 2026</p>
+                    <p><strong>Uploaded by:</strong> Administrator</p>
+                    <p><strong>Status:</strong> <span class="badge success">Successful</span></p>
+                </div>
+
+                <hr class="section-divider">
+
+                <!-- ================= Backup Actions Module ================= -->
+                <h3 class="section-subheading">System Backup & Recovery</h3>
+                <div class="action-grid">
+                    <button class="action-tile">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span class="label">Backup Database</span>
+                        <span class="desc">Create a complete backup of all records.</span>
+                    </button>
+
+                    <button class="action-tile">
+                        <i class="fa-solid fa-cloud-arrow-down"></i>
+                        <span class="label">Restore Backup</span>
+                        <span class="desc">Restore data from a previous backup.</span>
+                    </button>
+
+                    <button class="action-tile">
+                        <i class="fa-solid fa-file-export"></i>
+                        <span class="label">Export Reports</span>
+                        <span class="desc">Download reports in Excel or PDF.</span>
+                    </button>
+
+                    <button class="action-tile">
+                        <i class="fa-solid fa-file-import"></i>
+                        <span class="label">Import Backup</span>
+                        <span class="desc">Import an existing CRIS backup.</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- ================= HEATMAP SETTINGS TAB ================= -->
+            <section id="heatmap" class="settings-card tab-content">
+                <div class="card-title">
+                    <i class="fa-solid fa-fire-flame-curved"></i>
+                    <div>
+                        <h2>Heatmap Settings</h2>
+                        <small>Calibrate intelligence visualization thresholds</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Investigation Radius</label>
+                    <div class="radio-group-vertical">
+                        <label class="radio-container">
+                            <input type="radio" name="radius" value="1"> 1 km
+                        </label>
+                        <label class="radio-container">
+                            <input type="radio" name="radius" value="2"> 2 km
+                        </label>
+                        <label class="radio-container">
+                            <input type="radio" name="radius" value="3" checked> 3 km
+                        </label>
+                        <label class="radio-container">
+                            <input type="radio" name="radius" value="5"> 5 km
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="default-layer">Default Layer</label>
+                    <select id="default-layer" class="form-select">
+                        <option selected>Animal Bite Cases</option>
+                        <option>Human Rabies Deaths</option>
+                        <option>Animal Rabies Cases</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="default-municipality">Default Municipality Target</label>
+                    <select id="default-municipality" class="form-select">
+                        <option selected>All Municipalities</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- ================= SECURITY / USER MANAGEMENT TAB ================= -->
+            <section id="security" class="settings-card tab-content">
+                <div class="card-title">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <div>
+                        <h2>User Management</h2>
+                        <small>Update administrator credentials</small>
+                    </div>
+                </div>
+                <form class="settings-form" onsubmit="event.preventDefault();">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" placeholder="Administrator Name" value="Xaniel Nava">
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" placeholder="admin_username" value="admin_xaniel">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" placeholder="admin@cris.ph">
+                    </div>
+                    <button type="button" class="btn btn-outline-danger">Change Password</button>
+                </form>
+            </section>
+
+            <!-- ================= ACTIVITY HISTORY TAB ================= -->
+            <section id="history" class="settings-card tab-content">
+                <div class="card-title">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <div>
+                        <h2>Activity History</h2>
+                        <small>Audit trail for changes made to CRIS configurations</small>
+                    </div>
+                </div>
+                <ul class="audit-timeline">
+                    <li class="timeline-item">
+                        <span class="timeline-date">July 15, 2026</span>
+                        <p class="timeline-desc"><strong>Xaniel</strong> uploaded Animal Bite Dataset</p>
+                    </li>
+                    <li class="timeline-item">
+                        <span class="timeline-date">July 12, 2026</span>
+                        <p class="timeline-desc"><strong>Admin</strong> changed Heatmap Radius to 3 km</p>
+                    </li>
+                    <li class="timeline-item">
+                        <span class="timeline-date">July 11, 2026</span>
+                        <p class="timeline-desc">Population dataset updated</p>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- ================= SYSTEM APPEARANCE TAB ================= -->
+            <section id="appearance" class="settings-card tab-content">
+                <div class="card-title">
+                    <i class="fa-solid fa-palette"></i>
+                    <div>
+                        <h2>System Appearance</h2>
+                        <small>Personalize layout visualizations and themes</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="theme-select">Theme Style</label>
+                    <select id="theme-select" class="form-select">
+                        <option>Light Theme</option>
+                        <option selected>Dark Mode Enabled</option>
+                        <option>System Default</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="accent-select">Accent Color</label>
+                    <select id="accent-select" class="form-select">
+                        <option selected>Classic Blue</option>
+                        <option>Teal Health</option>
+                        <option>Alert Red</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="font-size">Font Scaling</label>
+                    <select id="font-size" class="form-select">
+                        <option>Small (14px)</option>
+                        <option selected>Medium (16px)</option>
+                        <option>Large (18px)</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- ================= ABOUT CRIS SYSTEM BLOCK ================= -->
+            <section class="settings-card unified-about-footer">
+                <div class="card-title">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <div>
+                        <h2>About CRIS</h2>
+                        <small>Community-Centric Rabies Intelligence System</small>
+                    </div>
+                </div>
+
+                <div class="about-container">
+                    <div class="about-logo">
+                        <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
+                    </div>
+
+                    <div class="about-content">
+                        <h2>Community-Centric Rabies Intelligence System</h2>
+                        <p>
+                            CRIS is a web-based Provincial Rabies Surveillance
+                            and Decision Support System designed to assist the
+                            Provincial Health Office in monitoring animal bite
+                            cases, human rabies deaths, animal rabies deaths,
+                            epidemiological investigations, and hotspot analysis
+                            throughout Iloilo Province.
+                        </p>
+
+                        <table class="about-table">
+                            <tr>
+                                <td><strong>Version</strong></td>
+                                <td>Version 1.0</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Database</strong></td>
+                                <td>Firebase Firestore</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Storage</strong></td>
+                                <td>Firebase Storage</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Province</strong></td>
+                                <td>Iloilo Province</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Developed For</strong></td>
+                                <td>Provincial Health Office</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Core Interactive View Controller Script -->
+    <script src="js/settings.js"></script>
+</body>
+
+</html>

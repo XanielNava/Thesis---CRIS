@@ -1,0 +1,222 @@
+//
+
+{
+  "facilities": [
+    {
+      "facility_name": "Aleosan District Hosp.",
+      "municipality": "Alimodian",
+      "latitude": 10.8222,
+      "longitude": 122.4314
+    },
+    {
+      "facility_name": "GNTSDH, Btac. Viejo",
+      "municipality": "Barotac Viejo",
+      "latitude": 11.0383,
+      "longitude": 122.8447
+    },
+    {
+      "facility_name": "DRSPSMDH, Calinog",
+      "municipality": "Calinog",
+      "latitude": 11.1256,
+      "longitude": 122.5408
+    },
+    {
+      "facility_name": "DRYLMDH, Lambunao",
+      "municipality": "Lambunao",
+      "latitude": 11.0544,
+      "longitude": 122.4822
+    },
+    {
+      "facility_name": "RDDH, Dumangas",
+      "municipality": "Dumangas",
+      "latitude": 10.8278,
+      "longitude": 122.7094
+    },
+    {
+      "facility_name": "DVPMDH, Passi City",
+      "municipality": "Passi City",
+      "latitude": 11.1071,
+      "longitude": 122.6414
+    },
+    {
+      "facility_name": "FRTSMDH, Janiuay",
+      "municipality": "Janiuay",
+      "latitude": 10.9525,
+      "longitude": 122.5089
+    },
+    {
+      "facility_name": "Iloilo Provincial Hospital",
+      "municipality": "Pototan",
+      "latitude": 10.9386,
+      "longitude": 122.6289
+    },
+    {
+      "facility_name": "JCMDH, Balasan",
+      "municipality": "Balasan",
+      "latitude": 11.4394,
+      "longitude": 123.0856
+    },
+    {
+      "facility_name": "RPGTMDH, Guimbal",
+      "municipality": "Guimbal",
+      "latitude": 10.6592,
+      "longitude": 122.3217
+    },
+    {
+      "facility_name": "RPGTMDH, Cabatuan",
+      "municipality": "Cabatuan",
+      "latitude": 10.8789,
+      "longitude": 122.485
+    },
+    {
+      "facility_name": "Sara Dist. Hospital",
+      "municipality": "Sara",
+      "latitude": 11.2589,
+      "longitude": 123.0139
+    },
+    {
+      "facility_name": "SJMCH, San Joaquin",
+      "municipality": "San Joaquin",
+      "latitude": 10.4389,
+      "longitude": 122.1389
+    },
+    {
+      "facility_name": "Sta. Barbara ABTC",
+      "municipality": "Santa Barbara",
+      "latitude": 10.8247,
+      "longitude": 122.535
+    },
+    {
+      "facility_name": "Oton ABTC",
+      "municipality": "Oton",
+      "latitude": 10.6958,
+      "longitude": 122.4806
+    },
+    {
+      "facility_name": "Carles ABTC",
+      "municipality": "Carles",
+      "latitude": 11.5647,
+      "longitude": 123.1367
+    },
+    {
+      "facility_name": "San Joaquin ABTC",
+      "municipality": "San Joaquin",
+      "latitude": 10.4389,
+      "longitude": 122.1389
+    },
+    {
+      "facility_name": "Pavia ABTC",
+      "municipality": "Pavia",
+      "latitude": 10.7719,
+      "longitude": 122.5414
+    },
+    {
+      "facility_name": "Zarraga ABTC",
+      "municipality": "Zarraga",
+      "latitude": 10.8142,
+      "longitude": 122.6075
+    },
+    {
+      "facility_name": "Miagao ABTC",
+      "municipality": "Miagao",
+      "latitude": 10.6417,
+      "longitude": 122.2358
+    },
+    {
+      "facility_name": "San Dionisio ABTC",
+      "municipality": "San Dionisio",
+      "latitude": 11.2717,
+      "longitude": 123.0931
+    },
+    {
+      "facility_name": "Concepcion ABTC",
+      "municipality": "Concepcion",
+      "latitude": 11.2214,
+      "longitude": 123.1114
+    },
+    {
+      "facility_name": "Lemery ABTC",
+      "municipality": "Lemery",
+      "latitude": 11.1919,
+      "longitude": 122.9239
+    },
+    {
+      "facility_name": "Alimodian ABTC",
+      "municipality": "Alimodian",
+      "latitude": 10.8222,
+      "longitude": 122.4314
+    },
+    {
+      "facility_name": "Maasin ABTC",
+      "municipality": "Maasin",
+      "latitude": 10.8986,
+      "longitude": 122.4319
+    },
+    {
+      "facility_name": "Ajuy ABTC",
+      "municipality": "Ajuy",
+      "latitude": 11.1717,
+      "longitude": 123.0189
+    },
+    {
+      "facility_name": "Duenas ABTC",
+      "municipality": "Duenas",
+      "latitude": 11.0664,
+      "longitude": 122.6322
+    },
+    {
+      "facility_name": "Leganes ABTC",
+      "municipality": "Leganes",
+      "latitude": 10.7814,
+      "longitude": 122.6019
+    },
+    {
+      "facility_name": "Sara ABTC",
+      "municipality": "Sara",
+      "latitude": 11.2589,
+      "longitude": 123.0139
+    },
+    {
+      "facility_name": "Banate RHU",
+      "municipality": "Banate",
+      "latitude": 11.0256,
+      "longitude": 122.8122
+    },
+    {
+      "facility_name": "Mina RHU",
+      "municipality": "Mina",
+      "latitude": 10.9333,
+      "longitude": 122.5806
+    },
+    {
+      "facility_name": "Batad RHU",
+      "municipality": "Batad",
+      "latitude": 11.3342,
+      "longitude": 123.0119
+    },
+    {
+      "facility_name": "Passi City RHU",
+      "municipality": "Passi City",
+      "latitude": 11.1071,
+      "longitude": 122.6414
+    },
+    {
+      "facility_name": "Calinog RHU",
+      "municipality": "Calinog",
+      "latitude": 11.1256,
+      "longitude": 122.5408
+    },
+    {
+      "facility_name": "Pototan RHU",
+      "municipality": "Pototan",
+      "latitude": 10.9386,
+      "longitude": 122.6289
+    },
+    {
+      "facility_name": "Guimbal RHU",
+      "municipality": "Guimbal",
+      "latitude": 10.6592,
+      "longitude": 122.3217
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 // abtc-users.js - Dedicated Administration and Immutable Auditing Handler Engine
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
-import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { 
     getFirestore, doc, collection, addDoc, deleteDoc, query, where, onSnapshot 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
@@ -26,7 +26,6 @@ onAuthStateChanged(auth, (user) => {
         currentFacilityId = user.uid;
         console.log("Admin security terminal context mounted for workspace ID:", currentFacilityId);
         
-        // Initialize the real-time query pipelines
         startLiveStaffRosterStream(currentFacilityId);
         startLiveAuditLogsStream(currentFacilityId);
     } else {
@@ -35,7 +34,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ==========================================================
-// PIPELINE 1: WRITE NEW PERSONNEL RECORDS (FIXED V2)
+// PIPELINE 1: WRITE NEW PERSONNEL RECORDS
 // ==========================================================
 const addPersonnelBtn = document.getElementById("addPersonnelBtn");
 if (addPersonnelBtn) {
@@ -66,7 +65,6 @@ if (addPersonnelBtn) {
         }
 
         try {
-            // Securely utilizing our globally tracked currentFacilityId path mapping
             const staffSubcollectionRef = collection(db, "facilities", currentFacilityId, "staff");
             await addDoc(staffSubcollectionRef, {
                 name: name,
@@ -78,7 +76,6 @@ if (addPersonnelBtn) {
 
             alert(`Successfully enrolled ${name} into your active roster configuration.`);
             
-            // Flush input element text fields safely
             nameInput.value = ""; 
             emailInput.value = ""; 
             positionInput.value = ""; 
@@ -100,7 +97,7 @@ function startLiveStaffRosterStream(facilityId) {
     const staffQuery = collection(db, "facilities", facilityId, "staff");
 
     onSnapshot(staffQuery, (snapshot) => {
-        staffTableBody.innerHTML = ""; // Clear table row stack
+        staffTableBody.innerHTML = ""; 
         
         if (snapshot.empty) {
             staffTableBody.innerHTML = `<tr><td colspan="4" class="text-center" style="color:#999;">No active staff records mapped yet.</td></tr>`;
@@ -120,8 +117,7 @@ function startLiveStaffRosterStream(facilityId) {
                 </td>
             `;
 
-            // Bind click event listener context to deletion tracking codes
-            row.querySelector(".btn-delete").addEventListener("click", async (e) => {
+            row.querySelector(".btn-delete")?.addEventListener("click", async (e) => {
                 const targetDocId = e.target.getAttribute("data-id");
                 if (confirm(`Are you sure you want to remove this staff member from your active database tracking?`)) {
                     try {
@@ -138,13 +134,12 @@ function startLiveStaffRosterStream(facilityId) {
 }
 
 // ==========================================================
-// PIPELINE 3: LIVE STREAM AUDIT LOG ACCESS LOGS (INDEX-FREE PATCH)
+// PIPELINE 3: LIVE STREAM AUDIT LOG ACCESS LOGS
 // ==========================================================
 function startLiveAuditLogsStream(facilityId) {
     const auditTableBody = document.getElementById("auditLogTableBody");
     if (!auditTableBody) return;
     
-    // Querying filtered only by facilityId to ensure a Composite Index is not required
     const auditQuery = query(
         collection(db, "audit_logs"),
         where("facilityId", "==", facilityId)
@@ -158,16 +153,13 @@ function startLiveAuditLogsStream(facilityId) {
             return;
         }
 
-        // Gather document snapshot logs natively into a structural array list
         const logsArray = [];
         snapshot.forEach((logDoc) => {
             logsArray.push({ id: logDoc.id, ...logDoc.data() });
         });
 
-        // Sort chronologically (Newest check-ins at the top) purely client-side
         logsArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-        // Generate and render table row logs smoothly
         logsArray.forEach((log) => {
             const row = document.createElement("tr");
 
@@ -193,17 +185,18 @@ function startLiveAuditLogsStream(facilityId) {
 }
 
 // ==========================================================
-// LOGOUT INTERCEPTOR INTERACTION BLOCKS
+// LOGOUT INTERCEPTOR (TAB-ISOLATED EXIT)
 // ==========================================================
 const logoutBtn = document.getElementById("logout-btn");
 if (logoutBtn) {
-    logoutBtn.addEventListener("click", async (e) => {
+    logoutBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        if (confirm("Are you sure you want to close this admin workspace session log?")) {
-            await signOut(auth);
+        if (confirm("Are you sure you want to close this admin workspace session log on this tab?")) {
+            sessionStorage.removeItem("activeDesignation");
+            sessionStorage.removeItem("activePersonnelName");
             localStorage.removeItem("activeDesignation");
             localStorage.removeItem("activePersonnelName");
-            window.location.href = 'abtc-login.html';
+            window.location.href = 'abtc-profiles.html';
         }
     });
 }

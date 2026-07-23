@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../../assets/css/abtc-reg.css">
     <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 
@@ -27,21 +28,12 @@
         </div>
 
         <nav class="menu">
-            <!-- <a href="abtc-dash.html" class="menu-item-link">
-                <button class="menu-item">Dashboard</button>
-            </a> -->
-
             <a href="abtc-reg.html" class="menu-item-link">
                 <button class="menu-item active">Patient Registry</button>
             </a>
-
-            <!-- <a href="abtc-report.html" class="menu-item-link">
-                <button class="menu-item">Dose Calendar</button>
-            </a> -->
         </nav>
 
         <div class="footer-nav">
-            <!-- <a href="abtc-setting.html" class="menu-item alt">Settings</a> -->
             <button id="logout-btn" class="menu-item alt">Logout</button>
         </div>
     </aside>
@@ -49,10 +41,10 @@
     <main class="main-content">
 
         <header class="header">
-            <h1 id="dashboardTitle"></h1>
+            <h1 id="dashboardTitle">PATIENT REGISTRY</h1>
 
             <div class="user-profile-top">
-                <div class="profile-info">
+                <div class="profile-info" id="profileInfoText">
                     <strong>Dr. Maria Dela Cruz</strong><br>
                     <span>Personnel</span>
                 </div>
@@ -131,6 +123,249 @@
 
     </main>
 
+</div>
+
+<!-- ================= EDITABLE RECORD DRAWER ================= -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+<aside class="record-drawer" id="recordDrawer">
+
+    <div class="drawer-header">
+        <div>
+            <h2 id="drawerIdLabel">RECORD</h2>
+            <span class="mode-badge" id="drawerModeBadge">VIEW MODE</span>
+        </div>
+        <div style="display: flex; align-items: center;">
+            <button class="btn-toggle-edit" id="toggleEditBtn" type="button" title="Edit Patient Record">
+                <i class="fa-solid fa-pen-to-square"></i> Edit
+            </button>
+            <button class="drawer-close-btn" id="drawerCloseBtn" type="button">&times;</button>
+        </div>
+    </div>
+
+    <div class="drawer-print-heading">
+        <h1>Individual Treatment Record</h1>
+        <p>Western Visayas Medical Center &mdash; Animal Bite Treatment Center</p>
+    </div>
+
+    <form id="drawerEditForm" onsubmit="return false;">
+        <div class="drawer-body">
+
+            <!-- 1. Patient Information -->
+            <div class="drawer-section-title"><i class="fa-solid fa-user"></i> Patient Information</div>
+            <div class="drawer-field-grid">
+                <div class="drawer-field">
+                    <label>Full Name</label>
+                    <span class="view-val" id="lblFullName">N/A</span>
+                    <input type="text" class="edit-val" id="editFullName" required>
+                </div>
+                <div class="drawer-field">
+                    <label>Age / Sex</label>
+                    <span class="view-val" id="lblAgeSex">N/A</span>
+                    <div class="edit-val edit-flex">
+                        <input type="number" id="editAge" min="0" max="120" placeholder="Age" style="width: 50%;">
+                        <select id="editSex" style="width: 50%;">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="drawer-field">
+                    <label>Contact No.</label>
+                    <span class="view-val" id="lblContact">N/A</span>
+                    <input type="tel" class="edit-val" id="editContact">
+                </div>
+                <div class="drawer-field drawer-field-wide">
+                    <label>Address</label>
+                    <span class="view-val" id="lblAddress">N/A</span>
+                    <input type="text" class="edit-val" id="editAddress">
+                </div>
+                <div class="drawer-field drawer-field-wide">
+                    <label>Attending Physician / Nurse</label>
+                    <span class="view-val" id="lblPhysician">N/A</span>
+                    <input type="text" class="edit-val" id="editPhysician">
+                </div>
+            </div>
+
+            <!-- 2. Exposure & Bite Details -->
+            <div class="drawer-section-title"><i class="fa-solid fa-paw"></i> Exposure & Bite Details</div>
+            <div class="drawer-field-grid">
+                <div class="drawer-field">
+                    <label>Exposure Date</label>
+                    <span class="view-val" id="lblExposureDate">N/A</span>
+                    <input type="date" class="edit-val" id="editExposureDate">
+                </div>
+                <div class="drawer-field">
+                    <label>Consultation Date/Time</label>
+                    <span class="view-val" id="lblConsultDateTime">N/A</span>
+                    <input type="datetime-local" class="edit-val" id="editConsultDateTime">
+                </div>
+                <div class="drawer-field drawer-field-wide">
+                    <label>Area of Bite</label>
+                    <span class="view-val" id="lblBiteArea">N/A</span>
+                    <input type="text" class="edit-val" id="editBiteArea">
+                </div>
+                <div class="drawer-field">
+                    <label>Type of Animal</label>
+                    <span class="view-val" id="lblAnimalType">N/A</span>
+                    <select class="edit-val" id="editAnimalType">
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="drawer-field">
+                    <label>Was Animal Caged?</label>
+                    <span class="view-val" id="lblAnimalCaged">N/A</span>
+                    <select class="edit-val" id="editAnimalCaged">
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                        <option value="Unknown">Unknown</option>
+                    </select>
+                </div>
+                <div class="drawer-field">
+                    <label>Bite Category</label>
+                    <span class="view-val" id="lblCategory">N/A</span>
+                    <select class="edit-val" id="editCategory">
+                        <option value="Category I">Category I</option>
+                        <option value="Category II">Category II</option>
+                        <option value="Category III">Category III</option>
+                    </select>
+                </div>
+                <div class="drawer-field">
+                    <label>Previously Vaccinated?</label>
+                    <span class="view-val" id="lblPriorVacc">N/A</span>
+                    <select class="edit-val" id="editPriorVacc">
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 3. Vital Signs -->
+            <div class="drawer-section-title"><i class="fa-solid fa-heart-pulse"></i> Vital Signs</div>
+            <div class="drawer-field-grid">
+                <div class="drawer-field">
+                    <label>Blood Pressure</label>
+                    <span class="view-val" id="lblBp">---</span>
+                    <input type="text" class="edit-val" id="editBp" placeholder="120/80">
+                </div>
+                <div class="drawer-field">
+                    <label>Temperature (&deg;C)</label>
+                    <span class="view-val" id="lblTemp">---</span>
+                    <input type="number" step="0.1" class="edit-val" id="editTemp">
+                </div>
+                <div class="drawer-field">
+                    <label>Pulse Rate (bpm)</label>
+                    <span class="view-val" id="lblPulse">---</span>
+                    <input type="number" class="edit-val" id="editPulse">
+                </div>
+                <div class="drawer-field">
+                    <label>Resp. Rate (cpm)</label>
+                    <span class="view-val" id="lblResp">---</span>
+                    <input type="number" class="edit-val" id="editResp">
+                </div>
+                <div class="drawer-field">
+                    <label>O2 Saturation (%)</label>
+                    <span class="view-val" id="lblO2">---</span>
+                    <input type="number" class="edit-val" id="editO2">
+                </div>
+                <div class="drawer-field">
+                    <label>Weight (kg)</label>
+                    <span class="view-val" id="lblWeight">---</span>
+                    <input type="number" step="0.1" class="edit-val" id="editWeight">
+                </div>
+            </div>
+
+            <!-- 4. Medical History -->
+            <div class="drawer-section-title"><i class="fa-solid fa-notes-medical"></i> Medical History</div>
+            <div class="drawer-field-grid">
+                <div class="drawer-field drawer-field-wide">
+                    <label>Comorbidities</label>
+                    <span class="view-val" id="lblComorbidities">None</span>
+                    <input type="text" class="edit-val" id="editComorbidities">
+                </div>
+                <div class="drawer-field">
+                    <label>Known Allergies</label>
+                    <span class="view-val" id="lblAllergies">None</span>
+                    <input type="text" class="edit-val" id="editAllergies">
+                </div>
+                <div class="drawer-field">
+                    <label>Current Medications</label>
+                    <span class="view-val" id="lblMedications">None</span>
+                    <input type="text" class="edit-val" id="editMedications">
+                </div>
+            </div>
+
+            <!-- 5. Management / Treatment -->
+            <div class="drawer-section-title"><i class="fa-solid fa-kit-medical"></i> Management & Treatment</div>
+            <div class="drawer-field-grid">
+                <div class="drawer-field drawer-field-wide">
+                    <label>Wound Care</label>
+                    <span class="view-val" id="lblWoundCare">N/A</span>
+                    <input type="text" class="edit-val" id="editWoundCare">
+                </div>
+                <div class="drawer-field">
+                    <label>Vaccine Brand</label>
+                    <span class="view-val" id="lblVaccineBrand">N/A</span>
+                    <input type="text" class="edit-val" id="editVaccineBrand">
+                </div>
+                <div class="drawer-field">
+                    <label>Route</label>
+                    <span class="view-val" id="lblRoute">N/A</span>
+                    <select class="edit-val" id="editRoute">
+                        <option value="Intramuscular">Intramuscular</option>
+                        <option value="Intradermal">Intradermal</option>
+                    </select>
+                </div>
+                <div class="drawer-field drawer-field-wide">
+                    <label>Immunoglobulin Given</label>
+                    <span class="view-val" id="lblImmunoglobulin">N/A</span>
+                    <input type="text" class="edit-val" id="editImmunoglobulin">
+                </div>
+                <div class="drawer-field drawer-field-wide">
+                    <label>Other Remarks</label>
+                    <span class="view-val" id="lblRemarks">None</span>
+                    <input type="text" class="edit-val" id="editRemarks">
+                </div>
+            </div>
+
+            <!-- 6. Wound Assessment Photo -->
+            <div class="drawer-section-title"><i class="fa-solid fa-camera"></i> Photo Documentation of Wound</div>
+            <div class="drawer-photo-frame" id="lblPhotoFrame">
+                <p style="color:#aaa; font-style: italic; font-size: 13px;">No assessment photo linked.</p>
+            </div>
+
+            <!-- 7. Case Revision & Activity History -->
+            <div class="drawer-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Case Revision & Activity History</div>
+            <div class="history-timeline" id="lblHistoryTimeline">
+                <!-- Dynamically populated in abtc-reg.js -->
+            </div>
+
+            <div class="drawer-sig-row">
+                <div class="drawer-sig-box">Attending Personnel</div>
+                <div class="drawer-sig-box">Patient / Guardian Signature</div>
+            </div>
+
+        </div>
+
+        <div class="drawer-footer">
+            <button type="button" class="btn-disable" id="drawerCloseBtnFooter">Close</button>
+            <button type="button" class="btn-enable" id="printRecordBtn"><i class="fa-solid fa-print"></i> Print Record</button>
+            <button type="button" class="btn-primary-action" id="saveRecordBtn" style="display: none; background-color: var(--sunset-orange);"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+        </div>
+    </form>
+
+</aside>
+
+<!-- ================= WOUND PHOTO LIGHTBOX MODAL ================= -->
+<div id="woundLightbox" class="lightbox-overlay">
+    <div class="lightbox-container">
+        <img id="lightboxImg" src="" alt="Wound Assessment Zoomed View">
+        <button type="button" id="closeLightboxBtn" class="lightbox-close-btn">
+            &times; Close View
+        </button>
+    </div>
 </div>
 
 <script type="module" src="../../assets/js/abtc-reg.js"></script>
