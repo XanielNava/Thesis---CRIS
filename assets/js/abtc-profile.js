@@ -39,7 +39,6 @@ onAuthStateChanged(auth, async (user) => {
         globalActiveFacilityId = user.uid;
         console.log("Active Facility Session Tracked:", globalActiveFacilityId);
         
-        // 🏢 FETCH CUSTOM LOGO AND SWAP DESIGNATION PREVIEW TARGET
         try {
             const facilityDocRef = doc(db, "facilities", user.uid);
             const facilitySnap = await getDoc(facilityDocRef);
@@ -50,8 +49,6 @@ onAuthStateChanged(auth, async (user) => {
                     const ownerLogoImgElement = document.getElementById("ownerLogoPreview");
                     if (ownerLogoImgElement) {
                         ownerLogoImgElement.src = facilityData.logoData;
-                        
-                        // Clean inherited filters to cleanly render customized institutional graphics
                         ownerLogoImgElement.style.backgroundColor = "transparent";
                         ownerLogoImgElement.style.padding = "0px";
                         ownerLogoImgElement.style.borderRadius = "50%";
@@ -113,7 +110,7 @@ if (ownerCard && ownerModal) {
     });
 }
 
-// Modal Dismiss Closes (Guarded safely to prevent console breaks)
+// Modal Dismiss Closes (TYPO FIXED HERE)
 if (closeOwnerModalBtn && ownerModal && ownerPasswordInput) {
     closeOwnerModalBtn.addEventListener("click", () => { ownerModal.classList.remove("active"); ownerPasswordInput.value = ""; });
 }
@@ -121,7 +118,7 @@ if (closeNurseModalBtn && nurseModal && nursePinInput) {
     closeNurseModalBtn.addEventListener("click", () => { nurseModal.classList.remove("active"); nursePinInput.value = ""; });
 }
 
-// 📌 FORGOT PIN ACCESS COMPLIANCE HANDLER
+// FORGOT PIN ACCESS COMPLIANCE HANDLER
 if (forgotPinLink) {
     forgotPinLink.addEventListener("click", (e) => {
         e.preventDefault();
@@ -129,9 +126,7 @@ if (forgotPinLink) {
     });
 }
 
-// ==========================================================
 // SECURITY ACCESS SUBMISSIONS & AUDIT TRACE LOG ENGINE
-// ==========================================================
 async function writeAuditRecord(name, role) {
     if (!globalActiveFacilityId) return;
     try {
@@ -161,8 +156,9 @@ if (nurseForm) {
             return;
         }
 
-        // Challenge security validation verification pins directly against the local cache array row
         if (matchedStaff.pin === typedPin) {
+            sessionStorage.setItem("activeDesignation", "Nurse");
+            sessionStorage.setItem("activePersonnelName", matchedStaff.name);
             localStorage.setItem("activeDesignation", "Nurse");
             localStorage.setItem("activePersonnelName", matchedStaff.name);
             
@@ -178,19 +174,27 @@ if (nurseForm) {
     });
 }
 
-// 💼 OWNER SYSTEM LOG ENTRY (DYNAMIC ADMINISTRATOR NAME RESOLUTION)
+// 💼 OWNER SYSTEM LOG ENTRY
 if (ownerForm) {
     ownerForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const enteredPassword = ownerPasswordInput.value;
-        const activeFacilityEmail = localStorage.getItem("authenticatedFacilityEmail") || "wvmc@gmail.com";
+        
+        // Pull email directly from active Firebase authentication session
+        const activeFacilityEmail = auth.currentUser?.email 
+            || sessionStorage.getItem("authenticatedFacilityEmail") 
+            || localStorage.getItem("authenticatedFacilityEmail");
+
+        if (!activeFacilityEmail) {
+            alert("Session Error: Workspace credentials expired. Please re-login.");
+            window.location.href = "abtc-login.html";
+            return;
+        }
 
         try {
-            // 1. Authenticate identity session context
             await signInWithEmailAndPassword(auth, activeFacilityEmail, enteredPassword);
             
-            // 2. Extract specific administrator custom metadata values from Firestore reference
-            let dynamicAdminName = "Facility Administrator"; // Secure baseline default fallback
+            let dynamicAdminName = "Facility Administrator";
             if (globalActiveFacilityId) {
                 const facilityDocRef = doc(db, "facilities", globalActiveFacilityId);
                 const facilitySnapshot = await getDoc(facilityDocRef);
@@ -200,11 +204,12 @@ if (ownerForm) {
                 }
             }
             
-            // 3. Stash customized parameters inside session storage blocks
+            // Set in both sessionStorage and localStorage so abtc-dash.js can read the admin role
+            sessionStorage.setItem("activeDesignation", "Owner");
+            sessionStorage.setItem("activePersonnelName", dynamicAdminName);
             localStorage.setItem("activeDesignation", "Owner");
             localStorage.setItem("activePersonnelName", dynamicAdminName);
             
-            // Log verified session initialization event securely
             await writeAuditRecord(dynamicAdminName, "Owner");
             
             console.log(`Admin gate verified for ${dynamicAdminName}. Routing to dashboard panels...`);

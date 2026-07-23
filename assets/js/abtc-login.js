@@ -16,7 +16,6 @@ const firebaseConfig = {
   measurementId: "G-0X99BH7GW4"
 };
 
-// Initialize Firebase services
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -24,18 +23,17 @@ const db = getFirestore(app);
 // ==========================================================
 // 🏢 INTELLIGENT WORKPLACE LOOKUP (AS THEY TYPE)
 // ==========================================================
-document.getElementById("email").addEventListener("change", async (e) => {
+document.getElementById("email")?.addEventListener("change", async (e) => {
   const emailValue = e.target.value.trim().toLowerCase();
   const indicatorBox = document.getElementById("facilityIndicator");
   const nameTextContainer = document.getElementById("facilityNameText");
 
   if (!emailValue) {
-    indicatorBox.style.display = "none";
+    if (indicatorBox) indicatorBox.style.display = "none";
     return;
   }
 
   try {
-    // Look up facility details by testing against the contact informational address fields
     const facilitiesRef = collection(db, "facilities");
     const q = query(facilitiesRef, where("contactInfo.email", "==", emailValue));
     const querySnapshot = await getDocs(q);
@@ -44,22 +42,21 @@ document.getElementById("email").addEventListener("change", async (e) => {
       const facilityDoc = querySnapshot.docs[0];
       const facilityData = facilityDoc.data();
       
-      // Update badge text and reveal container framework smoothly
-      nameTextContainer.innerText = facilityData.facilityName || "Registered ABTC Location";
-      indicatorBox.style.display = "block";
+      if (nameTextContainer) nameTextContainer.innerText = facilityData.facilityName || "Registered ABTC Location";
+      if (indicatorBox) indicatorBox.style.display = "block";
     } else {
-      indicatorBox.style.display = "none";
+      if (indicatorBox) indicatorBox.style.display = "none";
     }
   } catch (error) {
     console.error("Dynamic workspace identifier discovery failure:", error);
-    indicatorBox.style.display = "none";
+    if (indicatorBox) indicatorBox.style.display = "none";
   }
 });
 
 // ==========================================================
 // 🔒 MASTER GATEKEEPER SUBMIT HANDSHAKE
 // ==========================================================
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
+document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const email = document.getElementById("email").value.trim().toLowerCase();
@@ -67,8 +64,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   const loginBtn = document.getElementById('loginBtn');
 
   try {
-    loginBtn.textContent = 'Verifying workspace access...';
-    loginBtn.disabled = true; 
+    if (loginBtn) {
+      loginBtn.textContent = 'Verifying workspace access...';
+      loginBtn.disabled = true; 
+    }
 
     // 1. Authenticate facility baseline workspace tokens
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -81,22 +80,25 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     if (facilitySnapshot.exists()) {
       const facilityData = facilitySnapshot.data();
 
-      // Check if administrative actions have put this facility profile in a disabled state
       if (facilityData.status === "Disabled") {
         await signOut(auth);
         alert("Access Denied: This facility terminal account has been suspended.");
         return; 
       }
       
-      // Flip workspace state marker to Online
       await updateDoc(facilityDocRef, { status: "Online" });
     }
 
-    // 3. 🎯 THE LINK: Cache the master session email context for profile prompts later
-    localStorage.setItem("authenticatedFacilityEmail", email);
-    localStorage.removeItem("activeDesignation"); // Reset any stale role markers
+    // 3. Tab-Isolated session initialization
+    sessionStorage.setItem("authenticatedFacilityEmail", email);
+    sessionStorage.removeItem("activeDesignation");
+    sessionStorage.removeItem("activePersonnelName");
 
-    // 4. 🔀 Route cleanly into the custom Profile Choice Matrix page
+    // Clear stale global fallback storage
+    localStorage.removeItem("activeDesignation");
+    localStorage.removeItem("activePersonnelName");
+
+    // 4. Route into Profile Selection Matrix
     window.location.href = 'abtc-profiles.html';
 
   } catch (error) {
@@ -109,7 +111,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     alert('Login failed: ' + clientErrorMessage);
   } finally {
-    loginBtn.textContent = 'Login';
-    loginBtn.disabled = false;
+    if (loginBtn) {
+      loginBtn.textContent = 'Login';
+      loginBtn.disabled = false;
+    }
   }
 });

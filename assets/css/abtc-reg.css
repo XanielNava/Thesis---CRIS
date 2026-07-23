@@ -257,7 +257,6 @@ body {
     font-size: 13px;
 }
 
-/* Structural Alignment Fixes mapping actions strictly inside borders */
 .dashboard-table th:last-child {
     text-align: center !important;
     border-top-right-radius: 12px !important;
@@ -270,7 +269,6 @@ body {
     padding: 8px 12px !important;
 }
 
-/* Uniform Matrix Buttons Formatting Layout */
 .dashboard-table .btn-enable,
 .dashboard-table .btn-disable {
     padding: 6px 12px !important;
@@ -290,79 +288,338 @@ body {
 .dashboard-table .btn-disable { background-color: #dc3545 !important; color: white !important; }
 .dashboard-table .btn-disable:hover { background-color: #bd2130 !important; }
 
-/* ================= MODAL OVERLAYS WINDOW INTERFACES ================= */
-.modal {
+.menu-item-link { text-decoration: none; width: 100%; display: block; }
+
+/* ================= RECORD DRAWER ================= */
+.drawer-overlay {
     display: none;
     position: fixed;
-    z-index: 2000;
-    left: 0;
+    inset: 0;
+    background: rgba(26, 35, 78, 0.5);
+    z-index: 2500;
+}
+.drawer-overlay.open { display: block; }
+
+.record-drawer {
+    position: fixed;
     top: 0;
+    right: -560px;
     width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
+    max-width: 560px;
+    height: 100vh;
+    background: #ffffff;
+    z-index: 2600;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition-smooth);
+    overflow-y: auto;
+}
+.record-drawer.open { right: 0; }
+
+.drawer-header {
+    background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+    color: #fff;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
 }
 
-.modal-content {
-    background-color: #ffffff;
-    margin: 10% auto;
-    padding: 30px;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 480px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    animation: slideDown 0.3s ease-out;
+.drawer-header h2 {
+    font-size: 15px;
+    letter-spacing: 0.5px;
 }
 
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.close-modal-trigger, .close-edit-modal-trigger {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+.drawer-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 16px;
     cursor: pointer;
-    line-height: 20px;
+    line-height: 1;
 }
-.close-modal-trigger:hover, .close-edit-modal-trigger:hover { color: #000; }
 
-#patientRegistrationForm label, #editPatientForm label {
-    display: block;
-    margin-top: 15px;
+.drawer-print-heading { display: none; }
+
+.drawer-body {
+    padding: 20px 24px;
+    flex-grow: 1;
+}
+
+.drawer-section-title {
+    color: var(--sidebar-bg);
     font-size: 13px;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 20px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--sunset-yellow);
+}
+.drawer-section-title:first-child { margin-top: 0; }
+
+.drawer-field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 20px;
+}
+.drawer-field-wide { grid-column: 1 / -1; }
+
+.drawer-field label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--sunset-orange);
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.drawer-field span.view-val {
+    display: block;
+    font-size: 14px;
     color: var(--text-dark);
 }
 
-#patientRegistrationForm input, #patientRegistrationForm select,
-#editPatientForm input, #editPatientForm select {
-    width: 100%;
+.drawer-photo-frame {
+    margin-top: 8px;
+    border: 1px dashed #dcdcdc;
+    border-radius: 8px;
     padding: 12px;
-    margin-top: 6px;
+    text-align: center;
+}
+
+.wound-img-preview {
+    max-width: 100%;
+    border-radius: 6px;
+}
+
+/* ================= DRAWER EDIT MODE STYLES ================= */
+.record-drawer .edit-val {
+    display: none; /* Hidden by default in View Mode */
+    width: 100%;
+    padding: 8px 10px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 13px;
+    font-family: inherit;
+    margin-top: 2px;
     outline: none;
-    box-sizing: border-box;
 }
 
-.btn-submit-form {
-    background-color: var(--sunset-orange);
-    color: white;
-    width: 100%;
-    padding: 14px;
+.record-drawer .edit-val:focus {
+    border-color: var(--sunset-orange);
+    box-shadow: 0 0 0 2px rgba(234, 97, 19, 0.15);
+}
+
+.record-drawer.edit-mode .view-val {
+    display: none !important; /* Hide static text labels in Edit Mode */
+}
+
+.record-drawer.edit-mode .edit-val {
+    display: block !important; /* Show editable inputs in Edit Mode */
+}
+
+.edit-flex {
+    display: none;
+    gap: 8px;
+}
+
+.record-drawer.edit-mode .edit-flex {
+    display: flex !important;
+}
+
+.mode-badge {
+    font-size: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 2px;
+    display: inline-block;
+}
+
+.btn-toggle-edit {
+    background: #ffffff;
+    color: var(--sidebar-bg);
     border: none;
+    padding: 6px 14px;
     border-radius: 6px;
     font-weight: bold;
-    font-size: 14px;
-    margin-top: 25px;
+    font-size: 12px;
     cursor: pointer;
+    margin-right: 10px;
     transition: var(--transition-smooth);
 }
-.btn-submit-form:hover { background-color: #d1520e; }
 
-.menu-item-link { text-decoration: none; width: 100%; display: block; }
+.btn-toggle-edit:hover {
+    background: var(--sunset-yellow);
+}
+
+/* ================= CASE REVISION & HISTORY TIMELINE ================= */
+.history-timeline {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.history-item {
+    background-color: #f8f9fa;
+    border-left: 3px solid var(--sunset-gold);
+    padding: 10px 12px;
+    border-radius: 0 6px 6px 0;
+    font-size: 12px;
+}
+
+.history-item-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    color: var(--sidebar-bg);
+    margin-bottom: 3px;
+}
+
+.history-item-action {
+    color: var(--sunset-orange);
+}
+
+.history-item-meta {
+    font-size: 11px;
+    color: #666;
+}
+
+.drawer-sig-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 28px;
+}
+
+.drawer-sig-box {
+    border-top: 1px solid var(--text-dark);
+    padding-top: 6px;
+    font-size: 12px;
+    text-align: center;
+    color: var(--text-dark);
+}
+
+.drawer-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #eef2f5;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* ================= WOUND PHOTO LIGHTBOX MODAL ================= */
+.lightbox-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 3000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.lightbox-overlay.open {
+    display: flex;
+}
+
+.lightbox-container {
+    position: relative;
+    max-width: 90vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.lightbox-container img {
+    max-width: 100%;
+    max-height: 75vh;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    object-fit: contain;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-close-btn {
+    margin-top: 15px;
+    background: #dc3545;
+    color: #ffffff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: var(--transition-smooth);
+}
+
+.lightbox-close-btn:hover {
+    background: #bd2130;
+    transform: translateY(-2px);
+}
+
+.drawer-photo-frame img.wound-img-preview {
+    cursor: zoom-in;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.drawer-photo-frame img.wound-img-preview:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ================= PRINT RULES ================= */
+@media print {
+    body * { visibility: hidden; }
+    .record-drawer, .record-drawer * { visibility: visible; }
+    .record-drawer {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        box-shadow: none;
+    }
+    .drawer-overlay,
+    .drawer-close-btn,
+    .drawer-footer,
+    .lightbox-overlay,
+    .btn-toggle-edit,
+    .mode-badge,
+    .edit-val {
+        display: none !important;
+    }
+    .view-val {
+        display: block !important;
+    }
+    .drawer-print-heading {
+        display: block;
+        padding: 0 0 16px;
+    }
+    .drawer-print-heading h1 { font-size: 20px; color: var(--text-dark); }
+    .drawer-print-heading p { font-size: 12px; color: var(--text-dark); opacity: 0.8; }
+    .drawer-header { background: none !important; color: var(--text-dark) !important; padding: 0 0 8px; }
+}
