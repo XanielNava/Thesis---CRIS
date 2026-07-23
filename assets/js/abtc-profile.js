@@ -86,7 +86,8 @@ async function populatePersonnelDropdown(facilityId) {
 
             const option = document.createElement("option");
             option.value = doc.id;
-            option.innerText = `${data.name} (${data.position})`;
+            const staffRole = data.position || data.role || 'Staff';
+            option.innerText = `${data.name} (${staffRole})`;
             nurseDropdown.appendChild(option);
         });
     } catch (error) {
@@ -94,7 +95,7 @@ async function populatePersonnelDropdown(facilityId) {
     }
 }
 
-// 🟢 WORKFLOW A: NURSE SELECTION MODAL SYSTEM
+// 🟢 WORKFLOW A: PERSONNEL SELECTION MODAL SYSTEM
 if (nurseCard && nurseModal) {
     nurseCard.addEventListener("click", () => {
         nurseModal.classList.add("active");
@@ -110,7 +111,7 @@ if (ownerCard && ownerModal) {
     });
 }
 
-// Modal Dismiss Closes (TYPO FIXED HERE)
+// Modal Dismiss Closes
 if (closeOwnerModalBtn && ownerModal && ownerPasswordInput) {
     closeOwnerModalBtn.addEventListener("click", () => { ownerModal.classList.remove("active"); ownerPasswordInput.value = ""; });
 }
@@ -142,7 +143,7 @@ async function writeAuditRecord(name, role) {
     }
 }
 
-// 🩺 NURSE SYSTEM CLOCK IN
+// 🩺 CLINIC PERSONNEL SYSTEM CLOCK IN
 if (nurseForm) {
     nurseForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -157,15 +158,24 @@ if (nurseForm) {
         }
 
         if (matchedStaff.pin === typedPin) {
-            sessionStorage.setItem("activeDesignation", "Nurse");
+            // Determine Role / Position (defaults to Nurse if unassigned)
+            const resolvedRole = matchedStaff.position || matchedStaff.role || "Nurse";
+
+            sessionStorage.setItem("activeDesignation", resolvedRole);
             sessionStorage.setItem("activePersonnelName", matchedStaff.name);
-            localStorage.setItem("activeDesignation", "Nurse");
+            localStorage.setItem("activeDesignation", resolvedRole);
             localStorage.setItem("activePersonnelName", matchedStaff.name);
             
-            await writeAuditRecord(matchedStaff.name, "Nurse");
+            await writeAuditRecord(matchedStaff.name, resolvedRole);
             
-            console.log("Personnel profile match accepted. Routing to registry space...");
-            window.location.href = "abtc-reg.html";
+            console.log(`Personnel profile match accepted for ${matchedStaff.name} [${resolvedRole}]. Routing...`);
+
+            // Dispatch based on Role
+            if (resolvedRole.toLowerCase().includes("pharmacist")) {
+                window.location.href = "abtc-pharmacy.html";
+            } else {
+                window.location.href = "abtc-reg.html";
+            }
         } else {
             alert("Access Denied: The 4-digit passcode PIN entered does not match your roster record profile mapping.");
             nursePinInput.value = "";

@@ -345,3 +345,61 @@ textarea {
   .span-2 { grid-column: span 1; }
   .topbar { padding: 18px 20px; }
 }
+
+/* CLEAN PEP SCHEDULE GRID */
+.pep-schedule-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.pep-date-card {
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.pep-date-card.active {
+    background: #fff4e6;
+    border-color: #EA6113;
+}
+
+.pep-date-card .day-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: #495057;
+    text-transform: uppercase;
+}
+
+.pep-date-card.active .day-title {
+    color: #d9480f;
+}
+
+.pep-card-date {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 12px;
+    font-family: inherit;
+    color: #212529;
+    background: #ffffff;
+    outline: none;
+}
+
+.pep-card-date:focus {
+    border-color: #EA6113;
+}
+
+/* Category I Disabled State */
+.pep-date-card.disabled {
+    opacity: 0.4;
+    background: #e9ecef;
+    border-color: #ced4da;
+    pointer-events: none;
+}

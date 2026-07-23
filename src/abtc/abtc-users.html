@@ -6,16 +6,10 @@
     <title>Personnel & Auditing — CRIS | Animal Bite Treatment Center</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <!-- Reusing your clean setting styles for uniform cards and grid layouts -->
+    
+    <!-- Modular External Stylesheets -->
     <link rel="stylesheet" href="../../assets/css/abtc-setting.css">
-    <style>
-        /* Lightweight local overrides to handle the logging container size bounds */
-        .log-timestamp { color: #888; font-family: monospace; font-size: 13px; }
-        .badge-owner { background-color: #ffe8cc; color: #cc7a00; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
-        .badge-nurse { background-color: #e3faf2; color: #0ca678; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
-        .full-width-card { grid-column: span 2; }
-        @media (max-width: 1024px) { .full-width-card { grid-column: span 1; } }
-    </style>
+    <link rel="stylesheet" href="../../assets/css/abtc-users.css">
 </head>
 <body>
 
@@ -25,7 +19,7 @@
        CRIS UNIVERSAL SIDEBAR
        ===================================================== -->
   <aside class="sidebar">
-    <div class="logo-section">
+    <div class="logo-section logo-section-fixed">
       <img src="../../assets/images/logo-login.png" alt="Logo" class="logo-image">
       <p>Community-Centric<br>Rabies Intelligence<br>System</p>
       <div class="role-badge">ABTC MODULE</div>
@@ -75,8 +69,14 @@
                   <input type="email" id="personnelEmail" placeholder="e.g. you@abtc.gov.ph">
                 </div>
                 <div class="field">
-                  <label for="position">Position</label>
-                  <input type="text" id="position" placeholder="e.g. Nurse, Physician, Encoder">
+                  <label for="position">Position / Designation Role</label>
+                  <select id="position" class="form-select-input">
+                    <option value="" disabled selected>-- Select Position --</option>
+                    <option value="Nurse">Nurse / Duty Personnel</option>
+                    <option value="Pharmacist">Pharmacist / Vaccine Custodian</option>
+                    <option value="Physician">Attending Physician</option>
+                    <option value="Encoder">Data Encoder</option>
+                  </select>
                 </div>
                 <!-- 🔐 FOR ACCOUNTABILITY PIN ENTRY -->
                 <div class="field">
@@ -103,7 +103,9 @@
                     </tr>
                   </thead>
                   <tbody id="personnelTableBody">
-                    <!-- Dynamic staff roster rows stream here -->
+                    <tr>
+                      <td colspan="4" class="table-empty-notice">Loading roster records...</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -112,12 +114,12 @@
           </div>
         </section>
 
-        <!-- CARD 2: Dedicated Login History Log (Dynamically Sorted) -->
+        <!-- CARD 2: Dedicated Login History Log -->
         <section class="card full-width-card">
           <h2 class="card-title"><span class="icon">📜</span> Login History</h2>
           <p class="card-subtitle">Immutable, real-time logging records of user account clock-ins tracking terminal sessions.</p>
           
-          <div class="table-scroll-container" style="max-height: 350px; margin-top: 20px;">
+          <div class="table-scroll-container log-container-bounded">
             <table class="roster-table">
               <thead>
                 <tr>
@@ -129,7 +131,9 @@
                 </tr>
               </thead>
               <tbody id="auditLogTableBody">
-                <!-- Live streaming audit log objects inject here -->
+                <tr>
+                  <td colspan="5" class="table-empty-notice">Loading access history logs...</td>
+                </tr>
               </tbody>
             </table>
           </div>

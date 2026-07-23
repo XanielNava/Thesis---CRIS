@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacist Inventory — CRIS | ABTC</title>
+    
+    <!-- External Modular Stylesheets -->
+    <link rel="stylesheet" href="../../assets/css/abtc-reg.css">
+    <link rel="stylesheet" href="../../assets/css/abtc-pharmacy.css">
+    
+    <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- CRIS UNIVERSAL SIDEBAR -->
+    <aside class="sidebar">
+        <div class="logo-section logo-section-fixed">
+            <img src="../../assets/images/logo-login.png" alt="Logo" class="logo-image">
+            <p>Community-Centric<br>Rabies Intelligence<br>System</p>
+            <div class="role-badge role-badge-pharmacy">PHARMACY MODULE</div>
+        </div>
+
+        <nav class="menu">
+            <a href="abtc-pharmacy.html" class="menu-item-link">
+                <button class="menu-item active">Stock & Requisitions</button>
+            </a>
+        </nav>
+
+        <div class="footer-nav">
+            <button id="logout-btn" class="menu-item alt">Logout</button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <header class="header">
+            <h1 id="dashboardTitle">COLD-CHAIN VACCINE PHARMACY MANAGEMENT</h1>
+            <div class="user-profile-top">
+                <div class="profile-info" id="profileInfoText">
+                    <strong>Duty Pharmacist</strong><br>
+                    <span>Pharmacist / Custodian</span>
+                </div>
+                <div class="profile-icon"></div>
+            </div>
+        </header>
+
+        <!-- TOP SUMMARY CARDS -->
+        <div class="inventory-summary-cards">
+            <div class="summary-card">
+                <div class="summary-icon-box icon-blue">
+                    <i class="fa-solid fa-vials"></i>
+                </div>
+                <div class="summary-info">
+                    <h4>Total Vials in Storage</h4>
+                    <div class="stat-value" id="statTotalVials">0</div>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon-box icon-green">
+                    <i class="fa-solid fa-syringe"></i>
+                </div>
+                <div class="summary-info">
+                    <h4>Available Doses</h4>
+                    <div class="stat-value" id="statTotalDoses">0</div>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon-box icon-red">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <div class="summary-info">
+                    <h4>Pending Requisitions</h4>
+                    <div class="stat-value" id="statPendingReqs">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 1: PENDING NURSE REQUISITION TICKETS -->
+        <div class="card full-width card-spacing">
+            <div class="section-title-bar">
+                <h3><i class="fa-solid fa-file-prescription icon-requisition"></i> Pending Nurse Requisition Tickets</h3>
+                <span class="subtext-muted">Live queue of vaccine release requests from duty stations (Click any row to inspect details)</span>
+            </div>
+
+            <div class="table-container">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Requested By</th>
+                            <th>Target Patient</th>
+                            <th>Item & Quantity</th>
+                            <th>Remarks</th>
+                            <th>Date / Time</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requisitionTableBody">
+                        <tr>
+                            <td colspan="7" class="table-empty-notice">
+                                Loading live requisitions queue...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECTION 2: BATCH INVENTORY LEDGER -->
+        <div class="card full-width">
+            
+            <div class="inventory-action-bar">
+                <input type="text" id="searchInventoryInput" class="search-inventory-input" placeholder="Search brand or batch no...">
+                <button id="btnOpenAddModal" class="btn-add-stock">
+                    <i class="fa-solid fa-plus"></i> Register Incoming Stock Batch
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Brand / Vaccine Name</th>
+                            <th>Batch No.</th>
+                            <th>Vials Left</th>
+                            <th>Doses Per Vial</th>
+                            <th>Expiration Date</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                        <tr>
+                            <td colspan="7" class="table-loading-notice">
+                                Loading stock records...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<!-- ADD INCOMING STOCK MODAL -->
+<div class="modal-overlay" id="inventoryModal">
+    <div class="calendar-modal">
+        <div class="calendar-modal-header">
+            <h3 class="modal-heading-text"><i class="fa-solid fa-boxes-packing icon-dark-margin"></i> Register Incoming Vaccine Stock</h3>
+            <button class="modal-close-x" id="closeInvModalX">&times;</button>
+        </div>
+
+        <form id="addStockForm">
+            <div class="calendar-modal-body">
+                <div class="inventory-form-grid">
+                    <div class="form-group-inv full-width">
+                        <label>Vaccine Brand Name</label>
+                        <select id="invBrandName" required>
+                            <option value="Verorab">Verorab</option>
+                            <option value="Rabipur">Rabipur</option>
+                            <option value="Speeda">Speeda</option>
+                            <option value="Abhayrab">Abhayrab</option>
+                            <option value="RIG (Rabies Immunoglobulin)">RIG (Rabies Immunoglobulin)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group-inv">
+                        <label>Batch / Lot Number</label>
+                        <input type="text" id="invBatchNo" placeholder="e.g. B2026-99" required>
+                    </div>
+
+                    <div class="form-group-inv">
+                        <label>Expiration Date</label>
+                        <input type="date" id="invExpDate" required>
+                    </div>
+
+                    <div class="form-group-inv">
+                        <label>Vials Quantity Received</label>
+                        <input type="number" id="invVialsCount" min="1" placeholder="e.g. 50" required>
+                    </div>
+
+                    <div class="form-group-inv">
+                        <label>Doses per Vial</label>
+                        <input type="number" id="invDosesPerVial" min="1" value="1" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="calendar-modal-footer">
+                <button type="button" class="btn-modal-close" id="closeInvModalBtn">Cancel</button>
+                <button type="submit" class="btn-add-stock btn-flex-inline">Save & Authorize Batch</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- VIEW FULL REQUISITION TICKET DETAILS MODAL -->
+<div class="modal-overlay" id="viewReqModal">
+    <div class="calendar-modal modal-compact">
+        <div class="calendar-modal-header">
+            <div>
+                <h3 class="modal-heading-text"><i class="fa-solid fa-file-invoice icon-requisition"></i> Requisition Ticket Overview</h3>
+                <span class="subtext-muted" id="modalTicketSubId">Inspect complete request details</span>
+            </div>
+            <button class="modal-close-x" id="closeViewReqX">&times;</button>
+        </div>
+
+        <div class="calendar-modal-body modal-padding-compact">
+            <div class="req-detail-grid">
+                <div class="req-detail-item">
+                    <span class="req-label">Ticket ID</span>
+                    <strong id="detTicketId" class="req-val">--</strong>
+                </div>
+                <div class="req-detail-item">
+                    <span class="req-label">Date & Time</span>
+                    <span id="detTimestamp" class="req-val">--</span>
+                </div>
+                <div class="req-detail-item">
+                    <span class="req-label">Requested By</span>
+                    <span id="detRequestedBy" class="req-val">--</span>
+                </div>
+                <div class="req-detail-item">
+                    <span class="req-label">Target Patient</span>
+                    <span id="detPatientName" class="req-val">--</span>
+                </div>
+                <div class="req-detail-item full-width">
+                    <span class="req-label">Vaccine Item & Quantity</span>
+                    <span id="detItemQty" class="req-val highlight-val">--</span>
+                </div>
+                <div class="req-detail-item full-width">
+                    <span class="req-label">Remarks / Purpose</span>
+                    <span id="detRemarks" class="req-val">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="calendar-modal-footer footer-align-right">
+            <button type="button" class="btn-modal-close" id="closeViewReqBtn">Close</button>
+            <button type="button" id="modalApproveBtn" class="btn-add-stock btn-green">
+                <i class="fa-solid fa-check-double"></i> Approve & Issue Stock
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="../../assets/js/abtc-pharmacy.js"></script>
+</body>
+</html>

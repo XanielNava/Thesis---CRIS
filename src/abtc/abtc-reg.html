@@ -14,7 +14,7 @@
 <div class="container">
 
     <aside class="sidebar">
-        <div class="logo-section" style="height: 174.78px;">
+        <div class="logo-section logo-section-fixed" style="height: 174.78px;">
             <img src="../../assets/images/logo-login.png" alt="Logo" class="logo-image">
             <p>
                 Community-Centric<br>
@@ -30,6 +30,12 @@
         <nav class="menu">
             <a href="abtc-reg.html" class="menu-item-link">
                 <button class="menu-item active">Patient Registry</button>
+            </a>
+            <a href="abtc-calendar.html" class="menu-item-link">
+                <button class="menu-item">Dose Calendar</button>
+            </a>
+            <a href="abtc-inventory.html" class="menu-item-link">
+                <button class="menu-item">Vaccine Inventory</button>
             </a>
         </nav>
 
@@ -108,7 +114,7 @@
                             </thead>
 
                             <tbody id="patientRegistryTableBody">
-
+                                <!-- Dynamically streamed rows via abtc-reg.js -->
                             </tbody>
 
                         </table>
@@ -297,7 +303,7 @@
                 </div>
             </div>
 
-            <!-- 5. Management / Treatment -->
+            <!-- 5. Management / Treatment & Immunoglobulin -->
             <div class="drawer-section-title"><i class="fa-solid fa-kit-medical"></i> Management & Treatment</div>
             <div class="drawer-field-grid">
                 <div class="drawer-field drawer-field-wide">
@@ -318,11 +324,37 @@
                         <option value="Intradermal">Intradermal</option>
                     </select>
                 </div>
-                <div class="drawer-field drawer-field-wide">
-                    <label>Immunoglobulin Given</label>
-                    <span class="view-val" id="lblImmunoglobulin">N/A</span>
-                    <input type="text" class="edit-val" id="editImmunoglobulin">
+                <div class="drawer-field">
+                    <label>Immunoglobulin (RIG) Type</label>
+                    <span class="view-val" id="lblRigType">None</span>
+                    <select class="edit-val" id="editRigType">
+                        <option value="">None / Not Applicable</option>
+                        <option value="ERIG">ERIG (Equine)</option>
+                        <option value="HRIG">HRIG (Human)</option>
+                        <option value="mAb">Monoclonal Antibodies (mAb)</option>
+                    </select>
                 </div>
+                <div class="drawer-field">
+                    <label>RIG Dose / Volume</label>
+                    <span class="view-val" id="lblRigDose">N/A</span>
+                    <input type="text" class="edit-val" id="editRigDose" placeholder="e.g., 1,000 IU or 2.5 mL">
+                </div>
+
+                <!-- Targeted Vaccination Schedule Summary -->
+                <div class="drawer-field drawer-field-wide">
+                    <label>Target PEP Vaccination Schedule</label>
+                    <div class="view-val" id="lblPepScheduleSummary" style="font-size: 12px; font-weight: 600; color: #102a43;">
+                        Day 0: --- | Day 3: --- | Day 7: --- | Day 14: --- | Day 28: ---
+                    </div>
+                    <div class="edit-val edit-flex" style="gap: 6px; flex-wrap: wrap; margin-top: 4px;">
+                        <input type="date" id="editDay0" title="Day 0 Target Date" style="font-size: 11px; padding: 4px;">
+                        <input type="date" id="editDay3" title="Day 3 Target Date" style="font-size: 11px; padding: 4px;">
+                        <input type="date" id="editDay7" title="Day 7 Target Date" style="font-size: 11px; padding: 4px;">
+                        <input type="date" id="editDay14" title="Day 14 Target Date" style="font-size: 11px; padding: 4px;">
+                        <input type="date" id="editDay28" title="Day 28 Target Date" style="font-size: 11px; padding: 4px;">
+                    </div>
+                </div>
+
                 <div class="drawer-field drawer-field-wide">
                     <label>Other Remarks</label>
                     <span class="view-val" id="lblRemarks">None</span>
