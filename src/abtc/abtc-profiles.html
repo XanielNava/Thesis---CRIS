@@ -40,19 +40,19 @@
         <p class="profile-subtitle">Select your profile designation context to clock in</p>
 
         <!-- =====================================================
-             DYNAMIC DASHBOARD PROFILE GRID (ADJUSTED FOR ALIGNMENT)
+             DYNAMIC DASHBOARD PROFILE GRID
              ===================================================== -->
         <div class="logo-container" style="display: flex; justify-content: center; align-items: stretch; gap: 60px; width: 100%; max-width: 900px; margin: 40px auto;">
             
-            <!-- 🩺 NURSE PROFILE CARD (ABTC) -->
+            <!-- 🩺 CLINIC PERSONNEL PROFILE CARD (ABTC) -->
             <div class="logo-link" id="nurseProfileCard" style="cursor: pointer; flex: 1; max-width: 320px;">
                 <div class="logo-box" style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100%; text-align: center;">
                     <div style="width: 240px; height: 240px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
                         <img src="../../assets/images/abtc-logo.png" alt="Animal Bite Treatment Center Seal" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                     </div>
                     <p style="margin: 0; font-weight: 700; font-size: 16px; color: #333; min-height: 48px;">
-                        Personnel<br>
-                        <span class="profile-role-subtext" style="font-size: 13px; color: #666; font-weight: 400;">Personnel Duty Login</span>
+                        Duty Personnel<br>
+                        <span class="profile-role-subtext" style="font-size: 13px; color: #666; font-weight: 400;">Nurse / Pharmacist Duty Login</span>
                     </p>
                 </div>
             </div>
@@ -65,7 +65,7 @@
                     </div>
                     <p style="margin: 0; font-weight: 700; font-size: 16px; color: #333; min-height: 48px;">
                         Owner / Administrator<br>
-                        <span class="profile-role-subtext" style="font-size: 13px; color: #666; font-weight: 400;">Owner Login</span>
+                        <span class="profile-role-subtext" style="font-size: 13px; color: #666; font-weight: 400;">Owner Master Login</span>
                     </p>
                 </div>
             </div>
@@ -73,11 +73,11 @@
         </div>
     </main>
 
-    <!-- 🩺 🔒 NURSE PERSONNEL PIN VERIFICATION MODAL -->
+    <!-- 🩺 🔒 PERSONNEL DUTY PIN VERIFICATION MODAL -->
     <div class="modal-overlay" id="nurseModalOverlay">
         <div class="password-modal">
             <h3>Personnel Duty Verification</h3>
-            <p class="modal-description">Select your profile name from the facility register and provide your 4-digit security clock-in passcode PIN.</p>
+            <p class="modal-description">Select your profile name from the facility register and enter your 4-digit security clock-in PIN.</p>
             
             <form id="nurseVerificationForm">
                 <select id="nurseSelectDropdown" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px; margin-bottom: 15px; outline: none; background-color: #fff;">

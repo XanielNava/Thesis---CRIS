@@ -127,7 +127,7 @@ function streamFacilityRecords(facilityId) {
 }
 
 // ----------------------------------------------------
-// 3. Table Renderer
+// 3. Table Renderer with Whole-Row Click Support
 // ----------------------------------------------------
 function renderLibraryTable(dataList) {
     if (!tableBody) return;
@@ -140,6 +140,7 @@ function renderLibraryTable(dataList) {
 
     dataList.forEach((record) => {
         const row = document.createElement("tr");
+        row.className = "clickable-req-row"; // Adds pointer cursor and smooth hover background
         
         let dateString = "N/A";
         if (record.createdAt && record.createdAt.seconds) {
@@ -164,6 +165,12 @@ function renderLibraryTable(dataList) {
                 <button class="btn-disable btn-delete-file" data-id="${record.id}" data-name="${patientNameDisplay}">Delete</button>
             </td>
         `;
+
+        // Whole row click opens the drawer (unless action buttons are clicked directly)
+        row.addEventListener("click", (e) => {
+            if (e.target.closest("button")) return;
+            openDocumentDrawer(record.id);
+        });
 
         row.querySelector(".btn-open-file")?.addEventListener("click", (e) => {
             openDocumentDrawer(e.currentTarget.getAttribute("data-id"));
@@ -241,6 +248,7 @@ function openDocumentDrawer(docId) {
     
     safeSetText("drawerIdLabel", `RECORD: ${displayId}`);
     
+    // Patient Info
     safeSetText("lblFullName", file.fullName || file.name || "Not Specified");
     safeSetText("lblAgeSex", `${file.age || "N/A"} Yrs / ${file.sex || "N/A"}`);
     safeSetText("lblContact", file.contactNo || "N/A");
@@ -254,6 +262,7 @@ function openDocumentDrawer(docId) {
     if (document.getElementById("editAddress")) document.getElementById("editAddress").value = file.address || "";
     if (document.getElementById("editPhysician")) document.getElementById("editPhysician").value = file.physician || "";
 
+    // Exposure & Bite Details
     safeSetText("lblExposureDate", file.exposureDate || "N/A");
     safeSetText("lblConsultDateTime", file.consultDateTime ? new Date(file.consultDateTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : "N/A");
     safeSetText("lblBiteArea", file.biteArea || "N/A");
@@ -270,6 +279,7 @@ function openDocumentDrawer(docId) {
     if (document.getElementById("editCategory")) document.getElementById("editCategory").value = file.classification || (file.exposureCategory ? `Category ${file.exposureCategory}` : "Category I");
     if (document.getElementById("editPriorVacc")) document.getElementById("editPriorVacc").value = file.priorVaccination || "No";
 
+    // Vital Signs
     safeSetText("lblBp", file.bp || "---");
     safeSetText("lblTemp", file.temp ? `${file.temp} °C` : "---");
     safeSetText("lblPulse", file.pulse ? `${file.pulse} bpm` : "---");
@@ -284,6 +294,7 @@ function openDocumentDrawer(docId) {
     if (document.getElementById("editO2")) document.getElementById("editO2").value = file.o2sat || "";
     if (document.getElementById("editWeight")) document.getElementById("editWeight").value = file.weight || "";
 
+    // Medical History
     safeSetText("lblComorbidities", file.comorbidities || "None");
     safeSetText("lblAllergies", file.allergies || "None");
     safeSetText("lblMedications", file.medications || "None");
@@ -292,18 +303,91 @@ function openDocumentDrawer(docId) {
     if (document.getElementById("editAllergies")) document.getElementById("editAllergies").value = file.allergies || "";
     if (document.getElementById("editMedications")) document.getElementById("editMedications").value = file.medications || "";
 
+    // Management, Treatment & Structured Immunoglobulin (RIG)
     safeSetText("lblWoundCare", file.woundCare || "N/A");
     safeSetText("lblVaccineBrand", file.vaccineBrand || "None");
     safeSetText("lblRoute", file.route || "N/A");
-    safeSetText("lblImmunoglobulin", file.immunoglobulin || "None");
+    safeSetText("lblRigType", file.rigType || "None");
+    safeSetText("lblRigDose", file.rigDose || "N/A");
     safeSetText("lblRemarks", file.remarks || "None");
 
     if (document.getElementById("editWoundCare")) document.getElementById("editWoundCare").value = file.woundCare || "";
     if (document.getElementById("editVaccineBrand")) document.getElementById("editVaccineBrand").value = file.vaccineBrand || "";
     if (document.getElementById("editRoute")) document.getElementById("editRoute").value = file.route || "Intramuscular";
-    if (document.getElementById("editImmunoglobulin")) document.getElementById("editImmunoglobulin").value = file.immunoglobulin || "";
+    if (document.getElementById("editRigType")) document.getElementById("editRigType").value = file.rigType || "";
+    if (document.getElementById("editRigDose")) document.getElementById("editRigDose").value = file.rigDose || "";
     if (document.getElementById("editRemarks")) document.getElementById("editRemarks").value = file.remarks || "";
 
+    // PEP Schedule Target Dates Map & Dynamic Completion Badges
+    let dates = file.pepScheduleDates || {};
+
+    if (!dates.day0 && (file.consultDateTime || file.exposureDate)) {
+        const baseVal = file.consultDateTime ? file.consultDateTime.split('T')[0] : file.exposureDate;
+        if (baseVal) {
+            const [y, m, d] = baseVal.split('-').map(Number);
+            const baseDate = new Date(y, m - 1, d);
+            
+            const addDays = (dt, n) => {
+                const res = new Date(dt);
+                res.setDate(res.getDate() + n);
+                return `${res.getFullYear()}-${String(res.getMonth()+1).padStart(2,'0')}-${String(res.getDate()).padStart(2,'0')}`;
+            };
+
+            dates = {
+                day0: baseVal,
+                day3: addDays(baseDate, 3),
+                day7: addDays(baseDate, 7),
+                day14: addDays(baseDate, 14),
+                day28: addDays(baseDate, 28)
+            };
+        }
+    }
+
+    const completedList = Array.isArray(file.completedDoses) 
+        ? file.completedDoses 
+        : (Array.isArray(file.vaccSchedule) ? file.vaccSchedule : []);
+
+    function formatDisplayDate(dateStr) {
+        if (!dateStr || dateStr === '---') return '---';
+        const parts = dateStr.split('T')[0].split('-');
+        if (parts.length !== 3) return dateStr;
+        const [y, m, d] = parts;
+        return `${m}/${d}/${y}`;
+    }
+
+    function formatDoseBadge(dayLabel, dateValue) {
+        if (!dateValue) return `${dayLabel}: ---`;
+        const formattedDate = formatDisplayDate(dateValue);
+
+        const isDone = completedList.some(item => 
+            String(item).toLowerCase().trim() === dayLabel.toLowerCase().trim() ||
+            String(item).toLowerCase().includes(dayLabel.toLowerCase())
+        );
+
+        if (isDone) {
+            return `<span style="color: #2b8a3e; font-weight: 700;"><i class="fa-solid fa-circle-check"></i> ${dayLabel}: ${formattedDate}</span>`;
+        }
+        return `<span style="color: #495057;">${dayLabel}: ${formattedDate}</span>`;
+    }
+
+    const summaryEl = document.getElementById("lblPepScheduleSummary");
+    if (summaryEl) {
+        summaryEl.innerHTML = [
+            formatDoseBadge("Day 0", dates.day0),
+            formatDoseBadge("Day 3", dates.day3),
+            formatDoseBadge("Day 7", dates.day7),
+            formatDoseBadge("Day 14", dates.day14),
+            formatDoseBadge("Day 28", dates.day28)
+        ].join(' <span style="color:#ced4da; margin: 0 4px;">|</span> ');
+    }
+
+    if (document.getElementById("editDay0")) document.getElementById("editDay0").value = dates.day0 || "";
+    if (document.getElementById("editDay3")) document.getElementById("editDay3").value = dates.day3 || "";
+    if (document.getElementById("editDay7")) document.getElementById("editDay7").value = dates.day7 || "";
+    if (document.getElementById("editDay14")) document.getElementById("editDay14").value = dates.day14 || "";
+    if (document.getElementById("editDay28")) document.getElementById("editDay28").value = dates.day28 || "";
+
+    // Wound Photo
     const photoFrame = document.getElementById("lblPhotoFrame");
     const photoUrl = file.woundPhotoData || file.woundPhoto;
 
@@ -332,11 +416,13 @@ if (saveRecordBtn) {
     saveRecordBtn.addEventListener("click", async () => {
         if (!currentActiveDocId) return;
 
-        // Reads strictly from tab-isolated sessionStorage
         const activeStaff = sessionStorage.getItem("activePersonnelName") 
             || localStorage.getItem("activePersonnelName") 
             || document.getElementById("editPhysician")?.value 
             || "Duty Personnel";
+
+        const selectedRigType = document.getElementById("editRigType")?.value || "";
+        const enteredRigDose = document.getElementById("editRigDose")?.value?.trim() || "";
 
         const updatedData = {
             fullName: document.getElementById("editFullName")?.value || "",
@@ -364,7 +450,19 @@ if (saveRecordBtn) {
             woundCare: document.getElementById("editWoundCare")?.value || "",
             vaccineBrand: document.getElementById("editVaccineBrand")?.value || "",
             route: document.getElementById("editRoute")?.value || "",
-            immunoglobulin: document.getElementById("editImmunoglobulin")?.value || "",
+            
+            rigType: selectedRigType,
+            rigDose: enteredRigDose,
+            immunoglobulin: selectedRigType ? `${selectedRigType}${enteredRigDose ? ' - ' + enteredRigDose : ''}` : (enteredRigDose || 'None'),
+
+            pepScheduleDates: {
+                day0: document.getElementById("editDay0")?.value || "",
+                day3: document.getElementById("editDay3")?.value || "",
+                day7: document.getElementById("editDay7")?.value || "",
+                day14: document.getElementById("editDay14")?.value || "",
+                day28: document.getElementById("editDay28")?.value || ""
+            },
+
             remarks: document.getElementById("editRemarks")?.value || ""
         };
 

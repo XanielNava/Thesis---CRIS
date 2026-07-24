@@ -33,6 +33,23 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
+// Helper: Dynamic Badge Resolver
+function getRoleBadgeMarkup(role) {
+    if (!role) return `<span class="badge-nurse">Nurse</span>`;
+    const lower = role.toLowerCase();
+    
+    if (lower.includes("owner") || lower.includes("admin")) {
+        return `<span class="badge-owner">Owner</span>`;
+    }
+    if (lower.includes("pharmacist")) {
+        return `<span class="badge-pharmacist">Pharmacist</span>`;
+    }
+    if (lower.includes("physician") || lower.includes("doctor")) {
+        return `<span class="badge-doctor">Physician</span>`;
+    }
+    return `<span class="badge-nurse">${role}</span>`;
+}
+
 // ==========================================================
 // PIPELINE 1: WRITE NEW PERSONNEL RECORDS
 // ==========================================================
@@ -74,7 +91,7 @@ if (addPersonnelBtn) {
                 createdAt: new Date().toISOString()
             });
 
-            alert(`Successfully enrolled ${name} into your active roster configuration.`);
+            alert(`Successfully enrolled ${name} (${position}) into your active roster configuration.`);
             
             nameInput.value = ""; 
             emailInput.value = ""; 
@@ -100,7 +117,7 @@ function startLiveStaffRosterStream(facilityId) {
         staffTableBody.innerHTML = ""; 
         
         if (snapshot.empty) {
-            staffTableBody.innerHTML = `<tr><td colspan="4" class="text-center" style="color:#999;">No active staff records mapped yet.</td></tr>`;
+            staffTableBody.innerHTML = `<tr><td colspan="4" class="text-center table-empty-notice">No active staff records mapped yet.</td></tr>`;
             return;
         }
 
@@ -110,16 +127,16 @@ function startLiveStaffRosterStream(facilityId) {
 
             row.innerHTML = `
                 <td><strong>${staff.name}</strong></td>
-                <td>${staff.position}</td>
+                <td>${getRoleBadgeMarkup(staff.position)}</td>
                 <td>${staff.email}</td>
                 <td class="text-center">
-                    <button class="btn-delete" style="background:none; border:none; color:#e03131; cursor:pointer; font-weight:bold;" data-id="${staffDoc.id}">Remove</button>
+                    <button class="btn-delete btn-delete-inline" data-id="${staffDoc.id}">Remove</button>
                 </td>
             `;
 
             row.querySelector(".btn-delete")?.addEventListener("click", async (e) => {
                 const targetDocId = e.target.getAttribute("data-id");
-                if (confirm(`Are you sure you want to remove this staff member from your active database tracking?`)) {
+                if (confirm(`Are you sure you want to remove ${staff.name} from your active database tracking?`)) {
                     try {
                         await deleteDoc(doc(db, "facilities", facilityId, "staff", targetDocId));
                     } catch (err) {
@@ -149,7 +166,7 @@ function startLiveAuditLogsStream(facilityId) {
         auditTableBody.innerHTML = "";
 
         if (snapshot.empty) {
-            auditTableBody.innerHTML = `<tr><td colspan="5" class="text-center" style="color:#999;">No security login actions verified on log arrays yet.</td></tr>`;
+            auditTableBody.innerHTML = `<tr><td colspan="5" class="text-center table-empty-notice">No security login actions verified on log arrays yet.</td></tr>`;
             return;
         }
 
@@ -162,25 +179,21 @@ function startLiveAuditLogsStream(facilityId) {
 
         logsArray.forEach((log) => {
             const row = document.createElement("tr");
-
             const dateStr = log.timestamp ? new Date(log.timestamp).toLocaleString() : "N/A";
-            const roleBadge = log.role === "Owner" 
-                ? `<span class="badge-owner">Owner</span>` 
-                : `<span class="badge-nurse">Nurse</span>`;
 
             row.innerHTML = `
                 <td class="log-timestamp">${dateStr}</td>
                 <td><strong>${log.personnelName || "Unknown Staff"}</strong></td>
-                <td>${roleBadge}</td>
+                <td>${getRoleBadgeMarkup(log.role)}</td>
                 <td>${log.action || "System Sign-In"}</td>
-                <td><span style="color:#2b8a3e; font-weight:bold;">✓ Verified Pass</span></td>
+                <td><span class="verified-pass-text">✓ Verified Pass</span></td>
             `;
 
             auditTableBody.appendChild(row);
         });
     }, (error) => {
         console.error("Audit log real-time stream failed:", error);
-        auditTableBody.innerHTML = `<tr><td colspan="5" class="text-center" style="color:#e03131;">Security Authorization Error: Unable to stream session trails.</td></tr>`;
+        auditTableBody.innerHTML = `<tr><td colspan="5" class="stream-error-notice">Security Authorization Error: Unable to stream session trails.</td></tr>`;
     });
 }
 

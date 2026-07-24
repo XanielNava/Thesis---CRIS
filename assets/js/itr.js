@@ -45,6 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Generate initial preview sequence ID using facility acronym
             await previewRecordNumber(user.uid);
+
+            // Compute initial schedule automatically
+            recalculatePepSchedule();
         } else {
             window.location.href = "abtc-login.html";
         }
@@ -89,6 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     group.querySelectorAll('.pill').forEach((p) => p.classList.remove('active'));
                     pill.classList.add('active');
+
+                    // If Category pill changed, recalculate PEP schedule!
+                    if (group.dataset.name === 'exposureCategory') {
+                        recalculatePepSchedule();
+                    }
                 }
             });
         });
@@ -105,6 +113,106 @@ document.addEventListener('DOMContentLoaded', () => {
         const group = document.querySelector(`.pill-group[data-name="${name}"]`);
         if (!group) return [];
         return Array.from(group.querySelectorAll('.pill.active')).map((p) => p.dataset.value);
+    }
+
+    // ----------------------------------------------------
+    // 🌟 AUTOMATED PEP SCHEDULE CALCULATION ENGINE
+    // ----------------------------------------------------
+    const consultDateTimeInput = document.getElementById("consultDateTime");
+    const scheduleHelpText = document.getElementById("scheduleHelpText");
+
+    const dateInputDay0 = document.getElementById("dateInputDay0");
+    const dateInputDay3 = document.getElementById("dateInputDay3");
+    const dateInputDay7 = document.getElementById("dateInputDay7");
+    const dateInputDay14 = document.getElementById("dateInputDay14");
+    const dateInputDay28 = document.getElementById("dateInputDay28");
+
+    function formatDateForInput(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function addDays(baseDate, days) {
+        const result = new Date(baseDate);
+        result.setDate(result.getDate() + days);
+        return result;
+    }
+
+    function recalculatePepSchedule(fromDay0Input = false) {
+        const category = getPillValue('exposureCategory');
+        let baseDateVal = '';
+
+        // Priority 1: Direct edit inside Day 0 card picker
+        if (fromDay0Input && dateInputDay0 && dateInputDay0.value) {
+            baseDateVal = dateInputDay0.value;
+        } 
+        // Priority 2: Main consultation date input at top
+        else if (consultDateTimeInput && consultDateTimeInput.value) {
+            baseDateVal = consultDateTimeInput.value.split('T')[0];
+        }
+
+        if (!baseDateVal) return;
+
+        // Parse local date components to avoid UTC shift
+        const [year, month, day] = baseDateVal.split('-').map(Number);
+        const baseDate = new Date(year, month - 1, day);
+
+        const d0 = baseDate;
+        const d3 = addDays(baseDate, 3);
+        const d7 = addDays(baseDate, 7);
+        const d14 = addDays(baseDate, 14);
+        const d28 = addDays(baseDate, 28);
+
+        // Update inline date inputs
+        if (dateInputDay0) dateInputDay0.value = formatDateForInput(d0);
+        if (dateInputDay3) dateInputDay3.value = formatDateForInput(d3);
+        if (dateInputDay7) dateInputDay7.value = formatDateForInput(d7);
+        if (dateInputDay14) dateInputDay14.value = formatDateForInput(d14);
+        if (dateInputDay28) dateInputDay28.value = formatDateForInput(d28);
+
+        const cards = [
+            document.getElementById("cardDay0"),
+            document.getElementById("cardDay3"),
+            document.getElementById("cardDay7"),
+            document.getElementById("cardDay14"),
+            document.getElementById("cardDay28")
+        ];
+
+        if (category === "I") {
+            // Category I: Disable schedule cards
+            cards.forEach(card => {
+                if (card) {
+                    card.classList.remove('active');
+                    card.classList.add('disabled');
+                }
+            });
+            if (scheduleHelpText) {
+                scheduleHelpText.innerHTML = `<span style="color:#e03131; font-weight:bold;">Category I Exposure:</span> PEP is generally not required according to DOH/WHO protocols.`;
+            }
+        } else {
+            // Category II & III: Activate cards
+            cards.forEach(card => {
+                if (card) {
+                    card.classList.remove('disabled');
+                    card.classList.add('active');
+                }
+            });
+
+            if (scheduleHelpText) {
+                scheduleHelpText.innerHTML = `<span style="color:#2b8a3e; font-weight:bold;">Category ${category || 'II/III'} PEP Active:</span> Target dates auto-calculated relative to Day 0.`;
+            }
+        }
+    }
+
+    // Trigger schedule updates on date changes
+    if (consultDateTimeInput) {
+        consultDateTimeInput.addEventListener('change', () => recalculatePepSchedule(false));
+    }
+
+    if (dateInputDay0) {
+        dateInputDay0.addEventListener('change', () => recalculatePepSchedule(true));
     }
 
     const animalType = document.getElementById('animalType');
@@ -187,11 +295,12 @@ document.addEventListener('DOMContentLoaded', () => {
             uploadPreview.src = '';
             uploadPrompt.hidden = false;
             uploadPreviewWrap.hidden = true;
+            recalculatePepSchedule(false);
         });
     }
 
     // ----------------------------------------------------
-    // 3. Database Collection Persistence Submission
+    // 3. Database Persistence Submission
     // ----------------------------------------------------
     const itrForm = document.getElementById('itrForm');
     if (itrForm) {
@@ -216,7 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // Fetch acronym from the 'facilities' collection
                 const facilitySnap = await getDoc(doc(db, "facilities", activeFacilityUid));
                 let acronym = "ABTC";
                 if (facilitySnap.exists()) {
@@ -226,7 +334,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const counterDocRef = doc(db, "facility_counters", activeFacilityUid);
                 let generatedCustomId = "";
 
-                // Atomic transaction sequence generator
                 await runTransaction(db, async (transaction) => {
                     const counterDoc = await transaction.get(counterDocRef);
                     let currentSeq = 0;
@@ -238,10 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const nextIndex = currentSeq + 1;
                     const paddedSequence = String(nextIndex).padStart(3, '0');
                     
-                    // Case ID using acronym prefix (e.g., WVMC-001)
                     generatedCustomId = `${acronym.toUpperCase()}-${paddedSequence}`;
-
-                    // Update counter
                     transaction.set(counterDocRef, { currentSequence: nextIndex }, { merge: true });
                 });
 
@@ -250,18 +354,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const parsedFullName = document.getElementById('fullName').value.trim();
                 const fullItrDisplayString = document.getElementById('recordNo').value;
 
-                // Build object matching the 'patient-database' collection
+                // Extract RIG Values safely
+                const selectedRigType = document.getElementById('rigType') ? document.getElementById('rigType').value : '';
+                const enteredRigDose = document.getElementById('rigDose') ? document.getElementById('rigDose').value.trim() : '';
+
+                // Build payload matching 'patient-database' collection schema
                 const patientDataPayload = {
-                    recordNo: generatedCustomId,           // WVMC-001
-                    caseId: generatedCustomId,             // WVMC-001
-                    patientId: generatedCustomId,          // WVMC-001
-                    itrDisplayNo: fullItrDisplayString,    // WVMC - 2026 - 001
+                    recordNo: generatedCustomId,
+                    caseId: generatedCustomId,
+                    patientId: generatedCustomId,
+                    itrDisplayNo: fullItrDisplayString,
                     facilityId: activeFacilityUid,
                     facilityAcronym: acronym.toUpperCase(),
                     recordedBy: activePersonnelName,
                     createdAt: serverTimestamp(),
                     
-                    // Table mapping properties
                     name: parsedFullName,
                     fullName: parsedFullName,
                     exposureType: `${selectedAnimal} Exposure`,
@@ -284,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     priorVaccination: getPillValue('priorVaccination'),
                     lastVaccDate: document.getElementById('lastVaccDate').value,
 
-                    // Clinical Vitals Snapshot
+                    // Clinical Vitals
                     bp: document.getElementById('bp').value,
                     temp: document.getElementById('temp').value,
                     pulse: document.getElementById('pulse').value,
@@ -297,19 +404,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     allergies: document.getElementById('allergies').value,
                     medications: document.getElementById('medications').value,
 
-                    // Management / Treatment Plan
+                    // Management & Treatment Plan
                     woundCare: document.getElementById('woundCare').value,
                     vaccineBrand: document.getElementById('vaccineBrand').value,
                     route: document.getElementById('route').value,
-                    immunoglobulin: document.getElementById('immunoglobulin').value,
+                    
+                    // Structured RIG fields
+                    rigType: selectedRigType,
+                    rigDose: enteredRigDose,
+                    immunoglobulin: selectedRigType ? `${selectedRigType}${enteredRigDose ? ' - ' + enteredRigDose : ''}` : (enteredRigDose || 'None'),
+
                     vaccSchedule: getPillValues('vaccSchedule'),
                     remarks: document.getElementById('remarks').value,
 
-                    // Base64 Image
+                    // Auto-Calculated Target Dates Map
+                    pepScheduleDates: {
+                        day0: dateInputDay0 ? dateInputDay0.value : '',
+                        day3: dateInputDay3 ? dateInputDay3.value : '',
+                        day7: dateInputDay7 ? dateInputDay7.value : '',
+                        day14: dateInputDay14 ? dateInputDay14.value : '',
+                        day28: dateInputDay28 ? dateInputDay28.value : ''
+                    },
+
+                    // Base64 Wound Photo
                     woundPhotoData: capturedBase64Photo || null
                 };
 
-                // Save into 'patient-database'
                 await addDoc(collection(db, "patient-database"), patientDataPayload);
 
                 alert(`Success! Record ${generatedCustomId} for ${parsedFullName} has been stored.`);

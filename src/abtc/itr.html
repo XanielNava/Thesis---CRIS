@@ -44,7 +44,7 @@
         <input type="date" id="exposureDate" name="exposureDate" required>
       </div>
       <div class="field">
-        <label for="consultDateTime">Date and time of consultation</label>
+        <label for="consultDateTime">Date and time of consultation (Day 0)</label>
         <input type="datetime-local" id="consultDateTime" name="consultDateTime" required>
       </div>
     </div>
@@ -215,20 +215,59 @@
             <option value="Intradermal">Intradermal</option>
           </select>
         </div>
-        <div class="field span-2">
-          <label for="immunoglobulin">Immunoglobulin given (if applicable)</label>
-          <input type="text" id="immunoglobulin" name="immunoglobulin" placeholder="Type and dose, or leave blank if not given">
+        <!-- IMMUNOGLOBULIN (RIG) TYPE & DOSAGE -->
+        <div class="field">
+          <label for="rigType">Immunoglobulin Type (if Category III)</label>
+          <select id="rigType" name="rigType">
+            <option value="" selected>None / Not Applicable</option>
+            <option value="ERIG">ERIG (Equine - Horse Serum)</option>
+            <option value="HRIG">HRIG (Human Plasma)</option>
+            <option value="mAb">Monoclonal Antibodies (mAb)</option>
+          </select>
         </div>
-        <div class="field span-2">
-          <label>Vaccination schedule</label>
-          <div class="pill-group multi" data-name="vaccSchedule">
-            <button type="button" class="pill" data-value="Day 0">Day 0</button>
-            <button type="button" class="pill" data-value="Day 3">Day 3</button>
-            <button type="button" class="pill" data-value="Day 7">Day 7</button>
-            <button type="button" class="pill" data-value="Day 14">Day 14</button>
-            <button type="button" class="pill" data-value="Day 28">Day 28</button>
-          </div>
+
+        <div class="field">
+          <label for="rigDose">Immunoglobulin Dose / Volume</label>
+          <input type="text" id="rigDose" name="rigDose" placeholder="e.g., 1,000 IU or 2.5 mL">
         </div>
+        
+        
+        <!-- AUTO-CALCULATED PEP VACCINATION SCHEDULE -->
+     <div class="field span-2">
+  <label>Vaccination Schedule (Auto-Calculated from Consultation Date)</label>
+  
+  <div class="pep-schedule-card-grid" id="pepScheduleGrid">
+    <div class="pep-date-card active" id="cardDay0">
+      <span class="day-title">Day 0</span>
+      <input type="date" id="dateInputDay0" class="pep-card-date">
+    </div>
+
+    <div class="pep-date-card active" id="cardDay3">
+      <span class="day-title">Day 3</span>
+      <input type="date" id="dateInputDay3" class="pep-card-date">
+    </div>
+
+    <div class="pep-date-card active" id="cardDay7">
+      <span class="day-title">Day 7</span>
+      <input type="date" id="dateInputDay7" class="pep-card-date">
+    </div>
+
+    <div class="pep-date-card active" id="cardDay14">
+      <span class="day-title">Day 14</span>
+      <input type="date" id="dateInputDay14" class="pep-card-date">
+    </div>
+
+    <div class="pep-date-card active" id="cardDay28">
+      <span class="day-title">Day 28</span>
+      <input type="date" id="dateInputDay28" class="pep-card-date">
+    </div>
+  </div>
+
+  <small id="scheduleHelpText" style="display:block; margin-top:8px; color:#627d98;">
+    Target dates calculated automatically. Click any date picker to manually adjust.
+  </small>
+</div>
+
         <div class="field span-2">
           <label for="remarks">Other treatment / remarks</label>
           <textarea id="remarks" name="remarks" rows="2" placeholder="Any additional notes"></textarea>

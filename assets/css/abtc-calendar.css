@@ -1,0 +1,660 @@
+/* abtc-calendar.css - Split Visual Dose Calendar Layout */
+
+.calendar-dashboard-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    margin-top: 15px;
+}
+
+/* ========================================================= */
+/* LEFT SIDE PANEL: UPCOMING DOSES QUEUE & SEARCH BAR        */
+/* ========================================================= */
+.side-panel-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.side-panel-header {
+    margin-bottom: 4px;
+}
+
+.side-panel-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #102a43;
+}
+
+.side-panel-subtitle {
+    margin: 4px 0 12px 0;
+    font-size: 12px;
+    color: #627d98;
+}
+
+.search-upcoming-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 13px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-upcoming-input:focus {
+    border-color: #102a43;
+    box-shadow: 0 0 0 2px rgba(16, 42, 67, 0.1);
+}
+
+.upcoming-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.upcoming-item {
+    background: #f8f9fa;
+    border-left: 4px solid var(--sunset-orange, #EA6113);
+    border-radius: 6px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.upcoming-item:hover {
+    background: #f1f3f5;
+    transform: translateX(2px);
+}
+
+.upcoming-item .patient-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #212529;
+}
+
+.upcoming-item .dose-tag {
+    font-size: 12px;
+    color: #6c757d;
+    display: flex;
+    justify-content: space-between;
+}
+
+.upcoming-loading-state {
+    color: #888888;
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
+}
+
+/* ========================================================= */
+/* RIGHT PANEL: MONTHLY CALENDAR GRID                        */
+/* ========================================================= */
+.calendar-main-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.month-title {
+    font-size: 22px;
+    font-weight: 900;
+    color: #0d233a;
+}
+
+.calendar-nav-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-nav-cal {
+    background: #e9ecef;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    color: #495057;
+    transition: background 0.2s ease;
+}
+
+.btn-nav-cal:hover {
+    background: #dee2e6;
+}
+
+/* Month Grid System */
+.month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.day-header {
+    text-align: center;
+    font-weight: 700;
+    font-size: 12px;
+    color: #868e96;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+}
+
+.cal-day-cell {
+    min-height: 95px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 8px;
+    border: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.cal-day-cell:hover {
+    background: #eef2f6;
+}
+
+.cal-day-cell.other-month {
+    opacity: 0.35;
+}
+
+.cal-day-cell.today-cell {
+    border: 2px solid #102a43;
+    background: #f0f4f8;
+}
+
+.cell-number {
+    font-size: 13px;
+    font-weight: 700;
+    color: #343a40;
+}
+
+.cell-events {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+}
+
+.event-badge {
+    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+/* Dose Interval Color Badges */
+.badge-day0  { background: #ffe8cc; color: #d9480f; }
+.badge-day3  { background: #d3f9d8; color: #2b8a3e; }
+.badge-day7  { background: #e7f5ff; color: #1971c2; }
+.badge-day14 { background: #f3d9fa; color: #9c36b5; }
+.badge-day28 { background: #fff3bf; color: #f59f00; }
+
+/* ========================================================= */
+/* MODAL OVERLAYS & CONTAINER STYLES                         */
+/* ========================================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(13, 35, 58, 0.5);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.calendar-modal {
+    background: #ffffff;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    animation: fadeInModal 0.2s ease-out;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.calendar-modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+}
+
+.modal-close-x {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #6c757d;
+    cursor: pointer;
+}
+
+.calendar-modal-body {
+    padding: 20px;
+    max-height: 380px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Patient Dose Card inside Modal */
+.modal-dose-card {
+    background: #f8f9fa;
+    border-left: 4px solid #102a43;
+    padding: 12px 16px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-dose-card.done {
+    border-left-color: #2b8a3e;
+    background: #e6fcf5;
+}
+
+.modal-patient-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.modal-patient-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: #212529;
+}
+
+.modal-dose-badge {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6c757d;
+}
+
+.modal-empty-state {
+    text-align: center;
+    padding: 30px 10px;
+    color: #868e96;
+}
+
+.modal-empty-state i {
+    font-size: 36px;
+    margin-bottom: 10px;
+    color: #adb5bd;
+}
+
+.calendar-modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid #e9ecef;
+    text-align: right;
+    background: #f8f9fa;
+}
+
+.btn-modal-close {
+    background: #6c757d;
+    color: #ffffff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-modal-close:hover {
+    background: #495057;
+}
+
+/* ========================================================= */
+/* DOSE CONFIRMATION MODAL & PROGRESSIVE LIGHT-UP INPUT      */
+/* ========================================================= */
+#pharmacyInputWrap {
+    opacity: 0.4;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    margin-top: 8px;
+}
+
+#confirmPharmacyName:focus {
+    border-color: #102a43 !important;
+    box-shadow: 0 0 0 2px rgba(16, 42, 67, 0.15);
+}
+
+/* Hover effects for modal supply radio cards */
+#labelFacilityStock:hover, #labelPatientPurchased:hover {
+    border-color: #cbd5e1 !important;
+    background-color: #f1f5f9 !important;
+}
+
+/* ========================================================= */
+/* RESPONSIVE ADJUSTMENTS                                    */
+/* ========================================================= */
+@media (max-width: 1100px) {
+    .calendar-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* abtc-calendar.css - Dynamic Visual PEP Calendar & Dose Confirmation Styling */
+
+.calendar-dashboard-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .calendar-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Left Sidebar: Upcoming Doses Queue */
+.side-panel-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+}
+
+.side-panel-header {
+    margin-bottom: 16px;
+}
+
+.side-panel-title {
+    margin: 0;
+    font-size: 16px;
+    color: #0d233a;
+    font-weight: 700;
+}
+
+.side-panel-subtitle {
+    margin: 4px 0 12px 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.search-upcoming-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.search-upcoming-input:focus {
+    border-color: #102a43;
+}
+
+.upcoming-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.upcoming-loading-state {
+    text-align: center;
+    color: #888888;
+    padding: 20px;
+    font-size: 13px;
+}
+
+.upcoming-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.upcoming-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+.upcoming-item .patient-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #0d233a;
+}
+
+.upcoming-item .dose-tag {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* Right Panel: Monthly Calendar Grid */
+.calendar-main-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.month-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: #0d233a;
+}
+
+.calendar-nav-btns {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-nav-cal {
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #495057;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn-nav-cal:hover {
+    background: #e9ecef;
+}
+
+.month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+
+.day-header {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 900;
+    color: #64748b;
+    padding: 8px 0;
+}
+
+.cal-day-cell {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    min-height: 90px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.cal-day-cell:hover {
+    background: #f1f5f9;
+}
+
+.cal-day-cell.other-month {
+    background: #ffffff;
+    opacity: 0.4;
+}
+
+.cal-day-cell.today-cell {
+    border-color: #1971c2;
+    background: #e7f5ff;
+}
+
+.cell-number {
+    font-size: 12px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.cell-events {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow-y: auto;
+    max-height: 70px;
+}
+
+/* Event Badges */
+.event-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.badge-day0 { background: #ffe3e3; color: #e03131; }
+.badge-day3 { background: #ffec99; color: #f59f00; }
+.badge-day7 { background: #d3f9d8; color: #2b8a3e; }
+.badge-day14 { background: #e7f5ff; color: #1971c2; }
+.badge-day28 { background: #f3d9fa; color: #9c36b5; }
+
+/* Day Details Modal Cards */
+.modal-dose-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.modal-dose-card.done {
+    background: #f4fcf5;
+    border-color: #b2f2bb;
+}
+
+.modal-patient-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.modal-patient-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #0d233a;
+}
+
+.modal-dose-badge {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.modal-empty-state {
+    text-align: center;
+    padding: 30px;
+    color: #6c757d;
+}
+
+.modal-empty-state i {
+    font-size: 32px;
+    margin-bottom: 8px;
+    color: #adb5bd;
+}
+
+/* Acquire Vial Ticket Button Styling */
+.btn-acquire-vial {
+    background-color: #1971c2;
+    color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-acquire-vial:hover {
+    background-color: #1864ab;
+}
