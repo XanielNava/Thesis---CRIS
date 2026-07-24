@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PVO - Animal Bite Cases</title>
+
+    <link rel="stylesheet" href="../../assets/css/pho-animal-bite-cases.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PVO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="pvo-dash.html" class="menu-item">Dashboard</a>
+                <a href="pvo-animal-bite-cases.html" class="menu-item active">Animal Bite Cases</a>
+                <a href="pvo-heat-map.html" class="menu-item">Heatmaps</a>
+            </nav>
+
+            <div class="footer-nav">
+                <a href="../../settings/html/settings.html" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout"
+                    onclick="window.location.href='pvo-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>ANIMAL BITE CASES & RABIES SURVEILLANCE</h1>
+            </header>
+
+            <section class="card">
+                <div class="topbar">
+                    <div class="search-section">
+                        <div class="controls-row">
+                            <div class="search-input">
+                                <span class="search-icon"></span>
+                                <input type="text" id="caseSearch" placeholder="Search district or municipality...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="casesTable">
+                        <!-- ✅ THEAD: Headers -->
+                        <thead>
+                            <tr>
+                                <th rowspan="2">District</th>
+                                <th rowspan="2">Municipality / City</th>
+                                <th rowspan="2">Dog Population</th>
+                                <th colspan="2">Dogs & Cats Vaccinated</th>
+                                <th rowspan="2">Vaccination %</th>
+                                <th colspan="2">Neutered/Spayed</th>
+                                <th rowspan="2">Head Samples Submitted</th>
+                                <th colspan="2">Rabies Test Results</th>
+                                <th rowspan="2">Human Deaths</th>
+                            </tr>
+                            <tr>
+                                <!-- Row 2: Sub-headers -->
+                                <th>Dogs</th>
+                                <th>Cats</th>
+                                <th>Castrated</th>
+                                <th>Spayed</th>
+                                <th>Positive</th>
+                                <th>Negative</th>
+                            </tr>
+                        </thead>
+
+                        <!-- ✅ TBODY: Data rows populated by JavaScript -->
+                        <tbody id="casesTableBody">
+                            <!-- JavaScript will populate this section -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav class="pagination" id="pagination"></nav>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <script type="module" src="../../assets/js/pvo-animal-bite-cases.js"></script>
+</body>
+
+</html>
