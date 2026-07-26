@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - ABTC Facility Reports Draft</title>
+
+    <link rel="stylesheet" href="../../assets/css/abtc-reports.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script type="module" src="../../assets/js/reports.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        
+        <!-- UNIVERSAL NAVY SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img id="sidebarLogoPreview" src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence<br>System</p>
+                <div class="role-badge">ABTC MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="abtc-dash.html" class="menu-item"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="reports.html" class="menu-item active"><i class="fa-solid fa-file-invoice"></i> Reports & Drafts</a>
+            </nav>
+            
+            <div class="footer-nav">
+                <a href="abtc-users.html" class="menu-item alt"><i class="fa-solid fa-users-gear"></i> Personnel & History</a>
+                <a href="abtc-setting.html" class="menu-item alt"><i class="fa-solid fa-gear"></i> Settings</a>
+                <button id="logout-btn" class="menu-item alt logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+        </aside>
+
+        <!-- MAIN INTERFACE AREA -->
+        <main class="main-content">
+            
+            <!-- HEADER BANNER -->
+            <header class="header">
+                <div class="header-title">
+                    <h1 id="facilityHeaderTitle">FACILITY BITE CASES REPORT DRAFT</h1>
+                    <span id="facilitySubTitle">Operational Statistics & Official PHO Submission Prep</span>
+                </div>
+                <div class="user-profile-top">
+                    <div class="profile-info" id="profileInfoText">
+                        <strong>Loading Session...</strong><br>
+                        <span>Authenticating...</span>
+                    </div>
+                    <div class="profile-icon"><i class="fa-solid fa-user-doctor"></i></div>
+                </div>
+            </header>
+
+            <div class="reports-workspace">
+                <section class="card reports-card">
+                    <div class="topbar">
+                        <div class="search-section">
+                            <div class="search-input">
+                                <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                <input type="text" id="caseSearch" placeholder="Search report entries or patients...">
+                            </div>
+                        </div>
+
+                        <!-- SUBMIT TO PHO & EXPORT CONTROLS -->
+                        <div class="action-buttons">
+                            <button class="btn-submit-pho" id="submitPhoBtn">
+                                <i class="fa-solid fa-paper-plane"></i> Submit Report to PHO
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="casesTable">
+                            <thead>
+                                <tr>
+                                    <th rowspan="3">ABTC</th>
+                                    <th colspan="2" rowspan="2">Sex</th>
+                                    <th colspan="2" rowspan="2">Age</th>
+                                    <th colspan="3" rowspan="2">Biting Animal</th>
+                                    <th colspan="4" rowspan="2">Human Bite Case</th>
+                                    <th rowspan="3">HR</th>
+                                    <th colspan="4" rowspan="2">Post Exposure Treatment</th>
+                                    <th colspan="6">Remarks</th>
+                                    <th rowspan="3">REP</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2">Comp</th>
+                                    <th colspan="2">Incomplete</th>
+                                    <th colspan="2">None</th>
+                                </tr>
+                                <tr>
+                                    <th>Male</th>
+                                    <th>Female</th>
+                                    <th>&lt; 15</th>
+                                    <th>&gt; 15</th>
+                                    <th>Dog</th>
+                                    <th>Cat</th>
+                                    <th>Others</th>
+                                    <th>Cat 1</th>
+                                    <th>Cat 2</th>
+                                    <th>Cat III (New)</th>
+                                    <th>Cat III (Booster)</th>
+                                    <th>TCV</th>
+                                    <th>HRIG</th>
+                                    <th>ERIG</th>
+                                    <th>TOTAL</th>
+                                    <th>II</th>
+                                    <th>III</th>
+                                    <th>II</th>
+                                    <th>III</th>
+                                    <th>II</th>
+                                    <th>III</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="casesTableBody">
+                                <!-- Dynamic report draft data will be populated by reports.js -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <nav class="pagination" id="pagination"></nav>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

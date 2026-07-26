@@ -3,73 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRIS - Patient Registry</title>
+    <title>Patient Registry — CRIS | Animal Bite Treatment Center</title>
     <link rel="stylesheet" href="../../assets/css/abtc-reg.css">
-    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 
 <div class="container">
 
+    <!-- =====================================================
+         UNIVERSAL NAVY SIDEBAR (NURSE / CLINICAL MODULE)
+         ===================================================== -->
     <aside class="sidebar">
-        <div class="logo-section logo-section-fixed" style="height: 174.78px;">
-            <img src="../../assets/images/logo-login.png" alt="Logo" class="logo-image">
-            <p>
-                Community-Centric<br>
-                Rabies Intelligence<br>
-                System
-            </p>
-
-            <div class="role-badge">
-                ABTC MODULE
-            </div>
+        <div class="logo-section logo-section-fixed">
+            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+            <p>Community-Centric<br>Rabies Intelligence<br>System</p>
+            <div class="role-badge">ABTC MODULE</div>
         </div>
 
         <nav class="menu">
-            <a href="abtc-reg.html" class="menu-item-link">
-                <button class="menu-item active">Patient Registry</button>
-            </a>
-            <a href="abtc-calendar.html" class="menu-item-link">
-                <button class="menu-item">Dose Calendar</button>
-            </a>
-            <a href="abtc-inventory.html" class="menu-item-link">
-                <button class="menu-item">Vaccine Inventory</button>
-            </a>
+            <a href="abtc-home.html" class="menu-item"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="abtc-reg.html" class="menu-item active"><i class="fa-solid fa-id-card"></i> Patient Registry</a>
+            <a href="abtc-calendar.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> Dose Calendar</a>
+            <a href="abtc-inventory.html" class="menu-item"><i class="fa-solid fa-boxes-stacked"></i> Vaccine Inventory</a>
         </nav>
 
         <div class="footer-nav">
-            <button id="logout-btn" class="menu-item alt">Logout</button>
+            <button id="logout-btn" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
         </div>
     </aside>
 
+    <!-- =====================================================
+         MAIN INTERFACE AREA
+         ===================================================== -->
     <main class="main-content">
 
+        <!-- HEADER BANNER -->
         <header class="header">
-            <h1 id="dashboardTitle">PATIENT REGISTRY</h1>
+            <div class="header-title">
+                <h1 id="dashboardTitle">PATIENT REGISTRY</h1>
+                <span>Master Clinical Ledger & Exposure Tracking</span>
+            </div>
 
             <div class="user-profile-top">
                 <div class="profile-info" id="profileInfoText">
-                    <strong>Dr. Maria Dela Cruz</strong><br>
-                    <span>Personnel</span>
+                    <strong>Loading...</strong><br>
+                    <span>Loading...</span>
                 </div>
-
-                <div class="profile-icon"></div>
+                <div class="profile-icon"><i class="fa-solid fa-user-doctor"></i></div>
             </div>
         </header>
 
         <div class="content-grid single-layout">
-
             <div class="left-column full-width-override">
 
+                <!-- ACTION & FILTER BAR -->
                 <div class="action-bar-registry">
-
-                    <input
-                        type="text"
-                        id="searchRegistryInput"
-                        placeholder="Search by patient name..."
-                    >
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input
+                            type="text"
+                            id="searchRegistryInput"
+                            placeholder="Search by patient name or ITR number..."
+                        >
+                    </div>
 
                     <select id="filterExposureType" class="registry-dropdown-filter">
                         <option value="">All Exposure Types</option>
@@ -87,44 +88,36 @@
                     </select>
 
                     <button id="openPatientModalBtn" class="btn-primary-action" onclick="window.location.href='itr.html'">
-                        + Add New Patient
+                        <i class="fa-solid fa-user-plus"></i> Add New Patient
                     </button>
-
                 </div>
 
+                <!-- PATIENT REGISTRY TABLE CARD -->
                 <div class="card full-width">
-
                     <h3 class="card-title">
-                        Registered Exposure Cases
+                        <i class="fa-solid fa-folder-open"></i> Registered Exposure Cases
                     </h3>
 
                     <div class="table-container">
-
                         <table class="dashboard-table">
-
                             <thead>
                                 <tr>
-                                    <th>Case ID</th>
+                                    <th>ITR no.</th>
                                     <th>Patient Name</th>
                                     <th>Exposure Type</th>
                                     <th>Bite Category</th>
                                     <th>Date Registered</th>
-                                    <th>Actions</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
-
                             <tbody id="patientRegistryTableBody">
                                 <!-- Dynamically streamed rows via abtc-reg.js -->
                             </tbody>
-
                         </table>
-
                     </div>
-
                 </div>
 
             </div>
-
         </div>
 
     </main>
@@ -141,7 +134,7 @@
             <h2 id="drawerIdLabel">RECORD</h2>
             <span class="mode-badge" id="drawerModeBadge">VIEW MODE</span>
         </div>
-        <div style="display: flex; align-items: center;">
+        <div class="drawer-header-actions">
             <button class="btn-toggle-edit" id="toggleEditBtn" type="button" title="Edit Patient Record">
                 <i class="fa-solid fa-pen-to-square"></i> Edit
             </button>

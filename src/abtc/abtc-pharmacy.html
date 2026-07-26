@@ -3,50 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pharmacist Inventory — CRIS | ABTC</title>
+    <title>Pharmacist Inventory — CRIS | Animal Bite Treatment Center</title>
     
-    <!-- External Modular Stylesheets -->
-    <link rel="stylesheet" href="../../assets/css/abtc-reg.css">
+    <!-- External Modular Stylesheet -->
     <link rel="stylesheet" href="../../assets/css/abtc-pharmacy.css">
     
-    <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 
 <div class="container">
 
-    <!-- CRIS UNIVERSAL SIDEBAR -->
+    <!-- =====================================================
+         CRIS UNIVERSAL NAVY SIDEBAR (PHARMACY MODULE)
+         ===================================================== -->
     <aside class="sidebar">
         <div class="logo-section logo-section-fixed">
-            <img src="../../assets/images/logo-login.png" alt="Logo" class="logo-image">
+            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
             <p>Community-Centric<br>Rabies Intelligence<br>System</p>
             <div class="role-badge role-badge-pharmacy">PHARMACY MODULE</div>
         </div>
 
         <nav class="menu">
-            <a href="abtc-pharmacy.html" class="menu-item-link">
-                <button class="menu-item active">Stock & Requisitions</button>
-            </a>
+            <a href="abtc-pharmacy.html" class="menu-item active"><i class="fa-solid fa-boxes-packing"></i> Stock & Requisitions</a>
         </nav>
 
         <div class="footer-nav">
-            <button id="logout-btn" class="menu-item alt">Logout</button>
+            <button id="logout-btn" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
         </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
+    <!-- =====================================================
+         MAIN CONTENT AREA
+         ===================================================== -->
     <main class="main-content">
 
+        <!-- HEADER BANNER -->
         <header class="header">
-            <h1 id="dashboardTitle">COLD-CHAIN VACCINE PHARMACY MANAGEMENT</h1>
+            <div class="header-title">
+                <h1 id="dashboardTitle">COLD-CHAIN VACCINE PHARMACY MANAGEMENT</h1>
+                <span>Central Storage, Stock Authorization & Requisition Fulfillment</span>
+            </div>
             <div class="user-profile-top">
                 <div class="profile-info" id="profileInfoText">
                     <strong>Duty Pharmacist</strong><br>
                     <span>Pharmacist / Custodian</span>
                 </div>
-                <div class="profile-icon"></div>
+                <div class="profile-icon"><i class="fa-solid fa-user-nurse"></i></div>
             </div>
         </header>
 
@@ -106,7 +113,7 @@
                     <tbody id="requisitionTableBody">
                         <tr>
                             <td colspan="7" class="table-empty-notice">
-                                Loading live requisitions queue...
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading live requisitions queue...
                             </td>
                         </tr>
                     </tbody>
@@ -118,8 +125,11 @@
         <div class="card full-width">
             
             <div class="inventory-action-bar">
-                <input type="text" id="searchInventoryInput" class="search-inventory-input" placeholder="Search brand or batch no...">
-                <button id="btnOpenAddModal" class="btn-add-stock">
+                <div class="search-input-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="searchInventoryInput" class="search-inventory-input" placeholder="Search brand or batch no...">
+                </div>
+                <button id="btnOpenAddModal" class="btn-primary-action">
                     <i class="fa-solid fa-plus"></i> Register Incoming Stock Batch
                 </button>
             </div>
@@ -140,7 +150,7 @@
                     <tbody id="inventoryTableBody">
                         <tr>
                             <td colspan="7" class="table-loading-notice">
-                                Loading stock records...
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading stock records...
                             </td>
                         </tr>
                     </tbody>
@@ -153,11 +163,14 @@
 
 </div>
 
-<!-- ADD INCOMING STOCK MODAL -->
+<!-- ================= ADD INCOMING STOCK MODAL ================= -->
 <div class="modal-overlay" id="inventoryModal">
     <div class="calendar-modal">
         <div class="calendar-modal-header">
-            <h3 class="modal-heading-text"><i class="fa-solid fa-boxes-packing icon-dark-margin"></i> Register Incoming Vaccine Stock</h3>
+            <div>
+                <h3><i class="fa-solid fa-boxes-packing"></i> Register Incoming Vaccine Stock</h3>
+                <span class="modal-sub-label">Add new batch into cold-chain storage</span>
+            </div>
             <button class="modal-close-x" id="closeInvModalX">&times;</button>
         </div>
 
@@ -197,21 +210,23 @@
                 </div>
             </div>
 
-            <div class="calendar-modal-footer">
+            <div class="calendar-modal-footer footer-align-right">
                 <button type="button" class="btn-modal-close" id="closeInvModalBtn">Cancel</button>
-                <button type="submit" class="btn-add-stock btn-flex-inline">Save & Authorize Batch</button>
+                <button type="submit" class="btn-primary-action">
+                    <i class="fa-solid fa-check"></i> Save & Authorize Batch
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- VIEW FULL REQUISITION TICKET DETAILS MODAL -->
+<!-- ================= VIEW REQUISITION DETAILS MODAL ================= -->
 <div class="modal-overlay" id="viewReqModal">
     <div class="calendar-modal modal-compact">
         <div class="calendar-modal-header">
             <div>
-                <h3 class="modal-heading-text"><i class="fa-solid fa-file-invoice icon-requisition"></i> Requisition Ticket Overview</h3>
-                <span class="subtext-muted" id="modalTicketSubId">Inspect complete request details</span>
+                <h3><i class="fa-solid fa-file-invoice"></i> Requisition Ticket Overview</h3>
+                <span class="modal-sub-label" id="modalTicketSubId">Inspect complete request details</span>
             </div>
             <button class="modal-close-x" id="closeViewReqX">&times;</button>
         </div>
@@ -247,7 +262,7 @@
 
         <div class="calendar-modal-footer footer-align-right">
             <button type="button" class="btn-modal-close" id="closeViewReqBtn">Close</button>
-            <button type="button" id="modalApproveBtn" class="btn-add-stock btn-green">
+            <button type="button" id="modalApproveBtn" class="btn-primary-action btn-green">
                 <i class="fa-solid fa-check-double"></i> Approve & Issue Stock
             </button>
         </div>

@@ -34,21 +34,27 @@
 
   <form id="itrForm" novalidate>
 
+    <!-- TOP METADATA STRIP (MOVED PHYSICIAN FIELD HERE) -->
     <div class="record-strip">
       <div class="field">
         <label for="recordNo">ITR / Record No.</label>
         <input type="text" id="recordNo" name="recordNo" placeholder="e.g., ABTC-2026-0001" readonly>
       </div>
       <div class="field">
+        <label for="physician">Attending physician / nurse</label>
+        <input type="text" id="physician" name="physician_active_user" autocomplete="off" placeholder="Fetching active user..." readonly required>
+      </div>
+      <div class="field">
         <label for="exposureDate">Date of exposure</label>
         <input type="date" id="exposureDate" name="exposureDate" required>
       </div>
       <div class="field">
-        <label for="consultDateTime">Date and time of consultation (Day 0)</label>
+        <label for="consultDateTime">Date & time of consultation (Day 0)</label>
         <input type="datetime-local" id="consultDateTime" name="consultDateTime" required>
       </div>
     </div>
 
+    <!-- PATIENT INFORMATION CARD -->
     <section class="card">
       <div class="card-head">
         <i class="fa-solid fa-user"></i>
@@ -56,8 +62,16 @@
       </div>
       <div class="grid grid-2">
         <div class="field">
-          <label for="fullName">Full name</label>
-          <input type="text" id="fullName" name="fullName" placeholder="Last name, First name, Middle name" required>
+          <label for="lastName">Last name</label>
+          <input type="text" id="lastName" name="lastName" placeholder="Last name" required>
+        </div>
+        <div class="field">
+          <label for="firstName">First name</label>
+          <input type="text" id="firstName" name="firstName" placeholder="First name" required>
+        </div>
+        <div class="field">
+          <label for="middleName">Middle name</label>
+          <input type="text" id="middleName" name="middleName" placeholder="Middle name (optional)">
         </div>
         <div class="field">
           <label for="age">Age</label>
@@ -75,17 +89,27 @@
           <label for="contactNo">Contact number</label>
           <input type="tel" id="contactNo" name="contactNo" placeholder="09xx xxx xxxx">
         </div>
-        <div class="field span-2">
-          <label for="address">Address</label>
-          <input type="text" id="address" name="address" placeholder="House no., street, barangay, city">
+
+        <div class="field">
+          <label for="houseStreet">House no. / Street</label>
+          <input type="text" id="houseStreet" name="houseStreet" placeholder="House no., street/purok">
         </div>
-        <div class="field span-2">
-          <label for="physician">Attending physician / nurse</label>
-          <input type="text" id="physician" name="physician" placeholder="Name of attending physician or nurse">
+        <div class="field">
+          <label for="barangay">Barangay</label>
+          <input type="text" id="barangay" name="barangay" placeholder="Barangay">
+        </div>
+        <div class="field">
+          <label for="cityMunicipality">City / Municipality</label>
+          <input type="text" id="cityMunicipality" name="cityMunicipality" placeholder="City or municipality">
+        </div>
+        <div class="field">
+          <label for="province">Province</label>
+          <input type="text" id="province" name="province" placeholder="e.g. Iloilo">
         </div>
       </div>
     </section>
 
+    <!-- EXPOSURE DETAILS CARD -->
     <section class="card">
       <div class="card-head">
         <i class="fa-solid fa-paw"></i>
@@ -139,6 +163,7 @@
       </div>
     </section>
 
+    <!-- VITAL SIGNS CARD -->
     <section class="card">
       <div class="card-head">
         <i class="fa-solid fa-heart-pulse"></i>
@@ -172,6 +197,7 @@
       </div>
     </section>
 
+    <!-- MEDICAL HISTORY CARD -->
     <section class="card">
       <div class="card-head">
         <i class="fa-solid fa-notes-medical"></i>
@@ -193,6 +219,7 @@
       </div>
     </section>
 
+    <!-- MANAGEMENT / TREATMENT CARD -->
     <section class="card">
       <div class="card-head"> 
         <i class="fa-solid fa-kit-medical"></i>
@@ -215,7 +242,7 @@
             <option value="Intradermal">Intradermal</option>
           </select>
         </div>
-        <!-- IMMUNOGLOBULIN (RIG) TYPE & DOSAGE -->
+
         <div class="field">
           <label for="rigType">Immunoglobulin Type (if Category III)</label>
           <select id="rigType" name="rigType">
@@ -231,42 +258,40 @@
           <input type="text" id="rigDose" name="rigDose" placeholder="e.g., 1,000 IU or 2.5 mL">
         </div>
         
-        
-        <!-- AUTO-CALCULATED PEP VACCINATION SCHEDULE -->
-     <div class="field span-2">
-  <label>Vaccination Schedule (Auto-Calculated from Consultation Date)</label>
-  
-  <div class="pep-schedule-card-grid" id="pepScheduleGrid">
-    <div class="pep-date-card active" id="cardDay0">
-      <span class="day-title">Day 0</span>
-      <input type="date" id="dateInputDay0" class="pep-card-date">
-    </div>
+        <div class="field span-2">
+          <label>Vaccination Schedule (Auto-Calculated from Consultation Date)</label>
+          
+          <div class="pep-schedule-card-grid" id="pepScheduleGrid">
+            <div class="pep-date-card active" id="cardDay0">
+              <span class="day-title">Day 0</span>
+              <input type="date" id="dateInputDay0" class="pep-card-date">
+            </div>
 
-    <div class="pep-date-card active" id="cardDay3">
-      <span class="day-title">Day 3</span>
-      <input type="date" id="dateInputDay3" class="pep-card-date">
-    </div>
+            <div class="pep-date-card active" id="cardDay3">
+              <span class="day-title">Day 3</span>
+              <input type="date" id="dateInputDay3" class="pep-card-date">
+            </div>
 
-    <div class="pep-date-card active" id="cardDay7">
-      <span class="day-title">Day 7</span>
-      <input type="date" id="dateInputDay7" class="pep-card-date">
-    </div>
+            <div class="pep-date-card active" id="cardDay7">
+              <span class="day-title">Day 7</span>
+              <input type="date" id="dateInputDay7" class="pep-card-date">
+            </div>
 
-    <div class="pep-date-card active" id="cardDay14">
-      <span class="day-title">Day 14</span>
-      <input type="date" id="dateInputDay14" class="pep-card-date">
-    </div>
+            <div class="pep-date-card active" id="cardDay14">
+              <span class="day-title">Day 14</span>
+              <input type="date" id="dateInputDay14" class="pep-card-date">
+            </div>
 
-    <div class="pep-date-card active" id="cardDay28">
-      <span class="day-title">Day 28</span>
-      <input type="date" id="dateInputDay28" class="pep-card-date">
-    </div>
-  </div>
+            <div class="pep-date-card active" id="cardDay28">
+              <span class="day-title">Day 28</span>
+              <input type="date" id="dateInputDay28" class="pep-card-date">
+            </div>
+          </div>
 
-  <small id="scheduleHelpText" style="display:block; margin-top:8px; color:#627d98;">
-    Target dates calculated automatically. Click any date picker to manually adjust.
-  </small>
-</div>
+          <small id="scheduleHelpText" style="display:block; margin-top:8px; color:#627d98;">
+            Target dates calculated automatically. Click any date picker to manually adjust.
+          </small>
+        </div>
 
         <div class="field span-2">
           <label for="remarks">Other treatment / remarks</label>
@@ -275,6 +300,7 @@
       </div>
     </section>
 
+    <!-- PHOTO DOCUMENTATION CARD -->
     <section class="card">
       <div class="card-head">
         <i class="fa-solid fa-camera"></i>

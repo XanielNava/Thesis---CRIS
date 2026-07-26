@@ -170,11 +170,12 @@ if (nurseForm) {
             
             console.log(`Personnel profile match accepted for ${matchedStaff.name} [${resolvedRole}]. Routing...`);
 
-            // Dispatch based on Role
+            // 🎯 ROUTING LOGIC: Dispatch based on Role
             if (resolvedRole.toLowerCase().includes("pharmacist")) {
                 window.location.href = "abtc-pharmacy.html";
             } else {
-                window.location.href = "abtc-reg.html";
+                // Nurses and general duty personnel now route straight to abtc-home.html
+                window.location.href = "abtc-home.html";
             }
         } else {
             alert("Access Denied: The 4-digit passcode PIN entered does not match your roster record profile mapping.");

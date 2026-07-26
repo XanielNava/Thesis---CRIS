@@ -78,7 +78,7 @@ body {
   padding: 28px 20px 60px;
 }
 
-/* --- New Back Button Styles --- */
+/* Back Button Styles */
 .page-actions {
   margin-bottom: 20px;
 }
@@ -98,15 +98,15 @@ body {
 .btn-back:hover {
   color: var(--sunset-orange);
 }
-/* ------------------------------ */
 
+/* TOP METADATA STRIP - Updated to 4-column layout */
 .record-strip {
   background: var(--surface);
   border: 1px solid var(--border-tint);
   border-radius: var(--radius);
   padding: 18px 20px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 20px;
 }
@@ -155,9 +155,11 @@ body {
 
 .grid-1 { grid-template-columns: 1fr; }
 .grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
 .grid-6 { grid-template-columns: repeat(6, 1fr); }
 
 .span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
 
 .field {
   display: flex;
@@ -338,15 +340,7 @@ textarea {
   background: var(--sidebar-bg);
 }
 
-@media (max-width: 720px) {
-  .record-strip { grid-template-columns: 1fr; }
-  .grid-2 { grid-template-columns: 1fr; }
-  .grid-6 { grid-template-columns: repeat(2, 1fr); }
-  .span-2 { grid-column: span 1; }
-  .topbar { padding: 18px 20px; }
-}
-
-/* CLEAN PEP SCHEDULE GRID */
+/* PEP SCHEDULE CARD GRID */
 .pep-schedule-card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -396,10 +390,28 @@ textarea {
     border-color: #EA6113;
 }
 
-/* Category I Disabled State */
 .pep-date-card.disabled {
     opacity: 0.4;
     background: #e9ecef;
     border-color: #ced4da;
     pointer-events: none;
+}
+
+/* MOBILE RESPONSIVE MEDIA QUERIES */
+@media (max-width: 820px) {
+  .record-strip { 
+    grid-template-columns: repeat(2, 1fr); 
+  }
+}
+
+@media (max-width: 580px) {
+  .record-strip { 
+    grid-template-columns: 1fr; 
+  }
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-6 { grid-template-columns: repeat(2, 1fr); }
+  .span-2 { grid-column: span 1; }
+  .span-3 { grid-column: span 1; }
+  .topbar { padding: 18px 20px; }
 }

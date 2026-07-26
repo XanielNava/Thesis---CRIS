@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABTC Module - Home Dashboard</title>
+    <link rel="stylesheet" href="../../assets/css/abtc-home.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        
+        <!-- UNIVERSAL NAVY SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence<br>System</p>
+                <div class="role-badge">ABTC MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="abtc-home.html" class="menu-item active"><i class="fa-solid fa-house"></i> Home</a>
+                <a href="abtc-reg.html" class="menu-item"><i class="fa-solid fa-id-card"></i> Patient Registry</a>
+                <a href="abtc-calendar.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> Dose Calendar</a>
+                <a href="abtc-inventory.html" class="menu-item"><i class="fa-solid fa-boxes-stacked"></i> Vaccine Inventory</a>
+            </nav>
+            
+            <div class="footer-nav">
+                <button id="logout-btn" class="menu-item alt logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+        </aside>
+
+        <!-- MAIN INTERFACE AREA -->
+        <main class="main-content">
+            
+            <!-- TOP BANNER HEADER -->
+            <header class="header">
+                <div class="header-title">
+                    <h1 id="facilityTitleDisplay">Loading ABTC Facility...</h1>
+                    <span>Operational Command Center</span>
+                </div>
+                <div class="user-profile-top">
+                    <div class="profile-info" id="profileInfoText">
+                        <strong>Loading...</strong><br>
+                        <span>Duty Staff</span>
+                    </div>
+                    <div class="profile-icon"><i class="fa-solid fa-user-doctor"></i></div>
+                </div>
+            </header>
+
+            <div class="content-body">
+                
+                <!-- WELCOME & QUICK ACTIONS STRIP -->
+                <div class="action-banner">
+                    <div class="welcome-text">
+                        <h2><i class="fa-solid fa-sun"></i> Good day, Duty Personnel</h2>
+                        <p>Here is your active patient queue and operational overview for today.</p>
+                    </div>
+                    <div class="quick-buttons">
+                        <a href="itr.html" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> New Treatment Record (ITR)</a>
+                        <a href="abtc-reg.html" class="btn btn-secondary"><i class="fa-solid fa-list-check"></i> View Full Registry</a>
+                    </div>
+                </div>
+
+                <!-- METRICS GRID -->
+                <div class="metrics">
+                    <div class="card metric-card">
+                        <div class="metric-icon orange"><i class="fa-solid fa-users"></i></div>
+                        <div class="metric-info">
+                            <h3>Total Registered Patients</h3>
+                            <div class="value" id="totalPatientsCount">--</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card metric-card">
+                        <div class="metric-icon gold"><i class="fa-solid fa-syringe"></i></div>
+                        <div class="metric-info">
+                            <h3>Doses Scheduled Today</h3>
+                            <div class="value" id="dosesTodayCount">--</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card metric-card">
+                        <div class="metric-icon dark"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="metric-info">
+                            <h3>Category III Exposures</h3>
+                            <div class="value" id="categoryThreeCount">--</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card metric-card danger-zone">
+                        <div class="metric-icon red"><i class="fa-solid fa-vial-circle-check"></i></div>
+                        <div class="metric-info">
+                            <h3>PEP Vials Stock</h3>
+                            <div class="value" id="vialStockCount">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MAIN WORKSPACE LAYOUT (2 COLUMNS) -->
+                <div class="dashboard-grid">
+                    
+                    <!-- LEFT TABLE: TODAY'S FOLLOW-UP VACCINATION QUEUE -->
+                    <section class="card table-card">
+                        <div class="card-header">
+                            <div>
+                                <h3><i class="fa-solid fa-calendar-check"></i> Today's Vaccination Schedule</h3>
+                                <p>Patients due for follow-up PEP doses (Day 3, 7, 14, 28) today</p>
+                            </div>
+                            <span class="badge badge-today" id="todayDateBadge">Loading...</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ITR No.</th>
+                                        <th>Patient Name</th>
+                                        <th>Target Dose</th>
+                                        <th>Contact No.</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="todayScheduleTableBody">
+                                    <!-- Dynamic Rows Injected by abtc-home.js -->
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">
+                                            <i class="fa-solid fa-spinner fa-spin" style="margin-right: 6px;"></i> Loading today's schedule...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- RIGHT COLUMN: SYSTEM NOTICES & QUICK VACCINE TRACKER -->
+                    <aside class="side-panel">
+                        <div class="card notice-card">
+                            <h3><i class="fa-solid fa-bullhorn"></i> ABTC Announcements</h3>
+                            <div class="notice-item warning">
+                                <strong><i class="fa-solid fa-box-archive"></i> Vaccine Inventory Notice</strong>
+                                <p>Check active cold-chain stock expiration dates routinely and prioritize older batches.</p>
+                            </div>
+                            <div class="notice-item info">
+                                <strong><i class="fa-solid fa-shield-cat"></i> PHO Coordination</strong>
+                                <p>Ensure all Category III exposure cases and immunoglobulin dosages are logged promptly.</p>
+                            </div>
+                        </div>
+                    </aside>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="../../assets/js/abtc-home.js"></script>
+</body>
+</html>

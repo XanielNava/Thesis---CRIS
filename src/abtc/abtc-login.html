@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Access Portal</title>
+    <title>Admin Access Portal — CRIS</title>
     <link rel="stylesheet" href="../../assets/css/login.css">
     <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
     <script src="../../assets/js/menu.js"></script>
@@ -13,6 +13,7 @@
 </head>
 
 <body>
+    <!-- HEADER -->
     <header class="header">
         <div class="header-content">
             <img src="../../assets/images/logo-login.png" alt="CRIS logo" class="logo">
@@ -23,33 +24,36 @@
 
     <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
+    <!-- SIDEBAR NAV -->
     <aside class="sidebar" id="sidebar">
         <button class="close-btn" onclick="closeMenu()">✕</button>
         <nav>
-            <a href="../index.html">Home</a>
-            <a href="../src/pvo-login.html">Admin Access Portal</a>
-            <a href="../src/cris-reports.html">Reports</a>
-            <a href="../src/about-cris.html">About CRIS</a>
+            <a href="../../index.html">Home</a>
+            <a href="abtc-login.html" class="active">Admin Access Portal</a>
+            <a href="cris-reports.html">Reports</a>
+            <a href="about-cris.html">About CRIS</a>
         </nav>
     </aside>
 
+    <!-- MAIN PORTAL AREA -->
     <main class="main">
         <h2>ABTC PORTAL</h2>
 
         <div class="login-box">
             <a href="../../index.html" class="logo-link">
-                <img src="../../assets/images/abtc-logo.png" alt="PVO logo" class="login-logo">
+                <img src="../../assets/images/abtc-logo.png" alt="ABTC logo" class="login-logo">
             </a>
 
             <form id="loginForm">
-                <!-- Changed label and placeholder to target individual user accounts -->
                 <label for="email">Email Address</label>
                 <input type="email" id="email" placeholder="Enter your email address" required>
 
-                <!-- 🏢 INTELLIGENT FACILITY BADGE REVEAL INDICATOR -->
-                <div id="facilityIndicator" style="display: none; width: 100%; margin-bottom: 15px; padding: 10px; background-color: #f0f7ff; border-left: 4px solid #1a73e8; border-radius: 4px; box-sizing: border-box;">
-                    <span style="font-size: 12px; color: #666; display: block; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Authorized Workplace</span>
-                    <span id="facilityNameText" style="font-size: 14px; color: #111; font-weight: 700;">Loading Facility Details...</span>
+                <!-- 🏢 INTELLIGENT WORKPLACE INDICATOR (SLIDES DOWN VIA CSS) -->
+                <div id="facilityIndicator" class="form-group-dynamic">
+                    <div style="padding: 10px 12px; margin-bottom: 15px; background-color: #ffffff; border-left: 4px solid var(--sunset-orange); border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                        <span style="font-size: 11px; color: #888; display: block; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Authorized Facility</span>
+                        <span id="facilityNameText" style="font-size: 13.5px; color: var(--text-dark); font-weight: 800;">Loading Facility Details...</span>
+                    </div>
                 </div>
 
                 <label for="password">Password</label>
@@ -60,16 +64,16 @@
                     <button type="submit" id="loginBtn">Login</button>
                 </div>
 
-                <div class="auth-links" style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 13px;">
-                    <a href="#" class="forgot" style="text-decoration: none; color: #666;">Forgot Password?</a>
-                    <a href="abtc-setup.html" class="setup-system" style="text-decoration: none; color: var(--sunset-orange, #EA6113); font-weight: bold;">⚙ Setup New Facility</a>
+                <div class="auth-links">
+                    <a href="#" class="forgot">Forgot Password?</a>
+                    <a href="abtc-setup.html" class="setup-system" style="color: var(--sunset-orange); font-weight: 700;">⚙ Setup New Facility</a>
                 </div>
             </form>
         </div>
-
-        <script type="module" src="../../assets/js/abtc-login.js"></script>
     </main>
 
     <footer class="footer"></footer>
+
+    <script type="module" src="../../assets/js/abtc-login.js"></script>
 </body>
 </html>

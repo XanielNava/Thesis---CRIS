@@ -1,660 +1,763 @@
-/* abtc-calendar.css - Split Visual Dose Calendar Layout */
-
-.calendar-dashboard-grid {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 24px;
-    margin-top: 15px;
+/* CRIS SUNSET PALETTE THEMATIC SYSTEM VARIABLE CONFIGURATIONS */
+:root {
+  --sunset-orange: #EA6113;
+  --sunset-gold: #F88F22;
+  --sunset-yellow: #FBB931;
+  --sunset-cream: #FFE3B3;
+  --text-dark: #412110;
+  --sidebar-bg: #1a234e;
+  --main-bg: #FFFAF0;
+  --surface: #ffffff;
+  --border-tint: #f0ddb8;
+  --text-muted: #8a6a52;
+  --success: #2b8a3e;
+  --danger: #dc3545;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ========================================================= */
-/* LEFT SIDE PANEL: UPCOMING DOSES QUEUE & SEARCH BAR        */
-/* ========================================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--main-bg);
+  color: var(--text-dark);
+  font-family: 'Lato', Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+/* ================= NAVY UNIVERSAL SIDEBAR ================= */
+.sidebar {
+  width: 280px;
+  background-color: var(--sidebar-bg);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 30px 20px;
+  flex-shrink: 0;
+  z-index: 1000;
+  overflow-x: hidden;
+  height: 100vh;
+}
+
+.logo-section-fixed {
+  text-align: center;
+  margin-bottom: 25px;
+  flex-shrink: 0;
+  height: 174.78px !important;
+}
+
+.logo-image {
+  width: 90px;
+  height: auto;
+  margin: 0 auto 10px;
+  display: block;
+  object-fit: contain;
+}
+
+.logo-section-fixed p {
+  font-size: 11px;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  opacity: 0.9;
+}
+
+.role-badge {
+  background-color: var(--sunset-yellow);
+  color: var(--text-dark);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.menu {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-bottom: 20px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.menu::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.menu-item {
+  width: 100%;
+  padding: 12px 18px;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  border-radius: 10px;
+  transition: var(--transition-smooth);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.menu-item:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+  color: var(--sunset-yellow);
+}
+
+.menu-item.active {
+  background-color: #FFFFFF !important;
+  color: var(--sidebar-bg) !important;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.footer-nav {
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.logout { 
+  background-color: rgba(220, 53, 69, 0.25) !important; 
+  color: #ff8b8b !important; 
+}
+
+.logout:hover { 
+  background-color: rgba(220, 53, 69, 0.45) !important; 
+  color: #fff !important; 
+}
+
+/* ================= MAIN CONTENT BOUNDS FRAME ================= */
+.main-content {
+  flex-grow: 1;
+  padding: 25px 30px;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+  padding: 18px 28px;
+  border-radius: 14px;
+  color: white;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 12px rgba(234, 97, 19, 0.2);
+}
+
+.header-title h1 {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.header-title span {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.user-profile-top {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px 16px;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  gap: 12px;
+}
+
+.profile-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--sunset-cream);
+  color: var(--text-dark);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* ================= SPLIT CALENDAR DASHBOARD GRID ================= */
+.calendar-dashboard-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+/* Left Panel: Upcoming Scheduled Doses Queue */
 .side-panel-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border-tint);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 150px);
 }
 
 .side-panel-header {
-    margin-bottom: 4px;
+  margin-bottom: 14px;
 }
 
 .side-panel-title {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 700;
-    color: #102a43;
+  margin: 0;
+  font-size: 16px;
+  color: var(--sidebar-bg);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.side-panel-title i {
+  color: var(--sunset-orange);
 }
 
 .side-panel-subtitle {
-    margin: 4px 0 12px 0;
-    font-size: 12px;
-    color: #627d98;
+  margin: 4px 0 12px 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-input-wrapper .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .search-upcoming-input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    font-size: 13px;
-    box-sizing: border-box;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  border: 1px solid var(--border-tint);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Lato', sans-serif;
+  outline: none;
+  background-color: #fffcf5;
+  transition: var(--transition-smooth);
 }
 
 .search-upcoming-input:focus {
-    border-color: #102a43;
-    box-shadow: 0 0 0 2px rgba(16, 42, 67, 0.1);
+  border-color: var(--sunset-orange);
+  box-shadow: 0 0 0 3px var(--sunset-cream);
 }
 
 .upcoming-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 420px;
-    overflow-y: auto;
-}
-
-.upcoming-item {
-    background: #f8f9fa;
-    border-left: 4px solid var(--sunset-orange, #EA6113);
-    border-radius: 6px;
-    padding: 10px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    cursor: pointer;
-    transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.upcoming-item:hover {
-    background: #f1f3f5;
-    transform: translateX(2px);
-}
-
-.upcoming-item .patient-name {
-    font-weight: 700;
-    font-size: 14px;
-    color: #212529;
-}
-
-.upcoming-item .dose-tag {
-    font-size: 12px;
-    color: #6c757d;
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .upcoming-loading-state {
-    color: #888888;
-    font-size: 13px;
-    text-align: center;
-    padding: 20px;
-}
-
-/* ========================================================= */
-/* RIGHT PANEL: MONTHLY CALENDAR GRID                        */
-/* ========================================================= */
-.calendar-main-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.calendar-header-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.month-title {
-    font-size: 22px;
-    font-weight: 900;
-    color: #0d233a;
-}
-
-.calendar-nav-btns {
-    display: flex;
-    gap: 8px;
-}
-
-.btn-nav-cal {
-    background: #e9ecef;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 700;
-    color: #495057;
-    transition: background 0.2s ease;
-}
-
-.btn-nav-cal:hover {
-    background: #dee2e6;
-}
-
-/* Month Grid System */
-.month-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-}
-
-.day-header {
-    text-align: center;
-    font-weight: 700;
-    font-size: 12px;
-    color: #868e96;
-    text-transform: uppercase;
-    padding-bottom: 8px;
-}
-
-.cal-day-cell {
-    min-height: 95px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 8px;
-    border: 1px solid #e9ecef;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.cal-day-cell:hover {
-    background: #eef2f6;
-}
-
-.cal-day-cell.other-month {
-    opacity: 0.35;
-}
-
-.cal-day-cell.today-cell {
-    border: 2px solid #102a43;
-    background: #f0f4f8;
-}
-
-.cell-number {
-    font-size: 13px;
-    font-weight: 700;
-    color: #343a40;
-}
-
-.cell-events {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    overflow-y: auto;
-}
-
-.event-badge {
-    font-size: 10px;
-    padding: 3px 6px;
-    border-radius: 4px;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-}
-
-/* Dose Interval Color Badges */
-.badge-day0  { background: #ffe8cc; color: #d9480f; }
-.badge-day3  { background: #d3f9d8; color: #2b8a3e; }
-.badge-day7  { background: #e7f5ff; color: #1971c2; }
-.badge-day14 { background: #f3d9fa; color: #9c36b5; }
-.badge-day28 { background: #fff3bf; color: #f59f00; }
-
-/* ========================================================= */
-/* MODAL OVERLAYS & CONTAINER STYLES                         */
-/* ========================================================= */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(13, 35, 58, 0.5);
-    backdrop-filter: blur(4px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-.modal-overlay.active {
-    display: flex;
-}
-
-.calendar-modal {
-    background: #ffffff;
-    width: 90%;
-    max-width: 500px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-    animation: fadeInModal 0.2s ease-out;
-}
-
-@keyframes fadeInModal {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.calendar-modal-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid #e9ecef;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f8f9fa;
-}
-
-.modal-close-x {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: #6c757d;
-    cursor: pointer;
-}
-
-.calendar-modal-body {
-    padding: 20px;
-    max-height: 380px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-/* Patient Dose Card inside Modal */
-.modal-dose-card {
-    background: #f8f9fa;
-    border-left: 4px solid #102a43;
-    padding: 12px 16px;
-    border-radius: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-dose-card.done {
-    border-left-color: #2b8a3e;
-    background: #e6fcf5;
-}
-
-.modal-patient-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.modal-patient-name {
-    font-weight: 700;
-    font-size: 15px;
-    color: #212529;
-}
-
-.modal-dose-badge {
-    font-size: 12px;
-    font-weight: 700;
-    color: #6c757d;
-}
-
-.modal-empty-state {
-    text-align: center;
-    padding: 30px 10px;
-    color: #868e96;
-}
-
-.modal-empty-state i {
-    font-size: 36px;
-    margin-bottom: 10px;
-    color: #adb5bd;
-}
-
-.calendar-modal-footer {
-    padding: 12px 20px;
-    border-top: 1px solid #e9ecef;
-    text-align: right;
-    background: #f8f9fa;
-}
-
-.btn-modal-close {
-    background: #6c757d;
-    color: #ffffff;
-    border: none;
-    padding: 8px 18px;
-    border-radius: 6px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.btn-modal-close:hover {
-    background: #495057;
-}
-
-/* ========================================================= */
-/* DOSE CONFIRMATION MODAL & PROGRESSIVE LIGHT-UP INPUT      */
-/* ========================================================= */
-#pharmacyInputWrap {
-    opacity: 0.4;
-    transition: opacity 0.25s ease, transform 0.25s ease;
-    pointer-events: none;
-    margin-top: 8px;
-}
-
-#confirmPharmacyName:focus {
-    border-color: #102a43 !important;
-    box-shadow: 0 0 0 2px rgba(16, 42, 67, 0.15);
-}
-
-/* Hover effects for modal supply radio cards */
-#labelFacilityStock:hover, #labelPatientPurchased:hover {
-    border-color: #cbd5e1 !important;
-    background-color: #f1f5f9 !important;
-}
-
-/* ========================================================= */
-/* RESPONSIVE ADJUSTMENTS                                    */
-/* ========================================================= */
-@media (max-width: 1100px) {
-    .calendar-dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* abtc-calendar.css - Dynamic Visual PEP Calendar & Dose Confirmation Styling */
-
-.calendar-dashboard-grid {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 24px;
-    align-items: start;
-}
-
-@media (max-width: 1024px) {
-    .calendar-dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Left Sidebar: Upcoming Doses Queue */
-.side-panel-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-    max-height: calc(100vh - 140px);
-    overflow-y: auto;
-}
-
-.side-panel-header {
-    margin-bottom: 16px;
-}
-
-.side-panel-title {
-    margin: 0;
-    font-size: 16px;
-    color: #0d233a;
-    font-weight: 700;
-}
-
-.side-panel-subtitle {
-    margin: 4px 0 12px 0;
-    font-size: 12px;
-    color: #64748b;
-}
-
-.search-upcoming-input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    font-size: 13px;
-    outline: none;
-    box-sizing: border-box;
-}
-
-.search-upcoming-input:focus {
-    border-color: #102a43;
-}
-
-.upcoming-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.upcoming-loading-state {
-    text-align: center;
-    color: #888888;
-    padding: 20px;
-    font-size: 13px;
+  text-align: center;
+  color: var(--text-muted);
+  padding: 20px;
+  font-size: 13px;
 }
 
 .upcoming-item {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  background: #fffcf5;
+  border: 1px solid var(--border-tint);
+  border-left: 4px solid var(--sunset-orange);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
 }
 
 .upcoming-item:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-    transform: translateY(-1px);
+  background: var(--sunset-cream);
+  transform: translateX(3px);
 }
 
 .upcoming-item .patient-name {
-    font-weight: 700;
-    font-size: 14px;
-    color: #0d233a;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--sidebar-bg);
 }
 
 .upcoming-item .dose-tag {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: #64748b;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 /* Right Panel: Monthly Calendar Grid */
 .calendar-main-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: var(--surface);
+  border: 1px solid var(--border-tint);
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
 .calendar-header-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .month-title {
-    font-size: 18px;
-    font-weight: 900;
-    color: #0d233a;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--sidebar-bg);
 }
 
 .calendar-nav-btns {
-    display: flex;
-    gap: 6px;
+  display: flex;
+  gap: 6px;
 }
 
 .btn-nav-cal {
-    background: #f8f9fa;
-    border: 1px solid #ced4da;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #495057;
-    cursor: pointer;
-    transition: background 0.2s ease;
+  background: var(--main-bg);
+  border: 1px solid var(--border-tint);
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: var(--transition-smooth);
 }
 
 .btn-nav-cal:hover {
-    background: #e9ecef;
+  background: var(--sunset-cream);
+  color: var(--sunset-orange);
 }
 
+/* ================= EQUAL-SIZED CALENDAR GRID CELLS ================= */
 .month-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
 }
 
 .day-header {
-    text-align: center;
-    font-size: 11px;
-    font-weight: 900;
-    color: #64748b;
-    padding: 8px 0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--text-muted);
+  padding: 8px 0;
+  letter-spacing: 0.5px;
 }
 
 .cal-day-cell {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    min-height: 90px;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    cursor: pointer;
-    transition: background 0.15s ease;
+  background: #fffcf5;
+  border: 1px solid var(--border-tint);
+  border-radius: 8px;
+  height: 105px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: var(--transition-smooth);
+  overflow: hidden;
 }
 
 .cal-day-cell:hover {
-    background: #f1f5f9;
+  background: var(--sunset-cream);
 }
 
 .cal-day-cell.other-month {
-    background: #ffffff;
-    opacity: 0.4;
+  background: #ffffff;
+  opacity: 0.35;
 }
 
 .cal-day-cell.today-cell {
-    border-color: #1971c2;
-    background: #e7f5ff;
+  border: 2px solid var(--sunset-orange);
+  background: #fff5ea;
 }
 
 .cell-number {
-    font-size: 12px;
-    font-weight: 700;
-    color: #334155;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--sidebar-bg);
+  flex-shrink: 0;
 }
 
 .cell-events {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    overflow-y: auto;
-    max-height: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex-grow: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.cell-events::-webkit-scrollbar {
+  display: none;
+  width: 0;
 }
 
 /* Event Badges */
 .event-badge {
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
 }
 
-.badge-day0 { background: #ffe3e3; color: #e03131; }
-.badge-day3 { background: #ffec99; color: #f59f00; }
-.badge-day7 { background: #d3f9d8; color: #2b8a3e; }
+.badge-day0  { background: #ffe3e3; color: #dc3545; }
+.badge-day3  { background: #fff3bf; color: #f59f00; }
+.badge-day7  { background: #d3f9d8; color: #2b8a3e; }
 .badge-day14 { background: #e7f5ff; color: #1971c2; }
 .badge-day28 { background: #f3d9fa; color: #9c36b5; }
 
-/* Day Details Modal Cards */
+/* ================= MODALS & OVERLAYS ================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(26, 35, 78, 0.6);
+  backdrop-filter: blur(2px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2500;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.calendar-modal {
+  background: #ffffff;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: fadeInModal 0.2s ease-out;
+  border: 1px solid var(--border-tint);
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.calendar-modal-header {
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border-tint);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+  color: #ffffff;
+}
+
+.calendar-modal-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 900;
+  color: #ffffff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calendar-modal-header h3 i {
+  color: var(--sunset-cream) !important;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+
+.modal-sub-label {
+  font-size: 12px;
+  color: #ffffff !important;
+  font-weight: 600;
+  opacity: 0.95;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close-x {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  font-size: 20px;
+  color: #ffffff !important;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.modal-close-x:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.calendar-modal-body {
+  padding: 20px;
+  max-height: 380px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Modal Dose Cards */
 .modal-dose-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fffcf5;
+  border: 1px solid var(--border-tint);
+  border-left: 4px solid var(--sidebar-bg);
+  padding: 12px 16px;
+  border-radius: 8px;
 }
 
 .modal-dose-card.done {
-    background: #f4fcf5;
-    border-color: #b2f2bb;
+  background: #f4fcf5;
+  border-color: #b2f2bb;
+  border-left-color: var(--success);
 }
 
 .modal-patient-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .modal-patient-name {
-    font-weight: 700;
-    font-size: 14px;
-    color: #0d233a;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--sidebar-bg);
 }
 
 .modal-dose-badge {
-    font-size: 11px;
-    color: #64748b;
-    font-weight: 600;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 .modal-empty-state {
-    text-align: center;
-    padding: 30px;
-    color: #6c757d;
+  text-align: center;
+  padding: 30px 10px;
+  color: var(--text-muted);
 }
 
 .modal-empty-state i {
-    font-size: 32px;
-    margin-bottom: 8px;
-    color: #adb5bd;
+  font-size: 36px;
+  margin-bottom: 10px;
+  color: var(--sunset-gold);
 }
 
-/* Acquire Vial Ticket Button Styling */
+.calendar-modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-tint);
+  text-align: right;
+  background: var(--main-bg);
+}
+
+.btn-modal-close {
+  background: var(--text-muted);
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.btn-modal-close:hover {
+  background: var(--text-dark);
+}
+
+.btn-primary-action {
+  background-color: var(--sunset-orange);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition-smooth);
+}
+
+.btn-primary-action:hover {
+  background-color: var(--sidebar-bg);
+}
+
+/* ================= VACCINE SUPPLY OPTION CARDS (UNIFORM) ================= */
+.supply-card-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-tint);
+  background-color: #fffcf5;
+  transition: var(--transition-smooth);
+  box-sizing: border-box;
+  min-height: 52px;
+}
+
+.supply-card-option:hover {
+  border-color: var(--sunset-orange);
+  background-color: var(--sunset-cream);
+}
+
+/* Inner Label Wrapper */
+.supply-option-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-dark);
+  cursor: pointer;
+  margin: 0;
+  flex-grow: 1;
+  user-select: none;
+}
+
+/* Radio Button Styling */
+.supply-card-option input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--sidebar-bg);
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: inline-grid;
+  place-content: center;
+  margin: 0;
+  transition: var(--transition-smooth);
+}
+
+.supply-card-option input[type="radio"]::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: 0.15s transform ease-in-out;
+  background-color: var(--sunset-orange);
+}
+
+.supply-card-option input[type="radio"]:checked {
+  border-color: var(--sunset-orange);
+}
+
+.supply-card-option input[type="radio"]:checked::before {
+  transform: scale(1);
+}
+
+/* Active Selected Card Outline Highlight */
+.supply-card-option:has(input[type="radio"]:checked) {
+  border-color: var(--sunset-orange);
+  background-color: var(--sunset-cream);
+  box-shadow: 0 0 0 1px var(--sunset-orange);
+}
+
 .btn-acquire-vial {
-    background-color: #1971c2;
-    color: #ffffff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    transition: background 0.2s ease;
-    white-space: nowrap;
+  background-color: var(--sidebar-bg);
+  color: #ffffff;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition-smooth);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-acquire-vial:hover {
-    background-color: #1864ab;
+  background-color: var(--sunset-orange);
+}
+
+#pharmacyInputWrap {
+  opacity: 0.4;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+  margin-top: 8px;
+}
+
+#confirmPharmacyName:focus {
+  border-color: var(--sunset-orange) !important;
+  box-shadow: 0 0 0 2px var(--sunset-cream);
+}
+
+/* RESPONSIVE QUERY */
+@media (max-width: 1024px) {
+  .calendar-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 }

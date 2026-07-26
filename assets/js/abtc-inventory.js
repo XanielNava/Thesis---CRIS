@@ -1,7 +1,7 @@
-// abtc-inventory.js - Read-Only Nurse Inventory & Requisition Generator
+// abtc-inventory.js - Read-Only Nurse Inventory & Requisition Generator (Optimized Pipeline)
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import { 
-    getFirestore, collection, onSnapshot, query, where, doc, getDoc, addDoc 
+    getFirestore, collection, onSnapshot, doc, getDoc, addDoc 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
@@ -22,7 +22,6 @@ let activeFacilityId = null;
 let inventoryList = [];
 let currentResolvedPersonnel = "Duty Personnel";
 
-// Standard Master Vaccine Register
 const STANDARD_VACCINES = [
     "Verorab",
     "Rabipur",
@@ -47,15 +46,14 @@ const closeReqModalBtn = document.getElementById("closeReqModalBtn");
 const requisitionForm = document.getElementById("requisitionForm");
 const reqVaccineBrand = document.getElementById("reqVaccineBrand");
 
-// ----------------------------------------------------
-// 1. Dynamic Dropdown Stock Indicator Population
-// ----------------------------------------------------
+/* --------------------
+    1. Dynamic Dropdown Stock Indicator Population
+-------------------- */
 function populateRequisitionDropdown() {
     if (!reqVaccineBrand) return;
 
     reqVaccineBrand.innerHTML = `<option value="" disabled selected>-- Select Vaccine --</option>`;
 
-    // Calculate total vials available per brand across all active batches
     const brandStockMap = {};
     STANDARD_VACCINES.forEach(v => brandStockMap[v] = 0);
 
@@ -70,23 +68,19 @@ function populateRequisitionDropdown() {
         }
     });
 
-    // Generate options with dynamic stock badges and status flags
     STANDARD_VACCINES.forEach(brand => {
         const count = brandStockMap[brand] || 0;
         const option = document.createElement("option");
         option.value = brand;
 
         if (count === 0) {
-            // OUT OF STOCK: Grayed out and disabled from selection
             option.textContent = `${brand} (0 vials — OUT OF STOCK)`;
             option.disabled = true;
             option.className = "opt-out-of-stock";
         } else if (count <= 5) {
-            // LOW STOCK: Highlighted warning text
             option.textContent = `${brand} (${count} vial[s] left — LOW STOCK)`;
             option.className = "opt-low-stock";
         } else {
-            // IN STOCK: Standard availability count
             option.textContent = `${brand} (${count} vials available)`;
             option.className = "opt-in-stock";
         }
@@ -95,9 +89,9 @@ function populateRequisitionDropdown() {
     });
 }
 
-// ----------------------------------------------------
-// 2. Modal Show / Hide Handlers
-// ----------------------------------------------------
+/* --------------------
+    2. Modal Handlers
+-------------------- */
 function openReqModal() {
     populateRequisitionDropdown();
     if (requisitionModal) requisitionModal.classList.add("active");
@@ -117,29 +111,33 @@ if (requisitionModal) {
     });
 }
 
-// ----------------------------------------------------
-// 3. Session Observer & Active Staff Resolution
-// ----------------------------------------------------
+/* --------------------
+    3. Session Observer & Caching
+-------------------- */
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         activeFacilityId = user.uid;
         
         try {
             const userRole = sessionStorage.getItem("activeDesignation") || localStorage.getItem("activeDesignation") || "Nurse";
-            const activePersonnel = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
+            let activePersonnel = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
 
-            const facilitySnapshot = await getDoc(doc(db, "facilities", user.uid));
-            if (facilitySnapshot.exists()) {
-                const facilityData = facilitySnapshot.data();
-
-                let activeStaffMember = activePersonnel || (userRole === "Owner" ? facilityData.contactInfo?.contactPerson : "Attending Personnel");
-                const displayRoleLabel = userRole === "Owner" ? "Administrator / Owner" : "Personnel";
-
-                currentResolvedPersonnel = activeStaffMember;
-
-                if (profileContainer) {
-                    profileContainer.innerHTML = `<strong>${activeStaffMember}</strong><br><span>${displayRoleLabel}</span>`;
+            if (!activePersonnel) {
+                const facilitySnapshot = await getDoc(doc(db, "facilities", user.uid));
+                if (facilitySnapshot.exists()) {
+                    const facilityData = facilitySnapshot.data();
+                    activePersonnel = userRole === "Owner" ? facilityData.contactInfo?.contactPerson : "Attending Personnel";
+                    sessionStorage.setItem("activePersonnelName", activePersonnel);
                 }
+            }
+
+            const activeStaffMember = activePersonnel || "Duty Personnel";
+            const displayRoleLabel = userRole === "Owner" ? "Administrator / Owner" : "Personnel";
+
+            currentResolvedPersonnel = activeStaffMember;
+
+            if (profileContainer) {
+                profileContainer.innerHTML = `<strong>${activeStaffMember}</strong><br><span>${displayRoleLabel}</span>`;
             }
         } catch (e) {
             console.error("Inventory session error:", e);
@@ -151,13 +149,13 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// ----------------------------------------------------
-// 4. Stream Inventory Records (Read-Only)
-// ----------------------------------------------------
+/* --------------------
+    4. Stream Subcollection Inventory Records
+-------------------- */
 function streamInventory(facilityId) {
-    const q = query(collection(db, "vaccine-inventory"), where("facilityId", "==", facilityId));
+    const invColRef = collection(db, "facilities", facilityId, "vaccine-inventory");
 
-    onSnapshot(q, (snapshot) => {
+    onSnapshot(invColRef, (snapshot) => {
         inventoryList = [];
         let totalVials = 0;
         let totalDoses = 0;
@@ -184,7 +182,6 @@ function streamInventory(facilityId) {
 
         renderInventoryTable();
 
-        // 🌟 Shortcut Auto-Open & Pre-fill Handler from Calendar
         if (sessionStorage.getItem("autoOpenRequisition") === "true") {
             sessionStorage.removeItem("autoOpenRequisition");
 
@@ -201,16 +198,14 @@ function streamInventory(facilityId) {
             sessionStorage.removeItem("reqTargetPatient");
             sessionStorage.removeItem("reqRemarks");
 
-            setTimeout(() => {
-                openReqModal();
-            }, 250);
+            setTimeout(() => { openReqModal(); }, 250);
         }
     });
 }
 
-// ----------------------------------------------------
-// 5. Render Table
-// ----------------------------------------------------
+/* --------------------
+    5. Render Table
+-------------------- */
 function renderInventoryTable() {
     if (!inventoryTableBody) return;
     inventoryTableBody.innerHTML = "";
@@ -262,9 +257,9 @@ function renderInventoryTable() {
 
 if (searchInventoryInput) searchInventoryInput.addEventListener("input", renderInventoryTable);
 
-// ----------------------------------------------------
-// 6. Form Requisition Submission & Printable Ticket Generator
-// ----------------------------------------------------
+/* --------------------
+    6. Form Submission & Ticket Printer
+-------------------- */
 if (requisitionForm) {
     requisitionForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -280,9 +275,8 @@ if (requisitionForm) {
         if (!brand) return alert("Please select a valid vaccine brand.");
 
         try {
-            await addDoc(collection(db, "vaccine-requisitions"), {
+            await addDoc(collection(db, "facilities", activeFacilityId, "vaccine-requisitions"), {
                 ticketId: reqTicketId,
-                facilityId: activeFacilityId,
                 requestedBy: activeStaff,
                 vaccineBrand: brand,
                 vialsRequested: Number(qty),
@@ -294,7 +288,6 @@ if (requisitionForm) {
 
             closeReqModal();
 
-            // Print Preview Ticket Window
             const printWindow = window.open('', '_blank', 'width=600,height=700');
             printWindow.document.write(`
                 <html>
@@ -358,6 +351,6 @@ document.getElementById("logout-btn")?.addEventListener("click", (e) => {
     if (confirm("Are you sure you want to exit your session?")) {
         sessionStorage.removeItem("activeDesignation");
         sessionStorage.removeItem("activePersonnelName");
-        window.location.href = 'abtc-profiles.html';
+        window.location.href = 'abtc-login.html';
     }
 });

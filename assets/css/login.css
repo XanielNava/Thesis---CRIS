@@ -160,7 +160,6 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Optional Scrollbar Styling for Landing Sidebar */
 .sidebar nav::-webkit-scrollbar {
     width: 4px;
 }
@@ -245,9 +244,8 @@ input:focus, select:focus {
     transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
 }
 
-/* Triggered via JS toggle class script operations */
 .form-group-dynamic.visible {
-    max-height: 100px; /* Expands open safely */
+    max-height: 100px;
     opacity: 1;
 }
 

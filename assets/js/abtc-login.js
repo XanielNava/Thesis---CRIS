@@ -29,7 +29,7 @@ document.getElementById("email")?.addEventListener("change", async (e) => {
   const nameTextContainer = document.getElementById("facilityNameText");
 
   if (!emailValue) {
-    if (indicatorBox) indicatorBox.style.display = "none";
+    if (indicatorBox) indicatorBox.classList.remove("visible");
     return;
   }
 
@@ -43,13 +43,13 @@ document.getElementById("email")?.addEventListener("change", async (e) => {
       const facilityData = facilityDoc.data();
       
       if (nameTextContainer) nameTextContainer.innerText = facilityData.facilityName || "Registered ABTC Location";
-      if (indicatorBox) indicatorBox.style.display = "block";
+      if (indicatorBox) indicatorBox.classList.add("visible");
     } else {
-      if (indicatorBox) indicatorBox.style.display = "none";
+      if (indicatorBox) indicatorBox.classList.remove("visible");
     }
   } catch (error) {
     console.error("Dynamic workspace identifier discovery failure:", error);
-    if (indicatorBox) indicatorBox.style.display = "none";
+    if (indicatorBox) indicatorBox.classList.remove("visible");
   }
 });
 
@@ -73,7 +73,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // 2. Security Status Firewall Check
+    // 2. Security Status Firewall Check & First-Time Password Flag Check
     const facilityDocRef = doc(db, "facilities", user.uid);
     const facilitySnapshot = await getDoc(facilityDocRef);
 
@@ -86,6 +86,13 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
         return; 
       }
       
+      // Check if account uses initial/default setup password
+      if (facilityData.requiresPasswordChange === true || facilityData.requiresPasswordChange === undefined) {
+        sessionStorage.setItem("requiresPasswordChange", "true");
+      } else {
+        sessionStorage.setItem("requiresPasswordChange", "false");
+      }
+
       await updateDoc(facilityDocRef, { status: "Online" });
     }
 
