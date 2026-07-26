@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHO Dashboard - CRIS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/pho-dashboard.css">
+    <!-- Chart.js for Epidemiological Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <!-- ================= SIDEBAR ================= -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="logo.png" alt="CRIS Logo" class="logo-image" onerror="this.style.display='none'">
+                <p>Community-Centric Rabies<br>Intelligence System</p>
+                <span class="role-badge">PHO ADMIN</span>
+            </div>
+
+            <nav class="menu">
+                <a href="#" class="menu-item active">Dashboard</a>
+                <a href="#" class="menu-item">Animal Bite Cases</a>
+                <a href="#" class="menu-item">Heatmaps</a>
+            </nav>
+
+            <div class="footer-nav">
+                <a href="#" class="menu-item">Settings</a>
+                <a href="#" class="menu-item logout">Logout</a>
+            </div>
+        </aside>
+
+        <!-- ================= MAIN CONTENT ================= -->
+        <main class="main-content">
+            
+            <!-- HEADER -->
+            <header class="header">
+                <h1>PHO DASHBOARD</h1>
+                <div class="user-profile-top">
+                    <span>Provincial Health Office - Iloilo</span>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                
+                <!-- LEFT COLUMN: EPIDEMIOLOGICAL KPIs & EPI CURVE -->
+                <div class="left-column">
+                    
+                    <!-- EPIDEMIOLOGICAL KPI CARDS -->
+                    <section class="statistics-container">
+                        <div class="stat-card">
+                            <small>CUMULATIVE RABIES CASES</small>
+                            <h2 id="kpiRabiesCases">12</h2>
+                            <span class="card-subtext">Confirmed Human Rabies (YTD)</span>
+                        </div>
+                        <div class="stat-card">
+                            <small>INCIDENT RATE (PER 100K)</small>
+                            <h2 id="kpiBiteRate">142.5</h2>
+                            <span class="card-subtext">Animal Bite Exposures</span>
+                        </div>
+                        <div class="stat-card">
+                            <small>PEP COMPLETION RATE</small>
+                            <h2 id="kpiPepRate">91.4%</h2>
+                            <span class="card-subtext">Full Post-Exposure Protocol</span>
+                        </div>
+                        <div class="stat-card">
+                            <small>CATEGORY III EXPOSURES</small>
+                            <h2 id="kpiCat3">1,840</h2>
+                            <span class="card-subtext">Severe (RIG Required)</span>
+                        </div>
+                    </section>
+
+                    <!-- EPIDEMIOLOGICAL GRAPH (EPI CURVE) -->
+                    <section class="chart-card">
+                        <div class="chart-header">
+                            <h3>Epidemiological Curve: Weekly Animal Bite Exposures & Confirmed Rabies</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="epiCurveChart"></canvas>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- RIGHT COLUMN: CALENDAR & ANNOUNCEMENTS -->
+                <div class="right-column">
+                    
+                    <!-- CALENDAR CARD -->
+                    <div class="stat-card calendar-card">
+                        <div class="calendar-header">
+                            <button class="calendar-btn" id="prevMonth">&lt;</button>
+                            <div class="calendar-title" id="calendarMonthYear">Month Year</div>
+                            <button class="calendar-btn" id="nextMonth">&gt;</button>
+                        </div>
+
+                        <div class="calendar-weekdays">
+                            <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                        </div>
+
+                        <div class="calendar-grid" id="calendarGrid">
+                            <!-- JS Generates Date Tiles Here -->
+                        </div>
+
+                        <!-- POPUP SELECTOR FOR MONTH/YEAR -->
+                        <div class="calendar-modal hidden" id="calendarModal">
+                            <div class="modal-year-select">
+                                <button class="modal-nav-btn" id="prevYear">&lt;</button>
+                                <span id="modalYearDisplay">2026</span>
+                                <button class="modal-nav-btn" id="nextYear">&gt;</button>
+                            </div>
+                            <div class="modal-months-grid" id="modalMonthsGrid">
+                                <!-- JS Generates Months Here -->
+                            </div>
+                            <button class="modal-close-btn" id="closeModalBtn">Close</button>
+                        </div>
+                    </div>
+
+                    <!-- ANNOUNCEMENT / EVENT INPUT BOX -->
+                    <div class="stat-card compliance-box" id="complianceBox">
+                        <h4 id="selectedDateText">Select a date on the calendar</h4>
+                        <textarea id="eventInput" placeholder="Enter health advisory or system announcement for this date..."></textarea>
+                        <button id="saveEventBtn">Save Announcement</button>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>
