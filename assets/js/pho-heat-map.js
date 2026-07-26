@@ -1,9 +1,42 @@
 // ==========================================================
-// CRIS - PHO HEATMAP SYSTEM (INTEGRATED & DECOUPLED)
+// CRIS - PHO HEATMAP SYSTEM (SELF-CONTAINED & EMULATOR READY)
 // ==========================================================
 
-// import { db, collection, getDocs } from '../../settings/js/settings-firebase.js';
+// 1. Direct CDN Imports from Firebase Web SDK 10.8.0
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
+    getFirestore, 
+    collection, 
+    getDocs, 
+    connectFirestoreEmulator 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { 
+    getAuth, 
+    connectAuthEmulator 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+// 2. Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
+    authDomain: "cris-database-da989.firebaseapp.com",
+    databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "cris-database-da989",
+    storageBucket: "cris-database-da989.firebasestorage.app",
+    messagingSenderId: "627885439681",
+    appId: "1:627885439681:web:3c657d64c0aad9b4913240",
+    measurementId: "G-0X99BH7GW4"
+};
+
+// 3. Initialize Firebase Services
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// 🧪 4. DIRECT LOCAL EMULATOR CONNECTION
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+
+// --- Global App Variables ---
 let facilityCoordinates = {};
 let map;
 let excelData = [];
@@ -66,7 +99,6 @@ function getCoordinates(facilityName) {
     const keys = Object.keys(facilityCoordinates);
     for (const key of keys) {
         if (cleanName.includes(key) || key.includes(cleanName)) {
-            console.log(`✅ Matched "${facilityName}" to coordinate key "${key}"`);
             return facilityCoordinates[key];
         }
     }
@@ -118,17 +150,19 @@ function initializeControls() {
 }
 
 // ==========================================================
-// 3. FIRESTORE DATA FETCHING
+// 3. FIRESTORE DATA FETCHING (SUBCOLLECTION ARCHITECTURE)
 // ==========================================================
 
 async function fetchPopulationDataFromFirestore() {
     try {
-        console.log("📊 Fetching population data from Firestore...");
-        const populationCollection = collection(db, "pho_population_data");
+        console.log("📊 Fetching population data from subcollection pho-database/main/population-data...");
+        
+        // Updated to use the structured subcollection path
+        const populationCollection = collection(db, "pho-database", "main", "population-data");
         const querySnapshot = await getDocs(populationCollection);
 
         if (querySnapshot.empty) {
-            console.warn("⚠️ pho_population_data collection is empty.");
+            console.warn("⚠️ Population subcollection is empty.");
             totalHumanPopulation = 0;
             municipalityPopulations = {};
             updateHumanPopulationCard();
@@ -143,7 +177,6 @@ async function fetchPopulationDataFromFirestore() {
             const data = doc.data();
             const docIdUpper = doc.id.trim().toUpperCase();
 
-            // FIXED: Matches "ILOILO" stored by settings.js
             if (docIdUpper === "ILOILO" || docIdUpper === "ILOILO_TOTAL") {
                 totalPopulationAccumulator = Number(data.totalPopulation) || 0;
             } else {
@@ -155,7 +188,6 @@ async function fetchPopulationDataFromFirestore() {
             }
         });
 
-        // Fallback sum if total population record wasn't found separately
         if (totalPopulationAccumulator === 0) {
             Object.values(updatedMunicipalities).forEach(val => totalPopulationAccumulator += val);
         }
@@ -169,26 +201,31 @@ async function fetchPopulationDataFromFirestore() {
         refreshMap();
 
     } catch (error) {
-        console.error("❌ Error fetching population data:", error);
+        console.error("❌ Error fetching population data from subcollection:", error);
     }
 }
 
 function updateHumanPopulationCard() {
     const card = populationCard || document.getElementById("humanPopulation");
     if (card) {
-        const formattedValue = totalHumanPopulation.toLocaleString();
-        card.textContent = formattedValue;
-        console.log("✅ Human Population Card updated to:", formattedValue);
-    } else {
-        console.error("❌ Element 'humanPopulation' not found!");
+        card.textContent = totalHumanPopulation.toLocaleString();
     }
 }
 
 async function fetchLatestCaseDataFromFirestore() {
     try {
-        console.log("🔄 Fetching cases from pho_rabies_cases...");
-        const caseCollection = collection(db, "pho_rabies_cases");
-        const querySnapshot = await getDocs(caseCollection);
+        console.log("🔄 Fetching cases from pho-database/main/legacy-summary...");
+        
+        // Primary fetch from structured subcollection
+        let caseCollection = collection(db, "pho-database", "main", "legacy-summary");
+        let querySnapshot = await getDocs(caseCollection);
+
+        // Fallback to legacy top-level collection if subcollection is empty
+        if (querySnapshot.empty) {
+            console.warn("⚠️ Subcollection empty, falling back to top-level pho_rabies_cases...");
+            caseCollection = collection(db, "pho_rabies_cases");
+            querySnapshot = await getDocs(caseCollection);
+        }
 
         if (querySnapshot.empty) {
             console.warn("⚠️ No case data found.");
@@ -198,21 +235,40 @@ async function fetchLatestCaseDataFromFirestore() {
         }
 
         excelData = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const rawMunName = data.municipality || data.facilityName || "Unknown";
-            const cleanedMunName = String(rawMunName).trim();
-            const coords = getCoordinates(cleanedMunName);
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            
+            // Handles raw excel row format or parsed firestore format
+            if (data.rawData && Array.isArray(data.rawData)) {
+                const row = data.rawData;
+                const rawMunName = row[0] || "Unknown";
+                const cleanedMunName = String(rawMunName).trim();
+                const coords = getCoordinates(cleanedMunName);
 
-            excelData.push({
-                Year: data.year || new Date().getFullYear(),
-                Municipality: cleanedMunName,
-                Latitude: coords.lat,
-                Longitude: coords.lng,
-                "Animal Bite Cases": Number(data.totalCases || data.biteCases) || 0,
-                "Human Rabies Deaths": Number(data.humanDeaths || data.maleCases) || 0,
-                "Animal Rabies Deaths": Number(data.animalDeaths || data.femaleCases) || 0
-            });
+                excelData.push({
+                    Year: new Date().getFullYear(),
+                    Municipality: cleanedMunName,
+                    Latitude: coords.lat,
+                    Longitude: coords.lng,
+                    "Animal Bite Cases": Number(row[1]) || 0,
+                    "Human Rabies Deaths": Number(row[2]) || 0,
+                    "Animal Rabies Deaths": Number(row[3]) || 0
+                });
+            } else {
+                const rawMunName = data.municipality || data.facilityName || "Unknown";
+                const cleanedMunName = String(rawMunName).trim();
+                const coords = getCoordinates(cleanedMunName);
+
+                excelData.push({
+                    Year: data.year || new Date().getFullYear(),
+                    Municipality: cleanedMunName,
+                    Latitude: coords.lat,
+                    Longitude: coords.lng,
+                    "Animal Bite Cases": Number(data.totalCases || data.biteCases) || 0,
+                    "Human Rabies Deaths": Number(data.humanDeaths || data.maleCases) || 0,
+                    "Animal Rabies Deaths": Number(data.animalDeaths || data.femaleCases) || 0
+                });
+            }
         });
 
         console.log(`✅ Case data loaded: ${excelData.length} records`);
@@ -310,8 +366,6 @@ function populateFilters() {
             option.textContent = mun;
             municipalityFilter.appendChild(option);
         });
-        
-        console.log(`✅ Municipality filter populated with ${municipalities.length} items`);
     }
 }
 

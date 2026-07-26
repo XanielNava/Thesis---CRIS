@@ -1,8 +1,8 @@
 // itr.js - Individual Treatment Record Registration Controller
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { 
-    getFirestore, doc, getDoc, collection, addDoc, runTransaction, serverTimestamp 
+    getFirestore, doc, getDoc, collection, addDoc, runTransaction, serverTimestamp, connectFirestoreEmulator 
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -17,6 +17,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 let activeFacilityUid = null;
 let activePersonnelName = "Duty Staff";
@@ -302,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     caseId: generatedCustomId,
                     patientId: generatedCustomId,
                     itrDisplayNo: fullItrDisplayString,
-                    facilityId: activeFacilityUid, // 🎯 Included for facility filtering
+                    facilityId: activeFacilityUid,
                     facilityAcronym: acronym.toUpperCase(),
                     recordedBy: activePersonnelName,
                     createdAt: serverTimestamp(),
@@ -360,7 +364,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     woundPhotoData: capturedBase64Photo || null
                 };
 
-                // 🎯 Writes to the root 'patient-database' collection
                 await addDoc(collection(db, "patient-database"), patientDataPayload);
 
                 alert(`Success! Record ${generatedCustomId} for ${parsedFullName} has been stored.`);

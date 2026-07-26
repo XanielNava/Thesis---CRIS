@@ -1,9 +1,9 @@
 // abtc-pharmacy.js - Pharmacist Cold-Chain & Requisition Engine (Optimized Pipeline)
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import { 
-    getFirestore, collection, onSnapshot, query, where, doc, getDoc, addDoc, updateDoc, deleteDoc 
+    getFirestore, collection, onSnapshot, query, where, doc, getDoc, addDoc, updateDoc, deleteDoc, connectFirestoreEmulator 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -17,6 +17,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 let activeFacilityId = null;
 let inventoryList = [];

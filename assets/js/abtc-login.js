@@ -1,8 +1,8 @@
 // abtc-login.js - Master Facility Gatekeeper for Multi-Tenant Shared Terminals
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getAuth, signInWithEmailAndPassword, signOut, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { 
-  getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs 
+  getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs, connectFirestoreEmulator 
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'; 
 
 const firebaseConfig = {
@@ -19,6 +19,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 // ==========================================================
 // 🏢 INTELLIGENT WORKPLACE LOOKUP (AS THEY TYPE)

@@ -1,9 +1,9 @@
 // abtc-calendar.js - Dynamic PEP Calendar Engine (Root Collection)
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import { 
-    getFirestore, collection, onSnapshot, query, where, doc, getDoc, updateDoc 
+    getFirestore, collection, onSnapshot, query, where, doc, getDoc, updateDoc, connectFirestoreEmulator 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -17,6 +17,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 let currentDate = new Date();
 let activeFacilityId = null;
@@ -104,7 +108,6 @@ function computePepSchedule(day0DateStr) {
 }
 
 function streamPatientSchedules(facilityId) {
-    // 🎯 Reads patient schedules from root 'patient-database' collection
     const q = query(collection(db, "patient-database"), where("facilityId", "==", facilityId));
 
     onSnapshot(q, (snapshot) => {
@@ -374,7 +377,6 @@ if (submitConfirmDoseBtn) {
         const pharmacyName = confirmPharmacyName ? confirmPharmacyName.value.trim() : "";
 
         try {
-            // 🎯 Updates dose completion status in root 'patient-database' collection
             const patientDocRef = doc(db, "patient-database", patientId);
             const patientSnap = await getDoc(patientDocRef);
 

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRIS - PHO Settings</title>
+    <!-- SheetJS for Excel Parsing -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
@@ -29,15 +30,13 @@
 
             <div class="footer-nav">
                 <a href="../../settings/html/settings.html" class="menu-item active alt">Settings</a>
-                <button id="logout-btn" class="menu-item alt logout"
-                    onclick="window.location.href='../../src/pho/pho-login.html'">Logout</button>
+                <button id="logout-btn" class="menu-item alt logout">Logout</button>
             </div>
         </aside>
 
-        <!-- ================= MAIN DASHBOARD CONTENT ================= -->
+        <!-- MAIN DASHBOARD CONTENT -->
         <main class="main-content">
 
-            <!-- SETTINGS PAGE CONTENT (Single Scrollable Page) -->
             <div class="settings-main">
 
                 <div class="settings-header">
@@ -45,9 +44,7 @@
                     <p>Manage your Public Health Office Configuration</p>
                 </div>
 
-                <!-- ============================================
-                    1. GENERAL SETTINGS SECTION
-                    ============================================ -->
+                <!-- 1. GENERAL SETTINGS SECTION -->
                 <div class="settings-section">
                     <h2 class="section-title">⚙️ General Settings</h2>
                     <p class="section-subtitle">Configure your PHO facility information and basic details</p>
@@ -92,13 +89,13 @@
                             <div class="field full" style="margin-bottom:18px;">
                                 <label>PHO Logo</label>
                                 <label class="file-upload" for="phoLogo">
-                                    📤 Click to upload logo (PNG or JPG, max 2MB)
+                                    <span id="logoFileText">📤 Click to upload logo (PNG or JPG, max 2MB)</span>
                                     <input type="file" id="phoLogo" accept="image/png, image/jpeg">
                                 </label>
                             </div>
 
                             <div class="card-actions">
-                                <button type="button" class="btn btn-primary">Save Changes</button>
+                                <button type="button" id="saveFacilityBtn" class="btn btn-primary">Save Changes</button>
                             </div>
                         </section>
 
@@ -150,61 +147,61 @@
                             </div>
 
                             <div class="card-actions">
-                                <button type="button" class="btn btn-primary">Update Account</button>
+                                <button type="button" id="updateAccountBtn" class="btn btn-primary">Update Account</button>
                             </div>
                         </section>
                     </div>
                 </div>
 
-                <!-- ============================================
-                    2. UPLOAD DATASET SECTION
-                    ============================================ -->
+                <!-- 2. UPLOAD DATASET SECTION -->
                 <div class="settings-section">
                     <h2 class="section-title">📤 Upload Dataset</h2>
                     <p class="section-subtitle">Import case registers and demographic statistics for analysis</p>
 
                     <div class="settings-grid">
-                        <!-- CARD 3: Import Case Data -->
+                        <!-- CARD 3: Import Legacy / Annual Summary Dataset -->
                         <section class="card">
-                            <h3 class="card-title"><span class="icon">📋</span> Import Case Data</h3>
+                            <h3 class="card-title"><span class="icon">📋</span> Import Legacy Dataset</h3>
                             <p class="card-subtitle">Upload Provincial Report of Animal/Rabies Cases</p>
 
-                            <div class="field full" style="margin-bottom:18px;">
-                                <label>Upload File</label>
-                                <label class="file-upload" for="caseDataFile">
-                                    📤 Click to upload (CSV, XLSX)
-                                    <input type="file" id="caseDataFile" accept=".csv, .xlsx, .xls">
-                                </label>
-                            </div>
+                            <form id="importLegacyForm">
+                                <div class="field full" style="margin-bottom:18px;">
+                                    <label>Upload File</label>
+                                    <label class="file-upload" for="legacyFileInput">
+                                        <span id="legacyFileText">📤 Click to upload (CSV, XLSX)</span>
+                                        <input type="file" id="legacyFileInput" accept=".csv, .xlsx, .xls">
+                                    </label>
+                                </div>
 
-                            <div class="card-actions">
-                                <button type="button" class="btn btn-primary">Upload & Process</button>
-                            </div>
+                                <div class="card-actions">
+                                    <button type="submit" id="importLegacyBtn" class="btn btn-primary">Import Legacy Data</button>
+                                </div>
+                            </form>
                         </section>
 
-                        <!-- CARD 4: Import Population Data -->
+                        <!-- CARD 4: Import Population Dataset -->
                         <section class="card">
                             <h3 class="card-title"><span class="icon">💉</span> Import Population Dataset</h3>
                             <p class="card-subtitle">Upload Iloilo Province Population Data</p>
 
-                            <div class="field full" style="margin-bottom:18px;">
-                                <label>Upload File</label>
-                                <label class="file-upload" for="populationDataFile">
-                                    📤 Click to upload (CSV, XLSX)
-                                    <input type="file" id="populationDataFile" accept=".csv, .xlsx, .xls">
-                                </label>
-                            </div>
+                            <form id="importPopulationForm">
+                                <div class="field full" style="margin-bottom:18px;">
+                                    <label>Upload File</label>
+                                    <label class="file-upload" for="populationFileInput">
+                                        <span id="popFileText">📤 Click to upload (CSV, XLSX)</span>
+                                        <input type="file" id="populationFileInput" accept=".csv, .xlsx, .xls">
+                                    </label>
+                                </div>
 
-                            <div class="card-actions">
-                                <button type="button" class="btn btn-primary">Upload & Process</button>
-                            </div>
+                                <div class="card-actions">
+                                    <button type="submit" id="importPopulationBtn" class="btn btn-primary">Import Population</button>
+                                </div>
+                            </form>
                         </section>
                     </div>
                 </div>
 
-                <!-- ============================================
-                    3. RECENT ACTIVITY & LOGS
-                    ============================================ -->
+                <!-- 3. RECENT ACTIVITY LOGS -->
                 <div class="settings-section">
                     <h2 class="section-title">📋 Activity Log</h2>
                     <p class="section-subtitle">All updates to settings and configuration</p>
@@ -214,51 +211,31 @@
                             <h3 class="card-title"><span class="icon">🕒</span> System Audit Log</h3>
                             <p class="card-subtitle">Recent activity actions executed by system users.</p>
 
-                            <div class="log-container">
+                            <div class="log-container" id="auditLogContainer">
                                 <div class="log-entry">
-                                    <div class="log-time">Today, 2:45 PM</div>
-                                    <div class="log-action">Settings Updated</div>
-                                    <div class="log-details">User <strong>Juan Dela Cruz</strong> updated PHO contact information</div>
-                                    <div class="log-user">By: juan.delacruz</div>
-                                </div>
-                                <div class="log-entry">
-                                    <div class="log-time">Yesterday, 10:20 AM</div>
-                                    <div class="log-action">Data Imported</div>
-                                    <div class="log-details">Case data file <strong>case_data_july2024.csv</strong> processed successfully (245 records)</div>
-                                    <div class="log-user">By: maria.santos</div>
-                                </div>
-                                <div class="log-entry">
-                                    <div class="log-time">Jul 12, 2024</div>
-                                    <div class="log-action">User Added</div>
-                                    <div class="log-details">New user <strong>Dr. Robert Santos</strong> (Health Officer) added to system</div>
-                                    <div class="log-user">By: admin</div>
+                                    <div class="log-time">System Ready</div>
+                                    <div class="log-action">Initialization</div>
+                                    <div class="log-details">Settings terminal initialized</div>
+                                    <div class="log-user">By: System</div>
                                 </div>
                             </div>
-
-                            <!-- <div class="card-actions" style="margin-top:18px;">
-                                <button type="button" class="btn btn-secondary">Export Log</button>
-                                <button type="button" class="btn btn-secondary">Filter by Date</button>
-                            </div> -->
                         </section>
                     </div>
                 </div>
 
-                <!-- ============================================
-                    4. HISTORY SECTION
-                    ============================================ -->
+                <!-- 4. IMPORT HISTORY TABLE -->
                 <div class="settings-section">
                     <h2 class="section-title">📜 History</h2>
                     <p class="section-subtitle">View audit logs and system activity</p>
 
                     <div class="settings-grid">
-                        <!-- CARD 5: Data Import History -->
                         <section class="card full-width">
                             <h3 class="card-title"><span class="icon">📈</span> Import History</h3>
                             <p class="card-subtitle">Track all your data uploads and synchronizations.</p>
 
                             <div class="table-container">
                                 <div class="table-responsive">
-                                    <table class="history-table">
+                                    <table class="history-table" id="uploadHistoryTable">
                                         <thead>
                                             <tr>
                                                 <th>Date Uploaded</th>
@@ -267,7 +244,7 @@
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="uploadHistoryTableBody">
+                                        <tbody>
                                             <!-- Dynamically populated via JavaScript -->
                                         </tbody>
                                     </table>
@@ -276,10 +253,13 @@
                         </section>
                     </div>
                 </div>
+
             </div>
         </main>
     </div>
-    <!-- <script type="module" src="../js/settings-firebase.js"></script> -->
+
+    <!-- Master Application Script -->
     <script type="module" src="../js/settings.js"></script>
 </body>
+
 </html>

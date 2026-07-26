@@ -1,8 +1,8 @@
 // abtc-home.js - ABTC Home Dashboard Controller (Fully Optimized)
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signOut, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { 
-    getFirestore, collection, doc, getDoc, onSnapshot, query, where, getCountFromServer 
+    getFirestore, collection, doc, getDoc, onSnapshot, query, where, getCountFromServer, connectFirestoreEmulator 
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -18,6 +18,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 const facilityTitleDisplay = document.getElementById('facilityTitleDisplay');
 const profileInfoText = document.getElementById('profileInfoText');

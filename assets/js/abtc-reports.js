@@ -1,8 +1,8 @@
 // reports.js - ABTC Facility Reports Compiler & PHO Submission Engine
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
-import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signOut, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { 
-    getFirestore, doc, getDoc, collection, query, where, getDocs, addDoc 
+    getFirestore, doc, getDoc, collection, query, where, getDocs, addDoc, connectFirestoreEmulator 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -17,6 +17,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 let activeFacilityId = null;
 let currentFacilityName = "ABTC Facility";
@@ -92,7 +96,6 @@ async function loadAndCompileReportData() {
     if (!tableBody) return;
 
     try {
-        // Scoped read strictly filtered by logged-in facilityId
         const patientQuery = query(
             collection(db, "patient-database"), 
             where("facilityId", "==", activeFacilityId)
@@ -100,7 +103,6 @@ async function loadAndCompileReportData() {
 
         const snapshot = await getDocs(patientQuery);
 
-        // Reset tally matrix
         const totals = {
             male: 0, female: 0,
             under15: 0, over15: 0,
@@ -117,23 +119,19 @@ async function loadAndCompileReportData() {
         snapshot.forEach((docSnap) => {
             const patient = docSnap.data();
 
-            // Sex Breakdown
             const sexVal = (patient.sex || "").toLowerCase();
             if (sexVal === "male") totals.male++;
             else if (sexVal === "female") totals.female++;
 
-            // Age Breakdown
             const ageNum = Number(patient.age || 0);
             if (ageNum < 15) totals.under15++;
             else totals.over15++;
 
-            // Biting Animal Type
             const animal = (patient.animalType || "").toLowerCase();
             if (animal.includes("dog")) totals.dog++;
             else if (animal.includes("cat")) totals.cat++;
             else totals.others++;
 
-            // Category Exposure Breakdown
             const category = (patient.classification || patient.exposureCategory || "").toUpperCase();
             const isBooster = patient.priorVaccination === "Yes" || patient.isBooster === true;
 
@@ -144,7 +142,6 @@ async function loadAndCompileReportData() {
                 else totals.cat3New++;
             }
 
-            // RIG / Vaccine Treatments
             const rig = (patient.rigType || "").toUpperCase();
             if (rig.includes("HRIG") || rig.includes("HUMAN")) {
                 totals.hrig++;
@@ -159,7 +156,6 @@ async function loadAndCompileReportData() {
                 totals.totalDoses++;
             }
 
-            // Completion Remarks
             const status = (patient.treatmentStatus || "").toLowerCase();
             const isCat3 = category.includes("III");
 
@@ -245,7 +241,6 @@ if (submitPhoBtn) {
                 submittedAt: new Date().toISOString()
             };
 
-            // Writes to facility subcollection
             await addDoc(collection(db, "facilities", activeFacilityId, "submitted-reports"), reportPayload);
 
             alert(`Success! Report for ${reportMonthYear} has been officially submitted to PHO.`);
@@ -262,9 +257,6 @@ if (submitPhoBtn) {
     });
 }
 
-/* --------------------
-    5. Search / Filter Table Rows
--------------------- */
 const caseSearchInput = document.getElementById("caseSearch");
 if (caseSearchInput) {
     caseSearchInput.addEventListener("input", (e) => {
@@ -278,9 +270,6 @@ if (caseSearchInput) {
     });
 }
 
-/* --------------------
-    6. Logout Interceptor
--------------------- */
 document.getElementById("logout-btn")?.addEventListener("click", (e) => {
     e.preventDefault();
     if (confirm("Are you sure you want to log out?")) {

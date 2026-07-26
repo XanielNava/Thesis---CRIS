@@ -1,9 +1,9 @@
 // abtc-reg.js - Patient Registry Library Controller
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import { 
-    getFirestore, collection, onSnapshot, query, where, doc, getDoc, deleteDoc, updateDoc 
+    getFirestore, collection, onSnapshot, query, where, doc, getDoc, deleteDoc, updateDoc, connectFirestoreEmulator 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -17,6 +17,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 let activeFacilityId = null;
 let libraryCache = [];
@@ -87,7 +91,6 @@ onAuthStateChanged(auth, async (user) => {
 // Stream Root Collection filtered by Facility ID
 // ----------------------------------------------------
 function streamFacilityRecords(facilityId) {
-    // 🎯 Reads from root collection 'patient-database' filtered by facilityId
     const recordsQuery = query(
         collection(db, "patient-database"), 
         where("facilityId", "==", facilityId)
@@ -167,7 +170,6 @@ function renderLibraryTable(dataList) {
             
             if (confirm(`Are you sure you want to delete record "${caseIdDisplay}" for ${targetName}?`)) {
                 try {
-                    // 🎯 Deletes directly from root collection
                     await deleteDoc(doc(db, "patient-database", targetId));
                     alert("Patient record deleted successfully.");
                 } catch (err) {
@@ -233,7 +235,6 @@ if (saveRecordBtn) {
         };
 
         try {
-            // 🎯 Updates document in root collection
             await updateDoc(doc(db, "patient-database", currentActiveDocId), updatedData);
             alert("Patient record updated successfully!");
             toggleMode(false);

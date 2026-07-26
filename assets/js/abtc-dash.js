@@ -1,8 +1,8 @@
 // abtc-dash.js - Optimized Dashboard Controller with Untouched Calendar Engine
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
-import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signOut, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { 
-    getFirestore, doc, getDoc, setDoc, addDoc, collection, query, where, getDocs, onSnapshot, getCountFromServer 
+    getFirestore, doc, getDoc, setDoc, addDoc, collection, query, where, getDocs, onSnapshot, getCountFromServer, connectFirestoreEmulator 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -17,6 +17,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 /* --------------------
     Authentication State Observer & Profile Cache
@@ -40,7 +44,6 @@ onAuthStateChanged(auth, async (user) => {
                 return;
             }
 
-            // Session Caching Check (Bypasses repeated getDoc reads)
             let cachedFacilityName = sessionStorage.getItem("cachedFacilityName");
             let activeStaffMember = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
 
@@ -119,11 +122,9 @@ async function loadAggregatedDashboardMetrics(facilityId) {
     try {
         const rootPatientsCol = collection(db, "patient-database");
 
-        // 1. Server-side Count for Total Patients (1 Read)
         const totalQuery = query(rootPatientsCol, where("facilityId", "==", facilityId));
         const totalSnap = await getCountFromServer(totalQuery);
 
-        // 2. Server-side Count for Category III Patients (1 Read)
         const cat3Query = query(rootPatientsCol, where("facilityId", "==", facilityId), where("classification", "==", "Category III"));
         const cat3Snap = await getCountFromServer(cat3Query);
 
@@ -138,7 +139,6 @@ async function loadAggregatedDashboardMetrics(facilityId) {
         console.error("Server-side metrics aggregation failed:", error);
     }
 
-    // 3. Dynamic Calculation for Today's Scheduled Doses
     const now = new Date();
     const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
     const todayISODate = localDate.toISOString().split('T')[0];
@@ -164,7 +164,6 @@ async function loadAggregatedDashboardMetrics(facilityId) {
         }
     });
 
-    // 4. Live Cold-Chain PEP Vials Inventory Aggregation
     const inventoryColRef = collection(db, "facilities", facilityId, "vaccine-inventory");
     
     onSnapshot(inventoryColRef, (snapshot) => {
@@ -172,7 +171,6 @@ async function loadAggregatedDashboardMetrics(facilityId) {
 
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
-            // Fallback supports vialsLeft, vials, or stock
             const countVal = data.vialsLeft ?? data.vials ?? data.stock ?? 0;
             totalVials += Number(countVal);
         });
