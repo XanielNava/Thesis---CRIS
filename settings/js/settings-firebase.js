@@ -1,21 +1,23 @@
-// js/settings-firebase.js
+// settings-firebase.js
 
-// 1. Direct CDN imports inside this module (Added 'where')
-// import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-// import { 
-//     getFirestore, 
-//     collection, 
-//     addDoc, 
-//     writeBatch, 
-//     doc, 
-//     getDocs, 
-//     query, 
-//     where,          // <--- ADDED HERE
-//     orderBy, 
-//     setDoc,
-//     deleteDoc,
-//     limit,
-// } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// 1. Direct CDN imports inside this module
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    writeBatch, 
+    doc, 
+    getDocs, 
+    query, 
+    where, 
+    orderBy, 
+    setDoc,
+    deleteDoc,
+    limit,
+    getCountFromServer, // <--- ADDED
+    collectionGroup     // <--- ADDED
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // 2. Your Firebase Configuration
 const firebaseConfig = {
@@ -42,9 +44,11 @@ export {
     doc, 
     getDocs, 
     query, 
-    where,          // <--- ADDED HERE
+    where, 
     orderBy, 
     setDoc,
     deleteDoc,
     limit,
+    getCountFromServer, // <--- ADDED
+    collectionGroup     // <--- ADDED
 };

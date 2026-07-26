@@ -73,8 +73,10 @@ function renderHeaderUI(userRole) {
     const subTitleEl = document.getElementById("facilitySubTitle");
     const profileInfoEl = document.getElementById("profileInfoText");
 
+    const currentPeriod = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+
     if (titleEl) titleEl.innerText = `${currentFacilityName.toUpperCase()} - BITE CASES REPORT DRAFT`;
-    if (subTitleEl) subTitleEl.innerText = `Operational Statistics & PHO Submission Prep — ${new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}`;
+    if (subTitleEl) subTitleEl.innerText = `Operational Statistics & PHO Submission Prep — ${currentPeriod}`;
     
     if (profileInfoEl) {
         const roleText = userRole === "Owner" ? "Administrator / Owner" : "Nurse Duty Personnel";
@@ -90,7 +92,7 @@ async function loadAndCompileReportData() {
     if (!tableBody) return;
 
     try {
-        // Query root collection strictly filtered by facilityId
+        // Scoped read strictly filtered by logged-in facilityId
         const patientQuery = query(
             collection(db, "patient-database"), 
             where("facilityId", "==", activeFacilityId)
@@ -98,13 +100,13 @@ async function loadAndCompileReportData() {
 
         const snapshot = await getDocs(patientQuery);
 
-        // Reset tally metrics
+        // Reset tally matrix
         const totals = {
             male: 0, female: 0,
             under15: 0, over15: 0,
             dog: 0, cat: 0, others: 0,
             cat1: 0, cat2: 0, cat3New: 0, cat3Booster: 0,
-            rigType: "HR", // Default indicator
+            rigType: "HR",
             tcv: 0, hrig: 0, erig: 0, totalDoses: 0,
             compCat2: 0, compCat3: 0,
             incompCat2: 0, incompCat3: 0,
@@ -116,15 +118,16 @@ async function loadAndCompileReportData() {
             const patient = docSnap.data();
 
             // Sex Breakdown
-            if ((patient.sex || "").toLowerCase() === "male") totals.male++;
-            else if ((patient.sex || "").toLowerCase() === "female") totals.female++;
+            const sexVal = (patient.sex || "").toLowerCase();
+            if (sexVal === "male") totals.male++;
+            else if (sexVal === "female") totals.female++;
 
             // Age Breakdown
             const ageNum = Number(patient.age || 0);
             if (ageNum < 15) totals.under15++;
             else totals.over15++;
 
-            // Animal Type
+            // Biting Animal Type
             const animal = (patient.animalType || "").toLowerCase();
             if (animal.includes("dog")) totals.dog++;
             else if (animal.includes("cat")) totals.cat++;
@@ -228,6 +231,7 @@ if (submitPhoBtn) {
 
         try {
             submitPhoBtn.disabled = true;
+            submitPhoBtn.style.pointerEvents = "none";
             submitPhoBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
 
             const reportPayload = {
@@ -241,7 +245,7 @@ if (submitPhoBtn) {
                 submittedAt: new Date().toISOString()
             };
 
-            // Save to facility subcollection
+            // Writes to facility subcollection
             await addDoc(collection(db, "facilities", activeFacilityId, "submitted-reports"), reportPayload);
 
             alert(`Success! Report for ${reportMonthYear} has been officially submitted to PHO.`);
@@ -252,6 +256,7 @@ if (submitPhoBtn) {
             console.error("Submission failed:", error);
             alert("Error submitting report: " + error.message);
             submitPhoBtn.disabled = false;
+            submitPhoBtn.style.pointerEvents = "auto";
             submitPhoBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Submit Report to PHO`;
         }
     });
