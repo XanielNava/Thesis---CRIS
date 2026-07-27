@@ -1,0 +1,342 @@
+/* CRIS SUNSET PALETTE & BASE STYLES */
+:root {
+    --sunset-orange: #EA6113;
+    --sunset-gold: #F88F22;
+    --sunset-yellow: #FBB931;
+    --sunset-cream: #FFE3B3;
+    --sunset-input-bg: #FFF3E4;
+    --text-dark: #412110;
+    --text-muted: #665248;
+    --sidebar-bg: #1a234e;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Lato', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #FFFAF0;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+    padding: 10px 20px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(234, 97, 19, 0.2);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.logo {
+    width: 70px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.header h1 {
+    font-size: 20px;
+    letter-spacing: 0.5px;
+}
+
+/* Menu Burger */
+.burger {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: auto; 
+    transition: all 0.3s ease;
+}
+
+.burger:hover {
+    background: var(--sunset-cream);
+    color: var(--sunset-orange);
+}
+
+/* Sidebar & Overlay */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+    z-index: 10;
+}
+
+.overlay.active { 
+    opacity: 1; 
+    visibility: visible; 
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -280px;
+    width: 280px;
+    height: 100%;
+    background-color: var(--sidebar-bg);
+    color: white;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 11;
+}
+
+.sidebar.active { right: 0; }
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--sunset-cream);
+    font-size: 24px;
+    cursor: pointer;
+    align-self: flex-end;
+    margin-bottom: 20px;
+}
+
+.sidebar nav {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sidebar nav a {
+    padding: 14px 22px;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.sidebar nav a:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--sunset-yellow);
+}
+
+/* MAIN CONTAINER */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.main h2 {
+    margin-bottom: 20px;
+    color: var(--text-dark);
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+/* PHO LOGIN CONTAINER */
+.login-box {
+    background-color: var(--sunset-cream);
+    width: 100%;
+    max-width: 440px;
+    padding: 35px 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(234, 97, 19, 0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* REGISTRATION CARD (RESTORED TO PREVIOUS SQUARE-CARD LAYOUT) */
+.registration-card {
+    background-color: #FFFFFF;
+    width: 100%;
+    max-width: 680px;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Card Header & Divider */
+.card-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.login-logo {
+    display: block;
+    margin: 0 auto 15px auto;
+    width: 110px;
+    height: auto;
+}
+
+.form-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 16px;
+}
+
+.form-divider {
+    border: 0;
+    height: 1px;
+    background-color: #E2E8F0;
+    margin: 0 auto;
+}
+
+/* Form Sections */
+.form-section {
+    margin-bottom: 22px;
+}
+
+.section-label {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+}
+
+/* Input Grids */
+.grid-1-col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.grid-2-col {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 10px;
+}
+
+.grid-4-col {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 1.5fr;
+    gap: 12px;
+}
+
+/* Input Fields */
+input, select {
+    width: 100%;
+    height: 46px;
+    padding: 10px 16px;
+    background-color: var(--sunset-input-bg);
+    border: 1px solid #F3D9C1;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-dark);
+    outline: none;
+    transition: all 0.25s ease;
+}
+
+input::placeholder, select {
+    color: var(--text-muted);
+}
+
+input:focus, select:focus {
+    border-color: var(--sunset-orange);
+    background-color: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(234, 97, 19, 0.15);
+}
+
+/* BUTTONS & LINKS */
+.button-container {
+    display: flex;
+    gap: 16px;
+    margin-top: 30px;
+    width: 100%;
+}
+
+.btn {
+    flex: 1;
+    height: 48px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.btn-secondary {
+    background-color: #F1F5F9;
+    color: var(--text-dark) !important;
+    border: 1px solid #CBD5E1;
+}
+
+.btn-secondary:hover {
+    background-color: #E2E8F0;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--sunset-orange), var(--sunset-gold));
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(234, 97, 19, 0.25);
+}
+
+.btn-primary:hover {
+    background: var(--text-dark);
+    box-shadow: none;
+}
+
+/* Auth Links for Login Page */
+.auth-links {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.auth-links a {
+    font-size: 13px;
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+    color: var(--sunset-orange);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+    .registration-card {
+        padding: 24px 20px;
+    }
+
+    .form-title {
+        font-size: 22px;
+    }
+
+    .grid-2-col, .grid-4-col {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
