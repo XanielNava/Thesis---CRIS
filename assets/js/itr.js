@@ -1,7 +1,8 @@
+// itr.js - Individual Treatment Record Registration Controller
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { 
-    getFirestore, doc, getDoc, collection, addDoc, runTransaction, serverTimestamp 
+    getFirestore, doc, getDoc, collection, addDoc, runTransaction, serverTimestamp, connectFirestoreEmulator 
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -17,62 +18,91 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+
 let activeFacilityUid = null;
 let activePersonnelName = "Duty Staff";
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ----------------------------------------------------
-    // 1. Session Observer Loop
-    // ----------------------------------------------------
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             activeFacilityUid = user.uid;
-            activePersonnelName = localStorage.getItem("activePersonnelName") || "Duty Staff";
             
-            // Auto-populate the Physician/Nurse field if empty
-            const physicianInput = document.getElementById("physician");
-            if (physicianInput && !physicianInput.value) {
-                physicianInput.value = activePersonnelName;
+            let detectedName = sessionStorage.getItem("activePersonnelName") || 
+                               localStorage.getItem("activePersonnelName") || 
+                               localStorage.getItem("activePersonnel");
+
+            if (!detectedName) {
+                try {
+                    const userSnap = await getDoc(doc(db, "users", user.uid));
+                    if (userSnap.exists()) {
+                        detectedName = userSnap.data().name || userSnap.data().fullName;
+                    } else {
+                        const facSnap = await getDoc(doc(db, "facilities", user.uid));
+                        if (facSnap.exists()) detectedName = facSnap.data().personnelName;
+                    }
+                } catch (err) {
+                    console.warn("Firestore user profile fetch error:", err);
+                }
             }
 
-            // Set default consultation time to current local time string
+            activePersonnelName = (detectedName || user.displayName || user.email || "Duty Staff").trim();
+            
+            try {
+                const parsed = JSON.parse(activePersonnelName);
+                activePersonnelName = parsed.name || parsed.fullName || activePersonnelName;
+            } catch (e) {}
+
+            activePersonnelName = activePersonnelName.trim();
+            sessionStorage.setItem("activePersonnelName", activePersonnelName);
+
+            const applyPersonnelName = () => {
+                const physicianInput = document.getElementById("physician");
+                if (physicianInput) physicianInput.value = activePersonnelName;
+            };
+
+            applyPersonnelName();
+            setTimeout(applyPersonnelName, 150);
+
             const consultField = document.getElementById('consultDateTime');
             if (consultField && !consultField.value) {
                 const now = new Date();
                 now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                consultField.value = now.toISOString().slice(0,16);
+                consultField.value = now.toISOString().slice(0, 16);
             }
 
-            // Generate initial preview sequence ID using facility acronym
             await previewRecordNumber(user.uid);
-
-            // Compute initial schedule automatically
             recalculatePepSchedule();
         } else {
             window.location.href = "abtc-login.html";
         }
     });
 
-    // Fetch the ACRONYM from the facilities collection and format the ITR display field
     async function previewRecordNumber(uid) {
         const recordNoField = document.getElementById('recordNo');
         if (!recordNoField) return;
 
         try {
-            const facilitySnap = await getDoc(doc(db, "facilities", uid));
-            let facilityAcronym = "ABTC";
+            let facilityAcronym = sessionStorage.getItem("cachedFacilityAcronym");
             
-            if (facilitySnap.exists()) {
-                const facilityData = facilitySnap.data();
-                facilityAcronym = facilityData.acronym || facilityData.code || "ABTC";
+            if (!facilityAcronym) {
+                const facilitySnap = await getDoc(doc(db, "facilities", uid));
+                if (facilitySnap.exists()) {
+                    const facilityData = facilitySnap.data();
+                    facilityAcronym = facilityData.acronym || facilityData.code || "ABTC";
+                    sessionStorage.setItem("cachedFacilityAcronym", facilityAcronym);
+                } else {
+                    facilityAcronym = "ABTC";
+                }
             }
-            
+
             const counterSnap = await getDoc(doc(db, "facility_counters", uid));
             const nextIndex = counterSnap.exists() ? ((counterSnap.data().currentSequence || 0) + 1) : 1;
             const paddedSeq = String(nextIndex).padStart(3, '0');
             const year = new Date().getFullYear();
             
-            // Display: ACRONYM - YEAR - SEQUENCE (e.g., WVMC - 2026 - 001)
             recordNoField.value = `${facilityAcronym.toUpperCase()} - ${year} - ${paddedSeq}`;
         } catch (err) {
             console.error("Counter preview error:", err);
@@ -80,9 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ----------------------------------------------------
-    // 2. Form Controls & Interactive UI Handlers
-    // ----------------------------------------------------
+    // Pill Button Logic
     document.querySelectorAll('.pill-group').forEach((group) => {
         const isMulti = group.classList.contains('multi');
         group.querySelectorAll('.pill').forEach((pill) => {
@@ -93,10 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     group.querySelectorAll('.pill').forEach((p) => p.classList.remove('active'));
                     pill.classList.add('active');
 
-                    // If Category pill changed, recalculate PEP schedule!
-                    if (group.dataset.name === 'exposureCategory') {
-                        recalculatePepSchedule();
-                    }
+                    if (group.dataset.name === 'exposureCategory') recalculatePepSchedule();
                 }
             });
         });
@@ -115,9 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return Array.from(group.querySelectorAll('.pill.active')).map((p) => p.dataset.value);
     }
 
-    // ----------------------------------------------------
-    // 🌟 AUTOMATED PEP SCHEDULE CALCULATION ENGINE
-    // ----------------------------------------------------
+    // PEP Schedule Engine
     const consultDateTimeInput = document.getElementById("consultDateTime");
     const scheduleHelpText = document.getElementById("scheduleHelpText");
 
@@ -144,33 +167,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const category = getPillValue('exposureCategory');
         let baseDateVal = '';
 
-        // Priority 1: Direct edit inside Day 0 card picker
         if (fromDay0Input && dateInputDay0 && dateInputDay0.value) {
             baseDateVal = dateInputDay0.value;
         } 
-        // Priority 2: Main consultation date input at top
         else if (consultDateTimeInput && consultDateTimeInput.value) {
             baseDateVal = consultDateTimeInput.value.split('T')[0];
         }
 
         if (!baseDateVal) return;
 
-        // Parse local date components to avoid UTC shift
         const [year, month, day] = baseDateVal.split('-').map(Number);
         const baseDate = new Date(year, month - 1, day);
 
-        const d0 = baseDate;
-        const d3 = addDays(baseDate, 3);
-        const d7 = addDays(baseDate, 7);
-        const d14 = addDays(baseDate, 14);
-        const d28 = addDays(baseDate, 28);
-
-        // Update inline date inputs
-        if (dateInputDay0) dateInputDay0.value = formatDateForInput(d0);
-        if (dateInputDay3) dateInputDay3.value = formatDateForInput(d3);
-        if (dateInputDay7) dateInputDay7.value = formatDateForInput(d7);
-        if (dateInputDay14) dateInputDay14.value = formatDateForInput(d14);
-        if (dateInputDay28) dateInputDay28.value = formatDateForInput(d28);
+        if (dateInputDay0) dateInputDay0.value = formatDateForInput(baseDate);
+        if (dateInputDay3) dateInputDay3.value = formatDateForInput(addDays(baseDate, 3));
+        if (dateInputDay7) dateInputDay7.value = formatDateForInput(addDays(baseDate, 7));
+        if (dateInputDay14) dateInputDay14.value = formatDateForInput(addDays(baseDate, 14));
+        if (dateInputDay28) dateInputDay28.value = formatDateForInput(addDays(baseDate, 28));
 
         const cards = [
             document.getElementById("cardDay0"),
@@ -181,39 +194,16 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         if (category === "I") {
-            // Category I: Disable schedule cards
-            cards.forEach(card => {
-                if (card) {
-                    card.classList.remove('active');
-                    card.classList.add('disabled');
-                }
-            });
-            if (scheduleHelpText) {
-                scheduleHelpText.innerHTML = `<span style="color:#e03131; font-weight:bold;">Category I Exposure:</span> PEP is generally not required according to DOH/WHO protocols.`;
-            }
+            cards.forEach(card => card && card.classList.replace('active', 'disabled'));
+            if (scheduleHelpText) scheduleHelpText.innerHTML = `<span style="color:#e03131; font-weight:bold;">Category I Exposure:</span> PEP is generally not required according to DOH/WHO protocols.`;
         } else {
-            // Category II & III: Activate cards
-            cards.forEach(card => {
-                if (card) {
-                    card.classList.remove('disabled');
-                    card.classList.add('active');
-                }
-            });
-
-            if (scheduleHelpText) {
-                scheduleHelpText.innerHTML = `<span style="color:#2b8a3e; font-weight:bold;">Category ${category || 'II/III'} PEP Active:</span> Target dates auto-calculated relative to Day 0.`;
-            }
+            cards.forEach(card => card && card.classList.replace('disabled', 'active'));
+            if (scheduleHelpText) scheduleHelpText.innerHTML = `<span style="color:#2b8a3e; font-weight:bold;">Category ${category || 'II/III'} PEP Active:</span> Target dates auto-calculated relative to Day 0.`;
         }
     }
 
-    // Trigger schedule updates on date changes
-    if (consultDateTimeInput) {
-        consultDateTimeInput.addEventListener('change', () => recalculatePepSchedule(false));
-    }
-
-    if (dateInputDay0) {
-        dateInputDay0.addEventListener('change', () => recalculatePepSchedule(true));
-    }
+    if (consultDateTimeInput) consultDateTimeInput.addEventListener('change', () => recalculatePepSchedule(false));
+    if (dateInputDay0) dateInputDay0.addEventListener('change', () => recalculatePepSchedule(true));
 
     const animalType = document.getElementById('animalType');
     const animalOtherWrap = document.getElementById('animalOtherWrap');
@@ -223,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Photo Upload Handlers
+    // Photo Upload
     const uploadBox = document.getElementById('uploadBox');
     const woundPhoto = document.getElementById('woundPhoto');
     const uploadPrompt = document.getElementById('uploadPrompt');
@@ -234,32 +224,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (uploadBox && woundPhoto) {
         uploadBox.addEventListener('click', (e) => {
-            if (e.target.closest('.remove-photo')) return;
-            woundPhoto.click();
+            if (!e.target.closest('.remove-photo')) woundPhoto.click();
         });
 
         woundPhoto.addEventListener('change', () => {
             const file = woundPhoto.files[0];
             if (file) processImageFile(file);
-        });
-
-        uploadBox.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadBox.classList.add('dragover');
-        });
-
-        uploadBox.addEventListener('dragleave', () => {
-            uploadBox.classList.remove('dragover');
-        });
-
-        uploadBox.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadBox.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                woundPhoto.files = e.dataTransfer.files;
-                processImageFile(file);
-            }
         });
     }
 
@@ -285,38 +255,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const resetBtn = document.getElementById('resetBtn');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            document.getElementById('itrForm').reset();
-            document.querySelectorAll('.pill.active').forEach((p) => p.classList.remove('active'));
-            if (animalOtherWrap) animalOtherWrap.hidden = true;
-            capturedBase64Photo = null;
-            uploadPreview.src = '';
-            uploadPrompt.hidden = false;
-            uploadPreviewWrap.hidden = true;
-            recalculatePepSchedule(false);
-        });
-    }
-
-    // ----------------------------------------------------
-    // 3. Database Persistence Submission
-    // ----------------------------------------------------
+    // Form Submission
     const itrForm = document.getElementById('itrForm');
     if (itrForm) {
         itrForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            if (!activeFacilityUid) {
-                alert("Session Expired: Please log in again to register patients.");
-                window.location.href = "abtc-login.html";
-                return;
-            }
-
-            if (!itrForm.checkValidity()) {
-                itrForm.reportValidity();
-                return;
-            }
+            if (!activeFacilityUid) return alert("Session Expired: Please log in again.");
+            if (!itrForm.checkValidity()) return itrForm.reportValidity();
 
             const submitBtn = itrForm.querySelector('button[type="submit"]');
             if (submitBtn) {
@@ -325,40 +271,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const facilitySnap = await getDoc(doc(db, "facilities", activeFacilityUid));
-                let acronym = "ABTC";
-                if (facilitySnap.exists()) {
-                    acronym = facilitySnap.data().acronym || facilitySnap.data().code || "ABTC";
-                }
-
+                let acronym = sessionStorage.getItem("cachedFacilityAcronym") || "ABTC";
                 const counterDocRef = doc(db, "facility_counters", activeFacilityUid);
                 let generatedCustomId = "";
 
                 await runTransaction(db, async (transaction) => {
                     const counterDoc = await transaction.get(counterDocRef);
-                    let currentSeq = 0;
-                    
-                    if (counterDoc.exists()) {
-                        currentSeq = counterDoc.data().currentSequence || 0;
-                    }
-
+                    let currentSeq = counterDoc.exists() ? (counterDoc.data().currentSequence || 0) : 0;
                     const nextIndex = currentSeq + 1;
-                    const paddedSequence = String(nextIndex).padStart(3, '0');
-                    
-                    generatedCustomId = `${acronym.toUpperCase()}-${paddedSequence}`;
+                    generatedCustomId = `${acronym.toUpperCase()}-${String(nextIndex).padStart(3, '0')}`;
                     transaction.set(counterDocRef, { currentSequence: nextIndex }, { merge: true });
                 });
 
                 const selectedAnimal = animalType.value === 'Other' ? document.getElementById('animalOther').value : animalType.value;
                 const exposureCatValue = getPillValue('exposureCategory');
-                const parsedFullName = document.getElementById('fullName').value.trim();
                 const fullItrDisplayString = document.getElementById('recordNo').value;
 
-                // Extract RIG Values safely
-                const selectedRigType = document.getElementById('rigType') ? document.getElementById('rigType').value : '';
-                const enteredRigDose = document.getElementById('rigDose') ? document.getElementById('rigDose').value.trim() : '';
+                const lName = document.getElementById('lastName')?.value.trim() || '';
+                const fName = document.getElementById('firstName')?.value.trim() || '';
+                const mName = document.getElementById('middleName')?.value.trim() || '';
+                const parsedFullName = `${lName}, ${fName}${mName ? ' ' + mName : ''}`.trim();
 
-                // Build payload matching 'patient-database' collection schema
+                const houseStr = document.getElementById('houseStreet')?.value.trim() || '';
+                const brgy = document.getElementById('barangay')?.value.trim() || '';
+                const city = document.getElementById('cityMunicipality')?.value.trim() || '';
+                const prov = document.getElementById('province')?.value.trim() || '';
+                const parsedAddress = [houseStr, brgy, city, prov].filter(val => val !== '').join(', ');
+
+                const selectedRigType = document.getElementById('rigType')?.value || '';
+                const enteredRigDose = document.getElementById('rigDose')?.value.trim() || '';
+
                 const patientDataPayload = {
                     recordNo: generatedCustomId,
                     caseId: generatedCustomId,
@@ -374,16 +316,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     exposureType: `${selectedAnimal} Exposure`,
                     classification: exposureCatValue ? `Category ${exposureCatValue}` : "Unclassified",
 
-                    // Core Patient Information
                     exposureDate: document.getElementById('exposureDate').value,
                     consultDateTime: document.getElementById('consultDateTime').value,
                     age: document.getElementById('age').value,
                     sex: document.getElementById('sex').value,
                     contactNo: document.getElementById('contactNo').value,
-                    address: document.getElementById('address').value,
-                    physician: document.getElementById('physician').value,
+                    address: parsedAddress, 
+                    physician: document.getElementById('physician').value || activePersonnelName,
 
-                    // Bite Details
                     biteArea: document.getElementById('biteArea').value,
                     animalType: selectedAnimal,
                     animalCaged: getPillValue('animalCaged'),
@@ -391,7 +331,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     priorVaccination: getPillValue('priorVaccination'),
                     lastVaccDate: document.getElementById('lastVaccDate').value,
 
-                    // Clinical Vitals
                     bp: document.getElementById('bp').value,
                     temp: document.getElementById('temp').value,
                     pulse: document.getElementById('pulse').value,
@@ -399,17 +338,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     o2sat: document.getElementById('o2sat').value,
                     weight: document.getElementById('weight').value,
 
-                    // Medical History
                     comorbidities: document.getElementById('comorbidities').value,
                     allergies: document.getElementById('allergies').value,
                     medications: document.getElementById('medications').value,
 
-                    // Management & Treatment Plan
                     woundCare: document.getElementById('woundCare').value,
                     vaccineBrand: document.getElementById('vaccineBrand').value,
                     route: document.getElementById('route').value,
                     
-                    // Structured RIG fields
                     rigType: selectedRigType,
                     rigDose: enteredRigDose,
                     immunoglobulin: selectedRigType ? `${selectedRigType}${enteredRigDose ? ' - ' + enteredRigDose : ''}` : (enteredRigDose || 'None'),
@@ -417,7 +353,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     vaccSchedule: getPillValues('vaccSchedule'),
                     remarks: document.getElementById('remarks').value,
 
-                    // Auto-Calculated Target Dates Map
                     pepScheduleDates: {
                         day0: dateInputDay0 ? dateInputDay0.value : '',
                         day3: dateInputDay3 ? dateInputDay3.value : '',
@@ -426,7 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         day28: dateInputDay28 ? dateInputDay28.value : ''
                     },
 
-                    // Base64 Wound Photo
                     woundPhotoData: capturedBase64Photo || null
                 };
 
@@ -438,7 +372,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error("Firestore persistence error:", error);
                 alert("Database Error: " + error.message);
-                
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save treatment record`;

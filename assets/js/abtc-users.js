@@ -1,8 +1,8 @@
 // abtc-users.js - Dedicated Administration and Immutable Auditing Handler Engine
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { 
-    getFirestore, doc, collection, addDoc, deleteDoc, query, where, onSnapshot 
+    getFirestore, doc, collection, addDoc, deleteDoc, query, where, onSnapshot, connectFirestoreEmulator 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -17,6 +17,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 let currentFacilityId = null;
 

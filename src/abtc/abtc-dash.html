@@ -5,95 +5,147 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRIS - ABTC Dashboard</title>
     <link rel="stylesheet" href="../../assets/css/abtc-dash.css">
-    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script type="module" src="../../assets/js/abtc-dash.js"></script>
 </head>
 <body>
     <div class="container">
         
-        <!-- =====================================================
-             CRIS UNIVERSAL SIDEBAR
-             ===================================================== -->
+        <!-- UNIVERSAL NAVY SIDEBAR -->
         <aside class="sidebar">
             <div class="logo-section">
-                <img src="../../assets/images/logo-login.png" alt="Logo" class="logo-image">
+                <img id="sidebarLogoPreview" src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
                 <p>Community-Centric<br>Rabies Intelligence<br>System</p>
                 <div class="role-badge">ABTC MODULE</div>
             </div>
 
             <nav class="menu">
-                <a href="abtc-dash.html" class="menu-item active">Dashboard</a>
+                <a href="abtc-dash.html" class="menu-item active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="abtc-reports.html" class="menu-item"><i class="fa-solid fa-file-invoice"></i> Reports & Drafts</a>
             </nav>
             
             <div class="footer-nav">
-                <!-- 👤 Added link to the new standalone User & Security management file -->
-                <a href="abtc-users.html" class="menu-item alt">Personnel & Login History</a>
-                <a href="abtc-setting.html" class="menu-item alt">Settings</a>
-                <button id="logout-btn" class="menu-item alt">Logout</button>
+                <a href="abtc-users.html" class="menu-item alt"><i class="fa-solid fa-users-gear"></i> Personnel & History</a>
+                <a href="abtc-setting.html" class="menu-item alt"><i class="fa-solid fa-gear"></i> Settings</a>
+                <button id="logout-btn" class="menu-item alt logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
             </div>
         </aside>
 
-        <!-- =====================================================
-             MAIN INTERFACE AREA
-             ===================================================== -->
+        <!-- MAIN INTERFACE AREA -->
         <main class="main-content">
+            
+            <!-- HEADER BANNER -->
             <header class="header">
-                <h1 id="dashboardTitle">LOADING DASHBOARD...</h1>
+                <div class="header-title">
+                    <h1 id="dashboardTitle">LOADING DASHBOARD...</h1>
+                    <span>Operational Metrics & Coordination</span>
+                </div>
                 <div class="user-profile-top">
-                    <!-- Added id fields to target dynamic database injection strings -->
                     <div class="profile-info" id="profileInfoText">
                         <strong>Loading Session...</strong><br>
                         <span>Authenticating...</span>
                     </div>
-                    <div class="profile-icon"></div>
+                    <div class="profile-icon"><i class="fa-solid fa-user-doctor"></i></div>
                 </div>
             </header>
 
             <div class="content-grid">
                 <div class="left-column">
+                    <!-- WELCOME STRIP -->
                     <div class="welcome-bar" id="welcomeBarText">
-                        <div class="avatar-circle"></div>
+                        <div class="avatar-circle"><i class="fa-solid fa-user"></i></div>
                         Welcome back
                     </div>
 
+                    <!-- METRICS CARDS -->
                     <div class="metrics">
                         <div class="card metric-card">
-                            <h3>Total Patients</h3>
-                            <div class="value" id="totalPatientsCount">00</div>
+                            <div class="metric-icon orange"><i class="fa-solid fa-users"></i></div>
+                            <div class="metric-info">
+                                <h3>Total Patients</h3>
+                                <div class="value" id="totalPatientsCount">00</div>
+                            </div>
                         </div>
                         
                         <div class="card metric-card">
-                            <h3>Scheduled Today</h3>
-                            <div class="value">00</div>
+                            <div class="metric-icon gold"><i class="fa-solid fa-calendar-day"></i></div>
+                            <div class="metric-info">
+                                <h3>Scheduled Today</h3>
+                                <div class="value" id="scheduledTodayCount">00</div>
+                            </div>
                         </div>
                         
                         <div class="card metric-card danger-zone">
-                            <h3>PEP Vials</h3>
-                            <div class="value">12</div>
+                            <div class="metric-icon red"><i class="fa-solid fa-vial"></i></div>
+                            <div class="metric-info">
+                                <h3>PEP Vials</h3>
+                                <div class="value" id="pepVialsCount">00</div>
+                            </div>
                         </div>
                         
                         <div class="card metric-card">
-                            <h3>Category III Cases</h3>
-                            <div class="value" id="categoryThreeCount">00</div>
+                            <div class="metric-icon dark"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <div class="metric-info">
+                                <h3>Category III Cases</h3>
+                                <div class="value" id="categoryThreeCount">00</div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- INTEGRATED CALENDAR & ANNOUNCEMENTS SECTION -->
                 <aside class="right-column">
-                    <div class="calendar-card">
-                        <div class="calendar-header">Today, 20 July 2026</div>
-                        <div class="calendar-days">
-                            <div class="day">18<br><span>Fri</span></div>
-                            <div class="day">19<br><span>Sat</span></div>
-                            <div class="day active">20<br><span>Mon</span></div>
-                            <div class="day">21<br><span>Tue</span></div>
-                            <div class="day">22<br><span>Wed</span></div>
+                    <div class="card calendar-card">
+                        
+                        <!-- CALENDAR HEADER -->
+                        <div class="calendar-header">
+                            <button id="prevMonth" class="calendar-btn">&#10094;</button>
+                            <div class="calendar-title" id="calendarTitleContainer" style="cursor: pointer;" title="Click to jump to a specific month/year">
+                                <h3 id="monthYear"></h3>
+                            </div>
+                            <button id="nextMonth" class="calendar-btn">&#10095;</button>
                         </div>
-                        <div class="calendar-body alert-section">
-                            <strong>System Alerts:</strong>
-                            <p>Vaccine batch #402 expiring soon.</p>
-                            <p>3 Referrals from PHO pending.</p>
+
+                        <!-- CALENDAR MONTH/YEAR MODAL SELECTOR -->
+                        <div id="calendarModal" class="calendar-modal hidden">
+                            <div class="calendar-modal-content">
+                                <div class="modal-year-select">
+                                    <button id="modalPrevYear" class="modal-nav-btn">&#10094;</button>
+                                    <span id="modalYearDisplay">2026</span>
+                                    <button id="modalNextYear" class="modal-nav-btn">&#10095;</button>
+                                </div>
+                                
+                                <div class="modal-months-grid" id="modalMonthsGrid">
+                                    <button id="closeModalBtn" class="modal-close-btn">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- WEEKDAY LABELS -->
+                        <div class="calendar-weekdays">
+                            <div>Sun</div>
+                            <div>Mon</div>
+                            <div>Tue</div>
+                            <div>Wed</div>
+                            <div>Thu</div>
+                            <div>Fri</div>
+                            <div>Sat</div>
+                        </div>
+                        
+                        <!-- DATES GRID -->
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                    </div>
+
+                    <!-- CALENDAR EVENT / ANNOUNCEMENT CARD -->
+                    <div class="calendar-body">
+                        <div class="compliance-box">
+                            <h4 id="selectedDate">Select a date</h4>
+                            <textarea id="eventInput" placeholder="Type here for announcements and reminders" rows="4"></textarea>
+                            <button id="saveEventBtn">Save</button>
                         </div>
                     </div>
                 </aside>

@@ -1,8 +1,23 @@
-// js/settings-firebase.js
+// settings-firebase.js
 
-// 1. Direct CDN imports inside this module (Added onSnapshot here)
+// 1. Direct CDN imports inside this module
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc, writeBatch, doc, getDocs, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    writeBatch, 
+    doc, 
+    getDocs, 
+    query, 
+    where, 
+    orderBy, 
+    setDoc,
+    deleteDoc,
+    limit,
+    getCountFromServer, // <--- ADDED
+    collectionGroup     // <--- ADDED
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // 2. Your Firebase Configuration
 const firebaseConfig = {
@@ -20,5 +35,20 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 4. Export them for settings.js and pho-heat-map.js to use (Added onSnapshot here)
-export { db, collection, addDoc, writeBatch, doc, getDocs, query, orderBy, onSnapshot };
+// 4. Export them for settings.js, upload scripts, and views
+export { 
+    db, 
+    collection, 
+    addDoc, 
+    writeBatch, 
+    doc, 
+    getDocs, 
+    query, 
+    where, 
+    orderBy, 
+    setDoc,
+    deleteDoc,
+    limit,
+    getCountFromServer, // <--- ADDED
+    collectionGroup     // <--- ADDED
+};

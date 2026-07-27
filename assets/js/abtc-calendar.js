@@ -1,9 +1,9 @@
-// abtc-calendar.js - Dynamic Visual PEP Calendar Engine
+// abtc-calendar.js - Dynamic PEP Calendar Engine (Root Collection)
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import { 
-    getFirestore, collection, onSnapshot, query, where, doc, getDoc, updateDoc 
+    getFirestore, collection, onSnapshot, query, where, doc, getDoc, updateDoc, connectFirestoreEmulator 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -18,26 +18,27 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+
 let currentDate = new Date();
 let activeFacilityId = null;
 let allDosesList = [];
-let pendingAdministerTarget = null; // Stores target info while confirmation modal is active
+let pendingAdministerTarget = null;
 
-// DOM References
 const monthYearLabel = document.getElementById("currentMonthYearLabel");
 const calendarDaysGrid = document.getElementById("calendarDaysGrid");
 const upcomingDoseList = document.getElementById("upcomingDoseList");
 const profileContainer = document.getElementById("profileInfoText");
 const searchUpcomingInput = document.getElementById("searchUpcomingInput");
 
-// Modal DOM Elements - Day Details
 const dayDetailsModal = document.getElementById("dayDetailsModal");
 const modalSelectedDateTitle = document.getElementById("modalSelectedDateTitle");
 const modalDoseListBody = document.getElementById("modalDoseListBody");
 const closeDayModalBtn = document.getElementById("closeDayModalBtn");
 const closeDayModalFooterBtn = document.getElementById("closeDayModalFooterBtn");
 
-// Modal DOM Elements - Dose Confirmation
 const confirmDoseModal = document.getElementById("confirmDoseModal");
 const closeConfirmModalBtn = document.getElementById("closeConfirmModalBtn");
 const cancelConfirmModalBtn = document.getElementById("cancelConfirmModalBtn");
@@ -50,27 +51,28 @@ const pharmacyInputWrap = document.getElementById("pharmacyInputWrap");
 const confirmPharmacyName = document.getElementById("confirmPharmacyName");
 const btnAcquireVial = document.getElementById("btnAcquireVialTicket");
 
-// ----------------------------------------------------
-// 1. Session Observer & Header Branding
-// ----------------------------------------------------
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         activeFacilityId = user.uid;
         
         try {
             const userRole = sessionStorage.getItem("activeDesignation") || localStorage.getItem("activeDesignation") || "Nurse";
-            const activePersonnel = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
+            let activePersonnel = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
 
-            const facilitySnapshot = await getDoc(doc(db, "facilities", user.uid));
-            if (facilitySnapshot.exists()) {
-                const facilityData = facilitySnapshot.data();
-
-                let activeStaffMember = activePersonnel || (userRole === "Owner" ? facilityData.contactInfo?.contactPerson : "Attending Personnel");
-                const displayRoleLabel = userRole === "Owner" ? "Administrator / Owner" : "Personnel";
-
-                if (profileContainer) {
-                    profileContainer.innerHTML = `<strong>${activeStaffMember}</strong><br><span>${displayRoleLabel}</span>`;
+            if (!activePersonnel) {
+                const facilitySnapshot = await getDoc(doc(db, "facilities", user.uid));
+                if (facilitySnapshot.exists()) {
+                    const facilityData = facilitySnapshot.data();
+                    activePersonnel = userRole === "Owner" ? facilityData.contactInfo?.contactPerson : "Attending Personnel";
+                    sessionStorage.setItem("activePersonnelName", activePersonnel);
                 }
+            }
+
+            const activeStaffMember = activePersonnel || "Duty Personnel";
+            const displayRoleLabel = userRole === "Owner" ? "Administrator / Owner" : "Personnel";
+
+            if (profileContainer) {
+                profileContainer.innerHTML = `<strong>${activeStaffMember}</strong><br><span>${displayRoleLabel}</span>`;
             }
         } catch (e) {
             console.error("Calendar session error:", e);
@@ -82,7 +84,6 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// Calculate Dose Dates (Day 0, 3, 7, 14, 28)
 function computePepSchedule(day0DateStr) {
     if (!day0DateStr) return [];
     const baseDate = new Date(day0DateStr);
@@ -106,9 +107,6 @@ function computePepSchedule(day0DateStr) {
     });
 }
 
-// ----------------------------------------------------
-// 2. Stream Patient Records from Firestore
-// ----------------------------------------------------
 function streamPatientSchedules(facilityId) {
     const q = query(collection(db, "patient-database"), where("facilityId", "==", facilityId));
 
@@ -142,9 +140,6 @@ function streamPatientSchedules(facilityId) {
     });
 }
 
-// ----------------------------------------------------
-// 3. Render Monthly Calendar Grid
-// ----------------------------------------------------
 function renderCalendarGrid() {
     if (!calendarDaysGrid || !monthYearLabel) return;
 
@@ -162,7 +157,6 @@ function renderCalendarGrid() {
 
     const todayIso = new Date().toISOString().split("T")[0];
 
-    // Render Previous Month's Trailing Days
     for (let i = firstDayIndex; i > 0; i--) {
         const dayNum = prevMonthDays - i + 1;
         const cell = document.createElement("div");
@@ -171,7 +165,6 @@ function renderCalendarGrid() {
         calendarDaysGrid.appendChild(cell);
     }
 
-    // Render Current Month Days
     for (let day = 1; day <= totalDaysInMonth; day++) {
         const cell = document.createElement("div");
         const monthFormatted = String(month + 1).padStart(2, '0');
@@ -206,9 +199,6 @@ function renderCalendarGrid() {
     }
 }
 
-// ----------------------------------------------------
-// 4. Render Left Panel Upcoming List
-// ----------------------------------------------------
 function renderUpcomingQueue() {
     if (!upcomingDoseList) return;
     upcomingDoseList.innerHTML = "";
@@ -254,9 +244,6 @@ if (searchUpcomingInput) {
     searchUpcomingInput.addEventListener("input", renderUpcomingQueue);
 }
 
-// ----------------------------------------------------
-// 5. Day Details Modal Controllers
-// ----------------------------------------------------
 function closeModal() {
     if (dayDetailsModal) dayDetailsModal.classList.remove("active");
 }
@@ -323,9 +310,6 @@ function openDayDetailsModal(dateIso) {
     dayDetailsModal.classList.add("active");
 }
 
-// ----------------------------------------------------
-// 6. Progressive Disclosure & Confirmation Modal Handlers
-// ----------------------------------------------------
 function togglePharmacyInputState() {
     if (!pharmacyInputWrap || !confirmPharmacyName) return;
 
@@ -346,9 +330,7 @@ if (radioFacilityStock) radioFacilityStock.addEventListener("change", togglePhar
 if (radioPatientPurchased) radioPatientPurchased.addEventListener("change", togglePharmacyInputState);
 
 function openConfirmDoseModal(patientId, patientName, doseLabel) {
-    closeModal(); // Close schedule roster modal first to prevent stacking
-
-    // Explicitly set the target object to the exact patient selected
+    closeModal();
     pendingAdministerTarget = { patientId, patientName, doseLabel };
 
     if (confirmPatientName) confirmPatientName.innerText = patientName;
@@ -371,7 +353,6 @@ function closeConfirmDoseModal() {
 if (closeConfirmModalBtn) closeConfirmModalBtn.addEventListener("click", closeConfirmDoseModal);
 if (cancelConfirmModalBtn) cancelConfirmModalBtn.addEventListener("click", closeConfirmDoseModal);
 
-// Shortcut Button: Acquire Vial Ticket (Sends request to inventory/pharmacy)
 if (btnAcquireVial) {
     btnAcquireVial.addEventListener("click", (e) => {
         e.preventDefault();
@@ -387,10 +368,9 @@ if (btnAcquireVial) {
     });
 }
 
-// Execute Dose Administration Logging (Without auto-deducting inventory stock)
 if (submitConfirmDoseBtn) {
     submitConfirmDoseBtn.addEventListener("click", async () => {
-        if (!pendingAdministerTarget) return;
+        if (!pendingAdministerTarget || !activeFacilityId) return;
 
         const { patientId, patientName, doseLabel } = pendingAdministerTarget;
         const isPatientPurchased = radioPatientPurchased && radioPatientPurchased.checked;
@@ -436,9 +416,6 @@ if (submitConfirmDoseBtn) {
     });
 }
 
-// ----------------------------------------------------
-// 7. Navigation Controls & Logout
-// ----------------------------------------------------
 document.getElementById("prevMonthBtn")?.addEventListener("click", () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
     renderCalendarGrid();

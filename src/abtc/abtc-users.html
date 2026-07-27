@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personnel & Auditing — CRIS | Animal Bite Treatment Center</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Modular External Stylesheets -->
     <link rel="stylesheet" href="../../assets/css/abtc-setting.css">
@@ -16,7 +18,7 @@
 <div class="container">
 
   <!-- =====================================================
-       CRIS UNIVERSAL SIDEBAR
+       CRIS UNIVERSAL NAVY SIDEBAR
        ===================================================== -->
   <aside class="sidebar">
     <div class="logo-section logo-section-fixed">
@@ -26,13 +28,14 @@
     </div>
 
     <nav class="menu">
-      <a href="abtc-dash.html" class="menu-item">Dashboard</a>
+      <a href="abtc-dash.html" class="menu-item"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+       <a href="abtc-reports.html" class="menu-item"><i class="fa-solid fa-file-invoice"></i> Reports & Drafts</a>
     </nav>
     
     <div class="footer-nav">
-      <a href="abtc-users.html" class="menu-item alt active">Personnel & Login History</a>
-      <a href="abtc-setting.html" class="menu-item alt">Settings</a>
-      <button id="logout-btn" class="menu-item alt">Logout</button>
+      <a href="abtc-users.html" class="menu-item alt active"><i class="fa-solid fa-users-gear"></i> Personnel & Login History</a>
+      <a href="abtc-setting.html" class="menu-item alt"><i class="fa-solid fa-gear"></i> Settings</a>
+      <button id="logout-btn" class="menu-item alt logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
     </div>
   </aside>
 
@@ -40,25 +43,36 @@
        MAIN INTERFACE AREA
        ===================================================== -->
   <main class="main-content">
-    <div class="settings-main">
-
-      <div class="settings-header">
-          <h1>User Administration</h1>
-          <p>Monitor security check-ins and personnel shift authorization records</p>
+    
+    <!-- HEADER BANNER -->
+    <header class="header">
+      <div class="header-title">
+        <h1>User Administration</h1>
+        <span>Monitor security check-ins and personnel shift authorization records</span>
       </div>
+      <div class="user-profile-top">
+        <div class="profile-info" id="profileInfoText">
+          <strong>Active Session</strong><br>
+          <span>Administrator</span>
+        </div>
+        <div class="profile-icon"><i class="fa-solid fa-user-shield"></i></div>
+      </div>
+    </header>
+
+    <div class="settings-main">
 
       <div class="settings-grid">
 
         <!-- CARD 1: Personnel Management Panel -->
         <section class="card full-width-card">
-          <h2 class="card-title"><span class="icon">👤</span> Personnel Roster Management</h2>
+          <h2 class="card-title"><i class="fa-solid fa-user-gear"></i> Personnel Roster Management</h2>
           <p class="card-subtitle">Register and monitor your clinical staff details for system accountability traces.</p>
 
           <div class="personnel-layout">
             
             <!-- Form to Add Personnel -->
             <div class="personnel-form-column">
-              <h3 class="section-subheading">Add New Personnel</h3>
+              <h3 class="section-subheading"><i class="fa-solid fa-user-plus"></i> Add New Personnel</h3>
               <div class="field-group form-stack">
                 <div class="field">
                   <label for="fullName">Full Name</label>
@@ -78,20 +92,20 @@
                     <option value="Encoder">Data Encoder</option>
                   </select>
                 </div>
-                <!-- 🔐 FOR ACCOUNTABILITY PIN ENTRY -->
+                <!-- FOR ACCOUNTABILITY PIN ENTRY -->
                 <div class="field">
                   <label for="personnelPin">4-Digit Security Access PIN</label>
                   <input type="password" id="personnelPin" placeholder="e.g. 1234" maxlength="4" pattern="[0-9]{4}" inputmode="numeric">
                 </div>
               </div>
               <div class="card-actions btn-spacer">
-                <button type="button" id="addPersonnelBtn" class="btn btn-primary full-btn">Add Personnel</button>
+                <button type="button" id="addPersonnelBtn" class="btn btn-primary full-btn"><i class="fa-solid fa-plus"></i> Add Personnel</button>
               </div>
             </div>
 
             <!-- Active Personnel Roster Table -->
             <div class="personnel-table-column">
-              <h3 class="section-subheading">Active Personnel Roster</h3>
+              <h3 class="section-subheading"><i class="fa-solid fa-address-book"></i> Active Personnel Roster</h3>
               <div class="table-scroll-container">
                 <table class="roster-table">
                   <thead>
@@ -104,7 +118,7 @@
                   </thead>
                   <tbody id="personnelTableBody">
                     <tr>
-                      <td colspan="4" class="table-empty-notice">Loading roster records...</td>
+                      <td colspan="4" class="table-empty-notice"><i class="fa-solid fa-spinner fa-spin"></i> Loading roster records...</td>
                     </tr>
                   </tbody>
                 </table>
@@ -116,7 +130,7 @@
 
         <!-- CARD 2: Dedicated Login History Log -->
         <section class="card full-width-card">
-          <h2 class="card-title"><span class="icon">📜</span> Login History</h2>
+          <h2 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Login History</h2>
           <p class="card-subtitle">Immutable, real-time logging records of user account clock-ins tracking terminal sessions.</p>
           
           <div class="table-scroll-container log-container-bounded">
@@ -132,7 +146,7 @@
               </thead>
               <tbody id="auditLogTableBody">
                 <tr>
-                  <td colspan="5" class="table-empty-notice">Loading access history logs...</td>
+                  <td colspan="5" class="table-empty-notice"><i class="fa-solid fa-spinner fa-spin"></i> Loading access history logs...</td>
                 </tr>
               </tbody>
             </table>

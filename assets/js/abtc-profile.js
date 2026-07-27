@@ -1,7 +1,7 @@
 // abtc-profile.js - Secured Profile Gatekeeper Handler
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, connectFirestoreEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -15,6 +15,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 // DOM Selection Elements
 const nurseCard = document.getElementById("nurseProfileCard");
@@ -158,7 +162,6 @@ if (nurseForm) {
         }
 
         if (matchedStaff.pin === typedPin) {
-            // Determine Role / Position (defaults to Nurse if unassigned)
             const resolvedRole = matchedStaff.position || matchedStaff.role || "Nurse";
 
             sessionStorage.setItem("activeDesignation", resolvedRole);
@@ -170,11 +173,10 @@ if (nurseForm) {
             
             console.log(`Personnel profile match accepted for ${matchedStaff.name} [${resolvedRole}]. Routing...`);
 
-            // Dispatch based on Role
             if (resolvedRole.toLowerCase().includes("pharmacist")) {
                 window.location.href = "abtc-pharmacy.html";
             } else {
-                window.location.href = "abtc-reg.html";
+                window.location.href = "abtc-home.html";
             }
         } else {
             alert("Access Denied: The 4-digit passcode PIN entered does not match your roster record profile mapping.");
@@ -190,7 +192,6 @@ if (ownerForm) {
         e.preventDefault();
         const enteredPassword = ownerPasswordInput.value;
         
-        // Pull email directly from active Firebase authentication session
         const activeFacilityEmail = auth.currentUser?.email 
             || sessionStorage.getItem("authenticatedFacilityEmail") 
             || localStorage.getItem("authenticatedFacilityEmail");
@@ -214,7 +215,6 @@ if (ownerForm) {
                 }
             }
             
-            // Set in both sessionStorage and localStorage so abtc-dash.js can read the admin role
             sessionStorage.setItem("activeDesignation", "Owner");
             sessionStorage.setItem("activePersonnelName", dynamicAdminName);
             localStorage.setItem("activeDesignation", "Owner");

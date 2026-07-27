@@ -1,10 +1,9 @@
 // abtc-setup.js
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
     authDomain: "cris-database-da989.firebaseapp.com",
@@ -16,23 +15,23 @@ const firebaseConfig = {
     measurementId: "G-0X99BH7GW4"
 };
 
-// Initialize Firebase App & Services
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app); 
 
-// Listen to Form Submission
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+
 const setupForm = document.getElementById("abtcSetupForm");
 
 if (setupForm) {
     setupForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        // 1. Grab password fields from HTML instead of prompt boxes
         const password = document.getElementById("abtcPassword").value;
         const confirmPassword = document.getElementById("confirmAbtcPassword").value;
 
-        // Validation Checks
         if (password !== confirmPassword) {
             alert("Validation Error: Passwords do not match. Please verify and try again.");
             return;
@@ -43,7 +42,6 @@ if (setupForm) {
             return;
         }
 
-        // Grab all other field values from your partitioned setup form
         const email = document.getElementById("abtcEmail").value.trim();
         const facilityName = document.getElementById("abtcName").value.trim();
         const acronym = document.getElementById("abtcCode").value.toUpperCase().trim();
@@ -58,7 +56,6 @@ if (setupForm) {
         const position = document.getElementById("abtcPosition").value.trim();
         const phone = document.getElementById("abtcPhone").value.trim();
 
-        // Target the submit button to display visual loading indicators
         const submitBtn = e.target.querySelector(".btn-submit") || e.target.querySelector("button[type='submit']");
         if (submitBtn) {
             submitBtn.disabled = true;
@@ -66,19 +63,17 @@ if (setupForm) {
         }
 
         try {
-            // 2. Register the account in Firebase Auth
             console.log("Registering account credentials...");
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const userUid = userCredential.user.uid;
 
-            // 3. Save the facility data inside Firestore under "facilities/{userUid}"
             console.log("Saving facility layout data to Firestore...");
             await setDoc(doc(db, "facilities", userUid), {
                 facilityId: userUid,
                 facilityName: facilityName,
                 acronym: acronym,
                 facilityType: facilityType,
-                status: "Online", // Matching structural screenshots
+                status: "Online",
                 address: {
                     street: street,
                     barangay: barangay,
@@ -94,7 +89,6 @@ if (setupForm) {
                 createdAt: new Date()
             });
 
-            // 4. Create the required baseline count tracking document under "facility_counters/{userUid}"
             console.log("Initializing local sequence counters...");
             await setDoc(doc(db, "facility_counters", userUid), {
                 currentSequence: 0
@@ -111,7 +105,6 @@ if (setupForm) {
                 alert("Setup Failed: " + error.message);
             }
         } finally {
-            // Re-enable submit button if processing fails
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Initialize Workspace";

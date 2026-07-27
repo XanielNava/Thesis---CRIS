@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHO - Dashboard</title>
+
+    <link rel="stylesheet" href="../../assets/css/pho-dashboard.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,400;0,700;0,900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- UNIVERSAL SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PHO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="pho-dash.html" class="menu-item active">Dashboard</a>
+                <a href="pho-animal-bite-cases.html" class="menu-item">Animal Bite Cases</a>
+                <a href="pho-heat-map.html" class="menu-item">Heatmap</a>
+            </nav>
+
+            <div class="footer-nav">
+                <a href="../../settings/html/settings.html" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout"
+                    onclick="window.location.href='pho-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="header">
+                <h1>PHO DASHBOARD</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Xaniel Marios Angelo B. Nava</strong><br>
+                        <span>Administrator</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <section class="left-column">
+                    <div class="welcome-bar">
+                        <span>Hello, Xaniel Marios Angelo B. Nava</span>
+                    </div>
+
+                    <!-- STATISTICS / KPI CONTAINER -->
+                    <div class="statistics-container">
+
+                        <!-- 1. HUMAN POPULATION (LEFT) -->
+                        <div class="stat-card">
+                            <small>Human Population</small>
+                            <h2 id="humanPopulation">0</h2>
+                        </div>
+
+                        <!-- 2. ABTC REPORTING (CENTER) -->
+                        <div class="stat-card center-card">
+                            <small>ABTC Reporting</small>
+                            <h2 id="abtcReporting">38 / 43</h2>
+                            <span class="sub-stat-percentage">88.4% Completed</span>
+                        </div>
+
+                        <!-- 3. HUMAN RABIES CASES (RIGHT) -->
+                        <div class="stat-card right-card">
+                            <small>Human Rabies Cases</small>
+                            <h2 id="humanRabiesCases">0</h2>
+                        </div>
+
+                    </div>
+
+                    <!-- Main Split Grid: High-Risk Alerts & Fast Triage -->
+                    <div class="ops-grid">
+
+                        <!-- Urgent ABTC Alerts -->
+                        <div class="card alerts-card">
+                            <div class="card-header">
+                                <h3>Critical Case Flags</h3>
+                                <span class="badge warning">Needs Attention</span>
+                            </div>
+                            <div class="alert-feed">
+                                <div class="alert-item high-priority">
+                                    <div class="alert-title">
+                                        <strong>Category III Exposure Surge</strong>
+                                        <span class="time-stamp">Passi City ABTC</span>
+                                    </div>
+                                    <p>Spike in severe bite incidents reported in the last 24 hours.</p>
+                                    <a href="pho-animal-bite-cases.html" class="link-action">Inspect Reports &rarr;</a>
+                                </div>
+
+                                <div class="alert-item medium-priority">
+                                    <div class="alert-title">
+                                        <strong>Epidemiological Threshold Reached</strong>
+                                        <span class="time-stamp">San Joaquin Cluster</span>
+                                    </div>
+                                    <p>Incidence rate calculation triggered an intensity upgrade on the map.</p>
+                                    <a href="pho-heat-map.html" class="link-action">View Cluster on Heatmap &rarr;</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Operations & Directives -->
+                        <div class="card quick-access-card">
+                            <h3>Quick Actions</h3>
+                            <p class="subtext">Direct shortcuts for administrative workflow</p>
+
+                            <div class="shortcut-stack">
+                                <a href="pho-animal-bite-cases.html" class="btn-shortcut primary">
+                                    <span class="icon">📋</span> Review Pending ABTC Submissions
+                                </a>
+                                <a href="pho-heat-map.html" class="btn-shortcut secondary">
+                                    <span class="icon">🗺️</span> Launch Spatial Risk Heatmap
+                                </a>
+                                <a href="../../settings/html/settings.html" class="btn-shortcut secondary">
+                                    <span class="icon">⚙️</span> Update Municipal Population Data
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+            </div>
+            </section>
+
+            <!-- CALENDAR -->
+            <aside class="right-column">
+                <div class="card calendar-card">
+                    <div class="calendar-header">
+                        <button id="prevMonth" class="calendar-btn">&#10094;</button>
+                        <div class="calendar-title" id="calendarTitleContainer" style="cursor: pointer;"
+                            title="Click to jump to a specific month/year">
+                            <h3 id="monthYear"></h3>
+                        </div>
+                        <button id="nextMonth" class="calendar-btn">&#10095;</button>
+                    </div>
+
+                    <div id="calendarModal" class="calendar-modal hidden">
+                        <div class="calendar-modal-content">
+                            <div class="modal-year-select">
+                                <button id="modalPrevYear" class="modal-nav-btn">&#10094;</button>
+                                <span id="modalYearDisplay">2026</span>
+                                <button id="modalNextYear" class="modal-nav-btn">&#10095;</button>
+                            </div>
+
+                            <div class="modal-months-grid" id="modalMonthsGrid">
+                                <button id="closeModalBtn" class="modal-close-btn">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="calendar-weekdays">
+                        <div>Sun</div>
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                    </div>
+
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </div>
+
+                <div class="calendar-body">
+                    <div class="compliance-box">
+                        <h4 id="selectedDate">Select a date</h4>
+                        <textarea id="eventInput" placeholder="Type here for announcements and reminders"
+                            rows="4"></textarea>
+                        <button id="saveEventBtn">Save</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</main>
+
+    <!-- Application Script -->
+    <script type="module" src="../../assets/js/pho-dash.js"></script>
+</body>
+
+</html>

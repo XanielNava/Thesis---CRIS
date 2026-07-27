@@ -25,7 +25,63 @@
     display: inline-block;
 }
 
-/* 🔒 SECURITY DIALOG MODAL LAYOUTS */
+/* ==========================================================
+   ROLE SELECTION CARDS & ANIMATIONS
+   ========================================================== */
+
+.profile-options-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 60px; /* Space between the two logos */
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.profile-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    padding: 25px;
+    border-radius: 20px;
+    background-color: transparent;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.3s ease;
+}
+
+/* The Magic Hover Effect */
+.profile-option:hover {
+    transform: translateY(-8px);
+    background-color: #FFFFFF; /* Gives a crisp white card background on hover */
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08), 
+                0 10px 10px rgba(0, 0, 0, 0.04);
+}
+
+.profile-option img {
+    width: 220px; /* Adjust size to match your screenshot */
+    height: auto;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+/* Image scaling on hover */
+.profile-option:hover img {
+    transform: scale(1.05);
+}
+
+.profile-option h3 {
+    color: var(--text-dark);
+    font-size: 18px;
+    margin-bottom: 0;
+}
+
+/* ==========================================================
+   🔒 SECURITY DIALOG MODAL LAYOUTS 
+   ========================================================== */
+
 .modal-overlay {
     position: fixed;
     top: 0;

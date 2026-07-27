@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - PHO Executive Dashboard</title>
+    <link rel="stylesheet" href="../../assets/css/pho-dashboard.css">
+    <!-- Chart.js for the Bar Graph -->
+    <script src="https://cdn.jsdelivr.net/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+
+    <!-- ================= ORIGINAL SIDEBAR ================= -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <h2>CRIS</h2>
+            <p>Rabies Intelligence System</p>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="active">
+                    <a href="#">
+                        <span class="icon">📊</span>
+                        <span class="label">Executive Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="icon">🗺️</span>
+                        <span class="label">Spatio-Temporal Map</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="icon">🏥</span>
+                        <span class="label">Bite Centers & Inventories</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="icon">📋</span>
+                        <span class="label">Case Surveillance</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="icon">📢</span>
+                        <span class="label">Directives & Directives</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="icon">⚙️</span>
+                        <span class="label">System Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p class="user-role">PHO Administrator</p>
+            <p class="user-region">Iloilo Province</p>
+        </div>
+    </aside>
+
+    <!-- ================= MAIN DASHBOARD CONTENT ================= -->
+    <main class="dashboard-wrapper">
+
+        <!-- THREE TOP SECTIONS (UPDATED) -->
+        <section class="top-section-grid">
+            <div class="top-card">
+                <h3>Total Rabies Exposures</h3>
+                <div class="card-value">1,420</div>
+                <div class="card-subtext">Recorded across all municipal ABTCs</div>
+            </div>
+
+            <div class="top-card">
+                <h3>High-Risk Municipalities</h3>
+                <div class="card-value">4</div>
+                <div class="card-subtext">Threshold exceeded this month</div>
+            </div>
+
+            <div class="top-card">
+                <h3>PEP Vaccine Stock Status</h3>
+                <div class="card-value">88%</div>
+                <div class="card-subtext">Adequate inventory across hubs</div>
+            </div>
+        </section>
+
+        <!-- MAIN GRID: BAR GRAPH + ORIGINAL CALENDAR -->
+        <section class="dashboard-main-grid">
+
+            <!-- BAR GRAPH SECTION -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Monthly Bite Incidents by Category</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="biteIncidentsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- ORIGINAL CALENDAR SECTION -->
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <button class="cal-btn" id="prevMonth">&lt;</button>
+                    <h3 id="calendarMonthYear">July 2026</h3>
+                    <button class="cal-btn" id="nextMonth">&gt;</button>
+                </div>
+
+                <div class="calendar-days-header">
+                    <div>Su</div>
+                    <div>Mo</div>
+                    <div>Tu</div>
+                    <div>We</div>
+                    <div>Th</div>
+                    <div>Fr</div>
+                    <div>Sa</div>
+                </div>
+
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Dates render dynamically via JavaScript -->
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Optional Chart Initialization Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('biteIncidentsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                    datasets: [
+                        {
+                            label: 'Category II (Minor)',
+                            data: [120, 150, 180, 140, 200, 170, 160],
+                            backgroundColor: '#f6bd60'
+                        },
+                        {
+                            label: 'Category III (Severe)',
+                            data: [80, 95, 110, 85, 130, 105, 90],
+                            backgroundColor: '#ee6c4d'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -3,57 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dose Calendar — CRIS | ABTC</title>
+    <title>Dose Calendar — CRIS | Animal Bite Treatment Center</title>
     
-    <!-- External Modular Stylesheets -->
-    <link rel="stylesheet" href="../../assets/css/abtc-reg.css">
+    <!-- External Modular Stylesheet -->
     <link rel="stylesheet" href="../../assets/css/abtc-calendar.css">
-    
-    <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 </head>
 <body>
 
 <div class="container">
 
-    <!-- CRIS UNIVERSAL SIDEBAR -->
+    <!-- =====================================================
+         CRIS UNIVERSAL NAVY SIDEBAR (NURSE / CLINICAL MODULE)
+         ===================================================== -->
     <aside class="sidebar">
-        <div class="logo-section" style="height: 174.78px;">
-            <img src="../../assets/images/logo-login.png" alt="Logo" class="logo-image">
+        <div class="logo-section logo-section-fixed">
+            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
             <p>Community-Centric<br>Rabies Intelligence<br>System</p>
             <div class="role-badge">ABTC MODULE</div>
         </div>
 
         <nav class="menu">
-            <a href="abtc-reg.html" class="menu-item-link">
-                <button class="menu-item">Patient Registry</button>
-            </a>
-            <a href="abtc-calendar.html" class="menu-item-link">
-                <button class="menu-item active">Dose Calendar</button>
-            </a>
-            <a href="abtc-inventory.html" class="menu-item-link">
-                <button class="menu-item">Vaccine Inventory</button>
-            </a>
+            <a href="abtc-home.html" class="menu-item"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="abtc-reg.html" class="menu-item"><i class="fa-solid fa-id-card"></i> Patient Registry</a>
+            <a href="abtc-calendar.html" class="menu-item active"><i class="fa-solid fa-calendar-days"></i> Dose Calendar</a>
+            <a href="abtc-inventory.html" class="menu-item"><i class="fa-solid fa-boxes-stacked"></i> Vaccine Inventory</a>
         </nav>
 
         <div class="footer-nav">
-            <button id="logout-btn" class="menu-item alt">Logout</button>
+            <button id="logout-btn" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
         </div>
     </aside>
 
-    <!-- MAIN INTERFACE -->
+    <!-- =====================================================
+         MAIN INTERFACE AREA
+         ===================================================== -->
     <main class="main-content">
 
+        <!-- HEADER BANNER -->
         <header class="header">
-            <h1 id="dashboardTitle">PATIENT VACCINATION CALENDAR</h1>
+            <div class="header-title">
+                <h1 id="dashboardTitle">PATIENT VACCINATION CALENDAR</h1>
+                <span>PEP Schedule Queue & Monthly Planning</span>
+            </div>
             <div class="user-profile-top">
                 <div class="profile-info" id="profileInfoText">
                     <strong>Duty Personnel</strong><br>
                     <span>Personnel</span>
                 </div>
-                <div class="profile-icon"></div>
+                <div class="profile-icon"><i class="fa-solid fa-user-doctor"></i></div>
             </div>
         </header>
 
@@ -63,22 +65,25 @@
             <!-- LEFT SIDEBAR: UPCOMING DOSES QUEUE -->
             <div class="side-panel-card">
                 <div class="side-panel-header">
-                    <h3 class="side-panel-title">Upcoming Scheduled Doses</h3>
+                    <h3 class="side-panel-title"><i class="fa-solid fa-list-check"></i> Upcoming Scheduled Doses</h3>
                     <p class="side-panel-subtitle">Doses due today and upcoming days</p>
                     
                     <!-- Search Input -->
-                    <input 
-                        type="text" 
-                        id="searchUpcomingInput" 
-                        class="search-upcoming-input" 
-                        placeholder="Search patient name..."
-                    >
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input 
+                            type="text" 
+                            id="searchUpcomingInput" 
+                            class="search-upcoming-input" 
+                            placeholder="Search patient name..."
+                        >
+                    </div>
                 </div>
 
                 <div class="upcoming-list" id="upcomingDoseList">
                     <!-- Dynamic upcoming cards inject here -->
                     <div class="upcoming-loading-state">
-                        Loading schedule...
+                        <i class="fa-solid fa-spinner fa-spin"></i> Loading schedule...
                     </div>
                 </div>
             </div>
@@ -119,13 +124,13 @@
 
 </div>
 
-<!-- DAY DETAILS MODAL -->
+<!-- ================= DAY DETAILS MODAL ================= -->
 <div class="modal-overlay" id="dayDetailsModal">
     <div class="calendar-modal">
         <div class="calendar-modal-header">
             <div>
-                <h3 id="modalSelectedDateTitle" style="margin: 0; color: #0d233a;">July 24, 2026</h3>
-                <span style="font-size: 12px; color: #6c757d;">Daily Vaccination Schedule Roster</span>
+                <h3 id="modalSelectedDateTitle">July 24, 2026</h3>
+                <span class="modal-sub-label">Daily Vaccination Schedule Roster</span>
             </div>
             <button class="modal-close-x" id="closeDayModalBtn">&times;</button>
         </div>
@@ -140,30 +145,30 @@
     </div>
 </div>
 
-<!-- VACCINE DOSE CONFIRMATION MODAL -->
+<!-- ================= VACCINE DOSE CONFIRMATION MODAL ================= -->
 <div class="modal-overlay" id="confirmDoseModal" style="z-index: 1050;">
-    <div class="calendar-modal" style="max-width: 440px;">
+    <div class="calendar-modal" style="max-width: 460px;">
         <div class="calendar-modal-header">
             <div>
-                <h3 style="margin: 0; color: #0d233a;"><i class="fa-solid fa-syringe" style="color: #ff6b6b; margin-right: 6px;"></i> Administer Dose</h3>
-                <span style="font-size: 12px; color: #6c757d;" id="confirmModalSubLabel">Confirm vaccination source</span>
+                <h3><i class="fa-solid fa-syringe"></i> Administer Dose</h3>
+                <span class="modal-sub-label" id="confirmModalSubLabel">Confirm vaccination source</span>
             </div>
             <button class="modal-close-x" id="closeConfirmModalBtn">&times;</button>
         </div>
 
-        <div class="calendar-modal-body" style="padding: 18px 20px;">
-            <p style="margin-top: 0; margin-bottom: 14px; font-size: 14px; color: #334155; line-height: 1.4;" id="confirmModalPatientText">
+        <div class="calendar-modal-body" style="padding: 20px;">
+            <p id="confirmModalPatientText" style="margin-top: 0; margin-bottom: 16px; font-size: 13.5px; color: var(--text-dark); line-height: 1.4;">
                 Marking <strong><span id="confirmPatientName">Patient</span></strong> (<span id="confirmDoseDayLabel">Day 0</span>) as completed.
             </p>
 
-            <label style="display: block; font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 8px;">
+            <label style="display: block; font-weight: 700; font-size: 12.5px; color: var(--sidebar-bg); margin-bottom: 10px;">
                 Vaccine Supply Source
             </label>
 
-            <!-- Option 1: Facility Stock with an explicit Acquire Vial Ticket button -->
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; padding: 8px 10px; border-radius: 6px; border: 1px solid #e2e8f0; background-color: #f8fafc;" id="labelFacilityStockWrap">
-                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; cursor: pointer; margin: 0; flex-grow: 1;">
-                    <input type="radio" name="vaccineSupplySource" value="Facility" id="radioFacilityStock" checked style="accent-color: #ff6b6b;">
+            <!-- Option 1: Facility Stock with Ticket Button -->
+            <div id="labelFacilityStockWrap" class="supply-card-option">
+                <label for="radioFacilityStock" class="supply-option-label">
+                    <input type="radio" name="vaccineSupplySource" value="Facility" id="radioFacilityStock" checked>
                     <span><strong>Facility / ABTC Stock</strong></span>
                 </label>
                 <button type="button" id="btnAcquireVialTicket" class="btn-acquire-vial">
@@ -172,14 +177,16 @@
             </div>
 
             <!-- Option 2: Patient Purchased -->
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; cursor: pointer; margin-bottom: 12px; padding: 8px 10px; border-radius: 6px; border: 1px solid #e2e8f0; background-color: #f8fafc;" id="labelPatientPurchased">
-                <input type="radio" name="vaccineSupplySource" value="Patient-Purchased" id="radioPatientPurchased" style="accent-color: #ff6b6b;">
-                <span><strong>Patient-Purchased</strong> (Leaves stock untouched)</span>
-            </label>
+            <div id="labelPatientPurchased" class="supply-card-option">
+                <label for="radioPatientPurchased" class="supply-option-label">
+                    <input type="radio" name="vaccineSupplySource" value="Patient-Purchased" id="radioPatientPurchased">
+                    <span><strong>Patient-Purchased</strong> (Leaves stock untouched)</span>
+                </label>
+            </div>
 
-            <!-- Lit-Up Optional Pharmacy Input -->
-            <div id="pharmacyInputWrap" style="opacity: 0.4; transition: all 0.25s ease; pointer-events: none; margin-top: 8px;">
-                <label for="confirmPharmacyName" style="display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px;">
+            <!-- Optional Pharmacy Input -->
+            <div id="pharmacyInputWrap">
+                <label for="confirmPharmacyName" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">
                     Pharmacy / Supplier Source <span style="font-weight: normal; font-style: italic;">(Optional)</span>
                 </label>
                 <input 
@@ -187,14 +194,14 @@
                     id="confirmPharmacyName" 
                     placeholder="e.g., Mercury Drug, Rose Pharmacy" 
                     disabled
-                    style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; box-sizing: border-box;"
+                    style="width: 100%; padding: 9px 12px; font-size: 13px; border: 1px solid var(--border-tint); border-radius: 8px; outline: none; background: #fffcf5;"
                 >
             </div>
         </div>
 
         <div class="calendar-modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
             <button class="btn-modal-close" id="cancelConfirmModalBtn" style="padding: 8px 16px;">Cancel</button>
-            <button class="btn-primary-action" id="submitConfirmDoseBtn" style="padding: 8px 18px; background-color: #2b8a3e; border: none; font-weight: 700;">
+            <button class="btn-primary-action" id="submitConfirmDoseBtn" style="padding: 8px 18px; background-color: var(--success); border: none; font-weight: 700;">
                 <i class="fa-solid fa-check"></i> Confirm & Save Dose
             </button>
         </div>

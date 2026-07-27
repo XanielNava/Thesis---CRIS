@@ -1,9 +1,9 @@
-// abtc-pharmacy.js - Pharmacist Cold-Chain & Requisition Engine
+// abtc-pharmacy.js - Pharmacist Cold-Chain & Requisition Engine (Optimized Pipeline)
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import { 
-    getFirestore, collection, onSnapshot, query, where, doc, getDoc, addDoc, updateDoc, deleteDoc 
+    getFirestore, collection, onSnapshot, query, where, doc, getDoc, addDoc, updateDoc, deleteDoc, connectFirestoreEmulator 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -17,6 +17,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 let activeFacilityId = null;
 let inventoryList = [];
@@ -63,18 +67,22 @@ onAuthStateChanged(auth, async (user) => {
         
         try {
             const userRole = sessionStorage.getItem("activeDesignation") || localStorage.getItem("activeDesignation") || "Pharmacist";
-            const activePersonnel = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
+            let activePersonnel = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
 
-            const facilitySnapshot = await getDoc(doc(db, "facilities", user.uid));
-            if (facilitySnapshot.exists()) {
-                const facilityData = facilitySnapshot.data();
-
-                let activeStaffMember = activePersonnel || (userRole === "Owner" ? facilityData.contactInfo?.contactPerson : "Attending Pharmacist");
-                currentResolvedPersonnel = activeStaffMember;
-
-                if (profileContainer) {
-                    profileContainer.innerHTML = `<strong>${activeStaffMember}</strong><br><span>Pharmacist / Custodian</span>`;
+            if (!activePersonnel) {
+                const facilitySnapshot = await getDoc(doc(db, "facilities", user.uid));
+                if (facilitySnapshot.exists()) {
+                    const facilityData = facilitySnapshot.data();
+                    activePersonnel = userRole === "Owner" ? facilityData.contactInfo?.contactPerson : "Attending Pharmacist";
+                    sessionStorage.setItem("activePersonnelName", activePersonnel);
                 }
+            }
+
+            const activeStaffMember = activePersonnel || "Attending Pharmacist";
+            currentResolvedPersonnel = activeStaffMember;
+
+            if (profileContainer) {
+                profileContainer.innerHTML = `<strong>${activeStaffMember}</strong><br><span>Pharmacist / Custodian</span>`;
             }
         } catch (e) {
             console.error("Pharmacist session resolution error:", e);
@@ -88,12 +96,12 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ----------------------------------------------------
-// 2. Real-Time Inventory Stock Stream
+// 2. Real-Time Inventory Subcollection Stream
 // ----------------------------------------------------
 function streamInventory(facilityId) {
-    const q = query(collection(db, "vaccine-inventory"), where("facilityId", "==", facilityId));
+    const invColRef = collection(db, "facilities", facilityId, "vaccine-inventory");
 
-    onSnapshot(q, (snapshot) => {
+    onSnapshot(invColRef, (snapshot) => {
         inventoryList = [];
         let totalVials = 0;
         let totalDoses = 0;
@@ -168,7 +176,7 @@ function renderInventoryTable() {
             const docId = e.currentTarget.getAttribute("data-id");
             if (confirm("Are you sure you want to delete this batch record from cold-chain storage?")) {
                 try {
-                    await deleteDoc(doc(db, "vaccine-inventory", docId));
+                    await deleteDoc(doc(db, "facilities", activeFacilityId, "vaccine-inventory", docId));
                 } catch (err) {
                     alert("Delete failed: " + err.message);
                 }
@@ -182,14 +190,11 @@ function renderInventoryTable() {
 if (searchInventoryInput) searchInventoryInput.addEventListener("input", renderInventoryTable);
 
 // ----------------------------------------------------
-// 3. Real-Time Requisitions Stream & Fulfillment
+// 3. Real-Time Requisitions Subcollection Stream & Fulfillment
 // ----------------------------------------------------
 function streamRequisitions(facilityId) {
-    const q = query(
-        collection(db, "vaccine-requisitions"), 
-        where("facilityId", "==", facilityId),
-        where("status", "==", "Pending Release")
-    );
+    const reqColRef = collection(db, "facilities", facilityId, "vaccine-requisitions");
+    const q = query(reqColRef, where("status", "==", "Pending Release"));
 
     onSnapshot(q, (snapshot) => {
         pendingReqList = [];
@@ -216,7 +221,7 @@ function renderRequisitionTable() {
 
     pendingReqList.forEach(req => {
         const row = document.createElement("tr");
-        row.className = "clickable-req-row"; // Makes entire row interactive
+        row.className = "clickable-req-row";
         const formattedDate = new Date(req.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         row.innerHTML = `
@@ -233,13 +238,11 @@ function renderRequisitionTable() {
             </td>
         `;
 
-        // Entire row click triggers the pop-up modal, except when clicking the action button
         row.addEventListener("click", (e) => {
-            if (e.target.closest(".btn-approve-req")) return; // Prevent row click if button was pressed
+            if (e.target.closest(".btn-approve-req")) return;
             openViewModal(req.docId);
         });
 
-        // Approve & Issue Button from Table
         row.querySelector(".btn-approve-req")?.addEventListener("click", async (e) => {
             const reqDocId = e.currentTarget.getAttribute("data-id");
             const brand = e.currentTarget.getAttribute("data-brand");
@@ -299,11 +302,13 @@ async function executeStockApproval(reqDocId, brand, vialsRequested) {
 
     if (confirm(`Approve release of ${vialsRequested} vial(s) of ${brand} from Lot ${targetBatch.batchNo}?`)) {
         try {
-            await updateDoc(doc(db, "vaccine-inventory", targetBatch.docId), {
+            // Deduct stock from vaccine-inventory subcollection
+            await updateDoc(doc(db, "facilities", activeFacilityId, "vaccine-inventory", targetBatch.docId), {
                 vialsLeft: Number(targetBatch.vialsLeft) - vialsRequested
             });
 
-            await updateDoc(doc(db, "vaccine-requisitions", reqDocId), {
+            // Update ticket status directly in the vaccine-requisitions subcollection
+            await updateDoc(doc(db, "facilities", activeFacilityId, "vaccine-requisitions", reqDocId), {
                 status: "Released",
                 fulfilledBy: currentResolvedPersonnel,
                 batchAssigned: targetBatch.batchNo,
@@ -347,8 +352,7 @@ if (addStockForm) {
         const dosesPerVial = Number(document.getElementById("invDosesPerVial").value);
 
         try {
-            await addDoc(collection(db, "vaccine-inventory"), {
-                facilityId: activeFacilityId,
+            await addDoc(collection(db, "facilities", activeFacilityId, "vaccine-inventory"), {
                 brandName: brandName,
                 batchNo: batchNo,
                 expDate: expDate,
@@ -375,6 +379,6 @@ document.getElementById("logout-btn")?.addEventListener("click", (e) => {
     if (confirm("Are you sure you want to exit your Pharmacist session?")) {
         sessionStorage.removeItem("activeDesignation");
         sessionStorage.removeItem("activePersonnelName");
-        window.location.href = 'abtc-profiles.html';
+        window.location.href = 'abtc-login.html';
     }
 });

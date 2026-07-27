@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHO - Dashboard | CRIS</title>
+
+    <link rel="stylesheet" href="../../assets/css/pho-dashboard.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- UNIVERSAL SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <div class="brand-text">
+                    <p class="brand-title">Community-Centric</p>
+                    <p class="brand-subtitle">Rabies Intelligence System</p>
+                </div>
+                <span class="role-badge">PHO MODULE</span>
+            </div>
+
+            <nav class="menu" aria-label="Main Navigation">
+                <a href="pho-dash.html" class="menu-item active" aria-current="page">
+                    <span class="menu-text">Dashboard</span>
+                </a>
+                <a href="pho-animal-bite-cases.html" class="menu-item">
+                    <span class="menu-text">Animal Bite Cases</span>
+                </a>
+                <a href="pho-heat-map.html" class="menu-item">
+                    <span class="menu-text">Heatmap</span>
+                </a>
+            </nav>
+
+            <div class="footer-nav">
+                <a href="../../settings/html/settings.html" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout" type="button" onclick="window.location.href='pho-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <!-- TOP HEADER BAR -->
+            <header class="header">
+                <div class="header-title">
+                    <h1>PHO DASHBOARD</h1>
+                </div>
+                
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong class="user-name">Xaniel Marios Angelo B. Nava</strong>
+                        <span class="user-role">Administrator</span>
+                    </div>
+                    <div class="profile-avatar" aria-hidden="true"></div>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <!-- LEFT COLUMN: MAIN STATS & CHART -->
+                <section class="left-column">
+                    <div class="welcome-bar">
+                        <h2>Hello, <span id="welcomeUserName">Xaniel Marios Angelo B. Nava</span></h2>
+                    </div>
+
+                    <!-- STATISTICS CARDS GRID -->
+                    <div class="statistics-container">
+                        <!-- HUMAN POPULATION -->
+                        <article class="stat-card population">
+                            <div class="stat-header">
+                                <small class="stat-title">Human Population</small>
+                                <span class="stat-icon" aria-hidden="true">👥</span>
+                            </div>
+                            <div class="stat-body">
+                                <h3 id="humanPopulation" class="stat-value">0</h3>
+                            </div>
+                        </article>
+
+                        <!-- TOTAL ANIMAL BITE CASES -->
+                        <article class="stat-card bite-cases">
+                            <div class="stat-header">
+                                <small class="stat-title">Total Animal Bite Cases</small>
+                                <span class="stat-icon" aria-hidden="true">🐾</span>
+                            </div>
+                            <div class="stat-body">
+                                <h3 id="animalBiteCases" class="stat-value">0</h3>
+                            </div>
+                        </article>
+
+                        <!-- HUMAN RABIES DEATHS -->
+                        <article class="stat-card rabies-deaths">
+                            <div class="stat-header">
+                                <small class="stat-title">Human Rabies Deaths</small>
+                                <span class="stat-icon" aria-hidden="true">⚠️</span>
+                            </div>
+                            <div class="stat-body">
+                                <h3 id="humanRabiesDeaths" class="stat-value">0</h3>
+                            </div>
+                        </article>
+                    </div>
+
+                    <!-- DYNAMIC CHART CONTAINER -->
+                    <section class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Total Annual Animal Bite Cases</h3>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="statisticsLineChart"></canvas>
+                        </div>
+                    </section>
+                </section>
+
+                <!-- RIGHT COLUMN: CALENDAR & ANNOUNCEMENTS -->
+                <aside class="right-column">
+                    <div class="card calendar-card">
+                        <div class="calendar-header">
+                            <button id="prevMonth" class="calendar-btn" aria-label="Previous Month">&#10094;</button>
+                            <div class="calendar-title" id="calendarTitleContainer" title="Click to jump to a specific month/year">
+                                <h3 id="monthYear">July 2026</h3>
+                            </div>
+                            <button id="nextMonth" class="calendar-btn" aria-label="Next Month">&#10095;</button>
+                        </div>
+
+                        <!-- MONTH / YEAR PICKER MODAL -->
+                        <div id="calendarModal" class="calendar-modal hidden" aria-hidden="true">
+                            <div class="calendar-modal-content">
+                                <div class="modal-year-select">
+                                    <button id="modalPrevYear" class="modal-nav-btn" aria-label="Previous Year">&#10094;</button>
+                                    <span id="modalYearDisplay">2026</span>
+                                    <button id="modalNextYear" class="modal-nav-btn" aria-label="Next Year">&#10095;</button>
+                                </div>
+                                
+                                <div class="modal-months-grid" id="modalMonthsGrid"></div>
+                                <button id="closeModalBtn" class="modal-close-btn" type="button">Cancel</button>
+                            </div>
+                        </div>
+                        
+                        <div class="calendar-weekdays">
+                            <div>Sun</div>
+                            <div>Mon</div>
+                            <div>Tue</div>
+                            <div>Wed</div>
+                            <div>Thu</div>
+                            <div>Fri</div>
+                            <div>Sat</div>
+                        </div>
+                        
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                    </div>
+
+                    <!-- DIRECTIVES / REMINDERS BOX -->
+                    <div class="card compliance-card">
+                        <div class="compliance-header">
+                            <h4 id="selectedDate">Select a date</h4>
+                        </div>
+                        <div class="compliance-body">
+                            <textarea id="eventInput" placeholder="Type here for announcements and reminders" rows="4"></textarea>
+                            <button id="saveEventBtn" type="button" class="btn-primary">Save Directive</button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <!-- Chart.js & Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script type="module" src="../../assets/js/pho-dash.js"></script>
+</body>
+</html>

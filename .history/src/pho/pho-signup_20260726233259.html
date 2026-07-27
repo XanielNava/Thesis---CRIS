@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personnel Registration - CRIS</title>
+    
+    <!-- Stylesheets & Fonts -->
+    <link rel="stylesheet" href="../../assets/css/login.css">
+    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Menu Control Script -->
+    <script src="../assets/js/Menu.js"></script>
+</head>
+
+<body>
+    <!-- Firebase Configuration Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
+            authDomain: "cris-database-da989.firebaseapp.com",
+            databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "cris-database-da989",
+            storageBucket: "cris-database-da989.firebasestorage.app",
+            messagingSenderId: "627885439681",
+            appId: "1:627885439681:web:3c657d64c0aad9b4913240",
+            measurementId: "G-0X99BH7GW4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+    </script>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS logo" class="logo">
+            <h1>Personnel Registration</h1>
+            <button class="burger" onclick="openMenu()">☰ Menu</button>
+        </div>
+    </header>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="closeMenu()">✕</button>
+        <nav>
+            <a href="/index.html">Home</a>
+            <a href="../../src/pho/pho-login.html">Admin Access Portal</a>
+            <a href="../src/cris-reports.html">Reports</a>
+            <a href="../src/about-cris.html">About CRIS</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content Container -->
+    <main class="main">
+        <div class="login-box square-card">
+            <a href="../../index.html" class="logo-link">
+                <img src="../../assets/images/pho-logo.png" alt="PHO logo" class="login-logo">
+            </a>
+
+            <h2>Personnel Registration</h2>
+
+            <div class="container">
+                <form id="regForm">
+                    <div class="form-grid">
+                        <input type="text" id="lastName" placeholder="Last Name" required>
+                        <input type="text" id="firstName" placeholder="First Name" required>
+                        <input type="text" id="middleInitial" placeholder="M.I." required>
+                        <input type="text" id="suffix" placeholder="Suffix (Jr./Sr./III)">
+                        
+                        <input type="email" id="email" class="full-width" placeholder="Email Address" required>
+                        
+                        <input type="password" id="password" placeholder="Password" required>
+                        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                        
+                        <input type="text" id="address" class="full-width" placeholder="Address">
+                        
+                        <input type="tel" id="contactNumber" placeholder="Contact Number">
+                        <input type="date" id="dateOfBirth" placeholder="Date of Birth">
+                        
+                        <select id="designation" class="full-width" required>
+                            <option value="" disabled selected>Select Designation</option>
+                            <option value="Administrator">Administrator</option>
+                            <option value="Nurse">Nurse</option>
+                            <option value="Health Officer">Health Officer</option>
+                        </select>
+                    </div>
+
+                    <div class="button-container">
+                        <button id="backButton" type="button" onclick="window.location.href='../src/pho-login.html'">Back</button>
+                        <button id="regButton" type="submit">Sign Up</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Module Registration Handler -->
+    <script type="module" src="../assets/js/cris-signup-pho.js"></script>
+</body>
+
+</html>

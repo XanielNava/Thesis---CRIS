@@ -1,9 +1,9 @@
-// abtc-reg.js - Production Modular Library Controller Pipeline
+// abtc-reg.js - Patient Registry Library Controller
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import { 
-    getFirestore, collection, onSnapshot, query, where, doc, getDoc, deleteDoc, updateDoc 
+    getFirestore, collection, onSnapshot, query, where, doc, getDoc, deleteDoc, updateDoc, connectFirestoreEmulator 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -17,6 +17,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 let activeFacilityId = null;
 let libraryCache = [];
@@ -33,11 +37,6 @@ const closeBtnFooter = document.getElementById("drawerCloseBtnFooter");
 const printBtn = document.getElementById("printRecordBtn");
 const profileContainer = document.getElementById("profileInfoText");
 
-// Lightbox Elements
-const lightbox = document.getElementById("woundLightbox");
-const lightboxImg = document.getElementById("lightboxImg");
-const closeLightboxBtn = document.getElementById("closeLightboxBtn");
-
 // Edit Controls
 let currentActiveDocId = null;
 let isEditMode = false;
@@ -50,40 +49,33 @@ function safeSetText(id, value) {
     if (el) el.innerText = value ?? "N/A";
 }
 
-// ----------------------------------------------------
-// 1. Session Observer & Header Branding (TAB ISOLATED)
-// ----------------------------------------------------
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         activeFacilityId = user.uid;
         
         try {
             const userRole = sessionStorage.getItem("activeDesignation") || localStorage.getItem("activeDesignation") || "Nurse";
-            const activePersonnel = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
+            let activePersonnel = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
 
-            const facilitySnapshot = await getDoc(doc(db, "facilities", user.uid));
-
-            if (facilitySnapshot.exists()) {
-                const facilityData = facilitySnapshot.data();
-                
-                const name = facilityData.facilityName || "WESTERN VISAYAS MEDICAL CENTER";
-                const titleElement = document.getElementById("dashboardTitle");
-                if (titleElement) {
-                    titleElement.innerText = `${name.toUpperCase()} PATIENT REGISTRY`;
+            let facilityName = sessionStorage.getItem("cachedFacilityName");
+            if (!facilityName) {
+                const facilitySnapshot = await getDoc(doc(db, "facilities", user.uid));
+                if (facilitySnapshot.exists()) {
+                    facilityName = facilitySnapshot.data().facilityName || "WESTERN VISAYAS MEDICAL CENTER";
+                    sessionStorage.setItem("cachedFacilityName", facilityName);
                 }
+            }
 
-                let activeStaffMember = activePersonnel;
-                if (!activeStaffMember) {
-                    activeStaffMember = userRole === "Owner" 
-                        ? (facilityData.contactInfo?.contactPerson || "Facility Administrator")
-                        : "Attending Personnel";
-                }
+            const titleElement = document.getElementById("dashboardTitle");
+            if (titleElement && facilityName) {
+                titleElement.innerText = `${facilityName.toUpperCase()} PATIENT REGISTRY`;
+            }
 
-                const displayRoleLabel = userRole === "Owner" ? "Administrator / Owner" : "Personnel";
-                
-                if (profileContainer) {
-                    profileContainer.innerHTML = `<strong>${activeStaffMember}</strong><br><span>${displayRoleLabel}</span>`;
-                }
+            const activeStaffMember = activePersonnel || "Attending Personnel";
+            const displayRoleLabel = userRole === "Owner" ? "Administrator / Owner" : "Personnel";
+            
+            if (profileContainer) {
+                profileContainer.innerHTML = `<strong>${activeStaffMember}</strong><br><span>${displayRoleLabel}</span>`;
             }
         } catch (error) {
             console.error("Header rendering error:", error);
@@ -96,7 +88,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ----------------------------------------------------
-// 2. Real-Time Stream from 'patient-database'
+// Stream Root Collection filtered by Facility ID
 // ----------------------------------------------------
 function streamFacilityRecords(facilityId) {
     const recordsQuery = query(
@@ -126,9 +118,6 @@ function streamFacilityRecords(facilityId) {
     });
 }
 
-// ----------------------------------------------------
-// 3. Table Renderer with Whole-Row Click Support
-// ----------------------------------------------------
 function renderLibraryTable(dataList) {
     if (!tableBody) return;
     tableBody.innerHTML = "";
@@ -140,7 +129,7 @@ function renderLibraryTable(dataList) {
 
     dataList.forEach((record) => {
         const row = document.createElement("tr");
-        row.className = "clickable-req-row"; // Adds pointer cursor and smooth hover background
+        row.className = "clickable-req-row";
         
         let dateString = "N/A";
         if (record.createdAt && record.createdAt.seconds) {
@@ -166,7 +155,6 @@ function renderLibraryTable(dataList) {
             </td>
         `;
 
-        // Whole row click opens the drawer (unless action buttons are clicked directly)
         row.addEventListener("click", (e) => {
             if (e.target.closest("button")) return;
             openDocumentDrawer(record.id);
@@ -194,49 +182,6 @@ function renderLibraryTable(dataList) {
     });
 }
 
-// ----------------------------------------------------
-// 4. Slide Drawer Inspector Data Hydration & Editing
-// ----------------------------------------------------
-function openLightbox(imgSrc) {
-    if (!lightbox || !lightboxImg) return;
-    lightboxImg.src = imgSrc;
-    lightbox.classList.add("open");
-}
-
-function closeLightbox() {
-    if (!lightbox) return;
-    lightbox.classList.remove("open");
-}
-
-if (closeLightboxBtn) closeLightboxBtn.addEventListener("click", closeLightbox);
-if (lightbox) {
-    lightbox.addEventListener("click", (e) => {
-        if (e.target === lightbox) closeLightbox();
-    });
-}
-
-function toggleMode(forceEdit = null) {
-    isEditMode = forceEdit !== null ? forceEdit : !isEditMode;
-    
-    if (isEditMode) {
-        drawer?.classList.add("edit-mode");
-        if (modeBadge) modeBadge.innerText = "EDIT MODE";
-        if (toggleEditBtn) toggleEditBtn.innerHTML = `<i class="fa-solid fa-eye"></i> View`;
-        if (printBtn) printBtn.style.display = "none";
-        if (saveRecordBtn) saveRecordBtn.style.display = "inline-block";
-    } else {
-        drawer?.classList.remove("edit-mode");
-        if (modeBadge) modeBadge.innerText = "VIEW MODE";
-        if (toggleEditBtn) toggleEditBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Edit`;
-        if (printBtn) printBtn.style.display = "inline-block";
-        if (saveRecordBtn) saveRecordBtn.style.display = "none";
-    }
-}
-
-if (toggleEditBtn) {
-    toggleEditBtn.addEventListener("click", () => toggleMode());
-}
-
 function openDocumentDrawer(docId) {
     const file = libraryCache.find(item => item.id === docId);
     if (!file) return;
@@ -245,10 +190,8 @@ function openDocumentDrawer(docId) {
     toggleMode(false);
 
     const displayId = file.caseId || file.recordNo || file.id.substring(0,8).toUpperCase();
-    
     safeSetText("drawerIdLabel", `RECORD: ${displayId}`);
     
-    // Patient Info
     safeSetText("lblFullName", file.fullName || file.name || "Not Specified");
     safeSetText("lblAgeSex", `${file.age || "N/A"} Yrs / ${file.sex || "N/A"}`);
     safeSetText("lblContact", file.contactNo || "N/A");
@@ -262,331 +205,54 @@ function openDocumentDrawer(docId) {
     if (document.getElementById("editAddress")) document.getElementById("editAddress").value = file.address || "";
     if (document.getElementById("editPhysician")) document.getElementById("editPhysician").value = file.physician || "";
 
-    // Exposure & Bite Details
-    safeSetText("lblExposureDate", file.exposureDate || "N/A");
-    safeSetText("lblConsultDateTime", file.consultDateTime ? new Date(file.consultDateTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : "N/A");
-    safeSetText("lblBiteArea", file.biteArea || "N/A");
-    safeSetText("lblAnimalType", file.animalType || "N/A");
-    safeSetText("lblAnimalCaged", file.animalCaged || "N/A");
-    safeSetText("lblCategory", file.classification || (file.exposureCategory ? `Category ${file.exposureCategory}` : "Unclassified"));
-    safeSetText("lblPriorVacc", file.priorVaccination || "N/A");
-
-    if (document.getElementById("editExposureDate")) document.getElementById("editExposureDate").value = file.exposureDate || "";
-    if (document.getElementById("editConsultDateTime")) document.getElementById("editConsultDateTime").value = file.consultDateTime || "";
-    if (document.getElementById("editBiteArea")) document.getElementById("editBiteArea").value = file.biteArea || "";
-    if (document.getElementById("editAnimalType")) document.getElementById("editAnimalType").value = file.animalType || "Dog";
-    if (document.getElementById("editAnimalCaged")) document.getElementById("editAnimalCaged").value = file.animalCaged || "No";
-    if (document.getElementById("editCategory")) document.getElementById("editCategory").value = file.classification || (file.exposureCategory ? `Category ${file.exposureCategory}` : "Category I");
-    if (document.getElementById("editPriorVacc")) document.getElementById("editPriorVacc").value = file.priorVaccination || "No";
-
-    // Vital Signs
-    safeSetText("lblBp", file.bp || "---");
-    safeSetText("lblTemp", file.temp ? `${file.temp} °C` : "---");
-    safeSetText("lblPulse", file.pulse ? `${file.pulse} bpm` : "---");
-    safeSetText("lblResp", file.resp ? `${file.resp} cpm` : "---");
-    safeSetText("lblO2", file.o2sat ? `${file.o2sat}%` : "---");
-    safeSetText("lblWeight", file.weight ? `${file.weight} kg` : "---");
-
-    if (document.getElementById("editBp")) document.getElementById("editBp").value = file.bp || "";
-    if (document.getElementById("editTemp")) document.getElementById("editTemp").value = file.temp || "";
-    if (document.getElementById("editPulse")) document.getElementById("editPulse").value = file.pulse || "";
-    if (document.getElementById("editResp")) document.getElementById("editResp").value = file.resp || "";
-    if (document.getElementById("editO2")) document.getElementById("editO2").value = file.o2sat || "";
-    if (document.getElementById("editWeight")) document.getElementById("editWeight").value = file.weight || "";
-
-    // Medical History
-    safeSetText("lblComorbidities", file.comorbidities || "None");
-    safeSetText("lblAllergies", file.allergies || "None");
-    safeSetText("lblMedications", file.medications || "None");
-
-    if (document.getElementById("editComorbidities")) document.getElementById("editComorbidities").value = file.comorbidities || "";
-    if (document.getElementById("editAllergies")) document.getElementById("editAllergies").value = file.allergies || "";
-    if (document.getElementById("editMedications")) document.getElementById("editMedications").value = file.medications || "";
-
-    // Management, Treatment & Structured Immunoglobulin (RIG)
-    safeSetText("lblWoundCare", file.woundCare || "N/A");
-    safeSetText("lblVaccineBrand", file.vaccineBrand || "None");
-    safeSetText("lblRoute", file.route || "N/A");
-    safeSetText("lblRigType", file.rigType || "None");
-    safeSetText("lblRigDose", file.rigDose || "N/A");
-    safeSetText("lblRemarks", file.remarks || "None");
-
-    if (document.getElementById("editWoundCare")) document.getElementById("editWoundCare").value = file.woundCare || "";
-    if (document.getElementById("editVaccineBrand")) document.getElementById("editVaccineBrand").value = file.vaccineBrand || "";
-    if (document.getElementById("editRoute")) document.getElementById("editRoute").value = file.route || "Intramuscular";
-    if (document.getElementById("editRigType")) document.getElementById("editRigType").value = file.rigType || "";
-    if (document.getElementById("editRigDose")) document.getElementById("editRigDose").value = file.rigDose || "";
-    if (document.getElementById("editRemarks")) document.getElementById("editRemarks").value = file.remarks || "";
-
-    // PEP Schedule Target Dates Map & Dynamic Completion Badges
-    let dates = file.pepScheduleDates || {};
-
-    if (!dates.day0 && (file.consultDateTime || file.exposureDate)) {
-        const baseVal = file.consultDateTime ? file.consultDateTime.split('T')[0] : file.exposureDate;
-        if (baseVal) {
-            const [y, m, d] = baseVal.split('-').map(Number);
-            const baseDate = new Date(y, m - 1, d);
-            
-            const addDays = (dt, n) => {
-                const res = new Date(dt);
-                res.setDate(res.getDate() + n);
-                return `${res.getFullYear()}-${String(res.getMonth()+1).padStart(2,'0')}-${String(res.getDate()).padStart(2,'0')}`;
-            };
-
-            dates = {
-                day0: baseVal,
-                day3: addDays(baseDate, 3),
-                day7: addDays(baseDate, 7),
-                day14: addDays(baseDate, 14),
-                day28: addDays(baseDate, 28)
-            };
-        }
-    }
-
-    const completedList = Array.isArray(file.completedDoses) 
-        ? file.completedDoses 
-        : (Array.isArray(file.vaccSchedule) ? file.vaccSchedule : []);
-
-    function formatDisplayDate(dateStr) {
-        if (!dateStr || dateStr === '---') return '---';
-        const parts = dateStr.split('T')[0].split('-');
-        if (parts.length !== 3) return dateStr;
-        const [y, m, d] = parts;
-        return `${m}/${d}/${y}`;
-    }
-
-    function formatDoseBadge(dayLabel, dateValue) {
-        if (!dateValue) return `${dayLabel}: ---`;
-        const formattedDate = formatDisplayDate(dateValue);
-
-        const isDone = completedList.some(item => 
-            String(item).toLowerCase().trim() === dayLabel.toLowerCase().trim() ||
-            String(item).toLowerCase().includes(dayLabel.toLowerCase())
-        );
-
-        if (isDone) {
-            return `<span style="color: #2b8a3e; font-weight: 700;"><i class="fa-solid fa-circle-check"></i> ${dayLabel}: ${formattedDate}</span>`;
-        }
-        return `<span style="color: #495057;">${dayLabel}: ${formattedDate}</span>`;
-    }
-
-    const summaryEl = document.getElementById("lblPepScheduleSummary");
-    if (summaryEl) {
-        summaryEl.innerHTML = [
-            formatDoseBadge("Day 0", dates.day0),
-            formatDoseBadge("Day 3", dates.day3),
-            formatDoseBadge("Day 7", dates.day7),
-            formatDoseBadge("Day 14", dates.day14),
-            formatDoseBadge("Day 28", dates.day28)
-        ].join(' <span style="color:#ced4da; margin: 0 4px;">|</span> ');
-    }
-
-    if (document.getElementById("editDay0")) document.getElementById("editDay0").value = dates.day0 || "";
-    if (document.getElementById("editDay3")) document.getElementById("editDay3").value = dates.day3 || "";
-    if (document.getElementById("editDay7")) document.getElementById("editDay7").value = dates.day7 || "";
-    if (document.getElementById("editDay14")) document.getElementById("editDay14").value = dates.day14 || "";
-    if (document.getElementById("editDay28")) document.getElementById("editDay28").value = dates.day28 || "";
-
-    // Wound Photo
-    const photoFrame = document.getElementById("lblPhotoFrame");
-    const photoUrl = file.woundPhotoData || file.woundPhoto;
-
-    if (photoFrame) {
-        if (photoUrl) {
-            photoFrame.innerHTML = `
-                <img src="${photoUrl}" class="wound-img-preview" id="drawerWoundImg" alt="Assessment photo">
-                <p style="color:#777; font-size: 11px; margin-top: 6px;"><i class="fa-solid fa-magnifying-glass-plus"></i> Click image to expand view</p>
-            `;
-            document.getElementById("drawerWoundImg")?.addEventListener("click", () => openLightbox(photoUrl));
-        } else {
-            photoFrame.innerHTML = `<p style="color:#aaa; font-style: italic; font-size: 13px;"><i class="fa-solid fa-image-slash"></i> No assessment photo linked.</p>`;
-        }
-    }
-
-    renderHistoryTimeline(file);
-
     if (drawer && overlay) {
         drawer.classList.add("open");
         overlay.classList.add("open");
     }
 }
 
-// SAVE UPDATED RECORD TO FIREBASE
+function toggleMode(forceEdit = null) {
+    isEditMode = forceEdit !== null ? forceEdit : !isEditMode;
+    if (isEditMode) {
+        drawer?.classList.add("edit-mode");
+        if (modeBadge) modeBadge.innerText = "EDIT MODE";
+    } else {
+        drawer?.classList.remove("edit-mode");
+        if (modeBadge) modeBadge.innerText = "VIEW MODE";
+    }
+}
+
 if (saveRecordBtn) {
     saveRecordBtn.addEventListener("click", async () => {
         if (!currentActiveDocId) return;
-
-        const activeStaff = sessionStorage.getItem("activePersonnelName") 
-            || localStorage.getItem("activePersonnelName") 
-            || document.getElementById("editPhysician")?.value 
-            || "Duty Personnel";
-
-        const selectedRigType = document.getElementById("editRigType")?.value || "";
-        const enteredRigDose = document.getElementById("editRigDose")?.value?.trim() || "";
 
         const updatedData = {
             fullName: document.getElementById("editFullName")?.value || "",
             age: document.getElementById("editAge")?.value || "",
             sex: document.getElementById("editSex")?.value || "Male",
             contactNo: document.getElementById("editContact")?.value || "",
-            address: document.getElementById("editAddress")?.value || "",
-            physician: document.getElementById("editPhysician")?.value || "",
-            exposureDate: document.getElementById("editExposureDate")?.value || "",
-            consultDateTime: document.getElementById("editConsultDateTime")?.value || "",
-            biteArea: document.getElementById("editBiteArea")?.value || "",
-            animalType: document.getElementById("editAnimalType")?.value || "Dog",
-            animalCaged: document.getElementById("editAnimalCaged")?.value || "No",
-            classification: document.getElementById("editCategory")?.value || "Category I",
-            priorVaccination: document.getElementById("editPriorVacc")?.value || "No",
-            bp: document.getElementById("editBp")?.value || "",
-            temp: document.getElementById("editTemp")?.value || "",
-            pulse: document.getElementById("editPulse")?.value || "",
-            resp: document.getElementById("editResp")?.value || "",
-            o2sat: document.getElementById("editO2")?.value || "",
-            weight: document.getElementById("editWeight")?.value || "",
-            comorbidities: document.getElementById("editComorbidities")?.value || "",
-            allergies: document.getElementById("editAllergies")?.value || "",
-            medications: document.getElementById("editMedications")?.value || "",
-            woundCare: document.getElementById("editWoundCare")?.value || "",
-            vaccineBrand: document.getElementById("editVaccineBrand")?.value || "",
-            route: document.getElementById("editRoute")?.value || "",
-            
-            rigType: selectedRigType,
-            rigDose: enteredRigDose,
-            immunoglobulin: selectedRigType ? `${selectedRigType}${enteredRigDose ? ' - ' + enteredRigDose : ''}` : (enteredRigDose || 'None'),
-
-            pepScheduleDates: {
-                day0: document.getElementById("editDay0")?.value || "",
-                day3: document.getElementById("editDay3")?.value || "",
-                day7: document.getElementById("editDay7")?.value || "",
-                day14: document.getElementById("editDay14")?.value || "",
-                day28: document.getElementById("editDay28")?.value || ""
-            },
-
-            remarks: document.getElementById("editRemarks")?.value || ""
+            address: document.getElementById("editAddress")?.value || ""
         };
 
         try {
-            const currentFile = libraryCache.find(item => item.id === currentActiveDocId);
-            const currentHistory = currentFile?.historyLogs || [];
-
-            currentHistory.push({
-                action: "Record Modified",
-                timestamp: new Date().toISOString(),
-                personnel: activeStaff,
-                details: "Patient record information updated by staff."
-            });
-
-            updatedData.historyLogs = currentHistory;
-
             await updateDoc(doc(db, "patient-database", currentActiveDocId), updatedData);
-
             alert("Patient record updated successfully!");
             toggleMode(false);
         } catch (err) {
-            console.error("Update error:", err);
             alert("Failed to update record: " + err.message);
         }
     });
 }
 
-function renderHistoryTimeline(file) {
-    const historyContainer = document.getElementById("lblHistoryTimeline");
-    if (!historyContainer) return;
-
-    let historyHtml = "";
-    let creationDate = "Unknown Date";
-    if (file.createdAt && file.createdAt.seconds) {
-        creationDate = new Date(file.createdAt.seconds * 1000).toLocaleString();
-    } else if (file.consultDateTime) {
-        creationDate = new Date(file.consultDateTime).toLocaleString();
-    }
-
-    historyHtml += `
-        <div class="history-item">
-            <div class="history-item-header">
-                <span class="history-item-action"><i class="fa-solid fa-file-circle-check"></i> Record Created</span>
-                <span>${creationDate}</span>
-            </div>
-            <div class="history-item-meta">Initial intake record registered by <strong>${file.physician || "Duty Staff"}</strong>.</div>
-        </div>
-    `;
-
-    if (file.historyLogs && Array.isArray(file.historyLogs)) {
-        file.historyLogs.forEach(log => {
-            historyHtml += `
-                <div class="history-item">
-                    <div class="history-item-header">
-                        <span class="history-item-action"><i class="fa-solid fa-pen-to-square"></i> ${log.action || "Record Updated"}</span>
-                        <span>${log.timestamp ? new Date(log.timestamp).toLocaleString() : "Recently"}</span>
-                    </div>
-                    <div class="history-item-meta">${log.details || "Treatment or status updated."} &mdash; <strong>${log.personnel || "Personnel"}</strong></div>
-                </div>
-            `;
-        });
-    }
-
-    historyContainer.innerHTML = historyHtml;
-}
-
-const closeDrawer = () => { 
-    if (drawer && overlay) {
-        drawer.classList.remove("open"); 
-        overlay.classList.remove("open"); 
-    }
-};
-
-if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
-if (closeBtnFooter) closeBtnFooter.addEventListener("click", closeDrawer);
-if (overlay) overlay.addEventListener("click", closeDrawer);
-
-if (printBtn) {
-    printBtn.addEventListener("click", () => {
-        window.print();
-    });
-}
-
-// ----------------------------------------------------
-// 5. Client-Side Filtering
-// ----------------------------------------------------
 function executeCombinedFilters() {
     const searchValue = searchBox ? searchBox.value.toLowerCase().trim() : "";
-    const exposureValue = filterExposure ? filterExposure.value : "";
-    const categoryValue = filterCategory ? filterCategory.value : "";
-
     const filtered = libraryCache.filter(item => {
         const fullName = (item.fullName || item.name || "").toLowerCase();
         const recordId = (item.caseId || item.recordNo || "").toLowerCase();
-        
-        const matchText = fullName.includes(searchValue) || recordId.includes(searchValue);
-        
-        const itemType = item.exposureType || (item.animalType ? `${item.animalType} Exposure` : "");
-        const matchExposure = !exposureValue || itemType.toLowerCase().includes(exposureValue.toLowerCase().replace("bite", "").replace("scratch", "").trim());
-
-        const itemCat = item.classification || (item.exposureCategory ? `Category ${item.exposureCategory}` : "");
-        const matchCategory = !categoryValue || itemCat.toLowerCase() === categoryValue.toLowerCase();
-
-        return matchText && matchExposure && matchCategory;
+        return fullName.includes(searchValue) || recordId.includes(searchValue);
     });
 
     renderLibraryTable(filtered);
 }
 
 if (searchBox) searchBox.addEventListener("input", executeCombinedFilters);
-if (filterExposure) filterExposure.addEventListener("change", executeCombinedFilters);
-if (filterCategory) filterCategory.addEventListener("change", executeCombinedFilters);
-
-// ----------------------------------------------------
-// 6. Tab-Isolated Profile Session Switch / Logout
-// ----------------------------------------------------
-const logoutBtn = document.getElementById("logout-btn");
-if (logoutBtn) {
-    logoutBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (confirm("Are you sure you want to exit your profile session on this tab?")) {
-            sessionStorage.removeItem("activeDesignation");
-            sessionStorage.removeItem("activePersonnelName");
-            window.location.href = 'abtc-profiles.html';
-        }
-    });
-}

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personnel Registration - CRIS</title>
+    
+    <!-- Stylesheets & Fonts -->
+    <link rel="stylesheet" href="../../assets/css/login.css">
+    <link rel="icon" href="../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Menu Control Script -->
+    <script src="../../assets/js/menu.js"></script>
+</head>
+
+<body>
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
+            authDomain: "cris-database-da989.firebaseapp.com",
+            databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "cris-database-da989",
+            storageBucket: "cris-database-da989.firebasestorage.app",
+            messagingSenderId: "627885439681",
+            appId: "1:627885439681:web:3c657d64c0aad9b4913240",
+            measurementId: "G-0X99BH7GW4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+    </script>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS logo" class="logo">
+            <h1>Personnel Registration</h1>
+            <button class="burger" onclick="openMenu()">☰ Menu</button>
+        </div>
+    </header>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="closeMenu()">✕</button>
+        <nav>
+            <a href="/index.html">Home</a>
+            <a href="../../src/pho/pho-login.html">Admin Access Portal</a>
+            <a href="../src/cris-reports.html">Reports</a>
+            <a href="../src/about-cris.html">About CRIS</a>
+        </nav>
+    </aside>
+
+    <!-- Main Form Container -->
+    <main class="main">
+        <div class="registration-card">
+            
+            <!-- Top Banner Logo -->
+            <div class="card-header">
+                <a href="../../index.html" class="logo-link">
+                    <img src="../../assets/images/pho-logo.png" alt="PHO logo" class="login-logo">
+                </a>
+                <h2 class="form-title">Personnel Registration Form</h2>
+                <hr class="form-divider">
+            </div>
+
+            <!-- Form Content Body -->
+            <form id="regForm" class="registration-form">
+                
+                <!-- Section 1: Personnel Name -->
+                <div class="form-section">
+                    <label class="section-label">Personnel Name</label>
+                    <div class="grid-4-col">
+                        <input type="text" id="firstName" placeholder="First Name" required>
+                        <input type="text" id="lastName" placeholder="Last Name" required>
+                        <input type="text" id="middleInitial" placeholder="M.I." required>
+                        <input type="text" id="suffix" placeholder="Suffix (Jr./Sr.)">
+                    </div>
+                </div>
+
+                <!-- Section 2: Account Credentials -->
+                <div class="form-section">
+                    <label class="section-label">Account Credentials</label>
+                    <div class="grid-1-col">
+                        <input type="email" id="email" placeholder="Email Address" required>
+                    </div>
+                    <div class="grid-2-col">
+                        <input type="password" id="password" placeholder="Password" required>
+                        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                    </div>
+                </div>
+
+                <!-- Section 3: Address & Contact Details -->
+                <div class="form-section">
+                    <label class="section-label">Contact & Location</label>
+                    <div class="grid-1-col">
+                        <input type="text" id="address" placeholder="Complete Address (Street, Barangay, City/Municipality)">
+                    </div>
+                    <div class="grid-2-col">
+                        <input type="tel" id="contactNumber" placeholder="Contact Number">
+                        <input type="date" id="dateOfBirth" placeholder="Date of Birth">
+                    </div>
+                </div>
+
+                <!-- Section 4: Role Assignment -->
+                <div class="form-section">
+                    <label class="section-label">Designation</label>
+                    <div class="grid-1-col">
+                        <select id="designation" required>
+                            <option value="" disabled selected>Select Designation Role</option>
+                            <option value="Administrator">Administrator</option>
+                            <option value="Nurse">Nurse</option>
+                            <option value="Health Officer">Health Officer</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-container">
+                    <button id="backButton" class="btn btn-back" type="button" onclick="window.location.href='../src/pho-login.html'">Back</button>
+                    <button id="regButton" class="btn btn-submit" type="submit" onclick="">Sign Up</button>
+                </div>
+
+            </form>
+        </div>
+    </main>
+</body>
+
+</html>

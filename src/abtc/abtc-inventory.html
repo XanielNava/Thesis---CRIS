@@ -3,56 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vaccine Inventory — CRIS | ABTC</title>
+    <title>Vaccine Inventory — CRIS | Animal Bite Treatment Center</title>
     
-    <!-- External Modular Stylesheets -->
-    <link rel="stylesheet" href="../../assets/css/abtc-reg.css">
+    <!-- External Modular Stylesheet -->
     <link rel="stylesheet" href="../../assets/css/abtc-inventory.css">
     
-    <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 
 <div class="container">
 
-    <!-- CRIS UNIVERSAL SIDEBAR -->
+    <!-- =====================================================
+         CRIS UNIVERSAL NAVY SIDEBAR (NURSE / CLINICAL MODULE)
+         ===================================================== -->
     <aside class="sidebar">
         <div class="logo-section logo-section-fixed">
-            <img src="../../assets/images/logo-login.png" alt="Logo" class="logo-image">
+            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
             <p>Community-Centric<br>Rabies Intelligence<br>System</p>
             <div class="role-badge">ABTC MODULE</div>
         </div>
 
         <nav class="menu">
-            <a href="abtc-reg.html" class="menu-item-link">
-                <button class="menu-item">Patient Registry</button>
-            </a>
-            <a href="abtc-calendar.html" class="menu-item-link">
-                <button class="menu-item">Dose Calendar</button>
-            </a>
-            <a href="abtc-inventory.html" class="menu-item-link">
-                <button class="menu-item active">Vaccine Inventory</button>
-            </a>
+            <a href="abtc-home.html" class="menu-item"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="abtc-reg.html" class="menu-item"><i class="fa-solid fa-id-card"></i> Patient Registry</a>
+            <a href="abtc-calendar.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> Dose Calendar</a>
+            <a href="abtc-inventory.html" class="menu-item active"><i class="fa-solid fa-boxes-stacked"></i> Vaccine Inventory</a>
         </nav>
 
         <div class="footer-nav">
-            <button id="logout-btn" class="menu-item alt">Logout</button>
+            <button id="logout-btn" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
         </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
+    <!-- =====================================================
+         MAIN CONTENT AREA
+         ===================================================== -->
     <main class="main-content">
 
+        <!-- HEADER BANNER -->
         <header class="header">
-            <h1 id="dashboardTitle">CLINIC VACCINE STOCK STATUS</h1>
+            <div class="header-title">
+                <h1 id="dashboardTitle">CLINIC VACCINE STOCK STATUS</h1>
+                <span>Real-Time Inventory & Requisition Management</span>
+            </div>
             <div class="user-profile-top">
                 <div class="profile-info" id="profileInfoText">
                     <strong>Duty Personnel</strong><br>
                     <span>Personnel</span>
                 </div>
-                <div class="profile-icon"></div>
+                <div class="profile-icon"><i class="fa-solid fa-user-doctor"></i></div>
             </div>
         </header>
 
@@ -93,8 +97,11 @@
         <div class="card full-width">
             
             <div class="inventory-action-bar">
-                <input type="text" id="searchInventoryInput" class="search-inventory-input" placeholder="Search brand or batch no...">
-                <button id="btnRequestStock" class="btn-add-stock btn-green">
+                <div class="search-input-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="searchInventoryInput" class="search-inventory-input" placeholder="Search brand or batch no...">
+                </div>
+                <button id="btnRequestStock" class="btn-primary-action">
                     <i class="fa-solid fa-paper-plane"></i> Request Stock from Pharmacy
                 </button>
             </div>
@@ -115,7 +122,7 @@
                     <tbody id="inventoryTableBody">
                         <tr>
                             <td colspan="7" class="table-loading-notice">
-                                Loading stock records...
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading stock records...
                             </td>
                         </tr>
                     </tbody>
@@ -128,21 +135,21 @@
 
 </div>
 
-<!-- REQUISITION TICKET MODAL -->
+<!-- ================= REQUISITION TICKET MODAL ================= -->
 <div class="modal-overlay" id="requisitionModal">
     <div class="calendar-modal modal-compact">
         <div class="calendar-modal-header">
             <div>
-                <h3 class="modal-heading-text"><i class="fa-solid fa-file-prescription icon-green-margin"></i> Requisition Vial Ticket</h3>
-                <span class="subtext-muted">Request vaccine supply release from Pharmacy</span>
+                <h3><i class="fa-solid fa-file-prescription"></i> Requisition Vial Ticket</h3>
+                <span class="modal-sub-label">Request vaccine supply release from Pharmacy</span>
             </div>
             <button class="modal-close-x" id="closeReqModalX">&times;</button>
         </div>
 
         <form id="requisitionForm">
-            <div class="calendar-modal-body modal-padding-compact">
+            <div class="calendar-modal-body">
                 
-                <div class="form-group-inv full-width spacing-bottom-sm">
+                <div class="form-group-inv full-width">
                     <label>Select Vaccine Type</label>
                     <select id="reqVaccineBrand" required class="select-req-brand">
                         <option value="" disabled selected>-- Select Vaccine --</option>
@@ -150,7 +157,7 @@
                     </select>
                 </div>
 
-                <div class="inventory-form-grid spacing-bottom-sm">
+                <div class="inventory-form-grid">
                     <div class="form-group-inv">
                         <label>Vials Needed</label>
                         <input type="number" id="reqVialQty" min="1" value="1" required>
@@ -169,9 +176,9 @@
 
             </div>
 
-            <div class="calendar-modal-footer footer-align-right">
+            <div class="calendar-modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
                 <button type="button" class="btn-modal-close" id="closeReqModalBtn">Cancel</button>
-                <button type="submit" class="btn-add-stock btn-green">
+                <button type="submit" class="btn-primary-action">
                     <i class="fa-solid fa-print"></i> Submit & Print Ticket
                 </button>
             </div>

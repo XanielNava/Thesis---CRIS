@@ -1,8 +1,8 @@
 // abtc-setting.js - Core Profile & Workspace Meta Config Controller
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
-import { getAuth, onAuthStateChanged, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, updatePassword, signOut, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -19,6 +19,10 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// 🧪 CONNECT TO LOCAL EMULATOR
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 
 let currentFacilityId = null;
 let processedBase64Logo = null;
@@ -41,7 +45,6 @@ async function loadFacilityData(facilityId) {
       document.getElementById("facilityName").value = data.facilityName || "";
       document.getElementById("facilityCode").value = data.acronym || "";
 
-      // 👤 Map data payload properties cleanly onto our new element inputs
       if (data.contactInfo) {
         document.getElementById("adminName").value = data.contactInfo.contactPerson || "";
         document.getElementById("contactNumber").value = data.contactInfo.phone || "";
@@ -141,7 +144,7 @@ async function saveFacilityChanges() {
         province: document.getElementById("province").value.trim()
       },
       contactInfo: {
-        contactPerson: document.getElementById("adminName").value.trim(), // 👤 Pushing the updated name value
+        contactPerson: document.getElementById("adminName").value.trim(),
         phone: document.getElementById("contactNumber").value.trim(),
         email: document.getElementById("facilityEmail").value.trim()
       }
