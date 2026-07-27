@@ -1,5 +1,4 @@
 // abtc-login.js - Master Facility Gatekeeper for Multi-Tenant Shared Terminals
-import { db, auth } from "./firebase-init.js";
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, signOut, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { 

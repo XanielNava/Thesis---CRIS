@@ -11,3 +11,4 @@ export const auth = getAuth(app);
 const host = window.location.hostname;
 connectFirestoreEmulator(db, host, 8080);
 connectAuthEmulator(auth, `http://${host}:9099`, { disableWarnings: true });
+
