@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PVO - Dashboard</title>
+    
+    <link rel="stylesheet" href="../../assets/css/pvo-dashboard.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,400;0,700;0,900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- UNIVERSAL SIDEBAR (EXACT RETAINED) -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PVO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="pvo-dash.html" class="menu-item active">Dashboard</a>
+                <a href="pvo-animal-bite-cases.html" class="menu-item">Animal Bite Cases</a>
+                <a href="pvo-heat-map.html" class="menu-item">Heatmap</a>
+            </nav>
+
+            <div class="footer-nav">
+                <a href="/settings/html/pvo-settings.html" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout" onclick="window.location.href='pvo-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="header">
+                <h1>PVO DASHBOARD</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Xaniel Marios Angelo B. Nava</strong><br>
+                        <span>Administrator</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <!-- LEFT COLUMN -->
+                <section class="left-column">
+                    <div class="welcome-bar">
+                        <span>Hello, Xaniel Marios Angelo B. Nava</span>
+                    </div>
+
+                    <!-- STATISTICS CONTAINER (3 KPI CARDS) -->
+                    <div class="statistics-container">
+                        <div class="stat-card">
+                            <small>Total Animal Bite Cases</small>
+                            <h2 id="totalBiteCases">0</h2>
+                        </div>
+
+                        <div class="stat-card">
+                            <small>Confirmed AnimalRabies Cases</small>
+                            <h2 id="confirmedRabiesCases">0</h2>
+                        </div>
+
+                        <div class="stat-card">
+                            <small>Vaccination Coverage (%)</small>
+                            <h2 id="vaccinationCoverage">0%</h2>
+                        </div>
+                    </div>
+                    
+                    <!-- FULL-WIDTH RECENT INCIDENTS TABLE -->
+                    <div class="dashboard-card recent-incidents-container">
+                        <div class="card-header">
+                            <h3>Recent Animal Bite Incidents</h3>
+                            <a href="pvo-animal-bite-cases.html" class="view-all-link">View All</a>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="recent-cases-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Location</th>
+                                        <th>Animal Type</th>
+                                        <th>Bite Severity / Exposure</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentCasesBody">
+                                    <tr>
+                                        <td>Jul 27, 2026</td>
+                                        <td>Pavia</td>
+                                        <td>Canine (Dog)</td>
+                                        <td>Category III</td>
+                                        <td><span class="badge badge-warning">Pending</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jul 26, 2026</td>
+                                        <td>Santa Barbara</td>
+                                        <td>Feline (Cat)</td>
+                                        <td>Category II</td>
+                                        <td><span class="badge badge-success">Verified</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jul 25, 2026</td>
+                                        <td>Oton</td>
+                                        <td>Canine (Dog)</td>
+                                        <td>Category III</td>
+                                        <td><span class="badge badge-danger">High Risk</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jul 24, 2026</td>
+                                        <td>Pototan</td>
+                                        <td>Canine (Dog)</td>
+                                        <td>Category II</td>
+                                        <td><span class="badge badge-success">Verified</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- RIGHT COLUMN: CALENDAR (EXACT RETAINED) -->
+                <aside class="right-column">
+                    <div class="card calendar-card">
+                        <div class="calendar-header">
+                            <button id="prevMonth" class="calendar-btn">&#10094;</button>
+                            <div class="calendar-title">
+                                <h3 id="monthYear"></h3>
+                            </div>
+                            <button id="nextMonth" class="calendar-btn">&#10095;</button>
+                        </div>
+                        
+                        <!-- CALENDAR DAYS -->
+                        <div class="calendar-weekdays">
+                            <div>Sun</div>
+                            <div>Mon</div>
+                            <div>Tue</div>
+                            <div>Wed</div>
+                            <div>Thu</div>
+                            <div>Fri</div>
+                            <div>Sat</div>
+                        </div>
+                        
+                        <!-- ANNOUNCEMENTS -->
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                        <div class="calendar-body">
+                            <div class="compliance-box">
+                                <h4 id="selectedDate">Select a date</h4>
+                                <textarea id="eventInput" placeholder="Type here for announcements and reminders" rows="4"></textarea>
+                                <button id="saveEventBtn">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../../assets/js/pvo-dash.js"></script>
+</body>
+</html>
