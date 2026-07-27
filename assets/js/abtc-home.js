@@ -1,27 +1,13 @@
 // abtc-home.js - ABTC Home Dashboard Controller (Fully Optimized)
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, onAuthStateChanged, signOut, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+// 1. Import required Auth & Firestore functions from CDN
+import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { 
-    getFirestore, collection, doc, getDoc, onSnapshot, query, where, getCountFromServer, connectFirestoreEmulator 
+    collection, doc, getDoc, onSnapshot, query, where, getCountFromServer 
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
-    authDomain: "cris-database-da989.firebaseapp.com",
-    databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "cris-database-da989",
-    storageBucket: "cris-database-da989.firebasestorage.app",
-    messagingSenderId: "627885439681",
-    appId: "1:627885439681:web:3c657d64c0aad9b4913240"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// 🧪 CONNECT TO LOCAL EMULATOR
-connectFirestoreEmulator(db, '127.0.0.1', 8080);
-connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+// 2. Import shared central instances (Managed by firebase-config.js switch)
+import { auth, db } from './firebase-config.js';
 
 const facilityTitleDisplay = document.getElementById('facilityTitleDisplay');
 const profileInfoText = document.getElementById('profileInfoText');

@@ -1,28 +1,9 @@
 // abtc-setting.js - Core Profile & Workspace Meta Config Controller
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
-import { getAuth, onAuthStateChanged, updatePassword, signOut, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, updateDoc, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { onAuthStateChanged, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
-  authDomain: "cris-database-da989.firebaseapp.com",
-  databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "cris-database-da989",
-  storageBucket: "cris-database-da989.firebasestorage.app",
-  messagingSenderId: "627885439681",
-  appId: "1:627885439681:web:3c657d64c0aad9b4913240",
-  measurementId: "G-0X99BH7GW4"
-};
-
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// 🧪 CONNECT TO LOCAL EMULATOR
-connectFirestoreEmulator(db, '127.0.0.1', 8080);
-connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+// Import shared central instances (Managed by firebase-config.js switch)
+import { auth, db } from './firebase-config.js';
 
 let currentFacilityId = null;
 let processedBase64Logo = null;

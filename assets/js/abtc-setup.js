@@ -1,27 +1,10 @@
 // abtc-setup.js
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
-    authDomain: "cris-database-da989.firebaseapp.com",
-    databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "cris-database-da989",
-    storageBucket: "cris-database-da989.firebasestorage.app",
-    messagingSenderId: "627885439681",
-    appId: "1:627885439681:web:3c657d64c0aad9b4913240",
-    measurementId: "G-0X99BH7GW4"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app); 
-
-// 🧪 CONNECT TO LOCAL EMULATOR
-connectFirestoreEmulator(db, '127.0.0.1', 8080);
-connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+// Import shared central instances (Managed by firebase-config.js switch)
+import { auth, db } from './firebase-config.js';
 
 const setupForm = document.getElementById("abtcSetupForm");
 

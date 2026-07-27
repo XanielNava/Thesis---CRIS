@@ -1,32 +1,25 @@
 // abtc-calendar.js - Dynamic PEP Calendar Engine (Root Collection)
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+
+// 1. Import required Firestore functions from CDN
 import { 
-    getFirestore, collection, onSnapshot, query, where, doc, getDoc, updateDoc, connectFirestoreEmulator 
+    collection, onSnapshot, query, where, doc, getDoc, updateDoc 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
-import { getAuth, onAuthStateChanged, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
-    authDomain: "cris-database-da989.firebaseapp.com",
-    projectId: "cris-database-da989",
-    storageBucket: "cris-database-da989.firebasestorage.app",
-    messagingSenderId: "627885439681",
-    appId: "1:627885439681:web:3c657d64c0aad9b4913240"
-};
+// 2. Import required Auth functions from CDN
+import { 
+    onAuthStateChanged 
+} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// 3. Import shared Auth & Firestore instances (Managed by firebase-config.js switch)
+import { auth, db } from './firebase-config.js';
 
-// 🧪 CONNECT TO LOCAL EMULATOR
-connectFirestoreEmulator(db, '127.0.0.1', 8080);
-connectAuthEmulator(auth, 'http://127.0.0.1:9099');
-
+// Global state variables
 let currentDate = new Date();
 let activeFacilityId = null;
 let allDosesList = [];
 let pendingAdministerTarget = null;
 
+// DOM Elements
 const monthYearLabel = document.getElementById("currentMonthYearLabel");
 const calendarDaysGrid = document.getElementById("calendarDaysGrid");
 const upcomingDoseList = document.getElementById("upcomingDoseList");
@@ -51,6 +44,7 @@ const pharmacyInputWrap = document.getElementById("pharmacyInputWrap");
 const confirmPharmacyName = document.getElementById("confirmPharmacyName");
 const btnAcquireVial = document.getElementById("btnAcquireVialTicket");
 
+// Authentication Listener
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         activeFacilityId = user.uid;
@@ -416,6 +410,7 @@ if (submitConfirmDoseBtn) {
     });
 }
 
+// Navigation & Session Management
 document.getElementById("prevMonthBtn")?.addEventListener("click", () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
     renderCalendarGrid();

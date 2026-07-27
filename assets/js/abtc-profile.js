@@ -1,24 +1,9 @@
 // abtc-profile.js - Secured Profile Gatekeeper Handler
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc, connectFirestoreEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { collection, addDoc, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
-  authDomain: "cris-database-da989.firebaseapp.com",
-  projectId: "cris-database-da989",
-  storageBucket: "cris-database-da989.firebasestorage.app",
-  messagingSenderId: "627885439681",
-  appId: "1:627885439681:web:3c657d64c0aad9b4913240"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// 🧪 CONNECT TO LOCAL EMULATOR
-connectFirestoreEmulator(db, '127.0.0.1', 8080);
-connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+// Import shared central instances (Managed by firebase-config.js switch)
+import { auth, db } from './firebase-config.js';
 
 // DOM Selection Elements
 const nurseCard = document.getElementById("nurseProfileCard");
