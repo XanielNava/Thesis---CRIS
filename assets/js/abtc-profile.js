@@ -1,6 +1,6 @@
 // abtc-profile.js - Secured Profile Gatekeeper Handler
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { collection, addDoc, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { collection, addDoc, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 // Import shared central instances (Managed by firebase-config.js switch)
 import { auth, db } from './firebase-config.js';

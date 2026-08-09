@@ -1,7 +1,7 @@
-// itr.js - Individual Treatment Record Registration Controller
+// itr.js - Individual Treatment Record Registration Controller (patient-database exclusive)
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { 
-    doc, getDoc, collection, addDoc, runTransaction, serverTimestamp 
+    doc, getDoc, deleteDoc, collection, addDoc, runTransaction, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 // Import shared central instances (Managed by firebase-config.js switch)
@@ -9,6 +9,7 @@ import { auth, db } from './firebase-config.js';
 
 let activeFacilityUid = null;
 let activePersonnelName = "Duty Staff";
+let currentPrefillDocId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, async (user) => {
@@ -59,11 +60,124 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             await previewRecordNumber(user.uid);
+            
+            // Check if there is a prefillId query parameter from patient-database pending intake queue
+            const urlParams = new URLSearchParams(window.location.search);
+            currentPrefillDocId = urlParams.get("prefillId");
+            if (currentPrefillDocId) {
+                await loadPrefilledAppData(currentPrefillDocId);
+            }
+
             recalculatePepSchedule();
         } else {
             window.location.href = "abtc-login.html";
         }
     });
+
+    // Helper function to dynamically toggle pill buttons
+    function setPillActive(groupName, value) {
+        const group = document.querySelector(`.pill-group[data-name="${groupName}"]`);
+        if (!group) return;
+
+        const targetPill = Array.from(group.querySelectorAll('.pill')).find(
+            pill => pill.dataset.value.toLowerCase() === String(value).toLowerCase()
+        );
+
+        if (targetPill) {
+            group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            targetPill.classList.add('active');
+        }
+    }
+
+    // Function to fetch and auto-fill from patient-database with full nested map support
+    async function loadPrefilledAppData(docId) {
+        try {
+            const docRef = doc(db, "patient-database", docId);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+
+                // 1. Patient Demographics
+                if (document.getElementById('lastName')) document.getElementById('lastName').value = data.lastName || '';
+                if (document.getElementById('firstName')) document.getElementById('firstName').value = data.firstName || data.name || '';
+                if (document.getElementById('middleName')) document.getElementById('middleName').value = data.middleName || '';
+                if (document.getElementById('age')) document.getElementById('age').value = data.age || '';
+                if (document.getElementById('sex')) document.getElementById('sex').value = data.sex || 'Male';
+                if (document.getElementById('contactNo')) document.getElementById('contactNo').value = data.contactNo || data.mobileNumber || '';
+
+                // 2. Address Details
+                if (document.getElementById('houseStreet')) document.getElementById('houseStreet').value = data.houseStreet || data.street || '';
+                if (document.getElementById('barangay')) document.getElementById('barangay').value = data.barangay || '';
+                if (document.getElementById('cityMunicipality')) document.getElementById('cityMunicipality').value = data.cityMunicipality || data.municipality || '';
+                if (document.getElementById('province')) document.getElementById('province').value = data.province || 'Iloilo';
+
+                // 3. Exposure & Bite Details
+                let targetBiteArea = '';
+                if (Array.isArray(data.biteArea) && data.biteArea.length > 0) {
+                    targetBiteArea = data.biteArea[0];
+                } else if (data.exposure && Array.isArray(data.exposure.bodySites) && data.exposure.bodySites.length > 0) {
+                    targetBiteArea = data.exposure.bodySites[0];
+                } else if (data.exposure && data.exposure.areaDescription) {
+                    targetBiteArea = data.exposure.areaDescription;
+                } else {
+                    targetBiteArea = data.biteArea || data.biteAreaDescription || '';
+                }
+
+                if (document.getElementById('biteArea')) {
+                    document.getElementById('biteArea').value = targetBiteArea;
+                }
+
+                // Animal Type Select & Other Wrap Toggle
+                const rawAnimal = data.animalType || (data.exposure ? data.exposure.animalType : '') || '';
+                const animalSelect = document.getElementById('animalType');
+                const animalOtherWrap = document.getElementById('animalOtherWrap');
+                const animalOtherInput = document.getElementById('animalOther');
+
+                if (animalSelect) {
+                    if (rawAnimal.toLowerCase().includes('dog')) {
+                        animalSelect.value = 'Dog';
+                        if (animalOtherWrap) animalOtherWrap.hidden = true;
+                    } else if (rawAnimal.toLowerCase().includes('cat')) {
+                        animalSelect.value = 'Cat';
+                        if (animalOtherWrap) animalOtherWrap.hidden = true;
+                    } else if (rawAnimal) {
+                        animalSelect.value = 'Other';
+                        if (animalOtherWrap) animalOtherWrap.hidden = false;
+                        if (animalOtherInput) animalOtherInput.value = rawAnimal;
+                    }
+                }
+
+                // 4. Pill Buttons Auto-Activation
+                const cagedVal = data.animalCaged || (data.exposure ? data.exposure.animalCaged : '');
+                if (cagedVal) setPillActive('animalCaged', cagedVal);
+
+                const vaccVal = data.priorVaccination || data.previouslyVaccinated;
+                if (vaccVal) setPillActive('priorVaccination', vaccVal);
+
+                // 5. First Aid / Wound Care mapping
+                if (data.firstAid) {
+                    const woundCareInput = document.getElementById('woundCare');
+                    if (woundCareInput) {
+                        let careSummary = [];
+                        if (data.firstAid.washedWithSoapAndWater === "Yes" || data.firstAid.washed === true) {
+                            careSummary.push(`Washed with soap & water (${data.firstAid.washMinutes || '5'} mins)`);
+                        }
+                        if (data.firstAid.substanceApplied) {
+                            careSummary.push(`Applied ${data.firstAid.substanceApplied}`);
+                        }
+                        woundCareInput.value = careSummary.join(". ") || "Washed and treated";
+                    }
+                }
+
+                console.log("Successfully prefilled fields from patient-database for ID:", docId);
+            } else {
+                console.warn("No prefill document found in patient-database with ID:", docId);
+            }
+        } catch (err) {
+            console.error("Error loading prefilled app data from patient-database:", err);
+        }
+    }
 
     async function previewRecordNumber(uid) {
         const recordNoField = document.getElementById('recordNo');
@@ -296,6 +410,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     recordedBy: activePersonnelName,
                     createdAt: serverTimestamp(),
                     
+                    lastName: lName,
+                    firstName: fName,
+                    middleName: mName,
                     name: parsedFullName,
                     fullName: parsedFullName,
                     exposureType: `${selectedAnimal} Exposure`,
@@ -306,6 +423,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     age: document.getElementById('age').value,
                     sex: document.getElementById('sex').value,
                     contactNo: document.getElementById('contactNo').value,
+                    houseStreet: houseStr,
+                    barangay: brgy,
+                    cityMunicipality: city,
+                    province: prov,
                     address: parsedAddress, 
                     physician: document.getElementById('physician').value || activePersonnelName,
 
@@ -346,12 +467,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         day28: dateInputDay28 ? dateInputDay28.value : ''
                     },
 
-                    woundPhotoData: capturedBase64Photo || null
+                    woundPhotoData: capturedBase64Photo || null,
+                    historyLogs: [
+                        {
+                            action: "Record Created",
+                            timestamp: new Date().toISOString(),
+                            personnel: activePersonnelName,
+                            details: `Processed from intake report and registered under ITR No. ${fullItrDisplayString}.`
+                        }
+                    ]
                 };
 
+                // 1. Save official registered patient record into patient-database
                 await addDoc(collection(db, "patient-database"), patientDataPayload);
 
-                alert(`Success! Record ${generatedCustomId} for ${parsedFullName} has been stored.`);
+                // 2. Remove the processed intake draft record from patient-database
+                if (currentPrefillDocId) {
+                    try {
+                        await deleteDoc(doc(db, "patient-database", currentPrefillDocId));
+                        console.log("Deleted processed intake record from patient-database:", currentPrefillDocId);
+                    } catch (cleanupErr) {
+                        console.warn("Could not remove record from patient-database:", cleanupErr);
+                    }
+                }
+
+                alert(`Success! Record ${generatedCustomId} (${fullItrDisplayString}) for ${parsedFullName} has been stored and registered.`);
                 window.location.href = "abtc-reg.html";
 
             } catch (error) {

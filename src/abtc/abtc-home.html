@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ABTC Module - Home Dashboard</title>
     <link rel="stylesheet" href="../../assets/css/abtc-home.css">
+    <link rel="stylesheet" href="../../assets/css/abtc-master.css">
     <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,11 +14,15 @@
 </head>
 <body>
     <div class="container">
-        
+        <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.querySelector(".container").classList.add("collapsed");
+        }
+    </script>
         <!-- UNIVERSAL NAVY SIDEBAR -->
         <aside class="sidebar">
             <div class="logo-section">
-                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <img src="../../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
                 <p>Community-Centric<br>Rabies Intelligence<br>System</p>
                 <div class="role-badge">ABTC MODULE</div>
             </div>
@@ -31,6 +36,13 @@
             
             <div class="footer-nav">
                 <button id="logout-btn" class="menu-item alt logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+
+            <!-- FIREBASE-STYLE TOGGLE BUTTON -->
+            <div class="sidebar-toggle-container">
+                <button class="sidebar-collapse-btn" id="sidebar-collapse-btn">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
             </div>
         </aside>
 
@@ -160,5 +172,6 @@
     </div>
 
     <script type="module" src="../../assets/js/abtc-home.js"></script>
+    <script type="module" src="../../assets/js/sidebar.js"></script>
 </body>
 </html>

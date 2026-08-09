@@ -12,11 +12,16 @@
     <!-- Modular External Stylesheets -->
     <link rel="stylesheet" href="../../assets/css/abtc-setting.css">
     <link rel="stylesheet" href="../../assets/css/abtc-users.css">
+    <link rel="stylesheet" href="../../assets/css/abtc-master.css">
 </head>
 <body>
 
 <div class="container">
-
+<script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.querySelector(".container").classList.add("collapsed");
+        }
+    </script>
   <!-- =====================================================
        CRIS UNIVERSAL NAVY SIDEBAR
        ===================================================== -->
@@ -36,6 +41,13 @@
       <a href="abtc-users.html" class="menu-item alt active"><i class="fa-solid fa-users-gear"></i> Personnel & Login History</a>
       <a href="abtc-setting.html" class="menu-item alt"><i class="fa-solid fa-gear"></i> Settings</a>
       <button id="logout-btn" class="menu-item alt logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </div>
+
+    <!-- FIREBASE-STYLE TOGGLE BUTTON -->
+    <div class="sidebar-toggle-container">
+        <button class="sidebar-collapse-btn" id="sidebar-collapse-btn">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
     </div>
   </aside>
 
@@ -160,5 +172,6 @@
 
 <!-- Dedicated modular script handler linking Firebase functions -->
 <script type="module" src="../../assets/js/abtc-users.js"></script>
+<script type="module" src="../../assets/js/sidebar.js"></script>
 </body>
 </html>

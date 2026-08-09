@@ -18,7 +18,7 @@ export const db = getFirestore(app);
 
 // 🎛️ SWITCHES
 const USE_EMULATOR = true; 
-const USE_NGROK = true; 
+const USE_NGROK = false; 
 
 if (USE_EMULATOR) {
     if (USE_NGROK) {

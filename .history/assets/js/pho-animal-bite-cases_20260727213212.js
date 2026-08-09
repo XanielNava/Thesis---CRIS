@@ -1,40 +1,14 @@
 // ==============================================================================
-// pho-animal-bite-cases.js - PHO Animal Bite Cases Ledger Controller
+// pho-animal-bite-cases.js - PHO Animal Bite Cases Ledger Controller (Centralized abtc-reports Stream)
 // ==============================================================================
 
-// 1. Direct CDN Imports from Firebase Web SDK 10.8.0
-// import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-// import { 
-//     getFirestore, 
-//     collection, 
-//     getDocs, 
-//     connectFirestoreEmulator 
-// } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-// import { 
-//     getAuth, 
-//     connectAuthEmulator 
-// } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+    collection, 
+    getDocs 
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-// // 2. Firebase Configuration
-// const firebaseConfig = {
-//     apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
-//     authDomain: "cris-database-da989.firebaseapp.com",
-//     databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
-//     projectId: "cris-database-da989",
-//     storageBucket: "cris-database-da989.firebasestorage.app",
-//     messagingSenderId: "627885439681",
-//     appId: "1:627885439681:web:3c657d64c0aad9b4913240",
-//     measurementId: "G-0X99BH7GW4"
-// };
-
-// 3. Initialize Firebase Services
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// 🧪 4. DIRECT LOCAL EMULATOR CONNECTION
-connectFirestoreEmulator(db, '127.0.0.1', 8080);
-connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+// Import shared central instances from firebase-config.js
+import { auth, db } from './firebase-config.js';
 
 // --- Global App Variables ---
 let rowsPerPage = 36;
@@ -52,7 +26,7 @@ if (rowsPerPageSelect) {
     });
 }
 
-/* LOAD DATA FROM FIRESTORE */
+/* LOAD DATA FROM THE CENTRALIZED abtc-reports COLLECTION */
 async function loadCases() {
     const tbody = document.getElementById("casesTableBody");
     const info = document.getElementById("recordInfo");
@@ -72,30 +46,22 @@ async function loadCases() {
                 <div class="table-placeholder">
                     <i class="fa-solid fa-circle-notch fa-spin"></i>
                     <strong>Accessing Database Logs</strong>
-                    <p style="font-size:12px; color:#888; margin-top:4px;">Retrieving provincial medical metrics over secure socket...</p>
+                    <p style="font-size:12px; color:#888; margin-top:4px;">Retrieving provincial medical metrics from central repository...</p>
                 </div>
             </td>
         </tr>
     `;
 
     try {
-        console.log("🔄 Loading cases from pho-database/main/legacy-summary...");
+        console.log("🔄 Loading submitted reports from centralized abtc-reports collection...");
         
-        // Fetch from new structured subcollection
-        let legacyCollection = collection(db, "pho-database", "main", "legacy-summary");
-        let snapshot = await getDocs(legacyCollection);
-
-        // Fallback to legacy collection path if subcollection is empty
-        if (snapshot.empty) {
-            console.warn("⚠️ Subcollection empty, trying top-level pho_rabies_cases...");
-            legacyCollection = collection(db, "pho_rabies_cases");
-            snapshot = await getDocs(legacyCollection);
-        }
+        // Single fast read from the dedicated central collection
+        const snapshot = await getDocs(collection(db, "abtc-reports"));
         
-        console.log(`📊 Firestore returned ${snapshot.size} documents`);
+        console.log(`📊 Firestore returned ${snapshot.size} submitted reports`);
         
         if (snapshot.empty) {
-            console.warn("⚠️ No cases found in legacy summary dataset");
+            console.warn("⚠️ No submitted reports found in abtc-reports collection.");
             allCases = [];
             filteredCases = [];
             renderTable();
@@ -109,94 +75,52 @@ async function loadCases() {
             const data = docSnap.data();
             orderCounter++;
             
-            // Check if stored as rawData array or standard object fields
-            if (data.rawData && Array.isArray(data.rawData)) {
-                const row = data.rawData;
-                allCases.push({
-                    id: docSnap.id,
-                    abtc: row[0] || docSnap.id || "Unknown",
-                    year: data.year || new Date().getFullYear(),
-                    
-                    maleCases: Number(row[1] || 0),
-                    femaleCases: Number(row[2] || 0),
-                    ageLt15: Number(row[3] || 0),
-                    ageGt15: Number(row[4] || 0),
-                    
-                    bitingDog: Number(row[5] || 0),
-                    bitingCat: Number(row[6] || 0),
-                    bitingOthers: Number(row[7] || 0),
-                    
-                    humanCat1: Number(row[8] || 0),
-                    humanCat2: Number(row[9] || 0),
-                    humanCatNew: Number(row[10] || 0),
-                    humanCatBooster: Number(row[11] || 0),
-                    
-                    hr: Number(row[12] || 0),
-                    petTcv: Number(row[13] || 0),
-                    petHrig: Number(row[14] || 0),
-                    petErig: Number(row[15] || 0),
-                    
-                    total: Number(row[16] || 0),
-                    
-                    remarksCompII: Number(row[17] || 0),
-                    remarksCompIII: Number(row[18] || 0),
-                    remarksIncompleteII: Number(row[19] || 0),
-                    remarksIncompleteIII: Number(row[20] || 0),
-                    remarksNoneII: Number(row[21] || 0),
-                    remarksNoneIII: Number(row[22] || 0),
-                    
-                    rep: Number(row[23] || 0),
-                    documentOrder: data.documentOrder || orderCounter
-                });
-            } else {
-                allCases.push({
-                    id: docSnap.id,
-                    abtc: data.facilityName || data.municipality || docSnap.id || "Unknown",
-                    year: data.year || new Date().getFullYear(),
-                    
-                    maleCases: Number(data.maleCases || 0),
-                    femaleCases: Number(data.femaleCases || 0),
-                    ageLt15: Number(data.ageLessThan15 || data.ageLt15 || 0),
-                    ageGt15: Number(data.ageGreaterThan15 || data.ageGt15 || 0),
-                    
-                    bitingDog: Number(data.bitingDog || 0),
-                    bitingCat: Number(data.bitingCat || 0),
-                    bitingOthers: Number(data.bitingOthers || 0),
-                    
-                    humanCat1: Number(data.humanCat1 || 0),
-                    humanCat2: Number(data.humanCat2 || 0),
-                    humanCatNew: Number(data.humanCatNew || 0),
-                    humanCatBooster: Number(data.humanCatBooster || 0),
-                    
-                    hr: Number(data.hr || 0),
-                    petTcv: Number(data.petTcv || 0),
-                    petHrig: Number(data.petHrig || 0),
-                    petErig: Number(data.petErig || 0),
-                    
-                    total: Number(data.total || data.totalCases || 0),
-                    
-                    remarksCompII: Number(data.remarksCompII || 0),
-                    remarksCompIII: Number(data.remarksCompIII || 0),
-                    remarksIncompleteII: Number(data.remarksIncompleteII || 0),
-                    remarksIncompleteIII: Number(data.remarksIncompleteIII || 0),
-                    remarksNoneII: Number(data.remarksNoneII || 0),
-                    remarksNoneIII: Number(data.remarksNoneIII || 0),
-                    
-                    rep: Number(data.rep || 0),
-                    documentOrder: data.documentOrder || orderCounter
-                });
-            }
+            allCases.push({
+                id: docSnap.id,
+                abtc: data.facilityName || data.municipality || data.abtc || "Unknown Facility",
+                year: data.year || new Date().getFullYear(),
+                
+                maleCases: Number(data.maleCases || 0),
+                femaleCases: Number(data.femaleCases || 0),
+                ageLt15: Number(data.ageLessThan15 || data.ageLt15 || 0),
+                ageGt15: Number(data.ageGreaterThan15 || data.ageGt15 || 0),
+                
+                bitingDog: Number(data.bitingDog || 0),
+                bitingCat: Number(data.bitingCat || 0),
+                bitingOthers: Number(data.bitingOthers || 0),
+                
+                humanCat1: Number(data.humanCat1 || 0),
+                humanCat2: Number(data.humanCat2 || 0),
+                humanCatNew: Number(data.humanCatNew || 0),
+                humanCatBooster: Number(data.humanCatBooster || 0),
+                
+                hr: Number(data.hr || 0),
+                petTcv: Number(data.petTcv || 0),
+                petHrig: Number(data.petHrig || 0),
+                petErig: Number(data.petErig || 0),
+                
+                total: Number(data.total || data.totalCases || 0),
+                
+                remarksCompII: Number(data.remarksCompII || 0),
+                remarksCompIII: Number(data.remarksCompIII || 0),
+                remarksIncompleteII: Number(data.remarksIncompleteII || 0),
+                remarksIncompleteIII: Number(data.remarksIncompleteIII || 0),
+                remarksNoneII: Number(data.remarksNoneII || 0),
+                remarksNoneIII: Number(data.remarksNoneIII || 0),
+                
+                rep: Number(data.rep || 0),
+                documentOrder: data.documentOrder || orderCounter
+            });
         });
 
-        // Preserve upload sequence
         allCases.sort((a, b) => a.documentOrder - b.documentOrder);
         filteredCases = [...allCases];
 
-        console.log(`✅ Loaded ${allCases.length} facility records`);
+        console.log(`✅ Loaded ${allCases.length} facility report records into ledger`);
         renderTable();
 
     } catch (error) {
-        console.error("❌ Error loading cases:", error);
+        console.error("❌ Error loading submitted reports:", error);
         
         if (info) {
             info.textContent = `Error running query: ${error.message}`;
@@ -235,7 +159,7 @@ function renderTable() {
                     <div class="table-placeholder">
                         <i class="fa-solid fa-folder-open" style="opacity:0.6;"></i>
                         <strong>No Bite Reports Found</strong>
-                        <p style="font-size:12px; color:#888; margin-top:4px;">Import legacy data from Settings to populate this table.</p>
+                        <p style="font-size:12px; color:#888; margin-top:4px;">Submitted facility reports will appear here automatically.</p>
                     </div>
                 </td>
             </tr>
@@ -256,7 +180,6 @@ function renderTable() {
         info.textContent = `Showing ${start + 1}-${Math.min(end, totalRecords)} of ${totalRecords} records`;
     }
 
-    // Render table rows
     records.forEach(caseData => {
         tbody.innerHTML += `
             <tr>
@@ -288,7 +211,6 @@ function renderTable() {
         `;
     });
 
-    // Calculate totals across filtered dataset
     let totals = {
         male: 0, female: 0, ageLt15: 0, ageGt15: 0,
         dog: 0, cat: 0, others: 0,
@@ -360,12 +282,12 @@ function renderTable() {
 const caseSearch = document.getElementById("caseSearch");
 if (caseSearch) {
     caseSearch.addEventListener("input", (e) => {
-        const query = e.target.value.toLowerCase().trim();
+        const queryText = e.target.value.toLowerCase().trim();
 
         filteredCases = allCases.filter(caseData => {
             const abtcField = String(caseData.abtc ?? "").toLowerCase();
             const yearField = String(caseData.year ?? "").toLowerCase();
-            return abtcField.includes(query) || yearField.includes(query);
+            return abtcField.includes(queryText) || yearField.includes(queryText);
         });
 
         currentPage = 1;
@@ -437,6 +359,6 @@ function appendPageButton(pageNumber, container) {
 
 /* INITIAL LOAD */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 Animal Bite Cases ledger initializing...");
+    console.log("🚀 Animal Bite Cases ledger initializing from abtc-reports...");
     loadCases();
 });

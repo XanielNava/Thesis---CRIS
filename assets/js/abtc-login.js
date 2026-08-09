@@ -1,10 +1,20 @@
 // abtc-login.js - Master Facility Gatekeeper for Multi-Tenant Shared Terminals
-import { signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { 
-  doc, getDoc, updateDoc, collection, query, where, getDocs 
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'; 
+  signInWithEmailAndPassword, 
+  signOut 
+} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
-// 🔗 Import ready-to-use Auth & Firestore instances (Controlled by firebase-config.js switch)
+import { 
+  doc, 
+  getDoc, 
+  updateDoc, 
+  collection, 
+  query, 
+  where, 
+  getDocs 
+} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js'; 
+
+// 🔗 Import shared central instances (Managed by firebase-config.js switch)
 import { auth, db } from './firebase-config.js';
 
 // ==========================================================
@@ -17,6 +27,12 @@ document.getElementById("email")?.addEventListener("change", async (e) => {
 
   if (!emailValue) {
     if (indicatorBox) indicatorBox.classList.remove("visible");
+    return;
+  }
+
+  // Safety check for DB initialization
+  if (!db) {
+    console.error("Firestore instance (db) is not ready.");
     return;
   }
 

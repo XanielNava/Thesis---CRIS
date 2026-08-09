@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facility Registry | CRIS ABTC</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="admin-module.css">
+</head>
+<body>
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <img src="assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="sidebar__logo-img">
+      <h2>CRIS</h2>
+      <small>ABTC Manager</small>
+    </div>
+    <div class="sidebar__nav">
+      <span class="sidebar__label">Manage</span>
+      <a href="admin-dash.html" class="sidebar__link"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+      <a href="admin-faci.html" class="sidebar__link sidebar__link--active"><i class="fa-solid fa-hospital"></i> Facility Registry</a>
+      <a href="admin-reports.html" class="sidebar__link"><i class="fa-solid fa-triangle-exclamation"></i> Reports & Complaints <span class="sidebar__badge">3</span></a>
+      <span class="sidebar__label">Account</span>
+      <a href="admin-settings.html" class="sidebar__link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="admin-login.html" class="sidebar__link"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar__title">
+        <h1>Facility Registry</h1>
+        <p>Manage all registered Animal Bite Treatment Centers</p>
+      </div>
+      <div class="topbar__actions">
+        <div class="user-profile">
+          <div class="user-avatar">AM</div>
+          <div class="user-info"><strong>ABTC Admin</strong></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="panel">
+        <div class="toolbar">
+          <div class="search-bar" style="width: 320px;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search by name, city, or type...">
+          </div>
+          <button class="btn btn-primary" style="margin-left: auto;"><i class="fa-solid fa-plus"></i> Register Facility</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Facility Name</th><th>Type</th><th>Location</th><th>Contact Person</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-strong">St. Jude Animal Bite Center</td><td>Private Clinic</td><td>Cebu City</td><td>Dr. R. Fuentes</td>
+                <td><span class="badge active">Active</span></td>
+                <td>
+                  <button class="icon-btn"><i class="fa-solid fa-pen"></i></button>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-strong">Mandaue City Health Office</td><td>Gov / RHU</td><td>Mandaue City</td><td>N. K. Alcoseba</td>
+                <td><span class="badge pending">Pending</span></td>
+                <td>
+                  <button class="icon-btn"><i class="fa-solid fa-pen"></i></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

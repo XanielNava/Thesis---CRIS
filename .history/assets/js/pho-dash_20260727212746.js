@@ -1,44 +1,19 @@
-// pho-dash.js - PHO Dashboard, Calendar & Heatmap Controller (Self-Contained)
+// pho-dash.js - PHO Dashboard, Calendar & Heatmap Controller (Centralized Config)
 
-// 1. Direct CDN Imports
-// import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-// import { 
-//     getFirestore, 
-//     collection, 
-//     doc, 
-//     getDocs, 
-//     query, 
-//     where, 
-//     setDoc,
-//     getCountFromServer, 
-//     collectionGroup,
-//     connectFirestoreEmulator
-// } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-// import { 
-//     getAuth, 
-//     connectAuthEmulator 
-// } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+// 1. Import required Firestore functions from CDN (v11.10.0)
+import { 
+    collection, 
+    doc, 
+    getDocs, 
+    query, 
+    where, 
+    setDoc,
+    getCountFromServer, 
+    collectionGroup 
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-// // 2. Your Firebase Configuration
-// const firebaseConfig = {
-//   apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
-//   authDomain: "cris-database-da989.firebaseapp.com",
-//   databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
-//   projectId: "cris-database-da989",
-//   storageBucket: "cris-database-da989.firebasestorage.app",
-//   messagingSenderId: "627885439681",
-//   appId: "1:627885439681:web:3c657d64c0aad9b4913240",
-//   measurementId: "G-0X99BH7GW4"
-// };
-
-// 3. Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// 🧪 4. CONNECT TO LOCAL EMULATOR
-connectFirestoreEmulator(db, '127.0.0.1', 8080);
-connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+// 2. Import shared central instances from firebase-config.js
+import { auth, db } from './firebase-config.js';
 
 // ================= CORE CALENDAR ENGINE =================
 const monthYear = document.getElementById("monthYear");
@@ -213,7 +188,6 @@ async function loadHumanPopulation() {
             const rawVal = data.totalPopulation ?? data.population ?? data.count ?? data.iloiloPopulation ?? data.value ?? 0;
             const cleanVal = typeof rawVal === 'string' ? Number(rawVal.replace(/,/g, '')) : Number(rawVal || 0);
 
-            // Separate the provincial total row from municipal rows to prevent double-counting
             if (docIdUpper === "ILOILO" || docIdUpper === "ILOILO_TOTAL") {
                 iloiloSummaryTotal = cleanVal;
             } else {
@@ -221,7 +195,6 @@ async function loadHumanPopulation() {
             }
         });
 
-        // Use the explicit provincial total if available; otherwise use the sum of municipalities
         const finalPopulation = iloiloSummaryTotal > 0 ? iloiloSummaryTotal : municipalTotal;
         popElem.textContent = finalPopulation.toLocaleString();
     } catch (error) {
@@ -259,7 +232,13 @@ async function loadAbtcReportingStatus() {
             if (data.facilityId) submittedFacilitiesSet.add(data.facilityId);
         });
 
-        const submittedCount = submittedFacilitiesSet.size;
+        const summarySnap = await getDocs(collection(db, "pho-database", "main", "legacy-summary"));
+        summarySnap.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data.facilityId) submittedFacilitiesSet.add(data.facilityId);
+        });
+
+        const submittedCount = Math.min(submittedFacilitiesSet.size, totalFacilities);
         reportingRatioEl.textContent = `${submittedCount} / ${totalFacilities}`;
 
         if (percentageEl) {

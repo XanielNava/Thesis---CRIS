@@ -1,10 +1,10 @@
 // abtc-home.js - ABTC Home Dashboard Controller (Fully Optimized)
 
 // 1. Import required Auth & Firestore functions from CDN
-import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { 
     collection, doc, getDoc, onSnapshot, query, where, getCountFromServer 
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 // 2. Import shared central instances (Managed by firebase-config.js switch)
 import { auth, db } from './firebase-config.js';
@@ -169,9 +169,12 @@ function renderTodayScheduleTable(dosesList) {
 }
 
 if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-        await signOut(auth);
-        sessionStorage.clear();
-        window.location.href = "abtc-login.html";
+    logoutBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (confirm("Are you sure you want to switch personnel profiles?")) {
+            sessionStorage.removeItem("activeDesignation");
+            sessionStorage.removeItem("activePersonnelName");
+            window.location.href = "abtc-profiles.html";
+        }
     });
 }

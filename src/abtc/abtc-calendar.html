@@ -7,6 +7,7 @@
     
     <!-- External Modular Stylesheet -->
     <link rel="stylesheet" href="../../assets/css/abtc-calendar.css">
+    <link rel="stylesheet" href="../../assets/css/abtc-master.css">
     <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,13 +17,17 @@
 <body>
 
 <div class="container">
-
+<script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.querySelector(".container").classList.add("collapsed");
+        }
+    </script>
     <!-- =====================================================
          CRIS UNIVERSAL NAVY SIDEBAR (NURSE / CLINICAL MODULE)
          ===================================================== -->
     <aside class="sidebar">
         <div class="logo-section logo-section-fixed">
-            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+            <img src="../../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
             <p>Community-Centric<br>Rabies Intelligence<br>System</p>
             <div class="role-badge">ABTC MODULE</div>
         </div>
@@ -36,6 +41,13 @@
 
         <div class="footer-nav">
             <button id="logout-btn" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+
+        <!-- FIREBASE-STYLE TOGGLE BUTTON -->
+        <div class="sidebar-toggle-container">
+            <button class="sidebar-collapse-btn" id="sidebar-collapse-btn">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
         </div>
     </aside>
 
@@ -209,5 +221,6 @@
 </div>
 
 <script type="module" src="../../assets/js/abtc-calendar.js"></script>
+<script type="module" src="../../assets/js/sidebar.js"></script>
 </body>
 </html>

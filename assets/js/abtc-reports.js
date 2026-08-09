@@ -1,4 +1,4 @@
-// reports.js - ABTC Facility Reports Compiler & PHO Submission Engine
+// reports.js - ABTC Facility Reports Compiler & Central PHO Submission Engine
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { 
     doc, getDoc, collection, query, where, getDocs, addDoc 
@@ -197,7 +197,7 @@ function renderReportTableRow(tableBody, t) {
 }
 
 /* --------------------
-    4. Submit Report Draft to PHO
+    4. Submit Report Draft to PHO (Centralized abtc-reports Collection)
 -------------------- */
 const submitPhoBtn = document.getElementById("submitPhoBtn");
 if (submitPhoBtn) {
@@ -215,17 +215,48 @@ if (submitPhoBtn) {
             submitPhoBtn.style.pointerEvents = "none";
             submitPhoBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
 
+            // Flatten metrics payload directly into the report root so PHO tables can parse it instantly
             const reportPayload = {
                 facilityId: activeFacilityId,
                 facilityName: currentFacilityName,
                 submittedBy: currentPersonnelName,
                 reportPeriod: reportMonthYear,
                 totalCasesReported: aggregatedMetrics.rep || 0,
-                metrics: aggregatedMetrics,
+                
+                // Flat attributes mapping table columns directly
+                abtc: currentFacilityName,
+                maleCases: aggregatedMetrics.male || 0,
+                femaleCases: aggregatedMetrics.female || 0,
+                ageLessThan15: aggregatedMetrics.under15 || 0,
+                ageGreaterThan15: aggregatedMetrics.over15 || 0,
+                bitingDog: aggregatedMetrics.dog || 0,
+                bitingCat: aggregatedMetrics.cat || 0,
+                bitingOthers: aggregatedMetrics.others || 0,
+                humanCat1: aggregatedMetrics.cat1 || 0,
+                humanCat2: aggregatedMetrics.cat2 || 0,
+                humanCatNew: aggregatedMetrics.cat3New || 0,
+                humanCatBooster: aggregatedMetrics.cat3Booster || 0,
+                hr: aggregatedMetrics.rigType === "HR" ? 1 : 0,
+                petTcv: aggregatedMetrics.tcv || 0,
+                petHrig: aggregatedMetrics.hrig || 0,
+                petErig: aggregatedMetrics.erig || 0,
+                total: aggregatedMetrics.totalDoses || 0,
+                remarksCompII: aggregatedMetrics.compCat2 || 0,
+                remarksCompIII: aggregatedMetrics.compCat3 || 0,
+                remarksIncompleteII: aggregatedMetrics.incompCat2 || 0,
+                remarksIncompleteIII: aggregatedMetrics.incompCat3 || 0,
+                remarksNoneII: aggregatedMetrics.noneCat2 || 0,
+                remarksNoneIII: aggregatedMetrics.noneCat3 || 0,
+                rep: aggregatedMetrics.rep || 0,
+
                 status: "Submitted to PHO",
                 submittedAt: new Date().toISOString()
             };
 
+            // 1. Save to the main centralized collection for PHO ledger queries
+            await addDoc(collection(db, "abtc-reports"), reportPayload);
+
+            // 2. Also keep a local backup copy inside the facility subcollection
             await addDoc(collection(db, "facilities", activeFacilityId, "submitted-reports"), reportPayload);
 
             alert(`Success! Report for ${reportMonthYear} has been officially submitted to PHO.`);

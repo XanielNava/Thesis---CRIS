@@ -10,17 +10,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/abtc-master.css">
 </head>
 <body>
 
 <div class="container">
-
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.querySelector(".container").classList.add("collapsed");
+        }
+    </script>
     <!-- =====================================================
          UNIVERSAL NAVY SIDEBAR (NURSE / CLINICAL MODULE)
          ===================================================== -->
     <aside class="sidebar">
         <div class="logo-section logo-section-fixed">
-            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+            <img src="../../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
             <p>Community-Centric<br>Rabies Intelligence<br>System</p>
             <div class="role-badge">ABTC MODULE</div>
         </div>
@@ -34,6 +39,13 @@
 
         <div class="footer-nav">
             <button id="logout-btn" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+
+        <!-- FIREBASE-STYLE TOGGLE BUTTON -->
+        <div class="sidebar-toggle-container">
+            <button class="sidebar-collapse-btn" id="sidebar-collapse-btn">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
         </div>
     </aside>
 
@@ -78,6 +90,8 @@
                         <option value="Cat Bite">Cat Bite</option>
                         <option value="Dog Scratch">Dog Scratch</option>
                         <option value="Cat Scratch">Cat Scratch</option>
+                        <option value="Cat Exposure">Cat Exposure</option>
+                        <option value="Dog Exposure">Dog Exposure</option>
                     </select>
 
                     <select id="filterBiteCategory" class="registry-dropdown-filter">
@@ -223,7 +237,7 @@
                     </select>
                 </div>
                 <div class="drawer-field">
-                    <label>Bite Category</label>
+                    <label>Bite Category / Classification</label>
                     <span class="view-val" id="lblCategory">N/A</span>
                     <select class="edit-val" id="editCategory">
                         <option value="Category I">Category I</option>
@@ -318,36 +332,14 @@
                     </select>
                 </div>
                 <div class="drawer-field">
-                    <label>Immunoglobulin (RIG) Type</label>
+                    <label>Immunoglobulin (RIG)</label>
                     <span class="view-val" id="lblRigType">None</span>
-                    <select class="edit-val" id="editRigType">
-                        <option value="">None / Not Applicable</option>
-                        <option value="ERIG">ERIG (Equine)</option>
-                        <option value="HRIG">HRIG (Human)</option>
-                        <option value="mAb">Monoclonal Antibodies (mAb)</option>
-                    </select>
+                    <input type="text" class="edit-val" id="editRigType" placeholder="Immunoglobulin details">
                 </div>
-                <div class="drawer-field">
-                    <label>RIG Dose / Volume</label>
-                    <span class="view-val" id="lblRigDose">N/A</span>
-                    <input type="text" class="edit-val" id="editRigDose" placeholder="e.g., 1,000 IU or 2.5 mL">
-                </div>
-
-                <!-- Targeted Vaccination Schedule Summary -->
                 <div class="drawer-field drawer-field-wide">
-                    <label>Target PEP Vaccination Schedule</label>
-                    <div class="view-val" id="lblPepScheduleSummary" style="font-size: 12px; font-weight: 600; color: #102a43;">
-                        Day 0: --- | Day 3: --- | Day 7: --- | Day 14: --- | Day 28: ---
-                    </div>
-                    <div class="edit-val edit-flex" style="gap: 6px; flex-wrap: wrap; margin-top: 4px;">
-                        <input type="date" id="editDay0" title="Day 0 Target Date" style="font-size: 11px; padding: 4px;">
-                        <input type="date" id="editDay3" title="Day 3 Target Date" style="font-size: 11px; padding: 4px;">
-                        <input type="date" id="editDay7" title="Day 7 Target Date" style="font-size: 11px; padding: 4px;">
-                        <input type="date" id="editDay14" title="Day 14 Target Date" style="font-size: 11px; padding: 4px;">
-                        <input type="date" id="editDay28" title="Day 28 Target Date" style="font-size: 11px; padding: 4px;">
-                    </div>
+                    <label>Completed Doses</label>
+                    <span class="view-val" id="lblCompletedDoses">None</span>
                 </div>
-
                 <div class="drawer-field drawer-field-wide">
                     <label>Other Remarks</label>
                     <span class="view-val" id="lblRemarks">None</span>
@@ -357,14 +349,15 @@
 
             <!-- 6. Wound Assessment Photo -->
             <div class="drawer-section-title"><i class="fa-solid fa-camera"></i> Photo Documentation of Wound</div>
-            <div class="drawer-photo-frame" id="lblPhotoFrame">
-                <p style="color:#aaa; font-style: italic; font-size: 13px;">No assessment photo linked.</p>
+            <div class="drawer-photo-frame" id="lblPhotoFrame" style="text-align: center; padding: 10px;">
+                <p id="noPhotoText" style="color:#aaa; font-style: italic; font-size: 13px;">No assessment photo linked.</p>
+                <img id="imgWoundPhoto" src="" alt="Wound Photo" style="display: none; max-width: 100%; max-height: 250px; border-radius: 8px; cursor: pointer; border: 1px solid #ccc;">
             </div>
 
             <!-- 7. Case Revision & Activity History -->
             <div class="drawer-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Case Revision & Activity History</div>
             <div class="history-timeline" id="lblHistoryTimeline">
-                <!-- Dynamically populated in abtc-reg.js -->
+                <!-- Dynamically populated via abtc-reg.js -->
             </div>
 
             <div class="drawer-sig-row">
@@ -384,16 +377,18 @@
 </aside>
 
 <!-- ================= WOUND PHOTO LIGHTBOX MODAL ================= -->
-<div id="woundLightbox" class="lightbox-overlay">
+<div id="woundLightbox" class="lightbox-overlay" style="display: none;">
     <div class="lightbox-container">
-        <img id="lightboxImg" src="" alt="Wound Assessment Zoomed View">
+        <img id="lightboxImg" src="" alt="Wound Assessment Zoomed View" style="max-width: 90vw; max-height: 80vh;">
         <button type="button" id="closeLightboxBtn" class="lightbox-close-btn">
             &times; Close View
         </button>
     </div>
 </div>
 
-<script type="module" src="../../assets/js/abtc-reg.js"></script>
+<!-- INLINE SCRIPT FOR SIDEBAR TOGGLE TESTING -->
 
+<script type="module" src="../../assets/js/abtc-reg.js"></script>
+<script type="module" src="../../assets/js/sidebar.js"></script>
 </body>
 </html>

@@ -647,6 +647,49 @@ body {
   flex-shrink: 0;
 }
 
+/* ================= FOOTER BUTTON STYLING FIXES ================= */
+.drawer-footer .btn-disable,
+.drawer-footer .btn-enable,
+.drawer-footer .btn-primary-action {
+  padding: 10px 18px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition-smooth);
+}
+
+.drawer-footer .btn-disable {
+  background-color: #e2e8f0 !important;
+  color: var(--text-dark) !important;
+}
+
+.drawer-footer .btn-disable:hover {
+  background-color: #cbd5e1 !important;
+}
+
+.drawer-footer .btn-enable {
+  background-color: var(--sidebar-bg) !important;
+  color: #ffffff !important;
+}
+
+.drawer-footer .btn-enable:hover {
+  background-color: var(--sunset-orange) !important;
+}
+
+/* Save Changes button explicitly hidden when not in edit mode */
+.record-drawer:not(.edit-mode) #saveRecordBtn {
+  display: none !important;
+}
+
+.record-drawer.edit-mode #saveRecordBtn {
+  display: inline-flex !important;
+}
+
 /* ================= WOUND PHOTO LIGHTBOX MODAL ================= */
 .lightbox-overlay {
   display: none;

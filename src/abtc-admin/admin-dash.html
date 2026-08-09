@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard | CRIS ABTC</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="admin-module.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <img src="assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="sidebar__logo-img">
+      <h2>CRIS</h2>
+      <small>ABTC Manager</small>
+    </div>
+    <div class="sidebar__nav">
+      <span class="sidebar__label">Manage</span>
+      <a href="admin-dash.html" class="sidebar__link sidebar__link--active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+      <a href="admin-faci.html" class="sidebar__link"><i class="fa-solid fa-hospital"></i> Facility Registry</a>
+      <a href="admin-reports.html" class="sidebar__link"><i class="fa-solid fa-triangle-exclamation"></i> Reports & Complaints <span class="sidebar__badge">3</span></a>
+      <span class="sidebar__label">Account</span>
+      <a href="admin-settings.html" class="sidebar__link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="admin-login.html" class="sidebar__link"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar__title">
+        <h1>ABTC Dashboard</h1>
+        <p>Overview of registered Animal Bite Treatment Centers</p>
+      </div>
+      <div class="topbar__actions">
+        <div class="search-bar">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" placeholder="Search facilities...">
+        </div>
+        <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
+        <div class="user-profile">
+          <div class="user-avatar">AM</div>
+          <div class="user-info"><strong>ABTC Admin</strong><small>Manager</small></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon navy"><i class="fa-solid fa-hospital"></i></div>
+          <div class="stat-val">48</div>
+          <div class="stat-label">Registered Facilities</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon gold"><i class="fa-solid fa-check-circle"></i></div>
+          <div class="stat-val">41</div>
+          <div class="stat-label">Active & Accredited</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fa-solid fa-clock"></i></div>
+          <div class="stat-val">5</div>
+          <div class="stat-label">Pending Applications</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div class="stat-val">3</div>
+          <div class="stat-label">Open Complaints</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Recently Registered</h2>
+            <a href="abtc-facility-registry.html">View Registry <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Facility Name</th><th>Location</th><th>Status</th><th>Date</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-strong">St. Jude Animal Bite Center</td><td>Cebu City</td>
+                  <td><span class="badge active">Active</span></td><td>Aug 5, 2026</td>
+                </tr>
+                <tr>
+                  <td class="text-strong">Mandaue City Health Office</td><td>Mandaue City</td>
+                  <td><span class="badge pending">Pending</span></td><td>Aug 3, 2026</td>
+                </tr>
+                <tr>
+                  <td class="text-strong">Lapu-Lapu Rabies Prevention</td><td>Lapu-Lapu City</td>
+                  <td><span class="badge active">Active</span></td><td>Jul 29, 2026</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Action Needed</h2>
+            <a href="abtc-reports.html">All Reports</a>
+          </div>
+          <div class="feed-item">
+            <div class="feed-dot danger"></div>
+            <div class="feed-content">
+              <p>St. Jude Bite Center — delayed vaccine issuance</p>
+              <div class="feed-meta"><span class="badge pending">Pending</span><span>Aug 6</span></div>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-dot gold"></div>
+            <div class="feed-content">
+              <p>Mandaue Health Office — staff conduct complaint</p>
+              <div class="feed-meta"><span class="badge review">Review</span><span>Aug 1</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>
