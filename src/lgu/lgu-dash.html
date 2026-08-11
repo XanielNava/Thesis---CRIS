@@ -28,6 +28,12 @@
 
     <!-- PROFESSIONAL SAAS SIDEBAR (LGU MODULE) -->
 <aside class="sidebar" id="sidebar">
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.getElementById("sidebar").classList.add("collapsed");
+            document.querySelector(".container")?.classList.add("collapsed");
+        }
+    </script>
     <div class="sidebar-header">
         <div class="brand-logo">
             <img src="../../assets/images/logo-login.png" alt="CRIS Logo">
