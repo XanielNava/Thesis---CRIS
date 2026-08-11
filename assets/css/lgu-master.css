@@ -1,0 +1,102 @@
+/* ==========================================================================
+   CRIS LGU MODULE - MASTER STYLESHEET
+   ========================================================================== */
+
+/* Parent Container & Main Content Stacking Fixes */
+.container {
+  display: flex;
+  position: relative;
+  overflow-x: visible !important; /* Stops container from slicing off floating elements */
+}
+
+.main-content {
+  position: relative;
+  z-index: 1; /* Keeps main content below floating controls */
+}
+
+/* LGU Status Badges */
+.badge-lgu {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.badge-pending-verify {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.badge-verified-lgu {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.badge-flagged-risk {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.badge-draft-pho {
+  background-color: #e0e7ff;
+  color: #4f46e5;
+}
+
+/* LGU Action Buttons */
+.action-group-btn {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.btn-lgu-action {
+  padding: 5px 10px;
+  font-size: 11.5px;
+  border-radius: 5px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-lgu-action:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-lgu-verify { background-color: #16a34a; color: #fff; }
+.btn-lgu-flag { background-color: #dc2626; color: #fff; }
+.btn-lgu-view { background-color: #1a234e; color: #fff; }
+
+/* Grid Layout for LGU Main Workspace */
+.lgu-dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* Barangay Jurisdictions List in Settings */
+.brgy-jurisdiction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.brgy-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}

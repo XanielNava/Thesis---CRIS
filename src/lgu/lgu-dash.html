@@ -3,118 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRIS - LGU Dashboard</title>
-    <!-- External CSS Link -->
-    <link rel="stylesheet" href="../assets/css/lgu-dash.css">
-    <link rel="icon" href="../assets/images/cris-icon.png" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <title>LGU Dashboard — CRIS | Community Rabies Intelligence System</title>
+    
+    <link rel="stylesheet" href="../../assets/css/abtc-dash.css">
+    <link rel="stylesheet" href="../../assets/css/abtc-master.css">
+    <link rel="stylesheet" href="../../assets/css/lgu-master.css">
+    <link rel="stylesheet" href="../../assets/css/sidebar-master.css">
+    
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <div class="logo-section">
-                <img src="../assets/images/logo-login.png" alt="CRIS Logo" class="logo-image">
-                <p>Community-Centric<br>Rabies Intelligence System</p>
-                <div class="role-badge">LGU MODULE</div>
-            </div>
-            <nav class="menu">
-                <button class="menu-item active">Dashboard</button>
-                <button class="menu-item">Barangay Heatmap</button>
-                <button class="menu-item">Budget & Logistics</button>
-                <button class="menu-item">Ordinance Logs</button>
-                <button class="menu-item">Statistics</button>
-                <button class="menu-item">Reports</button>
-            </nav>
-            <div class="footer-nav">
-                <button class="menu-item alt">Settings</button>
-                <button class="menu-item alt logout" onclick="window.location.href='lgu-login.html'">Logout</button>
-            </div>
-        </aside>
 
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <header class="header">
-                <h1>LGU DASHBOARD</h1>
-                <div class="user-profile-top">
-                    <div class="profile-info">
-                        <strong>Hon. Alex Reyes</strong><br>
-                        <span>Municipal Lead</span>
-                    </div>
-                    <div class="profile-icon"></div>
-                </div>
-            </header>
+<div class="container">
 
-            <div class="content-grid">
-                <div class="left-column">
-                    <div class="welcome-bar">
-                        <div class="avatar-circle"></div>
-                        Municipal Overview: May 2026
-                    </div>
-                    
-                    <!-- LGU Summary Metrics -->
-                    <div class="metrics">
-                        <div class="card metric-card">
-                            <h3>Total Bites</h3>
-                            <div class="value">124</div>
-                        </div>
-                        <div class="card metric-card">
-                            <h3>Vax Coverage</h3>
-                            <div class="value coverage">72%</div>
-                        </div>
-                        <div class="card metric-card">
-                            <h3>Impounded</h3>
-                            <div class="value">15</div>
-                        </div>
-                        <div class="card metric-card">
-                            <h3>Active Hotspots</h3>
-                            <div class="value hotspot">02</div>
-                        </div>
-                    </div>
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.querySelector(".container").classList.add("collapsed");
+        }
+    </script>
 
-                    <!-- Barangay Case Distribution -->
-                    <div class="card">
-                        <h3 class="chart-title">Bite Incidents by Barangay</h3>
-                        <div class="bar-chart-container">
-                            <div class="bar-item">
-                                <span>Brgy. Mansilingan</span>
-                                <div class="bar-bg"><div class="bar-fill" style="width: 85%;"></div></div>
-                                <b>42</b>
-                            </div>
-                            <div class="bar-item">
-                                <span>Brgy. Estefania</span>
-                                <div class="bar-bg"><div class="bar-fill" style="width: 45%;"></div></div>
-                                <b>22</b>
-                            </div>
-                            <div class="bar-item">
-                                <span>Brgy. Tangub</span>
-                                <div class="bar-bg"><div class="bar-fill" style="width: 20%;"></div></div>
-                                <b>10</b>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Information Column -->
-                <aside class="right-column">
-                    <div class="card calendar-card">
-                        <div class="calendar-header">Today, 02 May 2026</div>
-                        <div class="day-row">
-                            <div>30<br>Tue</div>
-                            <div>01<br>Wed</div>
-                            <div class="active">02<br>Thu</div>
-                            <div>03<br>Fri</div>
-                            <div>04<br>Sat</div>
-                        </div>
-                        <div class="compliance-box">
-                            <strong>Compliance Check</strong>
-                            <p>85% of biting animals were surrendered for observation this week.</p>
-                            <button class="action-button">View Details</button>
-                        </div>
-                    </div>
-                </aside>
-            </div>
-        </main>
+    <!-- PROFESSIONAL SAAS SIDEBAR (LGU MODULE) -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="brand-logo">
+            <img src="../../assets/images/logo-login.png" alt="CRIS Logo">
+        </div>
+        <div class="brand-info">
+            <span class="brand-title">Community-Centric Rabies Intelligence Information Systems</span>
+            <span class="brand-badge">LGU Module</span>
+        </div>
+        <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18l-6-6 6-6"/>
+            </svg>
+        </button>
     </div>
+
+    <div class="sidebar-nav">
+        <div class="nav-group">
+            <span class="nav-label">Analytics</span>
+            <a href="lgu-dash.html" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                <span class="nav-text">LGU Dashboard</span>
+            </a>
+            <a href="lgu-reports.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span class="nav-text">Reports & Drafts</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="sidebar-footer">
+        <a href="lgu-settings.html" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="nav-text">Settings</span>
+        </a>
+        <button id="logout-btn" class="nav-item logout-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span class="nav-text">Logout</span>
+        </button>
+    </div>
+</aside>
+
+    <!-- MAIN INTERFACE -->
+    <main class="main-content">
+        
+        <header class="header">
+            <div class="header-title">
+                <h1 id="lguMunicipalTitle">LGU RABIES COMMAND CENTER</h1>
+                <span>Municipal / City Health & Rabies Surveillance</span>
+            </div>
+            <div class="user-profile-top">
+                <div class="profile-info" id="profileInfoText">
+                    <strong>Municipal Health Office</strong><br>
+                    <span>LGU Administrator</span>
+                </div>
+                <div class="profile-icon"><i class="fa-solid fa-building-user"></i></div>
+            </div>
+        </header>
+
+        <div class="content-body" style="padding: 20px;">
+            
+            <!-- METRICS SUMMARY CARDS -->
+            <div class="metrics">
+                <div class="card metric-card">
+                    <div class="metric-icon orange"><i class="fa-solid fa-inbox"></i></div>
+                    <div class="metric-info">
+                        <h3>Barangay Intake Feed</h3>
+                        <div class="value" id="pendingIntakeCount">08</div>
+                    </div>
+                </div>
+                
+                <div class="card metric-card">
+                    <div class="metric-icon gold"><i class="fa-solid fa-house-medical"></i></div>
+                    <div class="metric-info">
+                        <h3>Monitored Barangays</h3>
+                        <div class="value" id="totalBarangaysCount">18</div>
+                    </div>
+                </div>
+                
+                <div class="card metric-card danger-zone">
+                    <div class="metric-icon red"><i class="fa-solid fa-dog"></i></div>
+                    <div class="metric-info">
+                        <h3>Animals Under Watch</h3>
+                        <div class="value" id="quarantineAnimalsCount">12</div>
+                    </div>
+                </div>
+                
+                <div class="card metric-card">
+                    <div class="metric-icon dark"><i class="fa-solid fa-file-circle-check"></i></div>
+                    <div class="metric-info">
+                        <h3>PHO Draft Reports</h3>
+                        <div class="value" id="phoDraftCount">02</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKSPACE LAYOUT -->
+            <div class="lgu-dashboard-grid">
+                
+                <!-- LEFT COLUMN: LIVE BARANGAY REPORT INTAKE TABLE -->
+                <div class="card full-width">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px;">
+                        <h3><i class="fa-solid fa-clipboard-list"></i> Recent Barangay Incident Reports</h3>
+                        <a href="lgu-reports.html" style="font-size: 12px; color: var(--sunset-orange); font-weight: 700;">View All Reports &rarr;</a>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <th>Report ID</th>
+                                    <th>Barangay</th>
+                                    <th>Incident / Bite Type</th>
+                                    <th>Animal Status</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lguIntakeTableBody">
+                                <tr>
+                                    <td><strong>BRGY-2026-041</strong></td>
+                                    <td>Barangay Central</td>
+                                    <td>Stray Dog Bite</td>
+                                    <td>Under Quarantine</td>
+                                    <td><span class="badge-lgu badge-pending-verify">Pending Review</span></td>
+                                    <td class="text-center">
+                                        <div class="action-group-btn">
+                                            <button class="btn-lgu-action btn-lgu-verify"><i class="fa-solid fa-check"></i> Verify</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>BRGY-2026-040</strong></td>
+                                    <td>Barangay Zone 3</td>
+                                    <td>Domestic Cat Scratch</td>
+                                    <td>Observed Healthy</td>
+                                    <td><span class="badge-lgu badge-verified-lgu">Verified</span></td>
+                                    <td class="text-center">
+                                        <div class="action-group-btn">
+                                            <button class="btn-lgu-action btn-lgu-view"><i class="fa-solid fa-eye"></i> Details</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: LGU ANNOUNCEMENTS & PHO SUBMISSION STATUS -->
+                <div class="side-panel">
+                    <div class="card notice-card">
+                        <h3><i class="fa-solid fa-bullhorn"></i> LGU Notices & Tasks</h3>
+                        <div class="notice-item warning">
+                            <strong><i class="fa-solid fa-paper-plane"></i> Monthly PHO Submission</strong>
+                            <p>August Epidemiological report draft is ready for review and PHO transmission.</p>
+                        </div>
+                        <div class="notice-item info">
+                            <strong><i class="fa-solid fa-shield-cat"></i> BHW Surveillance Sync</strong>
+                            <p>3 Barangays submitted updated stray population surveillance logs today.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script type="module" src="../../assets/js/sidebar.js"></script>
 </body>
 </html>
