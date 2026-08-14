@@ -1,0 +1,425 @@
+/* CRIS LGU DASHBOARD STYLES */
+
+:root {
+    --sunset-orange: #EA6113;
+    --sunset-gold: #F88F22;
+    --sunset-yellow: #FBB931;
+    --sunset-cream: #FFE3B3;
+    --text-dark: #412110;
+    --sidebar-bg: #1a234e;
+    --main-bg: #FFFAF0;
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--main-bg);
+    color: var(--text-dark);
+    font-family: 'Lato', Arial, sans-serif;
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+/* ================= FLEXIBLE NON-SCROLLABLE SIDEBAR ================= */
+.sidebar {
+    width: 280px;
+    height: 100vh;
+    background-color: var(--sidebar-bg);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    flex-shrink: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+/* Logo Section */
+.logo-section {
+    text-align: center;
+    margin-bottom: 25px;
+    flex-shrink: 0;
+}
+
+.logo-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    display: block;
+    object-fit: cover;
+}
+
+.logo-section p {
+    font-size: 11px;
+    line-height: 1.4;
+    margin-bottom: 12px;
+}
+
+.role-badge {
+    background-color: var(--sunset-yellow);
+    color: var(--text-dark);
+    font-size: 10px;
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 4px;
+    display: inline-block;
+    text-transform: uppercase;
+}
+
+/* Flexible Menu (Expands/Shrinks dynamically, No Scrollbar) */
+.menu {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow: hidden; /* Strict removal of scrollbars */
+    margin-bottom: 20px;
+    justify-content: flex-start;
+}
+
+/* Flexible Navigation Buttons */
+.menu-item {
+    width: 100%;
+    padding: 12px 20px;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+    border-radius: 10px;
+    transition: var(--transition-smooth);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    flex-shrink: 1; /* Allows buttons to scale if section items grow/shrink */
+}
+
+.menu-item:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+    color: var(--sunset-yellow);
+}
+
+.menu-item.active {
+    background-color: #FFFFFF !important;
+    color: var(--sidebar-bg) !important;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Sidebar Footer Section */
+.footer-nav {
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.logout { 
+    background-color: rgba(80, 45, 60, 0.85) !important; 
+}
+
+.logout:hover { 
+    background-color: rgba(110, 40, 55, 1) !important; 
+}
+
+/* ================= MAIN CONTENT AREA ================= */
+.main-content {
+    flex-grow: 1;
+    padding: 25px;
+    overflow-y: auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+    padding: 15px 25px;
+    border-radius: 12px;
+    color: white;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(234, 97, 19, 0.2);
+}
+
+.user-profile-top {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 15px;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.profile-icon { 
+    width: 30px; 
+    height: 30px; 
+    margin-left: 10px; 
+    background: var(--sunset-cream);
+    border-radius: 50%;
+}
+
+.avatar-circle { 
+    width: 30px; 
+    height: 30px; 
+    margin-right: 15px; 
+    background: var(--sunset-cream);
+    border-radius: 50%;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 25px;
+}
+
+.left-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.welcome-bar {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    color: var(--text-dark);
+    margin-bottom: 25px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* ================= KPI CARDS (PVO DESIGN INTEGRATED) ================= */
+.statistics-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: white;
+    border-left: 6px solid var(--sunset-orange);
+    padding: 18px 15px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.06);
+    transition: var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 105px;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+}
+
+.stat-card small {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #777;
+    letter-spacing: 0.5px;
+}
+
+.stat-card .value {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--text-dark);
+}
+
+.value.coverage { color: var(--sunset-orange); }
+.value.hotspot { color: #d9534f; }
+
+/* ================= BAR CHART CONTAINER ================= */
+.dashboard-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.06);
+}
+
+.card-header h3 {
+    font-size: 16px;
+    color: var(--text-dark);
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.bar-chart-container {
+    margin-top: 10px;
+}
+
+.bar-item {
+    display: grid;
+    grid-template-columns: 140px 1fr 40px;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+.bar-bg {
+    background: #f0f0f0;
+    height: 12px;
+    border-radius: 6px;
+    margin: 0 15px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--sunset-gold), var(--sunset-orange));
+    border-radius: 6px;
+}
+
+/* ================= CALENDAR MODULE (COPIED FROM PVO) ================= */
+.calendar-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.08);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.calendar-title {
+    flex: 1;
+    text-align: center;
+    font-weight: bold;
+}
+
+.calendar-title h3 {
+    font-size: 15px;
+    color: var(--text-dark);
+}
+
+.calendar-btn {
+    border: none;
+    background: var(--sunset-orange);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.calendar-btn:hover {
+    background: var(--sunset-gold);
+}
+
+.calendar-weekdays,
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.calendar-weekdays {
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    color: #777;
+}
+
+.calendar-date {
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: 0.2s;
+    background: #f8f8f8;
+}
+
+.calendar-date:hover {
+    background: var(--sunset-cream);
+}
+
+.calendar-date.today {
+    background: var(--sunset-orange);
+    color: white;
+    font-weight: bold;
+}
+
+.calendar-date.selected {
+    border: 2px solid var(--sunset-orange);
+}
+
+.calendar-date.empty {
+    background: transparent;
+    cursor: default;
+}
+
+/* Compliance Box & Event Input */
+.compliance-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+#selectedDate {
+    margin: 0;
+    font-size: 13px;
+    color: var(--sunset-orange);
+}
+
+#eventInput {
+    width: 100%;
+    min-height: 90px;
+    resize: none;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+}
+
+#saveEventBtn {
+    background: var(--sunset-orange);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: var(--transition-smooth);
+}
+
+#saveEventBtn:hover {
+    background: var(--sunset-gold);
+}

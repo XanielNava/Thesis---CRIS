@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LGU Admin Access Portal - CRIS</title>
+    <link rel="stylesheet" href="../../assets/css/lgu-login.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <script src="../../assets/js/menu.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS logo" class="logo">
+            <h1>CRIS: Community-Centric Rabies Intelligence System</h1>
+            <button class="burger" onclick="openMenu()">☰ Menu</button>
+        </div>
+    </header>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="closeMenu()">✕</button>
+        <nav>
+            <a href="../../index.html">Home</a>
+            <a href="../pvo/pvo-login.html">Admin Access Portal</a>
+            <a href="../cris-reports.html">Reports</a>
+            <a href="../about-cris.html">About CRIS</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <h2>LGU ADMIN ACCESS PORTAL</h2>
+
+        <div class="login-box">
+            <a href="../../index.html" class="logo-link">
+                <img src="../../assets/images/lgu-logo.png" alt="LGU logo" class="login-logo">
+            </a>
+
+            <form id="loginForm">
+                <!-- Municipality / Jurisdiction Scope -->
+                <label for="municipality">Municipality / LGU</label>
+                <select id="municipality" name="municipality" required>
+                    <option value="">Select Municipality / City</option>
+                    <optgroup label="1st District">
+                        <option value="Guimbal">Guimbal</option>
+                        <option value="Igbaras">Igbaras</option>
+                        <option value="Miagao">Miagao</option>
+                        <option value="Oton">Oton</option>
+                        <option value="San Joaquin">San Joaquin</option>
+                        <option value="Tigbauan">Tigbauan</option>
+                        <option value="Tubungan">Tubungan</option>
+                    </optgroup>
+                    <optgroup label="2nd District">
+                        <option value="Alimodian">Alimodian</option>
+                        <option value="Leganes">Leganes</option>
+                        <option value="Leon">Leon</option>
+                        <option value="New Lucena">New Lucena</option>
+                        <option value="Pavia">Pavia</option>
+                        <option value="San Miguel">San Miguel</option>
+                        <option value="Santa Barbara">Santa Barbara</option>
+                        <option value="Zarraga">Zarraga</option>
+                    </optgroup>
+                    <optgroup label="3rd District">
+                        <option value="Badiangan">Badiangan</option>
+                        <option value="Bingawan">Bingawan</option>
+                        <option value="Cabatuan">Cabatuan</option>
+                        <option value="Calinog">Calinog</option>
+                        <option value="Janiuay">Janiuay</option>
+                        <option value="Lambunao">Lambunao</option>
+                        <option value="Maasin">Maasin</option>
+                        <option value="Mina">Mina</option>
+                        <option value="Pototan">Pototan</option>
+                    </optgroup>
+                    <optgroup label="4th District">
+                        <option value="Anilao">Anilao</option>
+                        <option value="Banate">Banate</option>
+                        <option value="Barotac Nuevo">Barotac Nuevo</option>
+                        <option value="Dingle">Dingle</option>
+                        <option value="Dueñas">Dueñas</option>
+                        <option value="Dumangas">Dumangas</option>
+                        <option value="Passi City">Passi City</option>
+                        <option value="San Enrique">San Enrique</option>
+                    </optgroup>
+                    <optgroup label="5th District">
+                        <option value="Ajuy">Ajuy</option>
+                        <option value="Balasan">Balasan</option>
+                        <option value="Barotac Viejo">Barotac Viejo</option>
+                        <option value="Batad">Batad</option>
+                        <option value="Carles">Carles</option>
+                        <option value="Concepcion">Concepcion</option>
+                        <option value="Estancia">Estancia</option>
+                        <option value="Lemery">Lemery</option>
+                        <option value="San Dionisio">San Dionisio</option>
+                        <option value="San Rafael">San Rafael</option>
+                        <option value="Sara">Sara</option>
+                    </optgroup>
+                    <optgroup label="Highly Urbanized City">
+                        <option value="Iloilo City">Iloilo City</option>
+                    </optgroup>
+                </select>
+
+                <!-- Official Email -->
+                <label for="email">Official Email</label>
+                <input type="email" id="email" placeholder="Enter Email" required>
+
+                <!-- Password Input with Matching Eye Icon Toggle -->
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" placeholder="Enter Password" required>
+                    <button type="button" class="toggle-password" onclick="toggleVisibility('password', this)" aria-label="Toggle password visibility">
+                        <svg class="eye-icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                    </button>
+                </div>
+
+                <!-- LGU Designation -->
+                <label for="designation">Designation</label>
+                <select id="designation" name="designation" required>
+                    <option value="">Select Designation</option>
+                    <option value="Administrator">Administrator</option>
+                    <option value="Veterinary Officer">Veterinary Officer</option>
+                    <option value="Health Officer">Health Officer</option>
+                    <option value="Data Encoder">Data Encoder</option>
+                </select>
+
+                <!-- Actions -->
+                <div class="button-container">
+                    <button type="button" id="backBtn" onclick="window.location.href='../../index.html'">Back</button>
+                    <button type="submit" id="loginBtn" 
+                    <button type="submit" id="loginBtn" onclick="window.Location.href='../../'">Login</button>
+                </div>
+
+                <div class="auth-links">
+                    <a href="lgu-signup.html" class="signup">Create Account</a>
+                    <a href="#" class="forgot">Forgot Password?</a>
+                </div>
+            </form>
+        </div>
+
+        <script type="module" src="../../assets/js/lgu-login.js"></script>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer"></footer>
+
+    <!-- Password Visibility Toggle Script -->
+    <script>
+        function toggleVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('.eye-icon');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                // Slashed Eye SVG when visible
+                icon.innerHTML = `<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.17c0-1.66-1.34-3-3-3l-.17.02z"/>`;
+            } else {
+                input.type = 'password';
+                // Regular Eye SVG when hidden
+                icon.innerHTML = `<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>`;
+            }
+        }
+    </script>
+</body>
+</html>
