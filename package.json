@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "firebase-admin": "^14.2.0"
+  },
+  "devDependencies": {
+    "clean-css": "^5.3.3"
+  }
+}

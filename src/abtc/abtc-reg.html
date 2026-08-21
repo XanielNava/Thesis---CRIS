@@ -4,38 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Registry — CRIS | Animal Bite Treatment Center</title>
-    <link rel="stylesheet" href="../../assets/css/abtc-reg.css">
+    <link rel="stylesheet" href="../../assets/css/abtc/abtc-reg.css">
     <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/abtc/abtc-master.css">
+    <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
 </head>
 <body>
 
 <div class="container">
-
-    <!-- =====================================================
-         UNIVERSAL NAVY SIDEBAR (NURSE / CLINICAL MODULE)
-         ===================================================== -->
-    <aside class="sidebar">
-        <div class="logo-section logo-section-fixed">
-            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
-            <p>Community-Centric<br>Rabies Intelligence<br>System</p>
-            <div class="role-badge">ABTC MODULE</div>
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.querySelector(".container").classList.add("collapsed");
+        }
+    </script>
+<!-- PROFESSIONAL SAAS SIDEBAR (ABTC MODULE — REGISTRY ACTIVE) -->
+<aside class="sidebar" id="sidebar">
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.getElementById("sidebar").classList.add("collapsed");
+            document.querySelector(".container")?.classList.add("collapsed");
+        }
+    </script>
+    <div class="sidebar-header">
+        <div class="brand-logo">
+            <img src="../../assets/images/logo-login.png" alt="CRIS Logo">
         </div>
-
-        <nav class="menu">
-            <a href="abtc-home.html" class="menu-item"><i class="fa-solid fa-house"></i> Home</a>
-            <a href="abtc-reg.html" class="menu-item active"><i class="fa-solid fa-id-card"></i> Patient Registry</a>
-            <a href="abtc-calendar.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> Dose Calendar</a>
-            <a href="abtc-inventory.html" class="menu-item"><i class="fa-solid fa-boxes-stacked"></i> Vaccine Inventory</a>
-        </nav>
-
-        <div class="footer-nav">
-            <button id="logout-btn" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        <div class="brand-info">
+            <span class="brand-title">Community-Centric Rabies Intelligence Information Systems</span>
+            <span class="brand-badge">ABTC Module</span>
         </div>
-    </aside>
+        <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18l-6-6 6-6"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="sidebar-nav">
+        <div class="nav-group">
+            <span class="nav-label">Navigation</span>
+            <a href="abtc-home.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span class="nav-text">Home</span>
+            </a>
+            <a href="abtc-reg.html" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/></svg>
+                <span class="nav-text">Patient Registry</span>
+            </a>
+            <a href="abtc-calendar.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span class="nav-text">Dose Calendar</span>
+            </a>
+            <a href="abtc-inventory.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                <span class="nav-text">Vaccine Inventory</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="sidebar-footer">
+        <button id="logout-btn" class="nav-item logout-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span class="nav-text">Logout</span>
+        </button>
+    </div>
+</aside>
 
     <!-- =====================================================
          MAIN INTERFACE AREA
@@ -78,6 +115,8 @@
                         <option value="Cat Bite">Cat Bite</option>
                         <option value="Dog Scratch">Dog Scratch</option>
                         <option value="Cat Scratch">Cat Scratch</option>
+                        <option value="Cat Exposure">Cat Exposure</option>
+                        <option value="Dog Exposure">Dog Exposure</option>
                     </select>
 
                     <select id="filterBiteCategory" class="registry-dropdown-filter">
@@ -223,7 +262,7 @@
                     </select>
                 </div>
                 <div class="drawer-field">
-                    <label>Bite Category</label>
+                    <label>Bite Category / Classification</label>
                     <span class="view-val" id="lblCategory">N/A</span>
                     <select class="edit-val" id="editCategory">
                         <option value="Category I">Category I</option>
@@ -318,36 +357,14 @@
                     </select>
                 </div>
                 <div class="drawer-field">
-                    <label>Immunoglobulin (RIG) Type</label>
+                    <label>Immunoglobulin (RIG)</label>
                     <span class="view-val" id="lblRigType">None</span>
-                    <select class="edit-val" id="editRigType">
-                        <option value="">None / Not Applicable</option>
-                        <option value="ERIG">ERIG (Equine)</option>
-                        <option value="HRIG">HRIG (Human)</option>
-                        <option value="mAb">Monoclonal Antibodies (mAb)</option>
-                    </select>
+                    <input type="text" class="edit-val" id="editRigType" placeholder="Immunoglobulin details">
                 </div>
-                <div class="drawer-field">
-                    <label>RIG Dose / Volume</label>
-                    <span class="view-val" id="lblRigDose">N/A</span>
-                    <input type="text" class="edit-val" id="editRigDose" placeholder="e.g., 1,000 IU or 2.5 mL">
-                </div>
-
-                <!-- Targeted Vaccination Schedule Summary -->
                 <div class="drawer-field drawer-field-wide">
-                    <label>Target PEP Vaccination Schedule</label>
-                    <div class="view-val" id="lblPepScheduleSummary" style="font-size: 12px; font-weight: 600; color: #102a43;">
-                        Day 0: --- | Day 3: --- | Day 7: --- | Day 14: --- | Day 28: ---
-                    </div>
-                    <div class="edit-val edit-flex" style="gap: 6px; flex-wrap: wrap; margin-top: 4px;">
-                        <input type="date" id="editDay0" title="Day 0 Target Date" style="font-size: 11px; padding: 4px;">
-                        <input type="date" id="editDay3" title="Day 3 Target Date" style="font-size: 11px; padding: 4px;">
-                        <input type="date" id="editDay7" title="Day 7 Target Date" style="font-size: 11px; padding: 4px;">
-                        <input type="date" id="editDay14" title="Day 14 Target Date" style="font-size: 11px; padding: 4px;">
-                        <input type="date" id="editDay28" title="Day 28 Target Date" style="font-size: 11px; padding: 4px;">
-                    </div>
+                    <label>Completed Doses</label>
+                    <span class="view-val" id="lblCompletedDoses">None</span>
                 </div>
-
                 <div class="drawer-field drawer-field-wide">
                     <label>Other Remarks</label>
                     <span class="view-val" id="lblRemarks">None</span>
@@ -357,14 +374,15 @@
 
             <!-- 6. Wound Assessment Photo -->
             <div class="drawer-section-title"><i class="fa-solid fa-camera"></i> Photo Documentation of Wound</div>
-            <div class="drawer-photo-frame" id="lblPhotoFrame">
-                <p style="color:#aaa; font-style: italic; font-size: 13px;">No assessment photo linked.</p>
+            <div class="drawer-photo-frame" id="lblPhotoFrame" style="text-align: center; padding: 10px;">
+                <p id="noPhotoText" style="color:#aaa; font-style: italic; font-size: 13px;">No assessment photo linked.</p>
+                <img id="imgWoundPhoto" src="" alt="Wound Photo" style="display: none; max-width: 100%; max-height: 250px; border-radius: 8px; cursor: pointer; border: 1px solid #ccc;">
             </div>
 
             <!-- 7. Case Revision & Activity History -->
             <div class="drawer-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Case Revision & Activity History</div>
             <div class="history-timeline" id="lblHistoryTimeline">
-                <!-- Dynamically populated in abtc-reg.js -->
+                <!-- Dynamically populated via abtc-reg.js -->
             </div>
 
             <div class="drawer-sig-row">
@@ -384,16 +402,18 @@
 </aside>
 
 <!-- ================= WOUND PHOTO LIGHTBOX MODAL ================= -->
-<div id="woundLightbox" class="lightbox-overlay">
+<div id="woundLightbox" class="lightbox-overlay" style="display: none;">
     <div class="lightbox-container">
-        <img id="lightboxImg" src="" alt="Wound Assessment Zoomed View">
+        <img id="lightboxImg" src="" alt="Wound Assessment Zoomed View" style="max-width: 90vw; max-height: 80vh;">
         <button type="button" id="closeLightboxBtn" class="lightbox-close-btn">
             &times; Close View
         </button>
     </div>
 </div>
 
-<script type="module" src="../../assets/js/abtc-reg.js"></script>
+<!-- INLINE SCRIPT FOR SIDEBAR TOGGLE TESTING -->
 
+<script type="module" src="../../assets/js/abtc/abtc-reg.js"></script>
+<script type="module" src="../../assets/js/main/sidebar.js"></script>
 </body>
 </html>

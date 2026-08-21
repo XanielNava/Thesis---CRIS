@@ -6,8 +6,9 @@
     <title>Pharmacist Inventory — CRIS | Animal Bite Treatment Center</title>
     
     <!-- External Modular Stylesheet -->
-    <link rel="stylesheet" href="../../assets/css/abtc-pharmacy.css">
-    
+    <link rel="stylesheet" href="../../assets/css/abtc/abtc-pharmacy.css">
+    <link rel="stylesheet" href="../../assets/css/abtc/abtc-master.css">
+    <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
     <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,25 +18,51 @@
 <body>
 
 <div class="container">
-
-    <!-- =====================================================
-         CRIS UNIVERSAL NAVY SIDEBAR (PHARMACY MODULE)
-         ===================================================== -->
-    <aside class="sidebar">
-        <div class="logo-section logo-section-fixed">
-            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
-            <p>Community-Centric<br>Rabies Intelligence<br>System</p>
-            <div class="role-badge role-badge-pharmacy">PHARMACY MODULE</div>
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.querySelector(".container").classList.add("collapsed");
+        }
+    </script>
+ <!-- PROFESSIONAL SAAS SIDEBAR (PHARMACY MODULE ACTIVE) -->
+<aside class="sidebar" id="sidebar">
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.getElementById("sidebar").classList.add("collapsed");
+            document.querySelector(".container")?.classList.add("collapsed");
+        }
+    </script>
+    <div class="sidebar-header">
+        <div class="brand-logo">
+            <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
         </div>
-
-        <nav class="menu">
-            <a href="abtc-pharmacy.html" class="menu-item active"><i class="fa-solid fa-boxes-packing"></i> Stock & Requisitions</a>
-        </nav>
-
-        <div class="footer-nav">
-            <button id="logout-btn" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        <div class="brand-info">
+            <span class="brand-title">Community-Centric Rabies Intelligence Information Systems</span>
+            <span class="brand-badge">Pharmacy Module</span>
         </div>
-    </aside>
+        <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18l-6-6 6-6"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="sidebar-nav">
+        <div class="nav-group">
+            <span class="nav-label">Inventory Management</span>
+            <a href="abtc-pharmacy.html" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                <span class="nav-text">Stock & Requisitions</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="sidebar-footer">
+        <button id="logout-btn" class="nav-item logout-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span class="nav-text">Logout</span>
+        </button>
+    </div>
+</aside>
 
     <!-- =====================================================
          MAIN CONTENT AREA
@@ -269,6 +296,7 @@
     </div>
 </div>
 
-<script type="module" src="../../assets/js/abtc-pharmacy.js"></script>
+<script type="module" src="../../assets/js/abtc/abtc-pharmacy.js"></script>
+
 </body>
 </html>

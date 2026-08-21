@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHO Dashboard - CRIS</title>
+    <link rel="stylesheet" href="pho-dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <!-- Sidebar Collapsible Toggle Button -->
+            <button id="sidebar-toggle" class="sidebar-toggle-btn" aria-label="Toggle Sidebar">
+                <span class="toggle-icon">&#10094;</span>
+            </button>
+
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p class="logo-text">Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PHO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="pho-dash.html" class="menu-item active">
+                    <span class="menu-text">Dashboard</span>
+                </a>
+                <a href="pho-animal-bite-cases.html" class="menu-item">
+                    <span class="menu-text">Animal Bite Cases</span>
+                </a>
+                <a href="pho-heat-map.html" class="menu-item">
+                    <span class="menu-text">Heatmap</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1>Provincial Health Office Dashboard</h1>
+            </header>
+
+            <section class="stats-row">
+                <div class="stat-card">
+                    <h3>Human Population</h3>
+                    <p id="humanPopulation" class="stat-number">--</p>
+                    <span class="sub-stat">Provincial Total</span>
+                </div>
+                <div class="stat-card">
+                    <h3>ABTC Reporting Status</h3>
+                    <p id="abtcReporting" class="stat-number">-- / --</p>
+                    <span class="sub-stat sub-stat-percentage">--% Completed</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Human Rabies Cases</h3>
+                    <p id="humanRabiesCases" class="stat-number">--</p>
+                    <span class="sub-stat">Recorded Deaths</span>
+                </div>
+            </section>
+
+            <section class="dashboard-grid">
+                <!-- CALENDAR SECTION -->
+                <div class="calendar-box">
+                    <div class="calendar-header">
+                        <button id="prevMonth" class="nav-btn">&lt;</button>
+                        <h2 id="monthYear">--</h2>
+                        <button id="nextMonth" class="nav-btn">&gt;</button>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                    </div>
+                    <div id="calendarGrid" class="calendar-grid"></div>
+                </div>
+
+                <!-- COMPLIANCE & ANNOUNCEMENTS SECTION -->
+                <div class="compliance-box">
+                    <h2 id="selectedDate">Select a Date</h2>
+                    <div class="announcement-form">
+                        <textarea id="eventInput" placeholder="Type here for announcements and reminders"></textarea>
+                        <button id="saveEventBtn" class="save-btn">Save Event</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Script File -->
+    <script type="module" src="pho-dash.js"></script>
+</body>
+</html>

@@ -1,0 +1,390 @@
+/* CRIS SUNSET PALETTE */
+:root {
+    --sunset-orange: #EA6113;
+    --sunset-gold: #F88F22;
+    --sunset-yellow: #FBB931;
+    --sunset-cream: #FFE3B3;
+    --sunset-input-bg: #FFF3E4;
+    --text-dark: #412110;
+    --text-muted: #665248;
+    --sidebar-bg: #1a234e;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Lato', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    background-color: #FFFAF0;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+    padding: 10px 20px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(234, 97, 19, 0.2);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.logo {
+    width: 70px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.header h1 {
+    font-size: 20px;
+    letter-spacing: 0.5px;
+}
+
+/* Menu Burger */
+.burger {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: auto; 
+    transition: all 0.3s ease;
+}
+
+.burger:hover {
+    background: var(--sunset-cream);
+    color: var(--sunset-orange);
+}
+
+/* Sidebar & Overlay */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+    z-index: 10;
+}
+
+.overlay.active { 
+    opacity: 1; 
+    visibility: visible; 
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -280px;
+    width: 280px;
+    height: 100%;
+    background-color: var(--sidebar-bg);
+    color: white;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 11;
+}
+
+.sidebar.active { right: 0; }
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--sunset-cream);
+    font-size: 24px;
+    cursor: pointer;
+    align-self: flex-end;
+    margin-bottom: 20px;
+}
+
+.sidebar nav {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sidebar nav a {
+    padding: 14px 22px;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.sidebar nav a:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--sunset-yellow);
+}
+
+/* MAIN CONTENT CONTAINER */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 15px;
+    width: 100%;
+}
+
+.main h2 {
+    margin-bottom: 20px;
+    color: var(--text-dark);
+    letter-spacing: 0.5px;
+    text-align: center;
+    width: 100%;
+}
+
+/* LOGIN BOX & REGISTRATION CARD FIX */
+.login-box, .registration-card {
+    background-color: var(--sunset-cream);
+    width: 100%;
+    max-width: 480px;
+    padding: 35px 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(234, 97, 19, 0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin: 0 auto;
+}
+
+/* Expanded max-width specifically for the registration card */
+.registration-card {
+    max-width: 720px;
+    background-color: #FFFFFF;
+}
+
+.login-logo {
+    display: block;
+    margin: 0 auto 20px auto;
+    width: 120px;
+    transition: transform 0.3s ease;
+}
+
+.logo-link:hover .login-logo { 
+    transform: scale(1.05); 
+}
+
+/* FORM LAYOUTS */
+#regForm, #loginForm, .registration-form {
+    width: 100%;
+}
+
+.card-header {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+}
+
+.form-divider {
+    border: 0;
+    height: 1px;
+    background-color: #E2E8F0;
+    margin: 0 auto 20px auto;
+    width: 100%;
+}
+
+.form-section {
+    margin-bottom: 18px;
+    text-align: left;
+}
+
+.section-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+}
+
+/* FORM GRID SYSTEM */
+.grid-1-col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.grid-2-col {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.grid-4-col {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 1.2fr;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+/* INPUT ICON WRAPPER & FIELD STYLING */
+label {
+    display: block;
+    text-align: left;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: var(--text-dark);
+    font-size: 13px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.input-icon {
+    position: absolute;
+    left: 12px;
+    width: 18px;
+    height: 18px;
+    fill: var(--text-muted);
+    pointer-events: none;
+    transition: fill 0.25s ease;
+}
+
+input, select {
+    width: 100%;
+    height: 44px;
+    padding: 10px 14px;
+    background-color: var(--sunset-input-bg);
+    border: 1.5px solid #F3D9C1;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-dark);
+    outline: none;
+    transition: all 0.25s ease;
+}
+
+.input-wrapper input, 
+.input-wrapper select {
+    padding-left: 40px;
+}
+
+input::placeholder, select {
+    color: var(--text-muted);
+}
+
+input:focus, select:focus {
+    border-color: var(--sunset-orange);
+    background-color: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(234, 97, 19, 0.15);
+}
+
+.input-wrapper:focus-within .input-icon {
+    fill: var(--sunset-orange);
+}
+
+/* BUTTON CONTROLLER */
+.button-container {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 25px;
+}
+
+/* Universal Button Class */
+.btn, #loginBtn, #backBtn, #backButton, #regButton {
+    flex: 1;
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+/* Primary Styling (Orange Fill) */
+.btn-primary, #loginBtn, #regButton {
+    background-color: var(--sunset-orange);
+    color: #FFFFFF !important;
+    border: none;
+}
+
+.btn-primary:hover, #loginBtn:hover, #regButton:hover { 
+    background-color: var(--text-dark); 
+}
+
+/* Secondary Styling (Light Outline Button) */
+.btn-secondary, #backBtn, #backButton {
+    background-color: #FFFFFF;
+    color: var(--text-dark) !important;
+    border: 1.5px solid #CBD5E1;
+}
+
+.btn-secondary:hover, #backBtn:hover, #backButton:hover { 
+    background-color: #F1F5F9; 
+}
+
+/* Auth Links */
+.auth-links {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.auth-links a {
+    font-size: 13px;
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.auth-links a:hover { 
+    text-decoration: underline; 
+    color: var(--sunset-orange); 
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+    .login-box, .registration-card { 
+        padding: 24px 20px; 
+    }
+
+    .grid-2-col, .grid-4-col {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}

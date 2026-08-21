@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - PHO Heatmap Analytics</title>
+    
+    <!-- Leaflet CSS & Heatmap Extension -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+    <!-- SheetJS for Excel Uploads -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- App Stylesheet -->
+    <link rel="stylesheet" href="../../assets/css/pho-heat">
+</head>
+<body>
+    <div class="app-layout">
+        
+        <!-- ================= PROFESSIONAL SAAS SIDEBAR ================= -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <img src="../../assets/images/logo.png" alt="CRIS Logo" onerror="this.src='https://via.placeholder.com/36'">
+                </div>
+                <div class="brand-info">
+                    <span class="brand-title">CRIS PHO Portal</span>
+                    <span class="brand-badge">Provincial Health</span>
+                </div>
+                <button class="toggle-btn" id="sidebarToggle" aria-label="Toggle Navigation">
+                    <i data-lucide="chevron-left" class="chevron-icon"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <span class="nav-label">Analytics & GIS</span>
+                <a href="../dashboard/dashboard.html" class="nav-item">
+                    <i data-lucide="layout-dashboard" class="nav-icon"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="../cases/cases.html" class="nav-item">
+                    <i data-lucide="activity" class="nav-icon"></i>
+                    <span class="nav-text">Bite Incidents</span>
+                </a>
+                <a href="pho-heat-map.html" class="nav-item active">
+                    <i data-lucide="map" class="nav-icon"></i>
+                    <span class="nav-text">Heatmap View</span>
+                </a>
+
+                <span class="nav-label">Data Management</span>
+                <a href="../reports/reports.html" class="nav-item">
+                    <i data-lucide="file-spread-sheet" class="nav-icon"></i>
+                    <span class="nav-text">Exports & Uploads</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="../settings/settings.html" class="nav-item">
+                    <i data-lucide="settings" class="nav-icon"></i>
+                    <span class="nav-text">Settings</span>
+                </a>
+                <button class="nav-item logout-item" id="logoutBtn">
+                    <i data-lucide="log-out" class="nav-icon"></i>
+                    <span class="nav-text">Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ================= MAIN CONTENT AREA ================= -->
+        <main class="main-content">
+            
+            <!-- Top Navbar Header -->
+            <header class="top-header">
+                <div class="header-title">
+                    <h1>Rabies Spatio-Temporal Heatmap</h1>
+                    <p>Provincial Health Office Density & Incidence Monitoring</p>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar">PHO</div>
+                    <div class="user-details">
+                        <span class="user-name">PHO Administrator</span>
+                        <span class="user-role">Iloilo Province</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Body -->
+            <div class="content-body">
+                
+                <!-- Filter & Control Toolbar -->
+                <div class="toolbar-card">
+                    <div class="filter-group">
+                        <div class="control-box">
+                            <label for="yearFilter">Year</label>
+                            <select id="yearFilter">
+                                <option value="All">All Years</option>
+                            </select>
+                        </div>
+                        <div class="control-box">
+                            <label for="municipalityFilter">Municipality</label>
+                            <select id="municipalityFilter">
+                                <option value="All">All Municipalities</option>
+                            </select>
+                        </div>
+                        <div class="control-box">
+                            <label for="layerFilter">Heatmap Data Density Layer</label>
+                            <select id="layerFilter">
+                                <option value="bite">Animal Bite Cases</option>
+                                <option value="human">Human Rabies Deaths</option>
+                                <option value="animal">Animal Rabies Cases</option>
+                                <option value="all">Combined All Layers</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="action-group">
+                        <label for="excelFile" class="btn-upload">
+                            <i data-lucide="upload-cloud"></i> Upload Dataset
+                        </label>
+                        <input type="file" id="excelFile" accept=".xlsx, .xls" hidden>
+                    </div>
+                </div>
+
+                <!-- Summary Metrics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">Total Human Population</span>
+                        <h2 class="stat-value" id="humanPopulation">0</h2>
+                        <span class="stat-sub">Tracked Catchment Area</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Bite Prevalence Rate</span>
+                        <h2 class="stat-value" id="prevalenceRate">0.000%</h2>
+                        <span class="stat-sub">Per Population Total</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Incidence Rate</span>
+                        <h2 class="stat-value" id="incidentsRate">0.000%</h2>
+                        <span class="stat-sub">Bites per Catchment</span>
+                    </div>
+                    <div class="stat-card highlight">
+                        <span class="stat-label">Human Rabies Mortality</span>
+                        <h2 class="stat-value" id="mortalityRate">0.0000%</h2>
+                        <span class="stat-sub">Fatalities / Catchment</span>
+                    </div>
+                </div>
+
+                <!-- Main GIS Panel Grid -->
+                <div class="map-grid">
+                    <div class="map-container">
+                        <div id="map"></div>
+                    </div>
+                    <div class="side-panel">
+                        <h3>Top High-Risk Areas</h3>
+                        <p class="panel-sub">Ranked by bite incident volume</p>
+                        <div id="topMunicipalities" class="top-list"></div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Application Script -->
+    <script type="module" src="pho-heat-map.js"></script>
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

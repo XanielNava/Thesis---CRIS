@@ -1,0 +1,129 @@
+// abtc-login.js - Master Facility Gatekeeper for Multi-Tenant Shared Terminals
+import { 
+  signInWithEmailAndPassword, 
+  signOut 
+} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+
+import { 
+  doc, 
+  getDoc, 
+  updateDoc, 
+  collection, 
+  query, 
+  where, 
+  getDocs 
+} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js'; 
+
+// 🔗 Import shared central instances (Managed by firebase-config.js switch)
+import { auth, db } from '../firebase/firebase-config.js';
+
+// ==========================================================
+// 🏢 INTELLIGENT WORKPLACE LOOKUP (AS THEY TYPE)
+// ==========================================================
+document.getElementById("email")?.addEventListener("change", async (e) => {
+  const emailValue = e.target.value.trim().toLowerCase();
+  const indicatorBox = document.getElementById("facilityIndicator");
+  const nameTextContainer = document.getElementById("facilityNameText");
+
+  if (!emailValue) {
+    if (indicatorBox) indicatorBox.classList.remove("visible");
+    return;
+  }
+
+  // Safety check for DB initialization
+  if (!db) {
+    console.error("Firestore instance (db) is not ready.");
+    return;
+  }
+
+  try {
+    const facilitiesRef = collection(db, "facilities");
+    const q = query(facilitiesRef, where("contactInfo.email", "==", emailValue));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const facilityDoc = querySnapshot.docs[0];
+      const facilityData = facilityDoc.data();
+      
+      if (nameTextContainer) nameTextContainer.innerText = facilityData.facilityName || "Registered ABTC Location";
+      if (indicatorBox) indicatorBox.classList.add("visible");
+    } else {
+      if (indicatorBox) indicatorBox.classList.remove("visible");
+    }
+  } catch (error) {
+    console.error("Dynamic workspace identifier discovery failure:", error);
+    if (indicatorBox) indicatorBox.classList.remove("visible");
+  }
+});
+
+// ==========================================================
+// 🔒 MASTER GATEKEEPER SUBMIT HANDSHAKE
+// ==========================================================
+document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const password = document.getElementById("password").value;
+  const loginBtn = document.getElementById('loginBtn');
+
+  try {
+    if (loginBtn) {
+      loginBtn.textContent = 'Verifying workspace access...';
+      loginBtn.disabled = true; 
+    }
+
+    // 1. Authenticate facility baseline workspace tokens
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // 2. Security Status Firewall Check & First-Time Password Flag Check
+    const facilityDocRef = doc(db, "facilities", user.uid);
+    const facilitySnapshot = await getDoc(facilityDocRef);
+
+    if (facilitySnapshot.exists()) {
+      const facilityData = facilitySnapshot.data();
+
+      if (facilityData.status === "Disabled") {
+        await signOut(auth);
+        alert("Access Denied: This facility terminal account has been suspended.");
+        return; 
+      }
+      
+      // Check if account uses initial/default setup password
+      if (facilityData.requiresPasswordChange === true || facilityData.requiresPasswordChange === undefined) {
+        sessionStorage.setItem("requiresPasswordChange", "true");
+      } else {
+        sessionStorage.setItem("requiresPasswordChange", "false");
+      }
+
+      await updateDoc(facilityDocRef, { status: "Online" });
+    }
+
+    // 3. Tab-Isolated session initialization
+    sessionStorage.setItem("authenticatedFacilityEmail", email);
+    sessionStorage.removeItem("activeDesignation");
+    sessionStorage.removeItem("activePersonnelName");
+
+    // Clear stale global fallback storage
+    localStorage.removeItem("activeDesignation");
+    localStorage.removeItem("activePersonnelName");
+
+    // 4. Route into Profile Selection Matrix
+    window.location.href = 'abtc-profiles.html';
+
+  } catch (error) {
+    console.error('Terminal authentication failure:', error.code, error.message);
+    
+    let clientErrorMessage = "The email address or password you entered is incorrect.";
+    if (error.code && !error.code.includes('auth/')) {
+       clientErrorMessage = error.message;
+    }
+
+    alert('Login failed: ' + clientErrorMessage);
+  } finally {
+    if (loginBtn) {
+      loginBtn.textContent = 'Login';
+      loginBtn.disabled = false;
+    }
+  }
+});

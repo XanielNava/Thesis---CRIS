@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PVO - Dashboard</title>
+    
+    <link rel="stylesheet" href="../../assets/css/pvo-dashboard.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,400;0,700;0,900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- UNIVERSAL SIDEBAR (RETAINED) -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">PVO MODULE</div>
+            </div>
+
+            <nav class="menu">
+                <a href="pvo-dash.html" class="menu-item active">Dashboard</a>
+                <a href="pvo-animal-bite-cases.html" class="menu-item">Animal Bite Cases</a>
+                <a href="pvo-heat-map.html" class="menu-item">Heatmap</a>
+            </nav>
+
+            <div class="footer-nav">
+                <a href="/settings/html/pvo-settings.html" class="menu-item alt">Settings</a>
+                <button id="logout-btn" class="menu-item alt logout" onclick="window.location.href='pvo-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="header">
+                <h1>PVO DASHBOARD</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Xaniel Marios Angelo B. Nava</strong><br>
+                        <span>Administrator</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <!-- LEFT MAIN COLUMN -->
+                <section class="left-column">
+                    <div class="welcome-bar">
+                        <span>Hello, Xaniel Marios Angelo B. Nava</span>
+                    </div>
+
+                    <!-- STATISTICS CONTAINER (RETAINED 3 KPI CARDS) -->
+                    <div class="statistics-container">
+                        <div class="stat-card">
+                            <small>Total Animal Bite Cases</small>
+                            <h2 id="totalBiteCases">0</h2>
+                        </div>
+
+                        <div class="stat-card">
+                            <small>Confirmed Rabies Cases</small>
+                            <h2 id="confirmedRabiesCases">0</h2>
+                        </div>
+
+                        <div class="stat-card">
+                            <small>Vaccination Coverage (%)</small>
+                            <h2 id="vaccinationCoverage">0%</h2>
+                        </div>
+                    </div>
+                    
+                    <!-- EPIDEMIOLOGICAL DUAL PANEL BELOW KPIs -->
+                    <div class="epi-grid">
+                        
+                        <!-- 1. RECENT INCIDENTS TABLE WITH EPI METRICS (60% WIDTH) -->
+                        <div class="dashboard-card incident-table-card">
+                            <div class="card-header">
+                                <h3>Surveillance & Incident Log</h3>
+                                <a href="pvo-animal-bite-cases.html" class="view-all-link">View All Log</a>
+                            </div>
+                            <div class="table-wrapper">
+                                <table class="recent-cases-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Location</th>
+                                            <th>Vector</th>
+                                            <th>Exposure</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentCasesBody">
+                                        <tr>
+                                            <td>Jul 27, 2026</td>
+                                            <td>Pavia</td>
+                                            <td>Dog (Stray)</td>
+                                            <td><span class="epi-tag cat-3">Category III</span></td>
+                                            <td><span class="badge badge-danger">High Risk</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jul 26, 2026</td>
+                                            <td>Santa Barbara</td>
+                                            <td>Cat (Owned)</td>
+                                            <td><span class="epi-tag cat-2">Category II</span></td>
+                                            <td><span class="badge badge-warning">Quarantine</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jul 25, 2026</td>
+                                            <td>Oton</td>
+                                            <td>Dog (Owned)</td>
+                                            <td><span class="epi-tag cat-3">Category III</span></td>
+                                            <td><span class="badge badge-success">Cleared</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jul 24, 2026</td>
+                                            <td>Pototan</td>
+                                            <td>Dog (Stray)</td>
+                                            <td><span class="epi-tag cat-1">Category I</span></td>
+                                            <td><span class="badge badge-success">Cleared</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 2. EPIDEMIOLOGICAL SURVEILLANCE SUMMARY (40% WIDTH) -->
+                        <div class="dashboard-card epi-summary-card">
+                            <div class="card-header">
+                                <h3>Epidemiological Summary</h3>
+                            </div>
+                            
+                            <!-- EXPOSURE SEVERITY STRATIFICATION -->
+                            <div class="epi-section">
+                                <div class="epi-section-title">
+                                    <span>Exposure Stratification</span>
+                                    <small>WHO/DOH Risk</small>
+                                </div>
+                                <div class="progress-stacked">
+                                    <div class="bar bar-cat3" style="width: 55%;" title="Category III: 55%">55%</div>
+                                    <div class="bar bar-cat2" style="width: 35%;" title="Category II: 35%">35%</div>
+                                    <div class="bar bar-cat1" style="width: 10%;" title="Category I: 10%"></div>
+                                </div>
+                                <div class="epi-legend">
+                                    <span><i class="dot cat3-dot"></i> Cat III (Severe)</span>
+                                    <span><i class="dot cat2-dot"></i> Cat II</span>
+                                    <span><i class="dot cat1-dot"></i> Cat I</span>
+                                </div>
+                            </div>
+
+                            <!-- HOST DYNAMICS / ANIMAL OWNERSHIP -->
+                            <div class="epi-section">
+                                <div class="epi-section-title">
+                                    <span>Reservoir Host Dynamics</span>
+                                </div>
+                                <div class="metric-row">
+                                    <div class="metric-box">
+                                        <small>Stray / Unknown</small>
+                                        <strong class="text-orange">62%</strong>
+                                    </div>
+                                    <div class="metric-box">
+                                        <small>Domestic Owned</small>
+                                        <strong>38%</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 14-DAY QUARANTINE TRACKER -->
+                            <div class="epi-section">
+                                <div class="epi-section-title">
+                                    <span>14-Day Animal Observation</span>
+                                </div>
+                                <ul class="quarantine-list">
+                                    <li>
+                                        <span>Under Active Observation</span>
+                                        <span class="count-badge warning">14 Animals</span>
+                                    </li>
+                                    <li>
+                                        <span>Completed & Cleared</span>
+                                        <span class="count-badge success">48 Animals</span>
+                                    </li>
+                                    <li>
+                                        <span>Died / Symptomatic</span>
+                                        <span class="count-badge danger">2 Cases</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- RIGHT COLUMN: CALENDAR (RETAINED) -->
+                <aside class="right-column">
+                    <div class="card calendar-card">
+                        <div class="calendar-header">
+                            <button id="prevMonth" class="calendar-btn">&#10094;</button>
+                            <div class="calendar-title">
+                                <h3 id="monthYear"></h3>
+                            </div>
+                            <button id="nextMonth" class="calendar-btn">&#10095;</button>
+                        </div>
+                        
+                        <!-- CALENDAR DAYS -->
+                        <div class="calendar-weekdays">
+                            <div>Sun</div>
+                            <div>Mon</div>
+                            <div>Tue</div>
+                            <div>Wed</div>
+                            <div>Thu</div>
+                            <div>Fri</div>
+                            <div>Sat</div>
+                        </div>
+                        
+                        <!-- ANNOUNCEMENTS -->
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                        <div class="calendar-body">
+                            <div class="compliance-box">
+                                <h4 id="selectedDate">Select a date</h4>
+                                <textarea id="eventInput" placeholder="Type here for announcements and reminders" rows="4"></textarea>
+                                <button id="saveEventBtn">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../../assets/js/pvo-dash.js"></script>
+</body>
+</html>

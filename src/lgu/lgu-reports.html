@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LGU Reports & Drafts — CRIS | LGU Module</title>
+    
+    <link rel="stylesheet" href="../../assets/css/abtc/abtc-reports.css">
+    <link rel="stylesheet" href="../../assets/css/abtc/abtc-master.css">
+    <link rel="stylesheet" href="../../assets/css/lgu/lgu-master.css">
+    <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
+    
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.querySelector(".container").classList.add("collapsed");
+        }
+    </script>
+
+    <!-- UNIVERSAL LGU SIDEBAR -->
+  <!-- PROFESSIONAL SAAS SIDEBAR (LGU MODULE — REPORTS ACTIVE) -->
+<aside class="sidebar" id="sidebar">
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.getElementById("sidebar").classList.add("collapsed");
+            document.querySelector(".container")?.classList.add("collapsed");
+        }
+    </script>
+    <div class="sidebar-header">
+        <div class="brand-logo">
+            <img src="../../assets/images/logo-login.png" alt="CRIS Logo">
+        </div>
+        <div class="brand-info">
+            <span class="brand-title">Community-Centric Rabies Intelligence Information Systems</span>
+            <span class="brand-badge">LGU Module</span>
+        </div>
+        <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18l-6-6 6-6"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="sidebar-nav">
+        <div class="nav-group">
+            <span class="nav-label">Analytics</span>
+            <a href="lgu-dash.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                <span class="nav-text">LGU Dashboard</span>
+            </a>
+            <a href="lgu-reports.html" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span class="nav-text">Reports & Drafts</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="sidebar-footer">
+        <a href="lgu-settings.html" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="nav-text">Settings</span>
+        </a>
+        <button id="logout-btn" class="nav-item logout-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span class="nav-text">Logout</span>
+        </button>
+    </div>
+</aside>
+
+    <!-- MAIN INTERFACE -->
+    <main class="main-content">
+        
+        <header class="header">
+            <div class="header-title">
+                <h1>LGU REPORTS & PHO SUBMISSION DRAFTS</h1>
+                <span>Barangay Aggregated Incidents & Official PHO Reporting</span>
+            </div>
+            <div class="user-profile-top">
+                <div class="profile-info">
+                    <strong>LGU Data Officer</strong><br>
+                    <span>Health Office</span>
+                </div>
+                <div class="profile-icon"><i class="fa-solid fa-file-export"></i></div>
+            </div>
+        </header>
+
+        <div class="content-body" style="padding: 20px;">
+            
+            <div class="card full-width">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div>
+                        <h3><i class="fa-solid fa-file-invoice"></i> August 2026 Epidemiological Report Draft</h3>
+                        <span style="font-size: 12px; color: #64748b;">Status: <strong class="badge-lgu badge-draft-pho">READY FOR TRANSMISSION TO PHO</strong></span>
+                    </div>
+
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-lgu-action btn-lgu-view" style="padding: 8px 14px; font-size: 12.5px;"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+                        <button class="btn-primary-action" style="padding: 8px 16px;"><i class="fa-solid fa-paper-plane"></i> Submit to PHO Portal</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th>Category Metric</th>
+                                <th>Monthly Total</th>
+                                <th>Highest Risk Barangay</th>
+                                <th>Validation Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Total Animal Exposure Cases Logged</strong></td>
+                                <td>86 Cases</td>
+                                <td>Barangay Central (18 cases)</td>
+                                <td><span class="badge-lgu badge-verified-lgu"><i class="fa-solid fa-check"></i> Passed Pre-Check</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Category III Exposure (HRIG Required)</strong></td>
+                                <td>24 Cases</td>
+                                <td>Barangay Zone 3 (8 cases)</td>
+                                <td><span class="badge-lgu badge-verified-lgu"><i class="fa-solid fa-check"></i> Passed Pre-Check</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Rabid Animal Suspects (Quarantined)</strong></td>
+                                <td>03 Animals</td>
+                                <td>Barangay Poblacion (2 animals)</td>
+                                <td><span class="badge-lgu badge-pending-verify"><i class="fa-solid fa-clock"></i> Pending Final Observation</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script type="module" src="../../assets/js/main/sidebar.js" src="../../assets/js/firebase/firebase-config.js"></script>
+</body>
+</html>

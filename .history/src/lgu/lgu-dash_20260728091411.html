@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIS - LGU Dashboard</title>
+    <!-- External CSS Link -->
+    <link rel="stylesheet" href="../../assets/css/lgu-dash.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation (Flexible & Dynamic Layout) -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo" class="logo-image">
+                <p>Community-Centric<br>Rabies Intelligence System</p>
+                <div class="role-badge">LGU MODULE</div>
+            </div>
+            
+            <nav class="menu">
+                <button class="menu-item active">Dashboard</button>
+                <button class="menu-item">Barangay Heatmap</button>
+                <button class="menu-item">Budget & Logistics</button>
+                <button class="menu-item">Ordinance Logs</button>
+                <button class="menu-item">Statistics</button>
+                <button class="menu-item">Reports</button>
+            </nav>
+
+            <div class="footer-nav">
+                <button class="menu-item alt">Settings</button>
+                <button class="menu-item alt logout" onclick="window.location.href='lgu-login.html'">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="header">
+                <h1>LGU DASHBOARD</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong>Hon. Alex Reyes</strong><br>
+                        <span>Municipal Lead</span>
+                    </div>
+                    <div class="profile-icon"></div>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <!-- Left Main Column -->
+                <section class="left-column">
+                    <div class="welcome-bar">
+                        <div class="avatar-circle"></div>
+                        <span>Municipal Overview: May 2026</span>
+                    </div>
+                    
+                    <!-- LGU KPI Metrics (Styled as PVO Stat Cards) -->
+                    <div class="statistics-container">
+                        <div class="stat-card">
+                            <small>Total Bites</small>
+                            <h2 class="value">124</h2>
+                        </div>
+                        <div class="stat-card">
+                            <small>Vax Coverage</small>
+                            <h2 class="value coverage">72%</h2>
+                        </div>
+                        <div class="stat-card">
+                            <small>Impounded</small>
+                            <h2 class="value">15</h2>
+                        </div>
+                        <div class="stat-card">
+                            <small>Active Hotspots</small>
+                            <h2 class="value hotspot">02</h2>
+                        </div>
+                    </div>
+
+                    <!-- Barangay Case Distribution -->
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            <h3 class="chart-title">Bite Incidents by Barangay</h3>
+                        </div>
+                        <div class="bar-chart-container">
+                            <div class="bar-item">
+                                <span>Brgy. Mansilingan</span>
+                                <div class="bar-bg"><div class="bar-fill" style="width: 85%;"></div></div>
+                                <b>42</b>
+                            </div>
+                            <div class="bar-item">
+                                <span>Brgy. Estefania</span>
+                                <div class="bar-bg"><div class="bar-fill" style="width: 45%;"></div></div>
+                                <b>22</b>
+                            </div>
+                            <div class="bar-item">
+                                <span>Brgy. Tangub</span>
+                                <div class="bar-bg"><div class="bar-fill" style="width: 20%;"></div></div>
+                                <b>10</b>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Information Column: Calendar Module (Matched with PVO Dash & JS Calendar) -->
+                <aside class="right-column">
+                    <div class="card calendar-card">
+                        <div class="calendar-header">
+                            <button id="prevMonth" class="calendar-btn">&#10094;</button>
+                            <div class="calendar-title">
+                                <h3 id="monthYear">May 2026</h3>
+                            </div>
+                            <button id="nextMonth" class="calendar-btn">&#10095;</button>
+                        </div>
+                        
+                        <!-- CALENDAR WEEKDAYS -->
+                        <div class="calendar-weekdays">
+                            <div>Sun</div>
+                            <div>Mon</div>
+                            <div>Tue</div>
+                            <div>Wed</div>
+                            <div>Thu</div>
+                            <div>Fri</div>
+                            <div>Sat</div>
+                        </div>
+                        
+                        <!-- CALENDAR GRID -->
+                        <div class="calendar-grid" id="calendarGrid"></div>
+
+                        <!-- ANNOUNCEMENTS & COMPLIANCE INPUT -->
+                        <div class="calendar-body">
+                            <div class="compliance-box">
+                                <h4 id="selectedDate">Select a date</h4>
+                                <textarea id="eventInput" placeholder="Type here for announcements and reminders" rows="4"></textarea>
+                                <button id="saveEventBtn">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <!-- Calendar JS Script -->
+    <script src="../../assets/js/pvo-dash.js"></script>
+</body>
+</html>
