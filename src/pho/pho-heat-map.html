@@ -22,14 +22,27 @@
 
 <body>
     <div class="app-container">
+        <!-- FAST ZERO-FLASH COLLAPSE INIT -->
+        <script>
+            if (localStorage.getItem("sidebarCollapsed") === "true") {
+                document.querySelector(".container, .app-container")?.classList.add("collapsed");
+            }
+        </script>
+
         <!-- SIDEBAR START -->
         <aside class="sidebar" id="sidebar">
+            <script>
+                if (localStorage.getItem("sidebarCollapsed") === "true") {
+                    document.getElementById("sidebar").classList.add("collapsed");
+                }
+            </script>
+
             <div class="sidebar-header">
                 <div class="brand-logo">
                     <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
                 </div>
                 <div class="brand-info">
-                    <span class="brand-title">Community-Centric Rabies Information Systems</span>
+                    <span class="brand-title">Community-Centric Rabies Intelligence Information Systems</span>
                     <span class="brand-badge">PHO Module</span>
                 </div>
                 <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
@@ -58,7 +71,7 @@
             </div>
 
             <div class="sidebar-footer">
-                <a href="../../settings/html/settings.html" class="nav-item">
+                <a href="pho-settings.html" class="nav-item">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     <span class="nav-text">Settings</span>
                 </a>
@@ -73,13 +86,6 @@
         <main class="main-content">
             <header class="header">
                 <h1>HEATMAPS</h1>
-                <!-- <div class="user-profile-top">
-                    <div class="profile-info">
-                        <strong>PHO Administrator</strong><br>
-                        <span>System Operator</span>
-                    </div>
-                    <div class="profile-icon"></div>
-                </div> -->
             </header>
 
             <!-- UPLOAD DATASET AND FILTERS -->
@@ -147,6 +153,7 @@
             </div>
 
             <script type="module" src="../../assets/js/pho-heat-map.js"></script>
+            <script type="module" src="../../assets/js/sidebar.js"></script>
         </main>
     </div>
 </body>

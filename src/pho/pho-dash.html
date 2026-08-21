@@ -10,8 +10,7 @@
     <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,400;0,700;0,900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,400;0,700;0,900&display=swap" rel="stylesheet">
     
     <!-- Chart.js CDN for Rabies Exposure Trends -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -19,14 +18,27 @@
 
 <body>
     <div class="container">
+        <!-- FAST ZERO-FLASH COLLAPSE INIT -->
+        <script>
+            if (localStorage.getItem("sidebarCollapsed") === "true") {
+                document.querySelector(".container, .app-container")?.classList.add("collapsed");
+            }
+        </script>
+
         <!-- PROFESSIONAL SAAS SIDEBAR -->
         <aside class="sidebar" id="sidebar">
+            <script>
+                if (localStorage.getItem("sidebarCollapsed") === "true") {
+                    document.getElementById("sidebar").classList.add("collapsed");
+                }
+            </script>
+
             <div class="sidebar-header">
                 <div class="brand-logo">
                     <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
                 </div>
                 <div class="brand-info">
-                    <span class="brand-title">Community-Centric Rabies Information Systems</span>
+                    <span class="brand-title">Community-Centric Rabies Intelligence Information Systems</span>
                     <span class="brand-badge">PHO Module</span>
                 </div>
                 <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
@@ -55,7 +67,7 @@
             </div>
 
             <div class="sidebar-footer">
-                <a href="../../settings/html/settings.html" class="nav-item">
+                <a href="pho-settings.html" class="nav-item">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     <span class="nav-text">Settings</span>
                 </a>
@@ -88,20 +100,17 @@
 
                     <!-- KPI STATISTICS CONTAINER -->
                     <div class="statistics-container">
-                        <!-- 1. HUMAN POPULATION -->
                         <div class="stat-card">
                             <small>Human Population</small>
                             <h2 id="humanPopulation">0</h2>
                         </div>
 
-                        <!-- 2. ABTC REPORTING -->
                         <div class="stat-card">
                             <small>ABTC Reporting</small>
                             <h2 id="abtcReporting">0 / 0</h2>
                             <span class="sub-stat-percentage">0.0% Completed</span>
                         </div>
 
-                        <!-- 3. HUMAN RABIES CASES -->
                         <div class="stat-card">
                             <small>Human Rabies Cases</small>
                             <h2 id="humanRabiesCases">0</h2>
@@ -133,8 +142,7 @@
                     <div class="card calendar-card">
                         <div class="calendar-header">
                             <button id="prevMonth" class="calendar-btn">&#10094;</button>
-                            <div class="calendar-title" id="calendarTitleContainer" style="cursor: pointer;"
-                                title="Click to jump to a specific month/year">
+                            <div class="calendar-title" id="calendarTitleContainer" style="cursor: pointer;" title="Click to jump to a specific month/year">
                                 <h3 id="monthYear"></h3>
                             </div>
                             <button id="nextMonth" class="calendar-btn">&#10095;</button>
@@ -169,8 +177,7 @@
                     <div class="calendar-body">
                         <div class="compliance-box">
                             <h4 id="selectedDate">Select a date</h4>
-                            <textarea id="eventInput" placeholder="Type here for announcements and reminders"
-                                rows="4"></textarea>
+                            <textarea id="eventInput" placeholder="Type here for announcements and reminders" rows="4"></textarea>
                             <button id="saveEventBtn">Save</button>
                         </div>
                     </div>
@@ -181,6 +188,7 @@
 
     <!-- Application Module Script -->
     <script type="module" src="../../assets/js/pho-dash.js"></script>
+    <script type="module" src="../../assets/js/sidebar.js"></script>
 </body>
 
 </html>

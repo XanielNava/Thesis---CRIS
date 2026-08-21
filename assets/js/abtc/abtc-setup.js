@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebase
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 // Import shared central instances (Managed by firebase-config.js switch)
-import { auth, db } from './firebase-config.js';
+import { auth, db } from '../firebase/firebase-config.js';
 
 const setupForm = document.getElementById("abtcSetupForm");
 
