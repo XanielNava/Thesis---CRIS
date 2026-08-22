@@ -2,7 +2,7 @@
 // CRIS PHO MODULE - SIGNUP CONTROLLER (pho-signup.js)
 // ==========================================================================
 
-import { auth, db } from './firebase-config.js';
+import { auth, db } from '../main/firebase-config.js';
 import { 
     createUserWithEmailAndPassword 
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
@@ -67,7 +67,7 @@ if (regForm) {
                 suffix: suffix,
                 fullName: `${firstName} ${middleInitial ? middleInitial + '.' : ''} ${lastName} ${suffix}`.trim(),
                 email: email,
-                designation: designation, // Stored to validate login role matching
+                designation: designation,
                 contactNumber: contactNumber,
                 dateOfBirth: dateOfBirth,
                 address: {

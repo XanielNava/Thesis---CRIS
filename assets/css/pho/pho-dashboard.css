@@ -28,7 +28,8 @@ body {
     overflow: hidden;
 }
 
-.container {
+.container,
+.app-container {
     display: flex;
     height: 100vh;
     width: 100vw;
@@ -50,14 +51,13 @@ body {
     user-select: none;
     flex-shrink: 0;
     z-index: 1000 !important;
-    overflow: visible !important; /* Critical: Allows button to float outside */
+    overflow: visible !important;
 }
 
 .sidebar.collapsed {
     width: var(--sidebar-collapsed-width) !important;
 }
 
-/* Sidebar Header & Brand Title */
 .sidebar-header {
     display: flex;
     align-items: center;
@@ -68,7 +68,7 @@ body {
     width: 100%;
     box-sizing: border-box;
     overflow: visible !important;
-    position: static !important; /* Passes positioning context up to .sidebar */
+    position: static !important;
 }
 
 .brand-logo img {
@@ -112,13 +112,11 @@ body {
     margin-top: 2px;
 }
 
-
 .toggle-btn {
     position: absolute !important;
-    top: 32px !important; /* Fixed vertical height within header area */
-    right: -16px !important; /* Pulls exactly 16px (half of 32px) over outer sidebar border */
-    transform: translateY(-50%) !important; /* Only centers vertically, avoiding X shifts */
-    
+    top: 32px !important;
+    right: -16px !important;
+    transform: translateY(-50%) !important;
     width: 32px;
     height: 32px;
     background: #111625;
@@ -150,7 +148,6 @@ body {
     transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* Sidebar Navigation Items */
 .sidebar-nav {
     flex: 1;
     display: flex;
@@ -217,7 +214,6 @@ body {
     display: none;
 }
 
-/* Active State Styles */
 .nav-item.active {
     color: var(--text-light);
     background: rgba(234, 97, 19, 0.12);
@@ -235,7 +231,6 @@ body {
     border-radius: 0 4px 4px 0;
 }
 
-/* Footer Section */
 .sidebar-footer {
     padding-top: 16px;
     border-top: 1px solid var(--sidebar-border);
@@ -316,62 +311,140 @@ body {
     width: 100%;
 }
 
-/* WELCOME BAR */
+/* WELCOME & TOOLBAR BAR */
 .welcome-bar {
     background: white;
-    padding: 15px;
-    border-radius: 10px;
-    font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    padding: 14px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
-/* KPI STATISTICS CARDS */
+.welcome-text span {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    display: block;
+}
+
+.welcome-subtext {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    display: block;
+}
+
+.year-filter-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.year-filter-wrapper label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dashboard-year-select {
+    padding: 6px 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 6px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+    background: #FFFBF6;
+    outline: none;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.dashboard-year-select:focus,
+.dashboard-year-select:hover {
+    border-color: var(--sunset-orange);
+}
+
+/* KPI STATISTICS CARDS (4 COLUMNS) */
 .statistics-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
 }
 
 .stat-card {
     background: white;
-    border-left: 8px solid var(--sunset-orange);
-    padding: 20px;
+    border-left: 6px solid var(--sunset-orange);
+    padding: 16px 18px;
     border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     transition: var(--transition-smooth);
     display: flex;
     flex-direction: column;
-    min-height: 140px;
+    justify-content: space-between;
+    min-height: 120px;
 }
 
 .stat-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
 .stat-card small {
     display: block;
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 12px;
+    font-size: 12px;
+    color: #64748b;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .stat-card h2 {
-    margin: 0;
-    font-size: 32px;
+    margin: 6px 0;
+    font-size: 26px;
     color: var(--sunset-orange);
+    font-weight: 800;
 }
 
-.stat-card .sub-stat-percentage {
+.text-danger-custom {
+    color: #d32f2f !important;
+}
+
+/* SUB-STAT BADGES */
+.sub-stat-badge {
     display: inline-block;
-    margin-top: 12px;
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 700;
-    color: #2e7d32;
-    background: #e8f5e9;
-    padding: 4px 10px;
-    border-radius: 12px;
+    padding: 3px 8px;
+    border-radius: 6px;
     width: fit-content;
+}
+
+.sub-stat-badge.success {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.sub-stat-badge.warning {
+    color: #9a3412;
+    background: #ffedd5;
+}
+
+.sub-stat-badge.info {
+    color: #1e40af;
+    background: #dbeafe;
+}
+
+.sub-stat-badge.neutral {
+    color: #475569;
+    background: #f1f5f9;
 }
 
 /* TREND CHART CARD */
@@ -392,19 +465,30 @@ body {
 .chart-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .chart-header h3 {
     font-size: 16px;
     font-weight: 700;
     color: var(--text-dark);
+    margin: 0;
+}
+
+.chart-subtitle {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 3px;
 }
 
 .chart-legend {
     display: flex;
-    gap: 15px;
-    font-size: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 11.5px;
     font-weight: 600;
 }
 
@@ -415,8 +499,8 @@ body {
 }
 
 .legend-color {
-    width: 10px;
-    height: 10px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
 }
 
@@ -424,9 +508,15 @@ body {
 .legend-color.cat-3 { background-color: var(--sunset-orange); }
 .legend-color.cat-mortality { background-color: #d32f2f; }
 
+.legend-line.threshold-line {
+    width: 14px;
+    height: 0;
+    border-top: 2px dashed rgba(211, 47, 47, 0.7);
+}
+
 .chart-wrapper {
     position: relative;
-    height: 230px;
+    height: 250px;
     width: 100%;
 }
 
@@ -520,7 +610,6 @@ body {
     border-bottom: 3px solid var(--sunset-orange);
 }
 
-/* Calendar Empty Cell Fix */
 .calendar-date.empty {
     background: transparent !important;
     border: none !important;
@@ -654,4 +743,20 @@ body {
 
 #saveEventBtn:hover {
     background: var(--sunset-gold);
+}
+
+/* RESPONSIVE BREAKPOINTS */
+@media (max-width: 1300px) {
+    .statistics-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    .statistics-container {
+        grid-template-columns: 1fr;
+    }
 }

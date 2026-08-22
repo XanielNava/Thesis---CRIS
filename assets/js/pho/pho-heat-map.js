@@ -1,67 +1,41 @@
-// ==========================================================
-// CRIS - PHO HEATMAP SYSTEM (SELF-CONTAINED & EMULATOR READY)
-// ==========================================================
+// ==============================================================================
+// pho-heat-map.js - CRIS PHO Heatmap Controller (Weighted Intensity Architecture)
+// ==============================================================================
 
-// 1. Direct CDN Imports from Firebase Web SDK 10.8.0
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { auth, db } from '../firebase/firebase-config.js';
 import { 
-    getFirestore, 
     collection, 
-    getDocs, 
-    connectFirestoreEmulator 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { 
-    getAuth, 
-    connectAuthEmulator 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    getDocs 
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-// 2. Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
-    authDomain: "cris-database-da989.firebaseapp.com",
-    databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "cris-database-da989",
-    storageBucket: "cris-database-da989.firebasestorage.app",
-    messagingSenderId: "627885439681",
-    appId: "1:627885439681:web:3c657d64c0aad9b4913240",
-    measurementId: "G-0X99BH7GW4"
+// Silence Chromium Canvas2D readback warning
+const originalGetContext = HTMLCanvasElement.prototype.getContext;
+HTMLCanvasElement.prototype.getContext = function (type, attributes) {
+    if (type === "2d") {
+        attributes = Object.assign({}, attributes, { willReadFrequently: true });
+    }
+    return originalGetContext.call(this, type, attributes);
 };
 
-// 3. Initialize Firebase Services
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// 🧪 4. DIRECT LOCAL EMULATOR CONNECTION
-connectFirestoreEmulator(db, '127.0.0.1', 8080);
-connectAuthEmulator(auth, 'http://127.0.0.1:9099');
-
-// --- Global App Variables ---
+// Global App Variables
 let facilityCoordinates = {};
 let map;
 let excelData = [];
 let totalHumanPopulation = 0;
 let municipalityPopulations = {};
 
-let biteHeatLayer = null;
-let humanHeatLayer = null;
-let animalHeatLayer = null;
+let currentHeatLayer = null;
 let markerLayer = null;
 
-let uploadInput;
 let yearFilter;
 let municipalityFilter;
 let layerFilter;
 let populationCard;
 let redrawTimeout;
 
-// ==========================================================
-// 1. FACILITY COORDINATE MAPPING
-// ==========================================================
-
+// ================= FACILITY COORDINATE MAPPING =================
 async function loadFacilityCoordinates() {
     try {
-        console.log("📍 Loading facility coordinates...");
         const response = await fetch('../../assets/data/facility-mapping.json');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
@@ -78,8 +52,6 @@ async function loadFacilityCoordinates() {
                 }
             });
         }
-        
-        console.log(`✅ Loaded coordinates for ${Object.keys(facilityCoordinates).length} facilities`);
     } catch (error) {
         console.error("❌ Error loading facility coordinates:", error);
     }
@@ -90,12 +62,10 @@ function getCoordinates(facilityName) {
 
     const cleanName = String(facilityName).trim().toLowerCase();
     
-    // 1. Direct match
     if (facilityCoordinates[cleanName]) {
         return facilityCoordinates[cleanName];
     }
     
-    // 2. Substring match
     const keys = Object.keys(facilityCoordinates);
     for (const key of keys) {
         if (cleanName.includes(key) || key.includes(cleanName)) {
@@ -103,66 +73,12 @@ function getCoordinates(facilityName) {
         }
     }
     
-    console.warn(`⚠️ No coordinate found for "${facilityName}" - using default (10.90, 122.60)`);
     return { lat: 10.90, lng: 122.60 };
 }
 
-// ==========================================================
-// 2. UNIFIED SIDEBAR ENGINE
-// ==========================================================
-
-function setupSidebarToggle() {
-    const sidebar = document.getElementById("sidebar");
-    // Supports both potential element IDs in your template
-    const toggleBtn = document.getElementById("sidebarToggle") || document.getElementById("sidebar-toggle");
-
-    if (!sidebar || !toggleBtn) {
-        console.warn("⚠️ Sidebar or Toggle Button not found in the DOM.");
-        return;
-    }
-
-    const toggleIcon = toggleBtn.querySelector(".toggle-icon") || toggleBtn.querySelector("i");
-
-    // Restore saved state on load
-    const isCollapsedSaved = localStorage.getItem("cris_sidebar_collapsed") === "true";
-    if (isCollapsedSaved) {
-        sidebar.classList.add("collapsed");
-        if (toggleIcon) {
-            toggleIcon.classList.remove("fa-chevron-left");
-            toggleIcon.classList.add("fa-chevron-right");
-        }
-    }
-
-    toggleBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        sidebar.classList.toggle("collapsed");
-        const isCollapsed = sidebar.classList.contains("collapsed");
-        localStorage.setItem("cris_sidebar_collapsed", isCollapsed);
-
-        if (toggleIcon) {
-            if (isCollapsed) {
-                toggleIcon.classList.remove("fa-chevron-left");
-                toggleIcon.classList.add("fa-chevron-right");
-            } else {
-                toggleIcon.classList.remove("fa-chevron-right");
-                toggleIcon.classList.add("fa-chevron-left");
-            }
-        }
-
-        // Trigger Leaflet resize after CSS transition completes
-        setTimeout(() => {
-            if (map) map.invalidateSize();
-        }, 300);
-    });
-}
-
-// ==========================================================
-// 3. LIFECYCLE INITIALIZATION
-// ==========================================================
-
+// ================= LIFECYCLE INITIALIZATION =================
 document.addEventListener("DOMContentLoaded", async () => {
     try {
-        setupSidebarToggle();
         await loadFacilityCoordinates();
         initializeMap();
         initializeControls();
@@ -187,30 +103,23 @@ function initializeMap() {
 }
 
 function initializeControls() {
-    uploadInput = document.getElementById("excelFile");
     yearFilter = document.getElementById("yearFilter");
     municipalityFilter = document.getElementById("municipalityFilter");
     layerFilter = document.getElementById("layerFilter");
     populationCard = document.getElementById("humanPopulation");
 
-    if (uploadInput) uploadInput.addEventListener("change", uploadExcel);
     if (yearFilter) yearFilter.addEventListener("change", refreshMap);
     if (municipalityFilter) municipalityFilter.addEventListener("change", refreshMap);
     if (layerFilter) layerFilter.addEventListener("change", refreshMap);
 }
 
-// ==========================================================
-// 4. FIRESTORE DATA FETCHING
-// ==========================================================
-
+// ================= FIRESTORE DATA FETCHING =================
 async function fetchPopulationDataFromFirestore() {
     try {
-        console.log("📊 Fetching population data...");
         const populationCollection = collection(db, "pho-database", "main", "population-data");
         const querySnapshot = await getDocs(populationCollection);
 
         if (querySnapshot.empty) {
-            console.warn("⚠️ Population subcollection is empty.");
             totalHumanPopulation = 0;
             municipalityPopulations = {};
             updateHumanPopulationCard();
@@ -221,14 +130,14 @@ async function fetchPopulationDataFromFirestore() {
         let totalPopulationAccumulator = 0;
         const updatedMunicipalities = {};
 
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const docIdUpper = doc.id.trim().toUpperCase();
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            const docIdUpper = docSnap.id.trim().toUpperCase();
 
             if (docIdUpper === "ILOILO" || docIdUpper === "ILOILO_TOTAL") {
                 totalPopulationAccumulator = Number(data.totalPopulation) || 0;
             } else {
-                const municipalityName = data.facilityName || data.municipality || doc.id;
+                const municipalityName = data.facilityName || data.municipality || docSnap.id;
                 if (municipalityName && data.totalPopulation !== undefined) {
                     const key = municipalityName.trim().toLowerCase();
                     updatedMunicipalities[key] = Number(data.totalPopulation) || 0;
@@ -260,7 +169,6 @@ function updateHumanPopulationCard() {
 
 async function fetchLatestCaseDataFromFirestore() {
     try {
-        console.log("🔄 Fetching cases...");
         let caseCollection = collection(db, "pho-database", "main", "legacy-summary");
         let querySnapshot = await getDocs(caseCollection);
 
@@ -285,14 +193,19 @@ async function fetchLatestCaseDataFromFirestore() {
                 const cleanedMunName = String(rawMunName).trim();
                 const coords = getCoordinates(cleanedMunName);
 
+                const is24Col = row.length >= 17;
+                const biteCases = is24Col ? (Number(row[16]) || (Number(row[1]) + Number(row[2])) || 0) : (Number(row[1]) || 0);
+                const humanDeaths = is24Col ? (Number(row[12]) || 0) : (Number(row[2]) || 0);
+                const animalDeaths = is24Col ? 0 : (Number(row[3]) || 0);
+
                 excelData.push({
                     Year: data.year || new Date().getFullYear(),
                     Municipality: cleanedMunName,
                     Latitude: coords.lat,
                     Longitude: coords.lng,
-                    "Animal Bite Cases": Number(row[1]) || 0,
-                    "Human Rabies Deaths": Number(row[2]) || 0,
-                    "Animal Rabies Deaths": Number(row[3]) || 0
+                    "Animal Bite Cases": biteCases,
+                    "Human Rabies Deaths": humanDeaths,
+                    "Animal Rabies Deaths": animalDeaths
                 });
             } else {
                 const rawMunName = data.municipality || data.facilityName || "Unknown";
@@ -304,9 +217,9 @@ async function fetchLatestCaseDataFromFirestore() {
                     Municipality: cleanedMunName,
                     Latitude: coords.lat,
                     Longitude: coords.lng,
-                    "Animal Bite Cases": Number(data.totalCases || data.biteCases) || 0,
-                    "Human Rabies Deaths": Number(data.humanDeaths || data.maleCases) || 0,
-                    "Animal Rabies Deaths": Number(data.animalDeaths || data.femaleCases) || 0
+                    "Animal Bite Cases": Number(data.total || data.totalCases || data.biteCases) || 0,
+                    "Human Rabies Deaths": Number(data.hr || data.humanDeaths) || 0,
+                    "Animal Rabies Deaths": Number(data.animalDeaths) || 0
                 });
             }
         });
@@ -323,65 +236,7 @@ async function fetchLatestCaseDataFromFirestore() {
     }
 }
 
-// ==========================================================
-// 5. FILE UPLOAD & NORMALIZATION
-// ==========================================================
-
-function uploadExcel(event) {
-    if (typeof XLSX === "undefined") {
-        console.error("❌ SheetJS (XLSX) library is missing.");
-        return;
-    }
-
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: "array" });
-            const firstSheet = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheet];
-            excelData = XLSX.utils.sheet_to_json(worksheet);
-            
-            normalizeHeaders();
-            populateFilters();
-            refreshMap();
-        } catch (err) {
-            console.error("❌ Error parsing uploaded Excel file:", err);
-        }
-    };
-    reader.readAsArrayBuffer(file);
-}
-
-function normalizeHeaders() {
-    excelData = excelData.map(function (row) {
-        const newRow = {};
-        Object.keys(row).forEach(function (key) {
-            const clean = key.trim().toLowerCase();
-            if (clean === "year" || clean === "years") newRow.Year = row[key];
-            else if (clean === "municipality" || clean === "facilityname") newRow.Municipality = String(row[key] || "").trim();
-            else if (clean === "latitude" || clean === "lat") newRow.Latitude = Number(row[key]);
-            else if (clean === "longitude" || clean === "lng") newRow.Longitude = Number(row[key]);
-            else if (clean.includes("bite")) newRow["Animal Bite Cases"] = Number(row[key]) || 0;
-            else if (clean.includes("human")) newRow["Human Rabies Deaths"] = Number(row[key]) || 0;
-            else if (clean.includes("animal")) newRow["Animal Rabies Deaths"] = Number(row[key]) || 0;
-        });
-
-        const mun = newRow.Municipality || "Unknown";
-        const coords = getCoordinates(mun);
-        if (isNaN(newRow.Latitude)) newRow.Latitude = coords.lat;
-        if (isNaN(newRow.Longitude)) newRow.Longitude = coords.lng;
-
-        return newRow;
-    });
-}
-
-// ==========================================================
-// 6. FILTERS & STATS COMPUTATION
-// ==========================================================
-
+// ================= FILTERS & STATS COMPUTATION =================
 function populateFilters() {
     if (yearFilter) {
         yearFilter.innerHTML = '<option value="All">All Years</option>';
@@ -432,7 +287,9 @@ function updateStatistics(data) {
         data.forEach(row => {
             biteTotal += Number(row["Animal Bite Cases"]) || 0;
             humanTotal += Number(row["Human Rabies Deaths"]) || 0;
-            if (row.Municipality) trackedMunicipalitiesInFilter.add(row.Municipality.trim().toLowerCase());
+            if (row.Municipality) {
+                trackedMunicipalitiesInFilter.add(row.Municipality.trim().toLowerCase());
+            }
         });
     }
 
@@ -446,25 +303,31 @@ function updateStatistics(data) {
         });
     }
 
+    // Default fallback to Iloilo Provincial Census Total (2,082,616)
     if (activePopulation === 0) {
         activePopulation = totalHumanPopulation > 0 ? totalHumanPopulation : 2082616;
     }
 
     if (activePopulation === 0) {
         if (prevalenceCard) prevalenceCard.textContent = "0.000%";
-        if (incidentsCard) incidentsCard.textContent = "0.000%";
-        if (mortalityCard) mortalityCard.textContent = "0.0000%";
+        if (incidentsCard) incidentsCard.textContent = "0.0 /100k";
+        if (mortalityCard) mortalityCard.textContent = "0.00 /100k";
         return;
     }
 
+    // 1. Exposure Rate as % of Active Population
     if (prevalenceCard) {
         prevalenceCard.textContent = `${((biteTotal / activePopulation) * 100).toFixed(3)}%`;
     }
+
+    // 2. Incidence Rate per 100,000 Population
     if (incidentsCard) {
         incidentsCard.textContent = `${((biteTotal / activePopulation) * 100000).toFixed(1)} /100k`;
     }
+
+    // 3. Cause-Specific Mortality Rate per 100,000 Population
     if (mortalityCard) {
-        mortalityCard.textContent = `${((humanTotal / activePopulation) * 100).toFixed(4)}%`;
+        mortalityCard.textContent = `${((humanTotal / activePopulation) * 100000).toFixed(2)} /100k`;
     }
 }
 
@@ -494,83 +357,105 @@ function updateTopMunicipalities(data) {
     });
 }
 
-// ==========================================================
-// 7. HEATMAP & LEAFLET RENDERING
-// ==========================================================
-
+// ================= ACCURATE WEIGHTED HEATMAP RENDERING =================
 function drawHeatmap(data) {
     clearMap();
     if (!data || data.length === 0 || typeof L.heatLayer !== "function") return;
 
-    const bitePoints = [];
-    const humanPoints = [];
-    const animalPoints = [];
+    const selectedLayer = layerFilter ? layerFilter.value : "bite";
     const bounds = [];
+    const heatPoints = [];
+
+    // Determine the maximum metric across all facilities in this filter to normalize weights
+    let maxMetric = 1;
+    data.forEach(row => {
+        let val = 0;
+        if (selectedLayer === "bite") val = Number(row["Animal Bite Cases"]) || 0;
+        else if (selectedLayer === "human") val = Number(row["Human Rabies Deaths"]) || 0;
+        else if (selectedLayer === "animal") val = Number(row["Animal Rabies Deaths"]) || 0;
+        if (val > maxMetric) maxMetric = val;
+    });
 
     data.forEach(row => {
         const lat = Number(row.Latitude);
         const lng = Number(row.Longitude);
-        if (isNaN(lat) || isNaN(lng)) return;
+        if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return;
         bounds.push([lat, lng]);
 
         const biteCases = Number(row["Animal Bite Cases"]) || 0;
         const humanDeaths = Number(row["Human Rabies Deaths"]) || 0;
         const animalDeaths = Number(row["Animal Rabies Deaths"]) || 0;
 
-        if (biteCases > 0) bitePoints.push(...generateCluster(lat, lng, biteCases, 0.020));
-        if (humanDeaths > 0) humanPoints.push(...generateCluster(lat, lng, humanDeaths, 0.010));
-        if (animalDeaths > 0) animalPoints.push(...generateCluster(lat, lng, animalDeaths, 0.015));
+        let activeMetric = biteCases;
+        if (selectedLayer === "human") activeMetric = humanDeaths;
+        else if (selectedLayer === "animal") activeMetric = animalDeaths;
+
+        // Calculate normalized weight intensity between 0.15 and 1.0
+        if (activeMetric > 0) {
+            const intensity = Math.min(Math.max(activeMetric / maxMetric, 0.15), 1.0);
+            heatPoints.push([lat, lng, intensity]);
+        }
+
+        // Scale marker radius dynamically between 4px and 12px based on case magnitude
+        const markerRadius = activeMetric > 0 
+            ? Math.min(Math.max(4 + (activeMetric / maxMetric) * 8, 4), 12)
+            : 4;
 
         const marker = L.circleMarker([lat, lng], {
-            radius: 6, color: "#ffffff", weight: 2, fillColor: "#1a234e", fillOpacity: 1
+            radius: markerRadius,
+            color: "#ffffff",
+            weight: 1.5,
+            fillColor: selectedLayer === "human" ? "#C62828" : (selectedLayer === "animal" ? "#1565C0" : "#EA6113"),
+            fillOpacity: 0.9
         });
         
         marker.bindPopup(`
-            <b style="font-size: 14px;">${row.Municipality}</b><br><hr style="margin: 5px 0;">
-            <b>Year:</b> ${row.Year}<br>
-            <b>Animal Bite Cases:</b> ${biteCases.toLocaleString()}<br>
-            <b>Human Rabies Deaths:</b> ${humanDeaths.toLocaleString()}<br>
-            <b>Animal Rabies Deaths:</b> ${animalDeaths.toLocaleString()}
+            <div style="font-family: 'Lato', sans-serif; min-width: 170px;">
+                <b style="font-size: 14px; color: #111625;">${row.Municipality}</b>
+                <hr style="margin: 6px 0; border: none; border-top: 1px solid #ddd;">
+                <div style="font-size: 12px; line-height: 1.5;">
+                    <b>Year:</b> ${row.Year}<br>
+                    <b>Animal Bite Cases:</b> ${biteCases.toLocaleString()}<br>
+                    <b>Human Rabies Deaths:</b> ${humanDeaths.toLocaleString()}<br>
+                    <b>Animal Rabies Deaths:</b> ${animalDeaths.toLocaleString()}
+                </div>
+            </div>
         `);
         
         if (markerLayer) markerLayer.addLayer(marker);
     });
 
-    biteHeatLayer = L.heatLayer(bitePoints, { radius: 28, blur: 18, maxZoom: 16, minOpacity: 0.45, max: 1.0, gradient: { '0.4': "#FFE082", '0.6': "#FFB300", '0.8': "#EA6113", '1.0': "#8C2F00" } });
-    humanHeatLayer = L.heatLayer(humanPoints, { radius: 24, blur: 16, maxZoom: 16, minOpacity: 0.45, max: 1.0, gradient: { '0.4': "#FFCDD2", '0.6': "#EF5350", '0.8': "#C62828", '1.0': "#7F0000" } });
-    animalHeatLayer = L.heatLayer(animalPoints, { radius: 24, blur: 16, maxZoom: 16, minOpacity: 0.45, max: 1.0, gradient: { '0.4': "#BBDEFB", '0.6': "#42A5F5", '0.8': "#1565C0", '1.0': "#002171" } });
-
-    const selected = layerFilter ? layerFilter.value : "bite";
-    if (selected === "bite") biteHeatLayer.addTo(map);
-    else if (selected === "human") humanHeatLayer.addTo(map);
-    else if (selected === "animal") animalHeatLayer.addTo(map);
-    else {
-        biteHeatLayer.addTo(map);
-        humanHeatLayer.addTo(map);
-        animalHeatLayer.addTo(map);
+    // Layer-specific gradient configs
+    let gradientConfig = { '0.2': "#FFE082", '0.5': "#FFB300", '0.8': "#EA6113", '1.0': "#8C2F00" }; // Sunset Orange (Bites)
+    if (selectedLayer === "human") {
+        gradientConfig = { '0.2': "#FFCDD2", '0.5': "#EF5350", '0.8': "#C62828", '1.0': "#7F0000" }; // Crimson (Human Deaths)
+    } else if (selectedLayer === "animal") {
+        gradientConfig = { '0.2': "#BBDEFB", '0.5': "#42A5F5", '0.8': "#1565C0", '1.0': "#002171" }; // Blue (Animal Deaths)
     }
+
+    currentHeatLayer = L.heatLayer(heatPoints, {
+        radius: 35,
+        blur: 22,
+        maxZoom: 14,
+        max: 1.0,
+        minOpacity: 0.35,
+        gradient: gradientConfig
+    }).addTo(map);
     
-    if (bounds.length > 0 && map) map.fitBounds(bounds, { padding: [40, 40] });
-}
-
-function generateCluster(lat, lng, cases, spread) {
-    const points = [];
-    if (cases <= 0) return points;
-    const totalPoints = Math.max(Math.round(cases / 5), 1);
-    for (let i = 0; i < totalPoints; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const distance = Math.sqrt(Math.random()) * spread;
-        points.push([lat + Math.cos(angle) * distance, lng + Math.sin(angle) * distance, 1.0]);
+    if (bounds.length > 0 && map) {
+        map.fitBounds(bounds, { padding: [40, 40] });
     }
-    return points;
 }
 
 function clearMap() {
     if (!map) return;
-    if (biteHeatLayer) { map.removeLayer(biteHeatLayer); biteHeatLayer = null; }
-    if (humanHeatLayer) { map.removeLayer(humanHeatLayer); humanHeatLayer = null; }
-    if (animalHeatLayer) { map.removeLayer(animalHeatLayer); animalHeatLayer = null; }
-    if (markerLayer) markerLayer.clearLayers();
+    if (currentHeatLayer) { 
+        map.removeLayer(currentHeatLayer); 
+        currentHeatLayer = null; 
+    }
+    if (markerLayer) {
+        markerLayer.clearLayers();
+    }
 }
 
 function refreshMap() {
@@ -580,7 +465,7 @@ function refreshMap() {
         updateStatistics(filteredData);
         updateTopMunicipalities(filteredData);
         drawHeatmap(filteredData);
-    }, 150);
+    }, 100);
 }
 
 window.addEventListener("resize", () => { if (map) map.invalidateSize(); });

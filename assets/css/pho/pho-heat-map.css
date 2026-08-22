@@ -8,7 +8,7 @@
     --sidebar-bg: #111625;
     --sidebar-border: rgba(255, 255, 255, 0.08);
     --sidebar-width: 260px;
-    --sidebar-collapsed-width: 72px;
+    --sidebar-collapsed-width: 76px;
     --text-light: #F3F4F6;
     --text-muted: #9CA3AF;
     --main-bg: #FFFAF0;
@@ -29,6 +29,7 @@ html {
     background-color: var(--main-bg);
 }
 
+.container,
 .app-container {
     display: flex;
     width: 100%;
@@ -57,7 +58,6 @@ html {
     width: var(--sidebar-collapsed-width) !important;
 }
 
-/* Sidebar Header & Brand Title */
 .sidebar-header {
     display: flex;
     align-items: center;
@@ -68,6 +68,7 @@ html {
     width: 100%;
     box-sizing: border-box;
     overflow: visible !important;
+    position: static !important;
 }
 
 .brand-logo img {
@@ -113,7 +114,7 @@ html {
 
 .toggle-btn {
     position: absolute !important;
-    top: 38px !important;
+    top: 32px !important;
     right: -16px !important;
     transform: translateY(-50%) !important;
     width: 32px;
@@ -147,7 +148,6 @@ html {
     transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* Sidebar Navigation Items */
 .sidebar-nav {
     flex: 1;
     display: flex;
@@ -214,7 +214,6 @@ html {
     display: none;
 }
 
-/* Active State Styles */
 .nav-item.active {
     color: var(--text-light);
     background: rgba(234, 97, 19, 0.12);
@@ -232,7 +231,6 @@ html {
     border-radius: 0 4px 4px 0;
 }
 
-/* Footer Section */
 .sidebar-footer {
     padding-top: 16px;
     border-top: 1px solid var(--sidebar-border);

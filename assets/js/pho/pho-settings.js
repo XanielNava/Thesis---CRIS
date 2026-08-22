@@ -1,11 +1,9 @@
 // ==============================================================================
-// settings.js - Master PHO Settings & Facility Management Controller
+// pho-settings.js - Master PHO Settings & Facility Management Controller
 // ==============================================================================
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { auth, db } from '../../js/firebase/firebase-config.js';
 import { 
-    getFirestore, 
-    connectFirestoreEmulator, 
     collection, 
     writeBatch, 
     doc, 
@@ -16,37 +14,12 @@ import {
     query, 
     orderBy, 
     limit 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { 
-    getAuth, 
     onAuthStateChanged,
     updatePassword,
-    signOut,
-    connectAuthEmulator 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-// Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
-    authDomain: "cris-database-da989.firebaseapp.com",
-    databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "cris-database-da989",
-    storageBucket: "cris-database-da989.firebasestorage.app",
-    messagingSenderId: "627885439681",
-    appId: "1:627885439681:web:3c657d64c0aad9b4913240",
-    measurementId: "G-0X99BH7GW4"
-};
-
-// Initialize Services
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// 🧪 CONNECT TO LOCAL EMULATOR (ONLY WHEN RUNNING LOCALLY)
-if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    connectFirestoreEmulator(db, '127.0.0.1', 8080);
-    connectAuthEmulator(auth, 'http://127.0.0.1:9099');
-}
+    signOut 
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 // Global State Variables
 let currentUserId = null;
@@ -54,32 +27,7 @@ let processedLogoBase64 = null;
 let editingFacilityId = null;
 let facilityModalInstance = null;
 
-// ================= SIDEBAR TOGGLE ENGINE =================
-function setupSidebar() {
-    const sidebarToggle = document.getElementById("sidebarToggle");
-    const sidebar = document.getElementById("sidebar");
-
-    if (sidebar) {
-        const wasCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
-        if (wasCollapsed) {
-            sidebar.classList.add("collapsed");
-        }
-    }
-
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener("click", function() {
-            sidebar.classList.toggle("collapsed");
-            const isCollapsed = sidebar.classList.contains("collapsed");
-            localStorage.setItem("sidebarCollapsed", isCollapsed);
-        });
-    }
-}
-
 document.addEventListener("DOMContentLoaded", () => {
-    
-    // Initialize Sidebar Controls
-    setupSidebar();
-
     // Initialize Bootstrap Modal Instance for Facility Management
     const facilityModalEl = document.getElementById("facilityModal");
     if (facilityModalEl && typeof bootstrap !== "undefined") {
@@ -185,7 +133,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // -------------------------------------------------------------
     // 2. HEALTH FACILITY MANAGEMENT (MODAL & ABTC DIRECTORY)
     // -------------------------------------------------------------
-    // Open Modal for New Facility Creation
     const openAddFacilityModalBtn = document.getElementById("openAddFacilityModalBtn");
     if (openAddFacilityModalBtn) {
         openAddFacilityModalBtn.addEventListener("click", () => {
@@ -196,16 +143,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Save/Update Managed Facility via Modal Form
-    const saveManagedFacilityBtn = document.getElementById("saveManagedFacilityBtn");
-    if (saveManagedFacilityBtn) {
-        saveManagedFacilityBtn.addEventListener("click", async () => {
-            const nameInput = document.getElementById("facilityMgmtName");
-            const codeInput = document.getElementById("facilityMgmtCode");
-            const typeInput = document.getElementById("facilityMgmtType");
-            const muniInput = document.getElementById("facilityMgmtMunicipality");
-            const contactInput = document.getElementById("facilityMgmtContact");
-            const statusInput = document.getElementById("facilityMgmtStatus");
+    const facilityForm = document.getElementById("facilityForm");
+    if (facilityForm) {
+        facilityForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById("facilityName");
+            const typeInput = document.getElementById("facilityType");
+            const headInput = document.getElementById("facilityHead");
+            const contactInput = document.getElementById("facilityContact");
+            const emailInput = document.getElementById("facilityEmail");
+            const submitBtn = document.getElementById("saveFacilitySubmitBtn");
 
             const facilityName = nameInput?.value.trim();
             if (!facilityName) {
@@ -213,18 +160,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            saveManagedFacilityBtn.disabled = true;
-            saveManagedFacilityBtn.innerText = "Saving...";
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Saving...";
+            }
 
             try {
                 const docId = editingFacilityId || sanitizeDocId(facilityName);
                 const facilityPayload = {
                     facilityName: facilityName,
-                    facilityCode: codeInput?.value.trim() || "",
                     facilityType: typeInput?.value || "ABTC",
-                    municipality: muniInput?.value.trim() || "",
+                    facilityHead: headInput?.value.trim() || "",
                     contactNumber: contactInput?.value.trim() || "",
-                    status: statusInput?.value || "Active",
+                    email: emailInput?.value.trim() || "",
                     lastUpdated: new Date().toISOString()
                 };
 
@@ -235,7 +183,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     `${editingFacilityId ? 'Updated' : 'Added'} facility record: ${facilityName}`
                 );
 
-                // Close Modal & Reset
                 if (facilityModalInstance) {
                     facilityModalInstance.hide();
                 }
@@ -246,8 +193,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error("Error saving facility record:", err);
                 alert("Failed to save facility: " + err.message);
             } finally {
-                saveManagedFacilityBtn.disabled = false;
-                saveManagedFacilityBtn.innerText = editingFacilityId ? "Update Facility" : "Save Facility";
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Save Facility";
+                }
             }
         });
     }
@@ -372,12 +321,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("logout-btn")?.addEventListener("click", async () => {
         if (confirm("Are you sure you want to log out?")) {
             await signOut(auth);
-            window.location.href = "../../src/pho/pho-login.html";
+            window.location.href = "pho-login.html";
         }
     });
 });
 
-// Helper: Fetch Facility Config
 async function loadFacilityData() {
     try {
         const snap = await getDoc(doc(db, "pho-database", "main", "facility-info", "config"));
@@ -396,64 +344,78 @@ async function loadFacilityData() {
     }
 }
 
-// Helper: Load Managed Facilities Directory Table
 async function loadManagedFacilities() {
-    const tableBody = document.querySelector("#facilityMgmtTable tbody");
-    if (!tableBody) return;
+    const container = document.getElementById("facilityListContainer");
+    if (!container) return;
 
     try {
         const q = query(collection(db, "pho-database", "main", "facility-management"), orderBy("facilityName", "asc"));
         const snap = await getDocs(q);
-        tableBody.innerHTML = "";
+        container.innerHTML = "";
 
         if (snap.empty) {
-            tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No operational health facilities registered yet. Click "Add Facility" to create one.</td></tr>`;
+            container.innerHTML = `<p class="text-muted" style="grid-column: 1 / -1;">No operational health facilities registered yet. Click "Add New Facility" to register one.</p>`;
             return;
         }
 
         snap.forEach((docSnap) => {
             const data = docSnap.data();
             const docId = docSnap.id;
-            const statusBadge = data.status === "Active" 
-                ? '<span class="badge bg-success">Active</span>' 
-                : '<span class="badge bg-secondary">Inactive</span>';
+            const typeBadgeClass = (data.facilityType || "ABTC").toLowerCase() === "rhu" ? "rhu" : "abtc";
 
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td><strong>${data.facilityName || "—"}</strong></td>
-                <td><code>${data.facilityCode || "N/A"}</code></td>
-                <td><span class="badge bg-info text-dark">${data.facilityType || "ABTC"}</span></td>
-                <td>${data.municipality || "—"}</td>
-                <td>${statusBadge}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary me-1 edit-facility-btn" data-id="${docId}">Edit</button>
-                    <button class="btn btn-sm btn-outline-danger delete-facility-btn" data-id="${docId}" data-name="${data.facilityName}">Delete</button>
-                </td>
+            const card = document.createElement("div");
+            card.className = "facility-card";
+            card.innerHTML = `
+                <div class="facility-card-header">
+                    <div class="facility-badge-group">
+                        <span class="facility-type-badge ${typeBadgeClass}">${data.facilityType || "ABTC"}</span>
+                        <div class="facility-name">${data.facilityName || "—"}</div>
+                    </div>
+                    <div class="facility-actions">
+                        <button class="btn-icon edit-facility-btn" data-id="${docId}"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-icon delete-facility-btn" data-id="${docId}" data-name="${data.facilityName}"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="facility-card-body">
+                    <div class="facility-info-grid">
+                        <div class="facility-info-item">
+                            <span class="info-label"><i class="fa-solid fa-user-doctor"></i> Head of Facility</span>
+                            <span class="info-value">${data.facilityHead || "—"}</span>
+                        </div>
+                        <div class="facility-info-item">
+                            <span class="info-label"><i class="fa-solid fa-phone"></i> Contact</span>
+                            <span class="info-value">${data.contactNumber || "—"}</span>
+                        </div>
+                        <div class="facility-info-item">
+                            <span class="info-label"><i class="fa-solid fa-envelope"></i> Email</span>
+                            <span class="info-value">${data.email || "—"}</span>
+                        </div>
+                    </div>
+                </div>
             `;
 
-            row.querySelector(".edit-facility-btn").addEventListener("click", () => editFacility(docId, data));
-            row.querySelector(".delete-facility-btn").addEventListener("click", () => deleteFacility(docId, data.facilityName));
+            card.querySelector(".edit-facility-btn").addEventListener("click", () => editFacility(docId, data));
+            card.querySelector(".delete-facility-btn").addEventListener("click", () => deleteFacility(docId, data.facilityName));
 
-            tableBody.appendChild(row);
+            container.appendChild(card);
         });
     } catch (err) {
         console.error("Failed loading facility management directory:", err);
     }
 }
 
-// Populate Modal Inputs for Editing
 function editFacility(id, data) {
     editingFacilityId = id;
-    if (document.getElementById("facilityMgmtName")) document.getElementById("facilityMgmtName").value = data.facilityName || "";
-    if (document.getElementById("facilityMgmtCode")) document.getElementById("facilityMgmtCode").value = data.facilityCode || "";
-    if (document.getElementById("facilityMgmtType")) document.getElementById("facilityMgmtType").value = data.facilityType || "ABTC";
-    if (document.getElementById("facilityMgmtMunicipality")) document.getElementById("facilityMgmtMunicipality").value = data.municipality || "";
-    if (document.getElementById("facilityMgmtContact")) document.getElementById("facilityMgmtContact").value = data.contactNumber || "";
-    if (document.getElementById("facilityMgmtStatus")) document.getElementById("facilityMgmtStatus").value = data.status || "Active";
+    if (document.getElementById("facilityId")) document.getElementById("facilityId").value = id;
+    if (document.getElementById("facilityName")) document.getElementById("facilityName").value = data.facilityName || "";
+    if (document.getElementById("facilityType")) document.getElementById("facilityType").value = data.facilityType || "ABTC";
+    if (document.getElementById("facilityHead")) document.getElementById("facilityHead").value = data.facilityHead || "";
+    if (document.getElementById("facilityContact")) document.getElementById("facilityContact").value = data.contactNumber || "";
+    if (document.getElementById("facilityEmail")) document.getElementById("facilityEmail").value = data.email || "";
 
-    const saveBtn = document.getElementById("saveManagedFacilityBtn");
-    const modalTitle = document.getElementById("facilityModalTitle");
-    if (saveBtn) saveBtn.innerText = "Update Facility";
+    const submitBtn = document.getElementById("saveFacilitySubmitBtn");
+    const modalTitle = document.getElementById("facilityModalLabel");
+    if (submitBtn) submitBtn.innerText = "Update Facility";
     if (modalTitle) modalTitle.innerText = "Edit Health Facility";
 
     if (facilityModalInstance) {
@@ -461,7 +423,6 @@ function editFacility(id, data) {
     }
 }
 
-// Delete Managed Facility
 async function deleteFacility(id, name) {
     if (confirm(`Are you sure you want to delete "${name}" from the facility registry?`)) {
         try {
@@ -476,23 +437,21 @@ async function deleteFacility(id, name) {
     }
 }
 
-// Reset Modal Form Fields
 function resetFacilityForm() {
     editingFacilityId = null;
-    if (document.getElementById("facilityMgmtName")) document.getElementById("facilityMgmtName").value = "";
-    if (document.getElementById("facilityMgmtCode")) document.getElementById("facilityMgmtCode").value = "";
-    if (document.getElementById("facilityMgmtType")) document.getElementById("facilityMgmtType").value = "ABTC";
-    if (document.getElementById("facilityMgmtMunicipality")) document.getElementById("facilityMgmtMunicipality").value = "";
-    if (document.getElementById("facilityMgmtContact")) document.getElementById("facilityMgmtContact").value = "";
-    if (document.getElementById("facilityMgmtStatus")) document.getElementById("facilityMgmtStatus").value = "Active";
+    if (document.getElementById("facilityId")) document.getElementById("facilityId").value = "";
+    if (document.getElementById("facilityName")) document.getElementById("facilityName").value = "";
+    if (document.getElementById("facilityType")) document.getElementById("facilityType").value = "ABTC";
+    if (document.getElementById("facilityHead")) document.getElementById("facilityHead").value = "";
+    if (document.getElementById("facilityContact")) document.getElementById("facilityContact").value = "";
+    if (document.getElementById("facilityEmail")) document.getElementById("facilityEmail").value = "";
 
-    const saveBtn = document.getElementById("saveManagedFacilityBtn");
-    const modalTitle = document.getElementById("facilityModalTitle");
-    if (saveBtn) saveBtn.innerText = "Save Facility";
-    if (modalTitle) modalTitle.innerText = "Add Health Facility";
+    const submitBtn = document.getElementById("saveFacilitySubmitBtn");
+    const modalTitle = document.getElementById("facilityModalLabel");
+    if (submitBtn) submitBtn.innerText = "Save Facility";
+    if (modalTitle) modalTitle.innerText = "Add New Facility";
 }
 
-// Helper: Fetch User Profile
 async function loadUserData(user) {
     try {
         if (document.getElementById("userEmail")) document.getElementById("userEmail").value = user.email || "";
@@ -510,7 +469,6 @@ async function loadUserData(user) {
     }
 }
 
-// File Processor: Population -> Stored in subcollection path: pho-database/main/population-data
 async function processPopulationFile(file) {
     if (typeof XLSX === "undefined") {
         throw new Error("SheetJS library (XLSX) is not loaded. Please verify script inclusion in your HTML.");
@@ -523,7 +481,7 @@ async function processPopulationFile(file) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: "array" });
                 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: 0 });
 
                 const cleanData = [];
                 for (let i = 3; i < rawRows.length; i++) {
@@ -539,7 +497,10 @@ async function processPopulationFile(file) {
                     const totalPopulation = parseNumber(row[2]);
                     if (totalPopulation === 0) continue;
 
-                    cleanData.push({ facilityName: val0, totalPopulation });
+                    cleanData.push({ 
+                        facilityName: val0, 
+                        totalPopulation: Number(totalPopulation) || 0 
+                    });
                 }
 
                 if (cleanData.length === 0) throw new Error("No valid population records found.");
@@ -563,7 +524,13 @@ async function processPopulationFile(file) {
                 }
 
                 const historyRef = doc(collection(db, "pho-database", "main", "import-history"));
-                const historyRecord = { timestamp: new Date(), fileName: file.name, importType: "population", totalFacilities: cleanData.length, status: "Completed" };
+                const historyRecord = { 
+                    timestamp: new Date(), 
+                    fileName: file.name, 
+                    importType: "population", 
+                    totalFacilities: cleanData.length, 
+                    status: "Completed" 
+                };
                 await setDoc(historyRef, historyRecord);
 
                 addHistoryRow(formatDateTime(historyRecord.timestamp), file.name, `${cleanData.length} Records (Incl. ILOILO Total)`, "Completed");
@@ -576,7 +543,6 @@ async function processPopulationFile(file) {
     });
 }
 
-// File Processor: Legacy -> Stored in subcollection path: pho-database/main/legacy-summary
 async function processLegacyFile(file) {
     if (typeof XLSX === "undefined") {
         throw new Error("SheetJS library (XLSX) is not loaded. Please verify script inclusion in your HTML.");
@@ -589,7 +555,7 @@ async function processLegacyFile(file) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: "array" });
                 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: 0 });
 
                 const cleanData = [];
                 for (let i = 1; i < rawRows.length; i++) {
@@ -598,7 +564,18 @@ async function processLegacyFile(file) {
                     const facilityName = String(row[0]).trim();
                     if (!facilityName || ["total", "grand total"].includes(facilityName.toLowerCase())) continue;
 
-                    cleanData.push({ facilityName, rawData: row, lastUpdated: new Date() });
+                    // Clean all 24 columns to prevent undefined values from reaching Firestore
+                    const sanitizedRow = Array.from({ length: 24 }, (_, idx) => {
+                        const val = row[idx];
+                        if (val === undefined || val === null) return idx === 0 ? facilityName : 0;
+                        return idx === 0 ? String(val).trim() : (isNaN(Number(val)) ? 0 : Number(val));
+                    });
+
+                    cleanData.push({
+                        facilityName,
+                        rawData: sanitizedRow,
+                        lastUpdated: new Date()
+                    });
                 }
 
                 if (cleanData.length === 0) throw new Error("No valid legacy data rows found.");
@@ -618,7 +595,13 @@ async function processLegacyFile(file) {
                 }
 
                 const historyRef = doc(collection(db, "pho-database", "main", "import-history"));
-                const historyRecord = { timestamp: new Date(), fileName: file.name, importType: "legacy", totalFacilities: cleanData.length, status: "Completed" };
+                const historyRecord = { 
+                    timestamp: new Date(), 
+                    fileName: file.name, 
+                    importType: "legacy", 
+                    totalFacilities: cleanData.length, 
+                    status: "Completed" 
+                };
                 await setDoc(historyRef, historyRecord);
 
                 addHistoryRow(formatDateTime(historyRecord.timestamp), file.name, `${cleanData.length} Municipalities`, "Completed");
@@ -631,7 +614,6 @@ async function processLegacyFile(file) {
     });
 }
 
-// Log System Actions
 async function logSystemActivity(action, details) {
     try {
         const userEmail = auth.currentUser?.email || "system";

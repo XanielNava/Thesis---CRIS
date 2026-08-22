@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,400;0,700;0,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
     
     <!-- Chart.js CDN for Rabies Exposure Trends -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -68,7 +69,10 @@
 
             <div class="sidebar-footer">
                 <a href="pho-settings.html" class="nav-item">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
                     <span class="nav-text">Settings</span>
                 </a>
                 <button id="logout-btn" class="nav-item logout-item" onclick="window.location.href='pho-login.html'">
@@ -84,10 +88,10 @@
                 <h1>PHO DASHBOARD</h1>
                 <div class="user-profile-top">
                     <div class="profile-info">
-                        <strong>Xaniel Marios Angelo B. Nava</strong><br>
-                        <span>Administrator</span>
+                        <strong id="topProfileName">Loading User...</strong><br>
+                        <span id="topProfileRole">PHO Module</span>
                     </div>
-                    <div class="profile-icon"></div>
+                    <div class="profile-icon" id="topProfileIcon"></div>
                 </div>
             </header>
 
@@ -95,25 +99,61 @@
                 <!-- LEFT COLUMN: WELCOME, KPIS, AND TREND CHART -->
                 <section class="left-column">
                     <div class="welcome-bar">
-                        <span>Hello, Xaniel Marios Angelo B. Nava</span>
+                        <div class="welcome-text">
+                            <span id="welcomeGreeting">Hello, Authorized Personnel</span>
+                            <small class="welcome-subtext">Provincial Health Office Rabies Surveillance & Data Intelligence</small>
+                        </div>
+                        <div class="year-filter-wrapper">
+                            <!-- Year Filter -->
+                            <label for="dashYearFilter"><i class="fa-regular fa-calendar"></i> Year:</label>
+                            <select id="dashYearFilter" class="dashboard-year-select">
+                                <option value="All">All Years</option>
+                            </select>
+
+                            <!-- Month Filter -->
+                            <label for="dashMonthFilter" style="margin-left: 8px;"><i class="fa-regular fa-calendar-days"></i> Month:</label>
+                            <select id="dashMonthFilter" class="dashboard-year-select">
+                                <option value="current">Current Month</option>
+                                <option value="0">January</option>
+                                <option value="1">February</option>
+                                <option value="2">March</option>
+                                <option value="3">April</option>
+                                <option value="4">May</option>
+                                <option value="5">June</option>
+                                <option value="6">July</option>
+                                <option value="7">August</option>
+                                <option value="8">September</option>
+                                <option value="9">October</option>
+                                <option value="10">November</option>
+                                <option value="11">December</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <!-- KPI STATISTICS CONTAINER -->
+                    <!-- KPI STATISTICS CONTAINER (4 CARDS) -->
                     <div class="statistics-container">
                         <div class="stat-card">
                             <small>Human Population</small>
                             <h2 id="humanPopulation">0</h2>
+                            <span class="sub-stat-badge neutral">Iloilo Province Total</span>
                         </div>
 
                         <div class="stat-card">
-                            <small>ABTC Reporting</small>
-                            <h2 id="abtcReporting">0 / 0</h2>
-                            <span class="sub-stat-percentage">0.0% Completed</span>
+                            <small id="monthlyPatientsTitle">Monthly Patients</small>
+                            <h2 id="monthlyPatientsCount">0</h2>
+                            <span class="sub-stat-badge success" id="monthlyPatientsBadge">Current Month</span>
                         </div>
 
                         <div class="stat-card">
-                            <small>Human Rabies Cases</small>
-                            <h2 id="humanRabiesCases">0</h2>
+                            <small>Human Rabies Deaths</small>
+                            <h2 id="humanRabiesCases" class="text-danger-custom">0</h2>
+                            <span class="sub-stat-badge warning">Target: Zero Rabies Deaths</span>
+                        </div>
+
+                        <div class="stat-card">
+                            <small>PEP Treatment Completion</small>
+                            <h2 id="pepCompletionRate">0.0%</h2>
+                            <span class="sub-stat-badge info" id="pepRatioBadge">Cat II & III Regimen</span>
                         </div>
                     </div>
 
@@ -122,12 +162,17 @@
                         <div class="chart-card">
                             <div class="chart-header">
                                 <div>
-                                    <h3>Rabies Exposure Trends</h3>
+                                    <h3>Rabies Exposure & Vaccine Trends</h3>
+                                    <span class="chart-subtitle">Monthly distribution of bite incidence, PEP administration, and mortality</span>
                                 </div>
-                                <div class="chart-legend">
-                                    <span class="legend-item"><span class="legend-color cat-2"></span> Animal Bite Cases</span>
-                                    <span class="legend-item"><span class="legend-color cat-3"></span> No. of Vaccinated Patients</span>
-                                    <span class="legend-item"><span class="legend-color cat-mortality"></span> Mortality</span>
+                                <div class="year-filter-wrapper">
+                                    <label for="chartMetricFilter"><i class="fa-solid fa-chart-line"></i> View Metric:</label>
+                                    <select id="chartMetricFilter" class="dashboard-year-select">
+                                        <option value="all">All Metrics</option>
+                                        <option value="0">Animal Bite Cases</option>
+                                        <option value="1">Vaccinated Patients (TCV)</option>
+                                        <option value="2">Mortality</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="chart-wrapper">
@@ -178,7 +223,7 @@
                         <div class="compliance-box">
                             <h4 id="selectedDate">Select a date</h4>
                             <textarea id="eventInput" placeholder="Type here for announcements and reminders" rows="4"></textarea>
-                            <button id="saveEventBtn">Save</button>
+                            <button id="saveEventBtn">Save Announcement</button>
                         </div>
                     </div>
                 </aside>
@@ -186,7 +231,7 @@
         </main>
     </div>
 
-    <!-- Application Module Script -->
+    <!-- Application Module Scripts -->
     <script type="module" src="../../assets/js/pho/pho-dash.js"></script>
     <script type="module" src="../../assets/js/main/sidebar.js"></script>
 </body>

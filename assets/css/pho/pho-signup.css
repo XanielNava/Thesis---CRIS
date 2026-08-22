@@ -280,7 +280,6 @@ input, select {
     padding-left: 40px;
 }
 
-/* Ensure password/text input content doesn't collide with the eye icon */
 .input-wrapper input[type="password"],
 .input-wrapper input[type="text"] {
     padding-right: 42px; 
