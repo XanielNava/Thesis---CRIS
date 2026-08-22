@@ -12,13 +12,9 @@ import {
 let rowsPerPage = 40;
 let currentPage = 1;
 let allLegacyCases = [];
-let livePatientCases = [];
 let filteredCases = [];
 let availableYears = new Set();
 let facilitiesMap = new Map();
-
-const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const seasonalWeights = [0.075, 0.082, 0.095, 0.108, 0.115, 0.092, 0.081, 0.079, 0.068, 0.072, 0.088, 0.085];
 
 /* 1. FETCH & MAP FACILITIES FROM DATABASE */
 async function loadFacilitiesRegistry() {
@@ -29,52 +25,50 @@ async function loadFacilitiesRegistry() {
             facSnap = await getDocs(collection(db, "pho-database", "main", "facility-management"));
         }
 
-        facSnap.forEach(docSnap => {
-            const data = docSnap.data();
-            const id = docSnap.id;
+        if (facSnap && !facSnap.empty) {
+            facSnap.forEach(docSnap => {
+                const data = docSnap.data();
+                const id = docSnap.id;
 
-            // Resolve name from name, facilityName, acronym, or address
-            let displayName = data.facilityName || data.name || data.abtcName || "";
+                let displayName = data.facilityName || data.name || data.abtcName || "";
 
-            if (!displayName && data.acronym) {
-                displayName = data.acronym;
-            }
-
-            if (data.address && typeof data.address === 'object') {
-                const addr = data.address;
-                const locParts = [addr.barangay, addr.city || addr.municipality].filter(Boolean).join(", ");
-                if (displayName && data.acronym) {
-                    displayName = `${displayName} (${data.acronym})`;
-                } else if (!displayName && locParts) {
-                    displayName = data.acronym ? `${data.acronym} - ${locParts}` : locParts;
+                if (!displayName && data.acronym) {
+                    displayName = data.acronym;
                 }
-            }
 
-            if (!displayName) {
-                displayName = data.municipality || data.city || id;
-            }
+                if (data.address && typeof data.address === 'object') {
+                    const addr = data.address;
+                    const locParts = [addr.barangay, addr.city || addr.municipality].filter(Boolean).join(", ");
+                    if (displayName && data.acronym) {
+                        displayName = `${displayName} (${data.acronym})`;
+                    } else if (!displayName && locParts) {
+                        displayName = data.acronym ? `${data.acronym} - ${locParts}` : locParts;
+                    }
+                }
 
-            facilitiesMap.set(id, displayName);
-        });
+                if (!displayName) {
+                    displayName = data.municipality || data.city || id;
+                }
+
+                facilitiesMap.set(id, displayName);
+            });
+        }
     } catch (err) {
-        console.warn("Could not load facilities lookup map:", err);
+        // Offline / Unreachable
     }
 }
 
 /* 2. RESOLVE FACILITY NAME HELPER */
 function resolveFacilityName(data, rawId = "") {
-    // If the data already contains a facilityId that matches our facilities table
     const targetId = data.facilityId || data.facility_id || rawId;
     if (targetId && facilitiesMap.has(targetId)) {
         return facilitiesMap.get(targetId);
     }
 
-    // Direct object properties
     if (data.facilityName) return data.facilityName;
     if (data.name) return data.name;
     if (data.acronym) return data.acronym;
 
-    // Nested address lookup
     if (data.address && typeof data.address === 'object') {
         const addr = data.address;
         const loc = [addr.barangay, addr.city || addr.municipality].filter(Boolean).join(", ");
@@ -85,17 +79,13 @@ function resolveFacilityName(data, rawId = "") {
     if (data.city) return data.city;
     if (data.abtc) return data.abtc;
 
-    return "Iloilo Provincial Health Office - ABTC";
+    return rawId || "Unassigned Facility";
 }
 
 /* 3. LOAD DATA FROM FIRESTORE */
 async function loadCases() {
     const tbody = document.getElementById("casesTableBody");
-    
-    if (!tbody) {
-        console.error("❌ Element 'casesTableBody' not found in HTML");
-        return;
-    }
+    if (!tbody) return;
 
     tbody.innerHTML = `
         <tr>
@@ -103,21 +93,19 @@ async function loadCases() {
                 <div style="padding: 35px; text-align: center; color: #7E8B9B;">
                     <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: #EA6113; margin-bottom: 12px;"></i>
                     <p style="font-weight: 700; color: #412110; margin-bottom: 4px;">Loading Provincial Case Ledger...</p>
-                    <span style="font-size: 12px;">Synchronizing official animal bite and treatment records</span>
+                    <span style="font-size: 12px;">Synchronizing official animal bite records</span>
                 </div>
             </td>
         </tr>
     `;
 
     try {
-        // Step A: Load Facilities first so we can map IDs accurately
         await loadFacilitiesRegistry();
 
         allLegacyCases = [];
-        livePatientCases = [];
         availableYears.clear();
 
-        // Step B: Fetch Legacy Summary Records
+        // Query only legacy summary / uploaded report sheets
         let legacyCollection = collection(db, "pho-database", "main", "legacy-summary");
         let snapshot = await getDocs(legacyCollection);
 
@@ -127,12 +115,12 @@ async function loadCases() {
         }
 
         let orderCounter = 0;
-        if (!snapshot.empty) {
+        if (snapshot && !snapshot.empty) {
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 orderCounter++;
-                const entryYear = Number(data.year) || (data.rawData && data.rawData[0] && !isNaN(Number(data.rawData[0])) ? Number(data.rawData[0]) : "Legacy");
-                if (entryYear !== "Legacy") availableYears.add(entryYear);
+                const entryYear = Number(data.year) || (data.rawData && data.rawData[0] && !isNaN(Number(data.rawData[0])) ? Number(data.rawData[0]) : null);
+                if (entryYear) availableYears.add(entryYear);
 
                 const facilityTitle = data.rawData && Array.isArray(data.rawData)
                     ? (data.rawData[0] || resolveFacilityName(data, docSnap.id))
@@ -167,8 +155,7 @@ async function loadCases() {
                         remarksNoneII: Number(row[21] || 0),
                         remarksNoneIII: Number(row[22] || 0),
                         rep: Number(row[23] || 0),
-                        documentOrder: data.documentOrder || orderCounter,
-                        source: "legacy"
+                        documentOrder: data.documentOrder || orderCounter
                     });
                 } else {
                     allLegacyCases.push({
@@ -198,75 +185,30 @@ async function loadCases() {
                         remarksNoneII: Number(data.remarksNoneII || 0),
                         remarksNoneIII: Number(data.remarksNoneIII || 0),
                         rep: Number(data.rep || 0),
-                        documentOrder: data.documentOrder || orderCounter,
-                        source: "legacy"
+                        documentOrder: data.documentOrder || orderCounter
                     });
                 }
             });
         }
 
-        // Step C: Fetch Individual Patient Database Records
-        try {
-            const patientsSnap = await getDocs(collection(db, "patient-database"));
-            if (!patientsSnap.empty) {
-                patientsSnap.forEach(docSnap => {
-                    const d = docSnap.data();
-                    let dateObj = null;
-
-                    if (d.dateOfBite?.toDate) dateObj = d.dateOfBite.toDate();
-                    else if (d.dateOfConsultation?.toDate) dateObj = d.dateOfConsultation.toDate();
-                    else if (d.createdAt?.toDate) dateObj = d.createdAt.toDate();
-                    else if (d.date) dateObj = new Date(d.date);
-
-                    const pYear = dateObj && !isNaN(dateObj.getTime()) ? dateObj.getFullYear() : 2026;
-                    const pMonth = dateObj && !isNaN(dateObj.getTime()) ? dateObj.getMonth() : new Date().getMonth();
-                    
-                    availableYears.add(pYear);
-
-                    livePatientCases.push({
-                        id: docSnap.id,
-                        abtc: resolveFacilityName(d, d.facilityId),
-                        year: pYear,
-                        month: pMonth,
-                        sex: String(d.sex || d.gender || "").toLowerCase(),
-                        age: Number(d.age || 0),
-                        bitingAnimal: String(d.bitingAnimal || d.animalType || "").toLowerCase(),
-                        category: String(d.category || d.exposureCategory || "").toLowerCase(),
-                        isNew: Boolean(d.isNewPatient ?? true),
-                        isBooster: Boolean(d.isBooster || d.boosterDose),
-                        died: d.treatmentStatus === "Died" || d.outcome === "Died" || d.status === "Died",
-                        tcv: Boolean(d.vaccineAdministered || d.treatmentGiven || Number(d.tcvDoses) > 0),
-                        hrig: Boolean(d.hrig || d.rigType === "HRIG"),
-                        erig: Boolean(d.erig || d.rigType === "ERIG"),
-                        treatmentStatus: String(d.treatmentStatus || d.status || "").toLowerCase()
-                    });
-                });
-            }
-        } catch (patientErr) {
-            console.warn("Could not query individual patient-database logs:", patientErr);
-        }
-
-        // Ensure 2026 is always available
-        availableYears.add(2026);
-
         populateYearSelect();
         applyFilters();
 
     } catch (error) {
-        console.error("❌ Error loading cases:", error);
         tbody.innerHTML = `
             <tr>
-                <td colspan="24" style="text-align:center; padding: 25px; color: #d32f2f;">
-                    <i class="fa-solid fa-triangle-exclamation" style="font-size: 20px; margin-bottom: 6px;"></i><br>
-                    <strong>Failed to Load Dataset</strong>
-                    <p style="font-size:12px; color:#666; margin-top: 4px;">${error.message}</p>
+                <td colspan="24" style="text-align:center; padding: 35px; color: #64748b;">
+                    <i class="fa-solid fa-folder-open" style="font-size:26px; opacity:0.4; margin-bottom: 8px;"></i>
+                    <p style="font-weight: 700; color: #412110;">No matching bite records found</p>
+                    <span style="font-size: 12px;">Database is empty or disconnected</span>
                 </td>
             </tr>
         `;
+        updateKpiSummary({ total: 0, tcv: 0, hr: 0, compII: 0, compIII: 0 });
     }
 }
 
-/* 4. POPULATE YEAR & MONTH DROPDOWNS */
+/* 4. POPULATE YEAR DROPDOWN */
 function populateYearSelect() {
     const yearSelect = document.getElementById("yearSelectFilter");
     if (!yearSelect) return;
@@ -282,134 +224,19 @@ function populateYearSelect() {
     });
 
     yearSelect.onchange = applyFilters;
-    
-    const monthSelect = document.getElementById("monthSelectFilter");
-    if (monthSelect) {
-        monthSelect.onchange = applyFilters;
-    }
 }
 
-/* 5. AGGREGATE LIVE PATIENTS BY RESOLVED FACILITY NAME */
-function aggregateLivePatients(patientsList) {
-    const map = {};
-
-    patientsList.forEach(p => {
-        const key = p.abtc || "Iloilo Provincial Health Office - ABTC";
-        if (!map[key]) {
-            map[key] = {
-                id: key,
-                abtc: key,
-                year: p.year,
-                maleCases: 0,
-                femaleCases: 0,
-                ageLt15: 0,
-                ageGt15: 0,
-                bitingDog: 0,
-                bitingCat: 0,
-                bitingOthers: 0,
-                humanCat1: 0,
-                humanCat2: 0,
-                humanCatNew: 0,
-                humanCatBooster: 0,
-                hr: 0,
-                petTcv: 0,
-                petHrig: 0,
-                petErig: 0,
-                total: 0,
-                remarksCompII: 0,
-                remarksCompIII: 0,
-                remarksIncompleteII: 0,
-                remarksIncompleteIII: 0,
-                remarksNoneII: 0,
-                remarksNoneIII: 0,
-                rep: 0,
-                source: "live"
-            };
-        }
-
-        const row = map[key];
-        row.total += 1;
-
-        if (p.sex.startsWith("m")) row.maleCases += 1;
-        else if (p.sex.startsWith("f")) row.femaleCases += 1;
-
-        if (p.age < 15) row.ageLt15 += 1;
-        else row.ageGt15 += 1;
-
-        if (p.bitingAnimal.includes("dog")) row.bitingDog += 1;
-        else if (p.bitingAnimal.includes("cat")) row.bitingCat += 1;
-        else row.bitingOthers += 1;
-
-        if (p.category.includes("1") || (p.category.includes("i") && !p.category.includes("ii") && !p.category.includes("iii"))) row.humanCat1 += 1;
-        else if (p.category.includes("2") || p.category.includes("ii")) row.humanCat2 += 1;
-
-        if (p.isBooster) row.humanCatBooster += 1;
-        else if (p.isNew) row.humanCatNew += 1;
-
-        if (p.died) row.hr += 1;
-        if (p.tcv) row.petTcv += 1;
-        if (p.hrig) row.petHrig += 1;
-        if (p.erig) row.petErig += 1;
-
-        if (p.treatmentStatus === "completed") {
-            if (p.category.includes("3") || p.category.includes("iii")) row.remarksCompIII += 1;
-            else row.remarksCompII += 1;
-        } else if (p.treatmentStatus === "incomplete") {
-            if (p.category.includes("3") || p.category.includes("iii")) row.remarksIncompleteIII += 1;
-            else row.remarksIncompleteII += 1;
-        } else if (p.treatmentStatus === "none") {
-            if (p.category.includes("3") || p.category.includes("iii")) row.remarksNoneIII += 1;
-            else row.remarksNoneII += 1;
-        }
-    });
-
-    return Object.values(map);
-}
-
-/* 6. FILTER LOGIC */
+/* 5. FILTER LOGIC */
 function applyFilters() {
     const query = (document.getElementById("caseSearch")?.value || "").toLowerCase().trim();
     const selectedYear = document.getElementById("yearSelectFilter")?.value || "All";
-    const selectedMonth = document.getElementById("monthSelectFilter")?.value || "All";
 
-    let result = [];
+    let result = allLegacyCases;
 
-    // MODE A: Specific Year (e.g. 2026) -> Only query records for that year
     if (selectedYear !== "All") {
-        let matchingLive = livePatientCases.filter(p => {
-            const matchesYr = String(p.year) === String(selectedYear);
-            const matchesMo = (selectedMonth === "All") || (Number(p.month) === Number(selectedMonth));
-            return matchesYr && matchesMo;
-        });
-
-        const liveAggregated = aggregateLivePatients(matchingLive);
-
-        let matchingLegacy = allLegacyCases.filter(c => String(c.year) === String(selectedYear));
-        if (selectedMonth !== "All" && matchingLegacy.length > 0) {
-            const factor = seasonalWeights[Number(selectedMonth)] || (1 / 12);
-            matchingLegacy = scaleLegacyCasesByFactor(matchingLegacy, factor, Number(selectedMonth));
-        }
-
-        result = [...liveAggregated, ...matchingLegacy];
-
-    // MODE B: "All Surveillance Years" -> Blend all legacy summary records + live records
-    } else {
-        let legacyRows = allLegacyCases;
-        if (selectedMonth !== "All") {
-            const factor = seasonalWeights[Number(selectedMonth)] || (1 / 12);
-            legacyRows = scaleLegacyCasesByFactor(allLegacyCases, factor, Number(selectedMonth));
-        }
-
-        let liveFiltered = livePatientCases;
-        if (selectedMonth !== "All") {
-            liveFiltered = livePatientCases.filter(p => Number(p.month) === Number(selectedMonth));
-        }
-        const liveAggregated = aggregateLivePatients(liveFiltered);
-
-        result = [...legacyRows, ...liveAggregated];
+        result = result.filter(c => String(c.year) === String(selectedYear));
     }
 
-    // Apply Search Query filter
     if (query) {
         result = result.filter(c => {
             const name = String(c.abtc || "").toLowerCase();
@@ -423,37 +250,7 @@ function applyFilters() {
     renderTable();
 }
 
-/* HELPER FOR SEASONAL MONTH CALCULATION ON LEGACY DATA */
-function scaleLegacyCasesByFactor(casesList, factor, mIndex) {
-    return casesList.map(c => ({
-        ...c,
-        maleCases: Math.round(c.maleCases * factor),
-        femaleCases: Math.round(c.femaleCases * factor),
-        ageLt15: Math.round(c.ageLt15 * factor),
-        ageGt15: Math.round(c.ageGt15 * factor),
-        bitingDog: Math.round(c.bitingDog * factor),
-        bitingCat: Math.round(c.bitingCat * factor),
-        bitingOthers: Math.round(c.bitingOthers * factor),
-        humanCat1: Math.round(c.humanCat1 * factor),
-        humanCat2: Math.round(c.humanCat2 * factor),
-        humanCatNew: Math.round(c.humanCatNew * factor),
-        humanCatBooster: Math.round(c.humanCatBooster * factor),
-        hr: (mIndex % 4 === 0 && c.hr > 0) ? Math.min(Math.round(c.hr / 3), c.hr) : 0,
-        petTcv: Math.round(c.petTcv * factor),
-        petHrig: Math.round(c.petHrig * factor),
-        petErig: Math.round(c.petErig * factor),
-        total: Math.round(c.total * factor),
-        remarksCompII: Math.round(c.remarksCompII * factor),
-        remarksCompIII: Math.round(c.remarksCompIII * factor),
-        remarksIncompleteII: Math.round(c.remarksIncompleteII * factor),
-        remarksIncompleteIII: Math.round(c.remarksIncompleteIII * factor),
-        remarksNoneII: Math.round(c.remarksNoneII * factor),
-        remarksNoneIII: Math.round(c.remarksNoneIII * factor),
-        rep: Math.round(c.rep * factor)
-    }));
-}
-
-/* HELPER FOR FORMATTING ZEROES VS NUMBERS */
+/* 6. FORMAT CELLS */
 function formatCell(val, isAlert = false) {
     const num = Number(val || 0);
     if (num === 0) {
@@ -465,7 +262,7 @@ function formatCell(val, isAlert = false) {
     return `<span class="val-nonzero">${num.toLocaleString()}</span>`;
 }
 
-/* RENDER TABLE */
+/* 7. RENDER TABLE */
 function renderTable() {
     const tbody = document.getElementById("casesTableBody");
     const countInfo = document.getElementById("recordCountInfo");
@@ -473,13 +270,10 @@ function renderTable() {
 
     const totalRecords = filteredCases.length;
     const totalPages = Math.ceil(totalRecords / rowsPerPage);
-
-    const selectedMonth = document.getElementById("monthSelectFilter")?.value || "All";
     const selectedYear = document.getElementById("yearSelectFilter")?.value || "All";
-    const monthSuffix = selectedMonth !== "All" ? ` (${shortMonths[Number(selectedMonth)]})` : "";
 
     if (countInfo) {
-        countInfo.textContent = `Showing ${totalRecords} reporting ABTC facilities / records for ${selectedYear}${monthSuffix}`;
+        countInfo.textContent = `Showing ${totalRecords} reporting ABTC facilities / records for ${selectedYear}`;
     }
 
     if (totalRecords === 0) {
@@ -488,7 +282,7 @@ function renderTable() {
                 <td colspan="24" style="text-align:center; padding: 35px; color: #64748b;">
                     <i class="fa-solid fa-folder-open" style="font-size:26px; opacity:0.4; margin-bottom: 8px;"></i>
                     <p style="font-weight: 700; color: #412110;">No matching bite records found</p>
-                    <span style="font-size: 12px;">Try adjusting your search query, year, or month filter</span>
+                    <span style="font-size: 12px;">Try adjusting your search query or year filter</span>
                 </td>
             </tr>
         `;
@@ -607,7 +401,7 @@ function renderTable() {
     createPagination(totalPages);
 }
 
-/* UPDATE TOP KPI SUMMARY MINI-CARDS */
+/* 8. UPDATE TOP KPI SUMMARY MINI-CARDS */
 function updateKpiSummary(totals) {
     const kpiBites = document.getElementById("kpiTotalBites");
     const kpiTcv = document.getElementById("kpiTotalTcv");
@@ -675,9 +469,6 @@ if (excelBtn) {
             return;
         }
 
-        const selectedMonth = document.getElementById("monthSelectFilter")?.value || "All";
-        const monthLabel = selectedMonth !== "All" ? `_${shortMonths[Number(selectedMonth)]}` : "";
-
         const exportData = filteredCases.map(item => ({
             "ABTC / Health Facility": item.abtc,
             "Surveillance Year": item.year,
@@ -709,7 +500,7 @@ if (excelBtn) {
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Animal Bite Registry");
-        XLSX.writeFile(workbook, `PHO_Animal_Bite_Cases${monthLabel}_${new Date().toISOString().split('T')[0]}.xlsx`);
+        XLSX.writeFile(workbook, `PHO_Animal_Bite_Cases_${new Date().toISOString().split('T')[0]}.xlsx`);
     });
 }
 

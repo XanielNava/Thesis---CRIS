@@ -1,6 +1,10 @@
 // firebase-config.js
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
-import { getFirestore, connectFirestoreEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+import { 
+    initializeFirestore, 
+    memoryLocalCache, 
+    connectFirestoreEmulator 
+} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 import { getAuth, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
 const firebaseConfig = {
@@ -13,20 +17,23 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// Forces Firestore to ONLY keep data in RAM memory (No IndexedDB caching)
+export const db = initializeFirestore(app, {
+    localCache: memoryLocalCache()
+});
+
 export const auth = getAuth(app);
-export const db = getFirestore(app);
 
 // 🎛️ SWITCHES
-const USE_EMULATOR = true; 
+const USE_EMULATOR = true; // Set to false if not running local emulator
 const USE_NGROK = false; 
 
 if (USE_EMULATOR) {
     if (USE_NGROK) {
-        // Point to your active ngrok URL (update domain string if ngrok generates a new one)
         connectFirestoreEmulator(db, 'isotope-editor-levitate.ngrok-free.dev', 443, { ssl: true });
         console.log("🌐 Connected to Firestore via ngrok Tunnel");
     } else {
-        // Local testing on port 8088
         connectFirestoreEmulator(db, '127.0.0.1', 8088);
         console.log("🧪 Connected to Local Firestore Emulator");
     }

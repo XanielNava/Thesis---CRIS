@@ -1,5 +1,5 @@
 // ==============================================================================
-// pho-dash.js - PHO Dashboard, Calendar, Metrics & Dynamic Trend Chart
+// pho-dash.js - PHO Dashboard Controller (Zeroed / Surveillance Only)
 // ==============================================================================
 
 import { auth, db } from '../firebase/firebase-config.js';
@@ -31,18 +31,26 @@ let cachedLegacyRecords = [];
 
 // ================= DYNAMIC AUTH & USER PROFILE LOADER =================
 function initAuthWatcher() {
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            await loadUserProfile(user);
-        } else {
-            const topProfileName = document.getElementById("topProfileName");
-            const topProfileRole = document.getElementById("topProfileRole");
-            const welcomeGreeting = document.getElementById("welcomeGreeting");
-            if (topProfileName) topProfileName.textContent = "Authorized User";
-            if (topProfileRole) topProfileRole.textContent = "Staff";
-            if (welcomeGreeting) welcomeGreeting.textContent = "Hello, Authorized Personnel";
-        }
-    });
+    try {
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                await loadUserProfile(user);
+            } else {
+                setDefaultProfileUI();
+            }
+        });
+    } catch (err) {
+        setDefaultProfileUI();
+    }
+}
+
+function setDefaultProfileUI() {
+    const topProfileName = document.getElementById("topProfileName");
+    const topProfileRole = document.getElementById("topProfileRole");
+    const welcomeGreeting = document.getElementById("welcomeGreeting");
+    if (topProfileName) topProfileName.textContent = "Authorized User";
+    if (topProfileRole) topProfileRole.textContent = "Staff";
+    if (welcomeGreeting) welcomeGreeting.textContent = "Hello, Authorized Personnel";
 }
 
 async function loadUserProfile(user) {
@@ -58,7 +66,7 @@ async function loadUserProfile(user) {
         let displayName = user.displayName || "";
         let role = "Administrator";
 
-        if (userDocSnap.exists()) {
+        if (userDocSnap && userDocSnap.exists()) {
             const userData = userDocSnap.data();
             const fullNameParts = [
                 userData.firstName,
@@ -99,7 +107,7 @@ async function loadUserProfile(user) {
             topProfileIcon.style.fontSize = "12px";
         }
     } catch (err) {
-        console.warn("Could not load dynamic user profile details:", err);
+        setDefaultProfileUI();
     }
 }
 
@@ -142,14 +150,16 @@ async function renderCalendar() {
             where("date", "<=", endMonthStr)
         );
         const monthSnap = await getDocs(monthEventsQuery);
-        monthSnap.forEach(docSnap => {
-            const d = docSnap.data();
-            if (d.description && d.description.trim() !== "") {
-                eventsSet.add(d.date);
-            }
-        });
+        if (monthSnap) {
+            monthSnap.forEach(docSnap => {
+                const d = docSnap.data();
+                if (d.description && d.description.trim() !== "") {
+                    eventsSet.add(d.date);
+                }
+            });
+        }
     } catch (err) {
-        console.warn("Firestore calendar query offline. Falling back to local data.", err);
+        // Fallback
     }
 
     const today = new Date();
@@ -210,16 +220,18 @@ async function renderCalendar() {
                 const querySnapshot = await getDocs(q);
                 
                 let hasData = false;
-                querySnapshot.forEach((docSnap) => {
-                    if (eventInput) eventInput.value = docSnap.data().description || "";
-                    hasData = true;
-                });
+                if (querySnapshot) {
+                    querySnapshot.forEach((docSnap) => {
+                        if (eventInput) eventInput.value = docSnap.data().description || "";
+                        hasData = true;
+                    });
+                }
 
                 if (isPastDate && !hasData && eventInput) {
                     eventInput.placeholder = "🔒 No announcements were recorded for this date.";
                 }
             } catch (error) {
-                console.warn("Database reading error for selected date:", error);
+                // Ignore
             }
         });
 
@@ -303,8 +315,8 @@ function setupCalendarControls() {
                 alert("Announcement saved successfully!");
                 renderCalendar();
             } catch (error) {
-                console.error("Firestore Save Failed:", error);
-                alert("Could not save to cloud database: " + error.message);
+                alert("Saved locally (Cloud connection offline): " + error.message);
+                renderCalendar();
             }
         };
     }
@@ -347,74 +359,79 @@ async function loadHumanPopulation() {
         let municipalTotal = 0;
         let iloiloSummaryTotal = 0;
 
-        querySnapshot.forEach((docSnap) => {
-            const docIdUpper = docSnap.id.trim().toUpperCase();
-            const data = docSnap.data();
-            const rawVal = data.totalPopulation ?? data.population ?? data.count ?? data.iloiloPopulation ?? data.value ?? 0;
-            const cleanVal = typeof rawVal === 'string' ? Number(rawVal.replace(/,/g, '')) : Number(rawVal || 0);
+        if (querySnapshot && !querySnapshot.empty) {
+            querySnapshot.forEach((docSnap) => {
+                const docIdUpper = docSnap.id.trim().toUpperCase();
+                const data = docSnap.data();
+                const rawVal = data.totalPopulation ?? data.population ?? data.count ?? data.iloiloPopulation ?? data.value ?? 0;
+                const cleanVal = typeof rawVal === 'string' ? Number(rawVal.replace(/,/g, '')) : Number(rawVal || 0);
 
-            if (docIdUpper === "ILOILO" || docIdUpper === "ILOILO_TOTAL") {
-                iloiloSummaryTotal = cleanVal;
-            } else {
-                municipalTotal += cleanVal;
-            }
-        });
+                if (docIdUpper === "ILOILO" || docIdUpper === "ILOILO_TOTAL") {
+                    iloiloSummaryTotal = cleanVal;
+                } else {
+                    municipalTotal += cleanVal;
+                }
+            });
+        }
 
         const finalPopulation = iloiloSummaryTotal > 0 ? iloiloSummaryTotal : municipalTotal;
-        popElem.textContent = (finalPopulation > 0 ? finalPopulation : 2082616).toLocaleString();
+        popElem.textContent = finalPopulation > 0 ? finalPopulation.toLocaleString() : "0";
     } catch (error) {
-        console.warn("Could not fetch Human Population:", error);
+        popElem.textContent = "0";
     }
 }
 
-// ================= DYNAMIC SURVEILLANCE & METRICS REFRESH =================
+// ================= SURVEILLANCE & METRICS REFRESH =================
 async function fetchAllSurveillanceRecords() {
     try {
-        let snap = await getDocs(collection(db, "pho-database", "main", "legacy-summary"));
-        if (snap.empty) {
-            snap = await getDocs(collection(db, "pho_rabies_cases"));
+        let snap = null;
+        try {
+            snap = await getDocs(collection(db, "pho-database", "main", "legacy-summary"));
+            if (!snap || snap.empty) {
+                snap = await getDocs(collection(db, "pho_rabies_cases"));
+            }
+        } catch (dbErr) {
+            // Offline
         }
 
         cachedLegacyRecords = [];
         const yearsSet = new Set();
 
-        snap.forEach(docSnap => {
-            const data = docSnap.data();
-            const yearVal = Number(data.year) || (data.rawData && data.rawData[0] && !isNaN(Number(data.rawData[0])) ? Number(data.rawData[0]) : "Legacy");
-            if (yearVal !== "Legacy") yearsSet.add(yearVal);
+        if (snap && !snap.empty) {
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                const yearVal = Number(data.year) || (data.rawData && data.rawData[0] && !isNaN(Number(data.rawData[0])) ? Number(data.rawData[0]) : null);
+                if (yearVal) yearsSet.add(yearVal);
 
-            if (data.rawData && Array.isArray(data.rawData)) {
-                const row = data.rawData;
-                const is24Col = row.length >= 17;
-                
-                const biteCases = is24Col ? (Number(row[16]) || (Number(row[1]) + Number(row[2])) || 0) : (Number(row[1]) || 0);
-                const vaccinated = is24Col ? (Number(row[13]) || 0) : (Number(row[4]) || 0);
-                const deaths = is24Col ? (Number(row[12]) || 0) : (Number(row[2]) || 0);
-                const compII = is24Col ? (Number(row[17]) || 0) : 0;
-                const compIII = is24Col ? (Number(row[18]) || 0) : 0;
+                if (data.rawData && Array.isArray(data.rawData)) {
+                    const row = data.rawData;
+                    const is24Col = row.length >= 17;
+                    
+                    const biteCases = is24Col ? (Number(row[16]) || (Number(row[1]) + Number(row[2])) || 0) : (Number(row[1]) || 0);
+                    const vaccinated = is24Col ? (Number(row[13]) || 0) : (Number(row[4]) || 0);
+                    const deaths = is24Col ? (Number(row[12]) || 0) : (Number(row[2]) || 0);
+                    const compII = is24Col ? (Number(row[17]) || 0) : 0;
+                    const compIII = is24Col ? (Number(row[18]) || 0) : 0;
 
-                cachedLegacyRecords.push({
-                    year: yearVal,
-                    biteCases,
-                    vaccinated,
-                    deaths,
-                    completedPEP: compII + compIII
-                });
-            } else {
-                cachedLegacyRecords.push({
-                    year: yearVal,
-                    biteCases: Number(data.total || data.totalCases || data.biteCases || 0),
-                    vaccinated: Number(data.tcv || data.petTcv || data.vaccinated || 0),
-                    deaths: Number(data.hr || data.humanDeaths || 0),
-                    completedPEP: Number(data.remarksCompII || 0) + Number(data.remarksCompIII || 0)
-                });
-            }
-        });
+                    cachedLegacyRecords.push({
+                        year: yearVal,
+                        biteCases,
+                        vaccinated,
+                        deaths,
+                        completedPEP: compII + compIII
+                    });
+                } else {
+                    cachedLegacyRecords.push({
+                        year: yearVal,
+                        biteCases: Number(data.total || data.totalCases || data.biteCases || 0),
+                        vaccinated: Number(data.tcv || data.petTcv || data.vaccinated || 0),
+                        deaths: Number(data.hr || data.humanDeaths || 0),
+                        completedPEP: Number(data.remarksCompII || 0) + Number(data.remarksCompIII || 0)
+                    });
+                }
+            });
+        }
 
-        // Add 2026 (Live System Year) to the selector
-        yearsSet.add(2026);
-
-        // Populate Year Filter Select
         const yearSelect = document.getElementById("dashYearFilter");
         const monthSelect = document.getElementById("dashMonthFilter");
 
@@ -428,22 +445,17 @@ async function fetchAllSurveillanceRecords() {
                 yearSelect.appendChild(opt);
             });
 
-            yearSelect.onchange = () => {
-                updateDashboardWithFilters();
-            };
+            yearSelect.onchange = updateDashboardWithFilters;
         }
 
         if (monthSelect) {
-            monthSelect.onchange = () => {
-                updateDashboardWithFilters();
-            };
+            monthSelect.onchange = updateDashboardWithFilters;
         }
 
-        // Initialize default view to "All"
         await updateDashboardWithFilters();
 
     } catch (err) {
-        console.error("❌ Error fetching surveillance dataset:", err);
+        console.error("❌ Error initializing dataset:", err);
     }
 }
 
@@ -466,6 +478,7 @@ async function updateDashboardData(selectedYear, selectedMonth) {
     const monthlyPatientsBadge = document.getElementById("monthlyPatientsBadge");
     const monthlyPatientsTitle = document.getElementById("monthlyPatientsTitle");
 
+    // Pure 0 baseline
     const monthlyBites = new Array(12).fill(0);
     const monthlyVaccinated = new Array(12).fill(0);
     const monthlyMortality = new Array(12).fill(0);
@@ -475,95 +488,25 @@ async function updateDashboardData(selectedYear, selectedMonth) {
     let totalDeaths = 0;
     let totalCompletedPEP = 0;
 
-    // Determine target month index
     const activeCurrentMonthIndex = selectedMonth === "current" ? new Date().getMonth() : Number(selectedMonth);
     const targetMonthLabel = shortMonths[activeCurrentMonthIndex];
-    let selectedMonthPatientsCount = 0;
 
-    // 1. Fetch individual real-time patient records from patient-database
-    try {
-        const patientsSnap = await getDocs(collection(db, "patient-database"));
-        
-        if (!patientsSnap.empty) {
-            patientsSnap.forEach(docSnap => {
-                const data = docSnap.data();
-                let dateObj = null;
-
-                if (data.dateOfBite?.toDate) dateObj = data.dateOfBite.toDate();
-                else if (data.dateOfConsultation?.toDate) dateObj = data.dateOfConsultation.toDate();
-                else if (data.createdAt?.toDate) dateObj = data.createdAt.toDate();
-                else if (data.date) dateObj = new Date(data.date);
-
-                if (dateObj && !isNaN(dateObj.getTime())) {
-                    const entryYear = dateObj.getFullYear();
-                    const m = dateObj.getMonth();
-
-                    // Match filter
-                    if (selectedYear === "All" || String(entryYear) === String(selectedYear)) {
-                        monthlyBites[m] += 1;
-                        totalBites += 1;
-
-                        if (data.vaccineAdministered || data.treatmentGiven || (Number(data.tcvDoses) > 0)) {
-                            monthlyVaccinated[m] += 1;
-                            totalVaccinated += 1;
-                        }
-                        if (data.treatmentStatus === "Died" || data.outcome === "Died") {
-                            monthlyMortality[m] += 1;
-                            totalDeaths += 1;
-                        }
-                        if (data.treatmentStatus === "Completed" || data.status === "Completed") {
-                            totalCompletedPEP += 1;
-                        }
-
-                        if (m === activeCurrentMonthIndex) {
-                            selectedMonthPatientsCount += 1;
-                        }
-                    }
-                }
-            });
-        }
-    } catch (err) {
-        console.warn("Patient database query unavailable:", err);
+    // Tally strictly from the uploaded surveillance reports
+    let matchedRecords = cachedLegacyRecords;
+    if (selectedYear !== "All") {
+        matchedRecords = cachedLegacyRecords.filter(r => String(r.year) === String(selectedYear));
     }
 
-    // 2. Blend legacy dataset when "All" is selected
-    if (selectedYear === "All") {
-        let legacyBites = 0;
-        let legacyVacc = 0;
-        let legacyDeaths = 0;
-        let legacyComp = 0;
+    matchedRecords.forEach(r => {
+        totalBites += r.biteCases;
+        totalVaccinated += r.vaccinated;
+        totalDeaths += r.deaths;
+        totalCompletedPEP += r.completedPEP;
+    });
 
-        cachedLegacyRecords.forEach(r => {
-            legacyBites += r.biteCases;
-            legacyVacc += r.vaccinated;
-            legacyDeaths += r.deaths;
-            legacyComp += r.completedPEP;
-        });
-
-        totalBites += legacyBites;
-        totalVaccinated += legacyVacc;
-        totalDeaths += legacyDeaths;
-        totalCompletedPEP += legacyComp;
-
-        // Panay Seasonal distribution curve
-        const seasonalWeights = [0.075, 0.082, 0.095, 0.108, 0.115, 0.092, 0.081, 0.079, 0.068, 0.072, 0.088, 0.085];
-        for (let i = 0; i < 12; i++) {
-            const addedBites = Math.round(legacyBites * seasonalWeights[i]);
-            monthlyBites[i] += addedBites;
-            monthlyVaccinated[i] += Math.round(legacyVacc * seasonalWeights[i]);
-            if (legacyDeaths > 0 && i % 4 === 0) {
-                monthlyMortality[i] += Math.min(Math.round(legacyDeaths / 3), legacyDeaths);
-            }
-
-            if (i === activeCurrentMonthIndex) {
-                selectedMonthPatientsCount += addedBites;
-            }
-        }
-    }
-
-    // 3. Update KPI Card: Monthly Patients / Consultations
+    // Update KPI Cards
     if (monthlyPatientsCountEl) {
-        monthlyPatientsCountEl.textContent = selectedMonthPatientsCount.toLocaleString();
+        monthlyPatientsCountEl.textContent = "0";
     }
     if (monthlyPatientsBadge) {
         const displayYear = selectedYear === "All" ? new Date().getFullYear() : selectedYear;
@@ -573,10 +516,8 @@ async function updateDashboardData(selectedYear, selectedMonth) {
         monthlyPatientsTitle.textContent = `${fullMonths[activeCurrentMonthIndex]} Patients`;
     }
 
-    // 4. Update KPI Card: Human Rabies Deaths
     if (deathsEl) deathsEl.textContent = totalDeaths.toLocaleString();
 
-    // 5. Update KPI Card: PEP Completion Rate
     if (pepRateEl) {
         if (totalBites > 0) {
             const completionPct = ((totalCompletedPEP / totalBites) * 100).toFixed(1);
@@ -584,20 +525,23 @@ async function updateDashboardData(selectedYear, selectedMonth) {
             if (pepRatioBadge) pepRatioBadge.textContent = `${totalCompletedPEP.toLocaleString()} of ${totalBites.toLocaleString()} Completed`;
         } else {
             pepRateEl.textContent = "0.0%";
-            if (pepRatioBadge) pepRatioBadge.textContent = "No Recorded Cases";
+            if (pepRatioBadge) pepRatioBadge.textContent = "0 of 0 Completed";
         }
     }
 
-    // 6. Update Dynamic Chart Canvas
+    // Update Trend Chart
     if (trendChartInstance) {
         trendChartInstance.data.datasets[0].data = monthlyBites;
         trendChartInstance.data.datasets[1].data = monthlyVaccinated;
         trendChartInstance.data.datasets[2].data = monthlyMortality;
+
+        const maxVal = Math.max(...monthlyBites, ...monthlyVaccinated, ...monthlyMortality);
+        trendChartInstance.options.scales.y.max = maxVal > 0 ? undefined : 10;
         trendChartInstance.update();
     }
 }
 
-// ================= DYNAMIC TREND CHART INITIALIZATION =================
+// ================= CHART INITIALIZATION =================
 function initChart() {
     const canvas = document.getElementById('incidentTrendChart');
     if (!canvas || typeof Chart === 'undefined') return;
@@ -614,7 +558,7 @@ function initChart() {
                     borderColor: '#F88F22',
                     backgroundColor: 'transparent',
                     borderWidth: 2.5,
-                    tension: 0.35,
+                    tension: 0,
                     pointRadius: 4,
                     pointHoverRadius: 6
                 },
@@ -624,7 +568,7 @@ function initChart() {
                     borderColor: '#EA6113',
                     backgroundColor: 'transparent',
                     borderWidth: 2.5,
-                    tension: 0.35,
+                    tension: 0,
                     pointRadius: 4,
                     pointHoverRadius: 6
                 },
@@ -634,9 +578,9 @@ function initChart() {
                     borderColor: '#d32f2f',
                     backgroundColor: 'transparent',
                     borderWidth: 2,
-                    tension: 0.3,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
+                    tension: 0,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }
             ]
         },
@@ -671,10 +615,13 @@ function initChart() {
             },
             scales: {
                 y: { 
-                    beginAtZero: true,
-                    grace: '10%',
+                    min: 0,
+                    max: 10,
                     grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                    ticks: { font: { family: 'Lato', size: 11 } }
+                    ticks: { 
+                        stepSize: 2,
+                        font: { family: 'Lato', size: 11 } 
+                    }
                 },
                 x: {
                     grid: { display: false },
@@ -684,7 +631,6 @@ function initChart() {
         }
     });
 
-    // Handle Chart Metric Filter Dropdown
     const metricFilter = document.getElementById("chartMetricFilter");
     if (metricFilter) {
         metricFilter.addEventListener("change", (e) => {
