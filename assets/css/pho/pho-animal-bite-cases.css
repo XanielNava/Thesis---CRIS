@@ -437,7 +437,7 @@ body {
     border-color: #10b981;
 }
 
-/* ================= TABLE WRAPPER & STICKY FEATURES ================= */
+/* ================= TABLE WRAPPER & STICKY 2-TIER MATRIX ================= */
 .table-wrapper {
     overflow-x: auto;
     max-height: calc(100vh - 350px);
@@ -464,10 +464,9 @@ body {
     text-align: center;
 }
 
-/* Sticky Headers (3-Row Matrix) */
+/* 2-Tier Sticky Header Offsets & Vertical Centering */
 .data-table thead th {
     position: sticky;
-    top: 0;
     z-index: 10;
     background: #FAF0E2;
     color: var(--text-dark);
@@ -476,12 +475,18 @@ body {
     border-right: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
+    vertical-align: middle;
 }
 
-/* Precise vertical offsets for stacked multi-row sticky header */
-.header-level-1 th { top: 0; }
-.header-level-2 th { top: 31px; }
-.header-level-3 th { top: 62px; }
+.header-level-1 th {
+    top: 0;
+    height: 32px;
+}
+
+.header-level-2 th {
+    top: 32px;
+    height: 28px;
+}
 
 /* Sticky Left Column for Facility Name */
 .data-table th.sticky-col,
@@ -497,11 +502,11 @@ body {
 }
 
 .data-table thead th.sticky-col {
-    z-index: 20;
+    z-index: 25;
     background: #FAF0E2;
 }
 
-/* Subtle Semantic Header Tinting */
+/* Color Groupings */
 .group-demo { background: #FFF4E5 !important; }
 .group-animal { background: #FEF3C7 !important; }
 .group-category { background: #E0E7FF !important; }
@@ -528,7 +533,6 @@ body {
     background-color: #FFF6EA;
 }
 
-/* Zero value de-emphasis */
 .data-table td.val-zero {
     color: #cbd5e1;
 }

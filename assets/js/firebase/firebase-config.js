@@ -3,9 +3,13 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/fireba
 import { 
     initializeFirestore, 
     memoryLocalCache, 
-    connectFirestoreEmulator 
+    connectFirestoreEmulator,
+    setLogLevel 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 import { getAuth, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+
+// Silence verbose internal connection warnings
+setLogLevel('silent');
 
 const firebaseConfig = {
     apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -18,27 +22,18 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Forces Firestore to ONLY keep data in RAM memory (No IndexedDB caching)
+// In-Memory cache only (prevents ghost cache from reappearing)
 export const db = initializeFirestore(app, {
     localCache: memoryLocalCache()
 });
 
 export const auth = getAuth(app);
 
-// 🎛️ SWITCHES
-const USE_EMULATOR = true; // Set to false if not running local emulator
-const USE_NGROK = false; 
-
-if (USE_EMULATOR) {
-    if (USE_NGROK) {
-        connectFirestoreEmulator(db, 'isotope-editor-levitate.ngrok-free.dev', 443, { ssl: true });
-        console.log("🌐 Connected to Firestore via ngrok Tunnel");
-    } else {
-        connectFirestoreEmulator(db, '127.0.0.1', 8088);
-        console.log("🧪 Connected to Local Firestore Emulator");
-    }
-
-    connectAuthEmulator(auth, 'http://127.0.0.1:9099');
-} else {
-    console.log("🚀 Connected to Live Firebase Database");
+// 🎛️ CONNECT DIRECTLY TO ACTIVE EMULATOR PORTS
+try {
+    connectFirestoreEmulator(db, '127.0.0.1', 8088);
+    connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+    console.log("🧪 Connected to Local Firebase Emulator (Firestore: 8088, Auth: 9099)");
+} catch (err) {
+    // Prevent duplicate attachment on fast refresh
 }

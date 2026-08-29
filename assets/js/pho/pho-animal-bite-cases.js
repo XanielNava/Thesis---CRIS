@@ -54,7 +54,7 @@ async function loadFacilitiesRegistry() {
             });
         }
     } catch (err) {
-        // Offline / Unreachable
+        // Offline / Emulator fallback
     }
 }
 
@@ -118,12 +118,28 @@ async function loadCases() {
         if (snapshot && !snapshot.empty) {
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
+
+                // 🛑 FILTER OUT EMPTY ROWS OR EXCEL HEADER ARTIFACT ROWS
+                const rawName = (data.rawData && data.rawData[0]) || data.abtc || data.facilityName || "";
+                if (!rawName || typeof rawName !== "string") return;
+                
+                const cleanName = rawName.trim();
+                if (
+                    cleanName === "" || 
+                    cleanName.toLowerCase().includes("abtc / health") || 
+                    cleanName.toLowerCase() === "abtc" ||
+                    cleanName.toLowerCase() === "facility" ||
+                    cleanName.toLowerCase().includes("health facility")
+                ) {
+                    return;
+                }
+
                 orderCounter++;
                 const entryYear = Number(data.year) || (data.rawData && data.rawData[0] && !isNaN(Number(data.rawData[0])) ? Number(data.rawData[0]) : null);
                 if (entryYear) availableYears.add(entryYear);
 
                 const facilityTitle = data.rawData && Array.isArray(data.rawData)
-                    ? (data.rawData[0] || resolveFacilityName(data, docSnap.id))
+                    ? (cleanName || resolveFacilityName(data, docSnap.id))
                     : resolveFacilityName(data, docSnap.id);
 
                 if (data.rawData && Array.isArray(data.rawData)) {
@@ -304,7 +320,7 @@ function renderTable() {
     records.forEach(caseData => {
         tableRows.push(`
             <tr>
-                <td class="sticky-col"><strong>${caseData.abtc ?? "N/A"}</strong></td>
+                <td class="sticky-col"><strong>${caseData.abtc || "N/A"}</strong></td>
                 <td>${formatCell(caseData.maleCases)}</td>
                 <td>${formatCell(caseData.femaleCases)}</td>
                 <td>${formatCell(caseData.ageLt15)}</td>
@@ -342,29 +358,29 @@ function renderTable() {
     };
 
     filteredCases.forEach(c => {
-        totals.male += Number(c.maleCases ?? 0);
-        totals.female += Number(c.femaleCases ?? 0);
-        totals.ageLt15 += Number(c.ageLt15 ?? 0);
-        totals.ageGt15 += Number(c.ageGt15 ?? 0);
-        totals.dog += Number(c.bitingDog ?? 0);
-        totals.cat += Number(c.bitingCat ?? 0);
-        totals.others += Number(c.bitingOthers ?? 0);
-        totals.cat1 += Number(c.humanCat1 ?? 0);
-        totals.cat2 += Number(c.humanCat2 ?? 0);
-        totals.catNew += Number(c.humanCatNew ?? 0);
-        totals.catBooster += Number(c.humanCatBooster ?? 0);
-        totals.hr += Number(c.hr ?? 0);
-        totals.tcv += Number(c.petTcv ?? 0);
-        totals.hrig += Number(c.petHrig ?? 0);
-        totals.erig += Number(c.petErig ?? 0);
-        totals.total += Number(c.total ?? 0);
-        totals.compII += Number(c.remarksCompII ?? 0);
-        totals.compIII += Number(c.remarksCompIII ?? 0);
-        totals.incII += Number(c.remarksIncompleteII ?? 0);
-        totals.incIII += Number(c.remarksIncompleteIII ?? 0);
-        totals.noneII += Number(c.remarksNoneII ?? 0);
-        totals.noneIII += Number(c.remarksNoneIII ?? 0);
-        totals.rep += Number(c.rep ?? 0);
+        totals.male += Number(c.maleCases || 0);
+        totals.female += Number(c.femaleCases || 0);
+        totals.ageLt15 += Number(c.ageLt15 || 0);
+        totals.ageGt15 += Number(c.ageGt15 || 0);
+        totals.dog += Number(c.bitingDog || 0);
+        totals.cat += Number(c.bitingCat || 0);
+        totals.others += Number(c.bitingOthers || 0);
+        totals.cat1 += Number(c.humanCat1 || 0);
+        totals.cat2 += Number(c.humanCat2 || 0);
+        totals.catNew += Number(c.humanCatNew || 0);
+        totals.catBooster += Number(c.humanCatBooster || 0);
+        totals.hr += Number(c.hr || 0);
+        totals.tcv += Number(c.petTcv || 0);
+        totals.hrig += Number(c.petHrig || 0);
+        totals.erig += Number(c.petErig || 0);
+        totals.total += Number(c.total || 0);
+        totals.compII += Number(c.remarksCompII || 0);
+        totals.compIII += Number(c.remarksCompIII || 0);
+        totals.incII += Number(c.remarksIncompleteII || 0);
+        totals.incIII += Number(c.remarksIncompleteIII || 0);
+        totals.noneII += Number(c.remarksNoneII || 0);
+        totals.noneIII += Number(c.remarksNoneIII || 0);
+        totals.rep += Number(c.rep || 0);
     });
 
     tableRows.push(`
