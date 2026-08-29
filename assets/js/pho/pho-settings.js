@@ -17,8 +17,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { 
     onAuthStateChanged,
-    updatePassword,
-    signOut 
+    updatePassword
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 // Global State Variables
@@ -316,14 +315,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-
-    // Logout
-    document.getElementById("logout-btn")?.addEventListener("click", async () => {
-        if (confirm("Are you sure you want to log out?")) {
-            await signOut(auth);
-            window.location.href = "pho-login.html";
-        }
-    });
 });
 
 async function loadFacilityData() {
@@ -564,7 +555,6 @@ async function processLegacyFile(file) {
                     const facilityName = String(row[0]).trim();
                     if (!facilityName || ["total", "grand total"].includes(facilityName.toLowerCase())) continue;
 
-                    // Clean all 24 columns to prevent undefined values from reaching Firestore
                     const sanitizedRow = Array.from({ length: 24 }, (_, idx) => {
                         const val = row[idx];
                         if (val === undefined || val === null) return idx === 0 ? facilityName : 0;

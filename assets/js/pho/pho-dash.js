@@ -384,9 +384,8 @@ async function loadHumanPopulation() {
 // ================= DATE & LEGACY PARSING HELPER =================
 function extractDateDetails(data) {
     let year = null;
-    let month = null; // 0 to 11
+    let month = null;
 
-    // 1. Direct Year/Month numbers
     if (data.year && !isNaN(Number(data.year))) {
         year = Number(data.year);
     }
@@ -395,7 +394,6 @@ function extractDateDetails(data) {
         month = m >= 1 && m <= 12 ? m - 1 : (m >= 0 && m <= 11 ? m : null);
     }
 
-    // 2. Timestamp or Date string inspection
     const rawDate = data.date || data.createdAt || data.reportDate || data.timestamp;
     if (rawDate) {
         if (typeof rawDate.toDate === 'function') {
@@ -411,16 +409,12 @@ function extractDateDetails(data) {
         }
     }
 
-    // 3. Fallback to rawData inspect
     if ((!year || month === null) && data.rawData && Array.isArray(data.rawData)) {
         for (let i = 0; i < data.rawData.length; i++) {
             const item = String(data.rawData[i]).trim();
-            
-            // Year match (e.g., 2020-2035)
             if (!year && /^(20\d\d)$/.test(item)) {
                 year = Number(item);
             }
-            // Month match by string name
             if (month === null) {
                 const mIdx = shortMonths.findIndex(sm => sm.toLowerCase() === item.substring(0, 3).toLowerCase());
                 if (mIdx !== -1) {
@@ -443,7 +437,7 @@ async function fetchAllSurveillanceRecords() {
                 snap = await getDocs(collection(db, "pho_rabies_cases"));
             }
         } catch (dbErr) {
-            // Offline / Error Handled
+            // Handled
         }
 
         cachedLegacyRecords = [];
@@ -453,7 +447,6 @@ async function fetchAllSurveillanceRecords() {
             snap.forEach(docSnap => {
                 const data = docSnap.data();
                 
-                // Skip empty spreadsheet artifact headers
                 const rawName = (data.rawData && data.rawData[0]) || data.abtc || data.facilityName || "";
                 if (typeof rawName === 'string' && (rawName.toLowerCase().includes("facility") || rawName.toLowerCase().includes("abtc / health"))) {
                     return;
@@ -509,7 +502,6 @@ function populateFilters() {
     if (yearSelect) {
         yearSelect.innerHTML = "";
 
-        // Standard Default Options
         const optAll = document.createElement("option");
         optAll.value = "All";
         optAll.textContent = "All Years";
@@ -520,7 +512,6 @@ function populateFilters() {
         optCurrent.textContent = `Current Year (${currentRealYear})`;
         yearSelect.appendChild(optCurrent);
 
-        // Populate dynamically scanned years from uploaded legacy records
         const sortedYears = Array.from(availableSurveillanceYears).sort((a, b) => b - a);
         sortedYears.forEach(yr => {
             if (yr !== currentRealYear) {
@@ -578,7 +569,6 @@ async function updateDashboardData(selectedYear, selectedMonth) {
     const currentRealYear = now.getFullYear();
     const currentRealMonth = now.getMonth();
 
-    // Resolve target year filter
     let targetYear = null;
     if (selectedYear === "current_year") {
         targetYear = currentRealYear;
@@ -586,7 +576,6 @@ async function updateDashboardData(selectedYear, selectedMonth) {
         targetYear = Number(selectedYear);
     }
 
-    // Resolve target month filter
     let targetMonth = null;
     if (selectedMonth === "current") {
         targetMonth = currentRealMonth;
@@ -594,14 +583,12 @@ async function updateDashboardData(selectedYear, selectedMonth) {
         targetMonth = Number(selectedMonth);
     }
 
-    // Filter Cached Records
     let matchedRecords = cachedLegacyRecords;
 
     if (targetYear !== null) {
         matchedRecords = matchedRecords.filter(r => r.year === targetYear);
     }
 
-    // Prepare Trend Chart Monthly Buckets
     const monthlyBites = new Array(12).fill(0);
     const monthlyVaccinated = new Array(12).fill(0);
     const monthlyMortality = new Array(12).fill(0);
@@ -613,14 +600,12 @@ async function updateDashboardData(selectedYear, selectedMonth) {
     let focusedPeriodPatients = 0;
 
     matchedRecords.forEach(r => {
-        // Distribute to monthly array if month is known
         if (r.month !== null && r.month >= 0 && r.month < 12) {
             monthlyBites[r.month] += r.biteCases;
             monthlyVaccinated[r.month] += r.vaccinated;
             monthlyMortality[r.month] += r.deaths;
         }
 
-        // Check if record matches selected month filter for KPI calculations
         const monthMatches = targetMonth === null || r.month === targetMonth;
 
         if (monthMatches) {
@@ -630,13 +615,11 @@ async function updateDashboardData(selectedYear, selectedMonth) {
             totalCompletedPEP += r.completedPEP;
         }
 
-        // Track Patient Consultations for the active month card
         if (r.month === (targetMonth !== null ? targetMonth : currentRealMonth)) {
             focusedPeriodPatients += r.biteCases;
         }
     });
 
-    // 1. Update Monthly Patients KPI Card
     const displayMonthIdx = targetMonth !== null ? targetMonth : currentRealMonth;
     const displayYearLabel = targetYear !== null ? targetYear : currentRealYear;
 
@@ -650,7 +633,6 @@ async function updateDashboardData(selectedYear, selectedMonth) {
         monthlyPatientsTitle.textContent = `${fullMonths[displayMonthIdx]} Patients`;
     }
 
-    // 2. Update Deaths & PEP KPIs
     if (deathsEl) deathsEl.textContent = totalDeaths.toLocaleString();
 
     if (pepRateEl) {
@@ -664,7 +646,6 @@ async function updateDashboardData(selectedYear, selectedMonth) {
         }
     }
 
-    // 3. Update Trend Chart
     if (trendChartInstance) {
         trendChartInstance.data.datasets[0].data = monthlyBites;
         trendChartInstance.data.datasets[1].data = monthlyVaccinated;

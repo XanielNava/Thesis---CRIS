@@ -54,7 +54,7 @@ async function loadFacilitiesRegistry() {
             });
         }
     } catch (err) {
-        // Offline / Emulator fallback
+        // Handled
     }
 }
 
@@ -105,7 +105,6 @@ async function loadCases() {
         allLegacyCases = [];
         availableYears.clear();
 
-        // Query only legacy summary / uploaded report sheets
         let legacyCollection = collection(db, "pho-database", "main", "legacy-summary");
         let snapshot = await getDocs(legacyCollection);
 
@@ -119,7 +118,6 @@ async function loadCases() {
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
 
-                // 🛑 FILTER OUT EMPTY ROWS OR EXCEL HEADER ARTIFACT ROWS
                 const rawName = (data.rawData && data.rawData[0]) || data.abtc || data.facilityName || "";
                 if (!rawName || typeof rawName !== "string") return;
                 

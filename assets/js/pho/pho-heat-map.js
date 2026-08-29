@@ -7,6 +7,7 @@ import {
     collection, 
     getDocs 
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 // Silence Chromium Canvas2D readback warning
 const originalGetContext = HTMLCanvasElement.prototype.getContext;
@@ -76,9 +77,33 @@ function getCoordinates(facilityName) {
     return { lat: 10.90, lng: 122.60 };
 }
 
+// ================= LOGOUT HANDLER =================
+function setupLogoutHandler() {
+    const logoutBtn = document.getElementById("logout-btn");
+    if (!logoutBtn) return;
+
+    logoutBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        const confirmLogout = confirm("Are you sure you want to log out of the PHO Surveillance Portal?");
+        if (!confirmLogout) return;
+
+        alert("You are being logged out of the portal. Redirecting to login page...");
+
+        try {
+            await signOut(auth);
+        } catch (err) {
+            console.error("Sign out error:", err);
+        } finally {
+            window.location.href = "pho-login.html";
+        }
+    });
+}
+
 // ================= LIFECYCLE INITIALIZATION =================
 document.addEventListener("DOMContentLoaded", async () => {
     try {
+        setupLogoutHandler();
         await loadFacilityCoordinates();
         initializeMap();
         initializeControls();
@@ -303,7 +328,6 @@ function updateStatistics(data) {
         });
     }
 
-    // Default fallback to Iloilo Provincial Census Total (2,082,616)
     if (activePopulation === 0) {
         activePopulation = totalHumanPopulation > 0 ? totalHumanPopulation : 2082616;
     }
@@ -315,17 +339,14 @@ function updateStatistics(data) {
         return;
     }
 
-    // 1. Exposure Rate as % of Active Population
     if (prevalenceCard) {
         prevalenceCard.textContent = `${((biteTotal / activePopulation) * 100).toFixed(3)}%`;
     }
 
-    // 2. Incidence Rate per 100,000 Population
     if (incidentsCard) {
         incidentsCard.textContent = `${((biteTotal / activePopulation) * 100000).toFixed(1)} /100k`;
     }
 
-    // 3. Cause-Specific Mortality Rate per 100,000 Population
     if (mortalityCard) {
         mortalityCard.textContent = `${((humanTotal / activePopulation) * 100000).toFixed(2)} /100k`;
     }
@@ -366,7 +387,6 @@ function drawHeatmap(data) {
     const bounds = [];
     const heatPoints = [];
 
-    // Determine the maximum metric across all facilities in this filter to normalize weights
     let maxMetric = 1;
     data.forEach(row => {
         let val = 0;
@@ -390,13 +410,11 @@ function drawHeatmap(data) {
         if (selectedLayer === "human") activeMetric = humanDeaths;
         else if (selectedLayer === "animal") activeMetric = animalDeaths;
 
-        // Calculate normalized weight intensity between 0.15 and 1.0
         if (activeMetric > 0) {
             const intensity = Math.min(Math.max(activeMetric / maxMetric, 0.15), 1.0);
             heatPoints.push([lat, lng, intensity]);
         }
 
-        // Scale marker radius dynamically between 4px and 12px based on case magnitude
         const markerRadius = activeMetric > 0 
             ? Math.min(Math.max(4 + (activeMetric / maxMetric) * 8, 4), 12)
             : 4;
@@ -425,12 +443,11 @@ function drawHeatmap(data) {
         if (markerLayer) markerLayer.addLayer(marker);
     });
 
-    // Layer-specific gradient configs
-    let gradientConfig = { '0.2': "#FFE082", '0.5': "#FFB300", '0.8': "#EA6113", '1.0': "#8C2F00" }; // Sunset Orange (Bites)
+    let gradientConfig = { '0.2': "#FFE082", '0.5': "#FFB300", '0.8': "#EA6113", '1.0': "#8C2F00" };
     if (selectedLayer === "human") {
-        gradientConfig = { '0.2': "#FFCDD2", '0.5': "#EF5350", '0.8': "#C62828", '1.0': "#7F0000" }; // Crimson (Human Deaths)
+        gradientConfig = { '0.2': "#FFCDD2", '0.5': "#EF5350", '0.8': "#C62828", '1.0': "#7F0000" };
     } else if (selectedLayer === "animal") {
-        gradientConfig = { '0.2': "#BBDEFB", '0.5': "#42A5F5", '0.8': "#1565C0", '1.0': "#002171" }; // Blue (Animal Deaths)
+        gradientConfig = { '0.2': "#BBDEFB", '0.5': "#42A5F5", '0.8': "#1565C0", '1.0': "#002171" };
     }
 
     currentHeatLayer = L.heatLayer(heatPoints, {
