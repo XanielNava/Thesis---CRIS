@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Individual Treatment Record | Animal Bite Treatment Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="../../assets/css/abtc/itr.css">
 </head>
@@ -25,7 +26,7 @@
 </header>
 
 <main class="page">
-  
+
   <div class="page-actions">
     <a href="abtc-reg.html" class="btn-back">
       <i class="fa-solid fa-arrow-left-long"></i> Back to Registry
@@ -34,10 +35,10 @@
 
   <form id="itrForm" novalidate>
 
-    <!-- TOP METADATA STRIP (MOVED PHYSICIAN FIELD HERE) -->
+    <!-- TOP METADATA STRIP -->
     <div class="record-strip">
       <div class="field">
-        <label for="recordNo">ITR / Record No.</label>
+        <label for="recordNo">Registry / ITR No.</label>
         <input type="text" id="recordNo" name="recordNo" placeholder="e.g., ABTC-2026-0001" readonly>
       </div>
       <div class="field">
@@ -45,20 +46,16 @@
         <input type="text" id="physician" name="physician_active_user" autocomplete="off" placeholder="Fetching active user..." readonly required>
       </div>
       <div class="field">
-        <label for="exposureDate">Date of exposure</label>
-        <input type="date" id="exposureDate" name="exposureDate" required>
-      </div>
-      <div class="field">
-        <label for="consultDateTime">Date & time of consultation (Day 0)</label>
+        <label for="consultDateTime">Date &amp; time of consultation (Day 0)</label>
         <input type="datetime-local" id="consultDateTime" name="consultDateTime" required>
       </div>
     </div>
 
-    <!-- PATIENT INFORMATION CARD -->
+    <!-- PATIENT'S INFORMATION -->
     <section class="card">
       <div class="card-head">
         <i class="fa-solid fa-user"></i>
-        <h2>Patient information</h2>
+        <h2>Patient's information</h2>
       </div>
       <div class="grid grid-2">
         <div class="field">
@@ -74,6 +71,14 @@
           <input type="text" id="middleName" name="middleName" placeholder="Middle name (optional)">
         </div>
         <div class="field">
+          <label for="suffix">Suffix</label>
+          <input type="text" id="suffix" name="suffix" placeholder="e.g., Jr., Sr., III (optional)">
+        </div>
+        <div class="field">
+          <label for="birthday">Birthday</label>
+          <input type="date" id="birthday" name="birthday">
+        </div>
+        <div class="field">
           <label for="age">Age</label>
           <input type="number" id="age" name="age" min="0" max="120" placeholder="0" required>
         </div>
@@ -86,8 +91,30 @@
           </select>
         </div>
         <div class="field">
+          <label for="civilStatus">Civil status</label>
+          <select id="civilStatus" name="civilStatus">
+            <option value="" selected>Select</option>
+            <option value="Single">Single</option>
+            <option value="Married">Married</option>
+            <option value="Widowed">Widowed</option>
+            <option value="Separated">Separated</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="religion">Religion</label>
+          <input type="text" id="religion" name="religion" placeholder="Religion">
+        </div>
+        <div class="field">
           <label for="contactNo">Contact number</label>
           <input type="tel" id="contactNo" name="contactNo" placeholder="09xx xxx xxxx">
+        </div>
+        <div class="field">
+          <label for="spouseName">Husband / wife</label>
+          <input type="text" id="spouseName" name="spouseName" placeholder="Name of spouse (if applicable)">
+        </div>
+        <div class="field">
+          <label for="parentName">Father / mother's name</label>
+          <input type="text" id="parentName" name="parentName" placeholder="Name of parent (for minors)">
         </div>
 
         <div class="field">
@@ -107,72 +134,51 @@
           <input type="text" id="province" name="province" placeholder="e.g. Iloilo">
         </div>
       </div>
-    </section>
 
-    <!-- EXPOSURE DETAILS CARD -->
-    <section class="card">
-      <div class="card-head">
-        <i class="fa-solid fa-paw"></i>
-        <h2>Exposure and bite details</h2>
+      <h3 class="sub-head">PhilHealth (PHIC) membership</h3>
+      <div class="check-grid">
+        <div class="check-row" data-group="phic" data-value="nhts">
+          <label class="check"><input type="checkbox"><span>NHTS</span></label>
+        </div>
+        <div class="check-row" data-group="phic" data-value="fourPs">
+          <label class="check"><input type="checkbox"><span>4Ps</span></label>
+        </div>
+        <div class="check-row" data-group="phic" data-value="seniorCitizen">
+          <label class="check"><input type="checkbox"><span>Senior citizen</span></label>
+        </div>
+        <div class="check-row" data-group="phic" data-value="lguSponsored">
+          <label class="check"><input type="checkbox"><span>LGU sponsored</span></label>
+        </div>
+        <div class="check-row" data-group="phic" data-value="others">
+          <label class="check"><input type="checkbox"><span>Others</span></label>
+          <div class="check-fields">
+            <input type="text" data-field="details" placeholder="Specify" aria-label="Other PHIC category" disabled>
+          </div>
+        </div>
       </div>
-      <div class="grid grid-2">
-        <div class="field span-2">
-          <label for="biteArea">Area of the bite</label>
-          <input type="text" id="biteArea" name="biteArea" placeholder="e.g., Right lower leg" required>
-        </div>
-        <div class="field">
-          <label for="animalType">Type of animal</label>
-          <select id="animalType" name="animalType" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Dog">Dog</option>
-            <option value="Cat">Cat</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="field" id="animalOtherWrap" hidden>
-          <label for="animalOther">Specify animal</label>
-          <input type="text" id="animalOther" name="animalOther" placeholder="Specify type of animal">
-        </div>
-        <div class="field">
-          <label>Was the animal caged?</label>
-          <div class="pill-group" data-name="animalCaged">
-            <button type="button" class="pill" data-value="Yes">Yes</button>
-            <button type="button" class="pill" data-value="No">No</button>
-            <button type="button" class="pill" data-value="Unknown">Unknown</button>
-          </div>
-        </div>
-        <div class="field">
-          <label>Category of exposure</label>
-          <div class="pill-group" data-name="exposureCategory">
-            <button type="button" class="pill" data-value="I">Category I</button>
-            <button type="button" class="pill" data-value="II">Category II</button>
-            <button type="button" class="pill" data-value="III">Category III</button>
-          </div>
-        </div>
-        <div class="field">
-          <label>Previously vaccinated?</label>
-          <div class="pill-group" data-name="priorVaccination">
-            <button type="button" class="pill" data-value="Yes">Yes</button>
-            <button type="button" class="pill" data-value="No">No</button>
-          </div>
-        </div>
-        <div class="field">
-          <label for="lastVaccDate">Date of last vaccination</label>
-          <input type="date" id="lastVaccDate" name="lastVaccDate">
+      <div class="field membership-field">
+        <label>Membership</label>
+        <div class="pill-group" data-name="phicMembership">
+          <button type="button" class="pill" data-value="Member">Member</button>
+          <button type="button" class="pill" data-value="Dependent">Dependent</button>
         </div>
       </div>
     </section>
 
-    <!-- VITAL SIGNS CARD -->
+    <!-- VITAL SIGNS -->
     <section class="card">
       <div class="card-head">
         <i class="fa-solid fa-heart-pulse"></i>
         <h2>Vital signs</h2>
       </div>
-      <div class="grid grid-6">
+      <div class="grid grid-4">
         <div class="field">
-          <label for="bp">Blood pressure</label>
-          <input type="text" id="bp" name="bp" placeholder="120/80">
+          <label for="weight">Weight (kg)</label>
+          <input type="number" step="0.1" id="weight" name="weight" placeholder="60">
+        </div>
+        <div class="field">
+          <label for="height">Height (ft)</label>
+          <input type="number" step="0.01" id="height" name="height" placeholder="5.5">
         </div>
         <div class="field">
           <label for="temp">Temperature (&deg;C)</label>
@@ -187,120 +193,296 @@
           <input type="number" id="resp" name="resp" placeholder="18">
         </div>
         <div class="field">
+          <label for="bp">Blood pressure</label>
+          <input type="text" id="bp" name="bp" placeholder="120/80">
+        </div>
+        <div class="field">
           <label for="o2sat">O2 saturation (%)</label>
           <input type="number" id="o2sat" name="o2sat" placeholder="98">
         </div>
+      </div>
+    </section>
+
+    <!-- CHIEF COMPLAINT / NATURE OF INCIDENT -->
+    <section class="card">
+      <div class="card-head">
+        <i class="fa-solid fa-paw"></i>
+        <h2>Chief complaint &mdash; nature of incident</h2>
+      </div>
+      <div class="grid grid-2">
         <div class="field">
-          <label for="weight">Weight (kg)</label>
-          <input type="number" step="0.1" id="weight" name="weight" placeholder="60">
+          <label for="animalType">Specie</label>
+          <select id="animalType" name="animalType" required>
+            <option value="" disabled selected>Select</option>
+            <option value="Dog">Dog</option>
+            <option value="Cat">Cat</option>
+            <option value="Other">Others</option>
+          </select>
+        </div>
+        <div class="field" id="animalOtherWrap" hidden>
+          <label for="animalOther">Specify animal</label>
+          <input type="text" id="animalOther" name="animalOther" placeholder="Specify type of animal">
+        </div>
+
+        <div class="field span-2">
+          <label>Type of wound</label>
+          <div class="check-grid">
+            <div class="check-row" data-group="woundType" data-value="Punctured">
+              <label class="check"><input type="checkbox"><span>Punctured</span></label>
+            </div>
+            <div class="check-row" data-group="woundType" data-value="Lacerated">
+              <label class="check"><input type="checkbox"><span>Lacerated</span></label>
+            </div>
+            <div class="check-row" data-group="woundType" data-value="Abrasion">
+              <label class="check"><input type="checkbox"><span>Abrasion</span></label>
+            </div>
+            <div class="check-row" data-group="woundType" data-value="Scratch">
+              <label class="check"><input type="checkbox"><span>Scratch</span></label>
+            </div>
+            <div class="check-row" data-group="woundType" data-value="Multiple">
+              <label class="check"><input type="checkbox"><span>Multiple</span></label>
+              <div class="check-fields">
+                <input type="text" data-field="details" placeholder="Specify" aria-label="Multiple wounds details" disabled>
+              </div>
+            </div>
+            <div class="check-row" data-group="woundType" data-value="Others">
+              <label class="check"><input type="checkbox"><span>Others</span></label>
+              <div class="check-fields">
+                <input type="text" data-field="details" placeholder="Specify" aria-label="Other wound type" disabled>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="exposureDate">Date of incident</label>
+          <input type="date" id="exposureDate" name="exposureDate" required>
+        </div>
+        <div class="field">
+          <label for="exposureTime">Time of incident</label>
+          <input type="time" id="exposureTime" name="exposureTime">
+        </div>
+        <div class="field">
+          <label for="incidentPlace">Place of incident</label>
+          <input type="text" id="incidentPlace" name="incidentPlace" placeholder="e.g., In front of the house">
+        </div>
+        <div class="field">
+          <label for="biteArea">Site of bite</label>
+          <input type="text" id="biteArea" name="biteArea" placeholder="e.g., Right lower leg" required>
+        </div>
+        <div class="field span-2">
+          <label for="animalStatus">Status of animal</label>
+          <input type="text" id="animalStatus" name="animalStatus" placeholder="e.g., Alive and caged, stray, dead, unknown">
         </div>
       </div>
     </section>
 
-    <!-- MEDICAL HISTORY CARD -->
+    <!-- PAST MEDICAL HISTORY -->
     <section class="card">
       <div class="card-head">
         <i class="fa-solid fa-notes-medical"></i>
-        <h2>Medical history</h2>
+        <h2>Past medical history</h2>
       </div>
-      <div class="grid grid-1">
-        <div class="field">
-          <label>Comorbidities / existing medical conditions</label>
-          <textarea id="comorbidities" name="comorbidities" rows="2" placeholder="e.g., Diabetes, hypertension, immunocompromised — leave blank if none"></textarea>
+      <div class="check-list">
+        <div class="check-row" data-group="pastHistory" data-value="hospitalization">
+          <label class="check"><input type="checkbox"><span>Hospitalization</span></label>
+          <div class="check-fields">
+            <input type="text" data-field="details" placeholder="Specify" aria-label="Hospitalization details" disabled>
+          </div>
         </div>
-        <div class="field">
-          <label for="allergies">Known allergies</label>
-          <input type="text" id="allergies" name="allergies" placeholder="e.g., None, or specify allergen">
+        <div class="check-row" data-group="pastHistory" data-value="allergy">
+          <label class="check"><input type="checkbox"><span>Food / drug allergy</span></label>
+          <div class="check-fields">
+            <input type="text" data-field="details" placeholder="Specify allergen" aria-label="Food or drug allergy details" disabled>
+          </div>
         </div>
-        <div class="field">
-          <label for="medications">Current medications</label>
-          <input type="text" id="medications" name="medications" placeholder="e.g., None, or list current medications">
+        <div class="check-row" data-group="pastHistory" data-value="immunization">
+          <label class="check"><input type="checkbox"><span>Previous immunization</span></label>
+          <div class="check-fields">
+            <input type="text" data-field="details" placeholder="Vaccine and date of last dose" aria-label="Previous immunization details" disabled>
+          </div>
+        </div>
+        <div class="check-row" data-group="pastHistory" data-value="medicalProblems">
+          <label class="check"><input type="checkbox"><span>Medical problems / medications</span></label>
+          <div class="check-fields">
+            <input type="text" data-field="details" placeholder="e.g., Diabetes, hypertension, maintenance meds" aria-label="Medical problems or medications" disabled>
+          </div>
+        </div>
+        <div class="check-row" data-group="pastHistory" data-value="others">
+          <label class="check"><input type="checkbox"><span>Others</span></label>
+          <div class="check-fields">
+            <input type="text" data-field="details" placeholder="Specify" aria-label="Other medical history" disabled>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- MANAGEMENT / TREATMENT CARD -->
+    <!-- PHYSICIAN'S ORDER -->
     <section class="card">
-      <div class="card-head"> 
-        <i class="fa-solid fa-kit-medical"></i>
-        <h2>Management / treatment</h2>
+      <div class="card-head">
+        <i class="fa-solid fa-user-doctor"></i>
+        <h2>Orders &amp; treatment given</h2>
       </div>
       <div class="grid grid-2">
+        <div class="field">
+          <label for="diagnosis">Diagnosis</label>
+          <input type="text" id="diagnosis" name="diagnosis" placeholder="e.g., Dog bite, right lower leg">
+        </div>
+        <div class="field">
+          <label>Category of exposure</label>
+          <div class="pill-group" data-name="exposureCategory">
+            <button type="button" class="pill" data-value="I">Category I</button>
+            <button type="button" class="pill" data-value="II">Category II</button>
+            <button type="button" class="pill" data-value="III">Category III</button>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="sub-head">Orders and treatment given</h3>
+      <p class="hint">Tick an item to enter its details, including when it was given.</p>
+      <div class="check-list">
+        <div class="check-row" data-group="physicianOrder" data-value="tetanusToxoid">
+          <label class="check"><input type="checkbox"><span>Tetanus toxoid / TD 0.5 mL IM</span></label>
+          <div class="check-fields">
+            <div class="field">
+              <label for="tetanusRemarks">Remarks</label>
+              <input type="text" id="tetanusRemarks" data-field="details" placeholder="Optional" disabled>
+            </div>
+            <div class="field">
+              <label for="tetanusGivenAt">Given on</label>
+              <input type="datetime-local" id="tetanusGivenAt" data-field="givenAt" disabled>
+            </div>
+          </div>
+        </div>
+        <div class="check-row" data-group="physicianOrder" data-value="htig">
+          <label class="check"><input type="checkbox"><span>HTIG 250 U IM</span></label>
+          <div class="check-fields">
+            <div class="field">
+              <label for="htigRemarks">Remarks</label>
+              <input type="text" id="htigRemarks" data-field="details" placeholder="Optional" disabled>
+            </div>
+            <div class="field">
+              <label for="htigGivenAt">Given on</label>
+              <input type="datetime-local" id="htigGivenAt" data-field="givenAt" disabled>
+            </div>
+          </div>
+        </div>
+        <div class="check-row" data-group="physicianOrder" data-value="pcecvPvrv">
+          <label class="check"><input type="checkbox"><span>PCECV / PVRV</span></label>
+          <div class="check-fields">
+            <input type="text" id="vaccineBrand" name="vaccineBrand" data-field="brand" placeholder="Brand / type" aria-label="Vaccine brand or type" disabled>
+            <select id="route" name="route" data-field="route" aria-label="Vaccine route" disabled>
+              <option value="" selected>Route</option>
+              <option value="Intramuscular">Intramuscular</option>
+              <option value="Intradermal">Intradermal</option>
+            </select>
+          </div>
+        </div>
+        <div class="check-row" data-group="physicianOrder" data-value="skinTest">
+          <label class="check"><input type="checkbox"><span>ERIG skin test (0.1 mL ERIG + 0.9 mL sterile water)</span></label>
+          <div class="check-fields">
+            <div class="field">
+              <label for="skinTestInjectedAt">Injected at</label>
+              <input type="datetime-local" id="skinTestInjectedAt" data-field="injectedAt" disabled>
+            </div>
+            <div class="field">
+              <label for="skinTestDueAt">Due on</label>
+              <input type="datetime-local" id="skinTestDueAt" data-field="dueAt" disabled>
+            </div>
+            <div class="field">
+              <label for="skinTestResult">Result</label>
+              <select id="skinTestResult" data-field="result" disabled>
+                <option value="" selected>Select</option>
+                <option value="Negative">Negative</option>
+                <option value="Positive">Positive</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="skinTestConsent">Consent from (patient / guardian)</label>
+              <input type="text" id="skinTestConsent" data-field="consentBy" placeholder="Name" disabled>
+            </div>
+          </div>
+        </div>
+        <div class="check-row" data-group="physicianOrder" data-value="erig">
+          <label class="check"><input type="checkbox"><span>ERIG 200 IU/mL, to infiltrate wound, ANST</span></label>
+          <div class="check-fields">
+            <div class="field">
+              <label for="erigMaxDose">Max dose (mL)</label>
+              <input type="number" step="0.1" min="0" id="erigMaxDose" data-field="maxDose" placeholder="0.0" disabled>
+            </div>
+            <div class="field">
+              <label for="erigAmountGiven">Amount infiltrated</label>
+              <input type="text" id="erigAmountGiven" data-field="amountGiven" placeholder="e.g., 2.5 mL" disabled>
+            </div>
+            <div class="field">
+              <label for="erigConsent">Consent from (patient / guardian)</label>
+              <input type="text" id="erigConsent" data-field="consentBy" placeholder="Name" disabled>
+            </div>
+          </div>
+        </div>
+        <div class="check-row" data-group="physicianOrder" data-value="hrig">
+          <label class="check"><input type="checkbox"><span>HRIG 150 IU/mL, to infiltrate wound, ANST</span></label>
+          <div class="check-fields">
+            <input type="number" step="0.1" min="0" data-field="maxDose" placeholder="Max dose (mL)" aria-label="HRIG max dose in mL" disabled>
+          </div>
+        </div>
+        <div class="check-row" data-group="physicianOrder" data-value="antibiotics">
+          <label class="check"><input type="checkbox"><span>Antibiotics</span></label>
+          <div class="check-fields">
+            <input type="text" data-field="details" placeholder="Drug, dose, frequency" aria-label="Antibiotics details" disabled>
+          </div>
+        </div>
+        <div class="check-row" data-group="physicianOrder" data-value="dailyDressing">
+          <label class="check"><input type="checkbox"><span>Daily wound dressing</span></label>
+        </div>
+        <div class="check-row" data-group="physicianOrder" data-value="observeAnimal">
+          <label class="check"><input type="checkbox"><span>Observe animal for 14 days</span></label>
+        </div>
+      </div>
+
+      <div class="grid grid-2 order-notes">
         <div class="field span-2">
           <label for="woundCare">Wound care / initial management</label>
           <textarea id="woundCare" name="woundCare" rows="2" placeholder="Describe washing, disinfection, wound closure, etc."></textarea>
         </div>
-        <div class="field">
-          <label for="vaccineBrand">Vaccine given (brand / type)</label>
-          <input type="text" id="vaccineBrand" name="vaccineBrand" placeholder="e.g., PVRV / PCEC">
-        </div>
-        <div class="field">
-          <label for="route">Route</label>
-          <select id="route" name="route">
-            <option value="" disabled selected>Select</option>
-            <option value="Intramuscular">Intramuscular</option>
-            <option value="Intradermal">Intradermal</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="rigType">Immunoglobulin Type (if Category III)</label>
-          <select id="rigType" name="rigType">
-            <option value="" selected>None / Not Applicable</option>
-            <option value="ERIG">ERIG (Equine - Horse Serum)</option>
-            <option value="HRIG">HRIG (Human Plasma)</option>
-            <option value="mAb">Monoclonal Antibodies (mAb)</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="rigDose">Immunoglobulin Dose / Volume</label>
-          <input type="text" id="rigDose" name="rigDose" placeholder="e.g., 1,000 IU or 2.5 mL">
-        </div>
-        
         <div class="field span-2">
-          <label>Vaccination Schedule (Auto-Calculated from Consultation Date)</label>
-          
-          <div class="pep-schedule-card-grid" id="pepScheduleGrid">
-            <div class="pep-date-card active" id="cardDay0">
-              <span class="day-title">Day 0</span>
-              <input type="date" id="dateInputDay0" class="pep-card-date">
-            </div>
+          <label for="remarks">Other orders / remarks</label>
+          <textarea id="remarks" name="remarks" rows="2" placeholder="Any additional orders or notes"></textarea>
+        </div>
+      </div>
 
-            <div class="pep-date-card active" id="cardDay3">
-              <span class="day-title">Day 3</span>
-              <input type="date" id="dateInputDay3" class="pep-card-date">
-            </div>
-
-            <div class="pep-date-card active" id="cardDay7">
-              <span class="day-title">Day 7</span>
-              <input type="date" id="dateInputDay7" class="pep-card-date">
-            </div>
-
-            <div class="pep-date-card active" id="cardDay14">
-              <span class="day-title">Day 14</span>
-              <input type="date" id="dateInputDay14" class="pep-card-date">
-            </div>
-
-            <div class="pep-date-card active" id="cardDay28">
-              <span class="day-title">Day 28</span>
-              <input type="date" id="dateInputDay28" class="pep-card-date">
-            </div>
+      <h3 class="sub-head">Vaccination schedule</h3>
+      <div class="field">
+        <label>Auto-calculated from consultation date</label>
+        <div class="pep-schedule-card-grid" id="pepScheduleGrid">
+          <div class="pep-date-card active" id="cardDay0">
+            <span class="day-title">Day 0</span>
+            <input type="date" id="dateInputDay0" class="pep-card-date">
           </div>
-
-          <small id="scheduleHelpText" style="display:block; margin-top:8px; color:#627d98;">
-            Target dates calculated automatically. Click any date picker to manually adjust.
-          </small>
+          <div class="pep-date-card active" id="cardDay3">
+            <span class="day-title">Day 3</span>
+            <input type="date" id="dateInputDay3" class="pep-card-date">
+          </div>
+          <div class="pep-date-card active" id="cardDay7">
+            <span class="day-title">Day 7</span>
+            <input type="date" id="dateInputDay7" class="pep-card-date">
+          </div>
+          <div class="pep-date-card active" id="cardDay14">
+            <span class="day-title">Day 14</span>
+            <input type="date" id="dateInputDay14" class="pep-card-date">
+          </div>
+          <div class="pep-date-card active" id="cardDay28">
+            <span class="day-title">Day 28</span>
+            <input type="date" id="dateInputDay28" class="pep-card-date">
+          </div>
         </div>
-
-        <div class="field span-2">
-          <label for="remarks">Other treatment / remarks</label>
-          <textarea id="remarks" name="remarks" rows="2" placeholder="Any additional notes"></textarea>
-        </div>
+        <small id="scheduleHelpText" class="schedule-help">
+          Target dates calculated automatically. Click any date picker to manually adjust.
+        </small>
       </div>
     </section>
 
-    <!-- PHOTO DOCUMENTATION CARD -->
+    <!-- PHOTO DOCUMENTATION -->
     <section class="card">
       <div class="card-head">
         <i class="fa-solid fa-camera"></i>

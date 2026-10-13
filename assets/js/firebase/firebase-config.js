@@ -29,11 +29,20 @@ export const db = initializeFirestore(app, {
 
 export const auth = getAuth(app);
 
-// 🎛️ CONNECT DIRECTLY TO ACTIVE EMULATOR PORTS
-try {
-    connectFirestoreEmulator(db, '127.0.0.1', 8088);
-    connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-    console.log("🧪 Connected to Local Firebase Emulator (Firestore: 8088, Auth: 9099)");
-} catch (err) {
-    // Prevent duplicate attachment on fast refresh
+// ==============================================================================
+// 🎛️ EMULATOR ON / OFF TOGGLE SWITCH
+// ==============================================================================
+// true = ON (Local Emulator) | false = OFF (Live Cloud Firebase)
+const USE_EMULATOR = false;
+
+if (USE_EMULATOR) {
+    try {
+        connectFirestoreEmulator(db, '127.0.0.1', 8088);
+        connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+        console.log("🧪 Connected to Local Firebase Emulator (Firestore: 8088, Auth: 9099)");
+    } catch (err) {
+        // Prevent duplicate attachment on fast refresh
+    }
+} else {
+    console.log("☁️ Connected to Live Cloud Firebase");
 }
