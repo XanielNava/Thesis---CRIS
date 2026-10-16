@@ -818,3 +818,92 @@ body {
     padding: 18px;
   }
 }
+/* ===== Drawer additions: ITR-aligned sections (append to your registry CSS) ===== */
+
+.drawer-subtitle {
+    margin: 14px 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted, #7a6a5d);
+}
+
+/* View-mode checklist output */
+.drawer-check-view {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+}
+.drawer-check-view li {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 13px;
+    color: var(--text-dark, #412110);
+}
+.drawer-check-view li > i { color: #EA6113; margin-top: 2px; }
+.drawer-check-view .check-detail {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted, #7a6a5d);
+}
+.drawer-check-view .check-detail em { font-style: normal; font-weight: 700; }
+.drawer-none { color: var(--text-muted, #7a6a5d); font-style: italic; font-size: 13px; }
+
+/* Edit-mode checklist rows */
+.drawer-check-list { display: grid; gap: 8px; }
+.drawer-check-row {
+    border: 1px solid #f0e2cf;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #FFFAF0;
+}
+.drawer-check { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.drawer-check-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+}
+.drawer-sub-field { display: grid; gap: 2px; font-size: 11px; color: var(--text-muted, #7a6a5d); }
+.drawer-sub-field input:disabled,
+.drawer-sub-field select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Vaccination schedule */
+.drawer-schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.drawer-schedule-card {
+    display: grid;
+    gap: 4px;
+    padding: 8px 10px;
+    border: 1px solid #f0e2cf;
+    border-radius: 8px;
+    background: #FFFAF0;
+    text-align: center;
+}
+.drawer-schedule-card .day-title { font-size: 11px; font-weight: 700; color: #EA6113; }
+.drawer-schedule-card.disabled { opacity: 0.45; }
+
+/* Photo block (replaces the old inline styles) */
+.drawer-photo-frame { text-align: center; padding: 10px; }
+.drawer-photo-empty { color: #aaa; font-style: italic; font-size: 13px; }
+.drawer-photo-img {
+    display: none;
+    max-width: 100%;
+    max-height: 250px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+}
+
+/* Edit-mode multi-input rows (name, address) wrap on narrow drawers */
+.edit-val.edit-flex { flex-wrap: wrap; gap: 6px; }
+.edit-val.edit-flex > input,
+.edit-val.edit-flex > select { flex: 1 1 120px; min-width: 0; }
