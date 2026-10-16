@@ -17,7 +17,7 @@ const categoryThreeCount = document.getElementById('categoryThreeCount');
 const vialStockCount = document.getElementById('vialStockCount');
 const todayDateBadge = document.getElementById('todayDateBadge');
 const todayScheduleTableBody = document.getElementById('todayScheduleTableBody');
-const logoutBtn = document.getElementById('logout-btn');
+
 
 let currentFacilityId = null;
 
@@ -165,16 +165,5 @@ function renderTodayScheduleTable(dosesList) {
         btn.addEventListener('click', () => {
             window.location.href = `abtc-calendar.html?patientId=${btn.getAttribute('data-id')}`;
         });
-    });
-}
-
-if (logoutBtn) {
-    logoutBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        if (confirm("Are you sure you want to switch personnel profiles?")) {
-            sessionStorage.removeItem("activeDesignation");
-            sessionStorage.removeItem("activePersonnelName");
-            window.location.href = "abtc-profiles.html";
-        }
     });
 }

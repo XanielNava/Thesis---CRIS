@@ -33,7 +33,7 @@ export const auth = getAuth(app);
 // 🎛️ EMULATOR ON / OFF TOGGLE SWITCH
 // ==============================================================================
 // true = ON (Local Emulator) | false = OFF (Live Cloud Firebase)
-const USE_EMULATOR = false;
+const USE_EMULATOR = true;
 
 if (USE_EMULATOR) {
     try {
