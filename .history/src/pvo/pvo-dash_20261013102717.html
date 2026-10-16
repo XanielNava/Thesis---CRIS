@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PVO - Dashboard</title>
+
+    <link rel="stylesheet" href="../../assets/css/pvo/pvo-dashboard.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- FAST ZERO-FLASH COLLAPSE INIT -->
+        <script>
+            if (localStorage.getItem("sidebarCollapsed") === "true") {
+                document.querySelector(".container, .app-container")?.classList.add("collapsed");
+            }
+        </script>
+
+        <!-- PROFESSIONAL SAAS SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <script>
+                if (localStorage.getItem("sidebarCollapsed") === "true") {
+                    document.getElementById("sidebar").classList.add("collapsed");
+                }
+            </script>
+
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
+                </div>
+                <div class="brand-info">
+                    <span class="brand-title">Community-Centric Rabies Intelligence Information Systems</span>
+                    <span class="brand-badge">PVO Module</span>
+                </div>
+                <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="sidebar-nav">
+                <div class="nav-group">
+                    <span class="nav-label">Analytics</span>
+                    <a href="pvo-dash.html" class="nav-item active">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="pvo-animal-bite-cases.html" class="nav-item">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span class="nav-text">Animal Bite Cases</span>
+                    </a>
+                    <a href="pvo-heat-map.html" class="nav-item">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+                        <span class="nav-text">Heatmap</span>
+                    </a>
+                    <a href="pvo-animal-registry.html" class="nav-item">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v1a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 11a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2v1a2 2 0 0 0 4 0v-1z"/><path d="M5 11a2 2 0 0 0-2 2v1a2 2 0 0 0 4 0v-1a2 2 0 0 0-2-2z"/><path d="M12 12c-4 0-7 2-7 5v2h14v-2c0-3-3-5-7-5z"/></svg>
+                        <span class="nav-text">Animal Registry</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <a href="pvo-settings.html" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span class="nav-text">Settings</span>
+                </a>
+                <button id="logout-btn" class="nav-item logout-item" onclick="window.location.href='pvo-login.html'">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span class="nav-text">Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN DASHBOARD CONTENT -->
+        <main class="main-content">
+            <header class="header">
+                <h1>PVO DASHBOARD</h1>
+                <div class="user-profile-top">
+                    <div class="profile-info">
+                        <strong id="topProfileName">Loading User...</strong>
+                        <span id="topProfileRole">PVO Module</span>
+                    </div>
+                    <div class="profile-icon" id="topProfileIcon">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <!-- LEFT MAIN COLUMN -->
+                <section class="left-column">
+                    <div class="welcome-bar">
+                        <div class="welcome-text">
+                            <h2 id="welcomeGreeting">Hello, Authorized Personnel</h2>
+                            <small class="welcome-subtext">Provincial Veterinary Office Rabies Surveillance & Data Intelligence</small>
+                        </div>
+                        <div class="dashboard-filter-group">
+                            <select id="yearFilter" class="filter-select">
+                                <option value="2026" selected>2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                            </select>
+                            <select id="monthFilter" class="filter-select">
+                                <option value="all" selected>All Months</option>
+                                <option value="0">January</option>
+                                <option value="1">February</option>
+                                <option value="2">March</option>
+                                <option value="3">April</option>
+                                <option value="4">May</option>
+                                <option value="5">June</option>
+                                <option value="6">July</option>
+                                <option value="7">August</option>
+                                <option value="8">September</option>
+                                <option value="9">October</option>
+                                <option value="10">November</option>
+                                <option value="11">December</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- STATISTICS CONTAINER (4 KPI CARDS - Standardized to Match PHO Blueprint) -->
+                    <div class="statistics-container">
+                        <div class="stat-card">
+                            <small>TOTAL ANIMAL BITE CASES</small>
+                            <h2 id="totalBiteCases">0</h2>
+                            <span class="stat-badge neutral">Iloilo Province Total</span>
+                        </div>
+
+                        <div class="stat-card">
+                            <small>CONFIRMED RABIES CASES</small>
+                            <h2 id="confirmedRabiesCases" class="text-danger-custom">0</h2>
+                            <span class="stat-badge warning">Target: Zero Rabies</span>
+                        </div>
+
+                        <div class="stat-card">
+                            <small>VACCINATION COVERAGE (%)</small>
+                            <h2 id="vaccinationCoverage">0%</h2>
+                            <span class="stat-badge success">Target: 70%+</span>
+                        </div>
+
+                        <div class="stat-card">
+                            <small>ANIMALS UNDER OBSERVATION</small>
+                            <h2 id="animalsObserved">0</h2>
+                            <span class="stat-badge info">14-Day Quarantine</span>
+                        </div>
+                    </div>
+
+                    <!-- CHART PANEL CONTAINER -->
+                    <div class="dashboard-card chart-card">
+                        <div class="card-header">
+                            <h3>Surveillance & Vaccination Trends</h3>
+                            <div class="chart-controls">
+                                <select id="chartMetricSelect" class="filter-select-sm">
+                                    <option value="bites">Animal Bite Cases</option>
+                                    <option value="vaccinations">Vaccinations Administered</option>
+                                    <option value="confirmed">Confirmed Rabies Cases</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="pvoSurveillanceChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- EPIDEMIOLOGICAL DUAL PANEL BELOW CHARTS -->
+                    <div class="epi-grid">
+                        <!-- 1. RECENT INCIDENTS TABLE -->
+                        <div class="dashboard-card incident-table-card">
+                            <div class="card-header">
+                                <h3>Surveillance & Incident Log</h3>
+                                <a href="pvo-animal-bite-cases.html" class="view-all-link">View All Log</a>
+                            </div>
+                            <div class="table-wrapper">
+                                <table class="recent-cases-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Location</th>
+                                            <th>Vector</th>
+                                            <th>Exposure</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentCasesBody">
+                                        <tr>
+                                            <td>Jul 27, 2026</td>
+                                            <td>Pavia</td>
+                                            <td>Dog (Stray)</td>
+                                            <td><span class="epi-tag cat-3">Category III</span></td>
+                                            <td><span class="badge badge-danger">High Risk</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jul 26, 2026</td>
+                                            <td>Santa Barbara</td>
+                                            <td>Cat (Owned)</td>
+                                            <td><span class="epi-tag cat-2">Category II</span></td>
+                                            <td><span class="badge badge-warning">Quarantine</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jul 25, 2026</td>
+                                            <td>Oton</td>
+                                            <td>Dog (Owned)</td>
+                                            <td><span class="epi-tag cat-3">Category III</span></td>
+                                            <td><span class="badge badge-success">Cleared</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jul 24, 2026</td>
+                                            <td>Pototan</td>
+                                            <td>Dog (Stray)</td>
+                                            <td><span class="epi-tag cat-1">Category I</span></td>
+                                            <td><span class="badge badge-success">Cleared</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 2. EPIDEMIOLOGICAL SURVEILLANCE SUMMARY -->
+                        <div class="dashboard-card epi-summary-card">
+                            <div class="card-header">
+                                <h3>Epidemiological Summary</h3>
+                            </div>
+                            
+                            <!-- EXPOSURE SEVERITY STRATIFICATION -->
+                            <div class="epi-section">
+                                <div class="epi-section-title">
+                                    <span>Exposure Stratification</span>
+                                    <small>WHO/DOH Risk</small>
+                                </div>
+                                <div class="progress-stacked">
+                                    <div class="bar bar-cat3" style="width: 55%;" title="Category III: 55%">55%</div>
+                                    <div class="bar bar-cat2" style="width: 35%;" title="Category II: 35%">35%</div>
+                                    <div class="bar bar-cat1" style="width: 10%;" title="Category I: 10%"></div>
+                                </div>
+                                <div class="epi-legend">
+                                    <span><i class="dot cat3-dot"></i> Cat III (Severe)</span>
+                                    <span><i class="dot cat2-dot"></i> Cat II</span>
+                                    <span><i class="dot cat1-dot"></i> Cat I</span>
+                                </div>
+                            </div>
+
+                            <!-- HOST DYNAMICS / ANIMAL OWNERSHIP -->
+                            <div class="epi-section">
+                                <div class="epi-section-title">
+                                    <span>Reservoir Host Dynamics</span>
+                                </div>
+                                <div class="metric-row">
+                                    <div class="metric-box">
+                                        <small>Stray / Unknown</small>
+                                        <strong class="text-orange">62%</strong>
+                                    </div>
+                                    <div class="metric-box">
+                                        <small>Domestic Owned</small>
+                                        <strong>38%</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 14-DAY QUARANTINE TRACKER -->
+                            <div class="epi-section">
+                                <div class="epi-section-title">
+                                    <span>14-Day Animal Observation</span>
+                                </div>
+                                <ul class="quarantine-list">
+                                    <li>
+                                        <span>Under Active Observation</span>
+                                        <span class="count-badge warning">14 Animals</span>
+                                    </li>
+                                    <li>
+                                        <span>Completed & Cleared</span>
+                                        <span class="count-badge success">48 Animals</span>
+                                    </li>
+                                    <li>
+                                        <span>Died / Symptomatic</span>
+                                        <span class="count-badge danger">2 Cases</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+                <!-- RIGHT COLUMN: CALENDAR & ANNOUNCEMENTS -->
+                <aside class="right-column">
+                    <div class="card calendar-card">
+                        <div class="calendar-header">
+                            <button id="prevMonth" class="calendar-btn">&#10094;</button>
+                            <div class="calendar-title" id="calendarTitleContainer" style="cursor: pointer;" title="Click to jump to a specific month/year">
+                                <h3 id="monthYear">September 2026</h3>
+                            </div>
+                            <button id="nextMonth" class="calendar-btn">&#10095;</button>
+                        </div>
+
+                        <!-- CALENDAR JUMP MODAL -->
+                        <div id="calendarModal" class="calendar-modal hidden">
+                            <div class="calendar-modal-content">
+                                <div class="modal-year-select">
+                                    <button id="modalPrevYear" class="modal-nav-btn">&#10094;</button>
+                                    <span id="modalYearDisplay">2026</span>
+                                    <button id="modalNextYear" class="modal-nav-btn">&#10095;</button>
+                                </div>
+
+                                <div class="modal-months-grid" id="modalMonthsGrid"></div>
+                                <button id="closeModalBtn" class="modal-close-btn">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- CALENDAR WEEKDAYS -->
+                        <div class="calendar-weekdays">
+                            <div>Sun</div>
+                            <div>Mon</div>
+                            <div>Tue</div>
+                            <div>Wed</div>
+                            <div>Thu</div>
+                            <div>Fri</div>
+                            <div>Sat</div>
+                        </div>
+                        
+                        <!-- CALENDAR GRID -->
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                    </div>
+
+                    <!-- ANNOUNCEMENT CARD -->
+                    <div class="card announcements-card">
+                        <div class="card-header">
+                            <h3 id="selectedDate">Select a date</h3>
+                        </div>
+                        <div class="compliance-box">
+                            <textarea id="eventInput" placeholder="Type here for announcements and reminders" rows="4"></textarea>
+                            <button id="saveEventBtn" class="btn-primary-orange">Save Announcement</button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <!-- Application Module Scripts -->
+    <script type="module" src="../../assets/js/pvo/pvo-dash.js"></script>
+    <script type="module" src="../../assets/js/main/sidebar.js"></script>
+</body>
+
+</html>

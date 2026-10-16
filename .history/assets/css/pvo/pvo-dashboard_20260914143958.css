@@ -1,0 +1,533 @@
+/* ==========================================================================
+   CRIS PALETTE & SYSTEM VARIABLES
+   ========================================================================== */
+:root {
+    /* Brand Primary / Accent Colors */
+    --cris-primary: #e65100;         /* Primary Orange */
+    --cris-primary-hover: #bf360c;   /* Darker Orange Hover */
+    --cris-primary-gradient: linear-gradient(90deg, #e65100 0%, #f57c00 100%);
+    
+    /* Sidebar / Dark Navigation Colors */
+    --cris-navy-dark: #0b132b;       /* Dark Sidebar Background */
+    --cris-navy-border: #1c2541;     /* Sidebar Border Accent */
+    --cris-nav-text-muted: #8d99ae;  /* Unselected Nav Text */
+    --cris-nav-text-subtle: #a0aab8; /* Secondary Logo/Subtle Text */
+    --cris-nav-label: #5c6b73;       /* Category Labels */
+    
+    /* Background & Structural Colors */
+    --cris-bg-main: #f8f6f0;         /* Off-white Dashboard Background */
+    --cris-card-bg: #ffffff;         /* Card White Background */
+    --cris-card-subtle-bg: #fdf8f5;  /* Subtle Warm Container Fill */
+    
+    /* Categorical & Epidemiological Colors */
+    --cris-danger: #d84315;          /* Category III / High Risk Danger Red-Orange */
+    --cris-danger-bg: #ffebee;
+    --cris-danger-text: #c62828;
+    
+    --cris-warning: #f57f17;         /* Category II / Quarantine Warning Yellow */
+    --cris-warning-bg: #fff8e1;
+    --cris-warning-text: #f57f17;
+    
+    --cris-success: #2e7d32;         /* Category I / Cleared Success Green */
+    --cris-success-bg: #e8f5e9;
+    --cris-success-text: #2e7d32;
+    
+    /* Text & Border Colors */
+    --cris-text-dark: #333333;
+    --cris-text-heading: #1a1a1a;
+    --cris-text-muted: #666666;
+    --cris-border-light: #f0f0f0;
+    --cris-border-input: #e0e0e0;
+    --cris-shadow: rgba(0, 0, 0, 0.04);
+}
+
+/* ==========================================================================
+   GLOBAL & LAYOUT RESET
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Lato', sans-serif;
+}
+
+body {
+    background-color: var(--cris-bg-main);
+    color: var(--cris-text-dark);
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ==========================================================================
+   UNIVERSAL SIDEBAR (CRIS DARK NAVY STYLING)
+   ========================================================================== */
+.sidebar {
+    width: 260px;
+    background-color: var(--cris-navy-dark);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Sidebar Collapse Toggle Button */
+.toggle-btn {
+    position: absolute;
+    top: 20px;
+    right: -14px;
+    width: 28px;
+    height: 28px;
+    background-color: var(--cris-navy-dark);
+    border: 2px solid var(--cris-navy-border);
+    color: #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: background-color 0.2s ease;
+}
+
+.toggle-btn:hover {
+    background-color: var(--cris-primary);
+}
+
+/* Logo Section */
+.logo-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.logo-image {
+    width: 38px;
+    height: auto;
+}
+
+.logo-text {
+    font-size: 0.75rem;
+    color: var(--cris-nav-text-subtle);
+    line-height: 1.3;
+}
+
+.role-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--cris-primary);
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+
+.nav-section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--cris-nav-label);
+    letter-spacing: 1px;
+    margin: 16px 0 8px 12px;
+}
+
+/* Menu & Navigation Links */
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-grow: 1;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    color: var(--cris-nav-text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.menu-item i {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.menu-item:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.menu-item.active {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.12);
+    font-weight: 700;
+}
+
+/* Footer Nav & Logout Button */
+.footer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 16px;
+}
+
+/* Reset default button styles for Logout */
+button.menu-item {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+button.menu-item.logout:hover {
+    color: #ff4d4d;
+    background-color: rgba(255, 77, 77, 0.1);
+}
+
+/* ==========================================================================
+   MAIN CONTENT AREA & CRIS HEADER
+   ========================================================================== */
+.main-content {
+    flex-grow: 1;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.header {
+    background: var(--cris-primary-gradient);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.header h1 {
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+}
+
+.user-profile-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-role-label {
+    font-size: 0.75rem;
+    text-align: right;
+    line-height: 1.2;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 4px 12px;
+    border-radius: 16px;
+}
+
+/* ==========================================================================
+   GRID & CARDS STYLING
+   ========================================================================== */
+.content-grid {
+    display: grid;
+    grid-template-columns: 2.2fr 1fr;
+    gap: 20px;
+}
+
+.welcome-bar h2 {
+    font-size: 1.4rem;
+    color: var(--cris-text-heading);
+}
+
+.sub-welcome {
+    font-size: 0.85rem;
+    color: var(--cris-text-muted);
+    margin-bottom: 20px;
+}
+
+.statistics-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: var(--cris-card-bg);
+    padding: 16px;
+    border-radius: 10px;
+    border-left: 4px solid var(--cris-primary);
+    box-shadow: 0 2px 6px var(--cris-shadow);
+}
+
+.stat-card small {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #6c757d;
+}
+
+.stat-card h2 {
+    font-size: 2rem;
+    color: var(--cris-primary);
+    margin: 6px 0;
+}
+
+.stat-badge {
+    font-size: 0.75rem;
+    color: #555555;
+}
+
+.epi-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 16px;
+}
+
+.dashboard-card {
+    background: var(--cris-card-bg);
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 6px var(--cris-shadow);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.view-all-link {
+    font-size: 0.75rem;
+    color: var(--cris-primary);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+/* Surveillance Incident Table */
+.recent-cases-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.recent-cases-table th {
+    background-color: var(--cris-card-subtle-bg);
+    color: #777777;
+    text-align: left;
+    padding: 8px;
+}
+
+.recent-cases-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--cris-border-light);
+}
+
+/* CRIS Badges & Epidemiological Tags */
+.badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.badge-danger { background-color: var(--cris-danger-bg); color: var(--cris-danger-text); }
+.badge-warning { background-color: var(--cris-warning-bg); color: var(--cris-warning-text); }
+.badge-success { background-color: var(--cris-success-bg); color: var(--cris-success-text); }
+
+.epi-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.cat-3 { background-color: #fbe9e7; color: var(--cris-danger); }
+.cat-2 { background-color: var(--cris-warning-bg); color: var(--cris-warning); }
+.cat-1 { background-color: var(--cris-success-bg); color: var(--cris-success); }
+
+/* Epidemiological Surveillance Summary Section */
+.epi-section {
+    margin-bottom: 16px;
+}
+
+.epi-section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #444444;
+    margin-bottom: 8px;
+}
+
+.progress-stacked {
+    display: flex;
+    height: 18px;
+    border-radius: 9px;
+    overflow: hidden;
+    background-color: #eeeeee;
+    margin-bottom: 6px;
+}
+
+.bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.bar-cat3 { background-color: var(--cris-danger); }
+.bar-cat2 { background-color: var(--cris-warning); }
+.bar-cat1 { background-color: var(--cris-success); }
+
+.epi-legend {
+    display: flex;
+    gap: 12px;
+    font-size: 0.7rem;
+    color: var(--cris-text-muted);
+}
+
+.dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+.cat3-dot { background-color: var(--cris-danger); }
+.cat2-dot { background-color: var(--cris-warning); }
+.cat1-dot { background-color: var(--cris-success); }
+
+.metric-row {
+    display: flex;
+    gap: 12px;
+}
+
+.metric-box {
+    flex: 1;
+    background: var(--cris-card-subtle-bg);
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.metric-box small {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--cris-text-muted);
+}
+
+.metric-box strong {
+    font-size: 1.1rem;
+    color: var(--cris-text-dark);
+}
+
+.text-orange { color: var(--cris-primary) !important; }
+
+.quarantine-list {
+    list-style: none;
+    font-size: 0.78rem;
+}
+
+.quarantine-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed #eeeeee;
+}
+
+.count-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.count-badge.warning { background: var(--cris-warning-bg); color: var(--cris-warning-text); }
+.count-badge.success { background: var(--cris-success-bg); color: var(--cris-success-text); }
+.count-badge.danger { background: var(--cris-danger-bg); color: var(--cris-danger-text); }
+
+/* ==========================================================================
+   RIGHT COLUMN: CALENDAR & ANNOUNCEMENTS
+   ========================================================================== */
+.right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.card {
+    background: var(--cris-card-bg);
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 6px var(--cris-shadow);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.calendar-btn {
+    background: var(--cris-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.75rem;
+    color: #777777;
+    margin-bottom: 8px;
+}
+
+.btn-primary-orange {
+    width: 100%;
+    background-color: var(--cris-primary);
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary-orange:hover {
+    background-color: var(--cris-primary-hover);
+}
+
+textarea {
+    width: 100%;
+    border: 1px solid var(--cris-border-input);
+    border-radius: 6px;
+    padding: 8px;
+    margin-top: 8px;
+    resize: none;
+    font-size: 0.85rem;
+}

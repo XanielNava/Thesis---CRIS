@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PVO - Animal Registry</title>
+
+    <link rel="stylesheet" href="../../assets/css/pvo/pvo-animal-registry.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+
+<body>
+    <div class="container">
+        <!-- FAST ZERO-FLASH COLLAPSE INIT -->
+        <script>
+            if (localStorage.getItem("sidebarCollapsed") === "true") {
+                document.querySelector(".container, .app-container")?.classList.add("collapsed");
+            }
+        </script>
+
+        <!-- SAAS SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <script>
+                if (localStorage.getItem("sidebarCollapsed") === "true") {
+                    document.getElementById("sidebar").classList.add("collapsed");
+                }
+            </script>
+
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
+                </div>
+                <div class="brand-info">
+                    <span class="brand-title">Community-Centric Rabies Intelligence Information Systems</span>
+                    <span class="brand-badge">PVO Module</span>
+                </div>
+                <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="sidebar-nav">
+                <div class="nav-group">
+                    <span class="nav-label">ANALYTICS</span>
+                    <a href="pvo-dash.html" class="nav-item">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="9" />
+                            <rect x="14" y="3" width="7" height="5" />
+                            <rect x="14" y="12" width="7" height="9" />
+                            <rect x="3" y="16" width="7" height="5" />
+                        </svg>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="pvo-animal-bite-cases.html" class="nav-item">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                        <span class="nav-text">Animal Bite Cases</span>
+                    </a>
+                    <a href="pvo-heat-map.html" class="nav-item">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                            <line x1="8" y1="2" x2="8" y2="18" />
+                            <line x1="16" y1="6" x2="16" y2="22" />
+                        </svg>
+                        <span class="nav-text">Heatmap</span>
+                    </a>
+                    <a href="pvo-animal-registry.html" class="nav-item active">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 3z" />
+                            <path d="M18 21v-2a4 4 0 0 0-4-4H10a4 4 0 0 0-4 4v2" />
+                            <circle cx="18" cy="8" r="1.5" />
+                            <circle cx="6" cy="8" r="1.5" />
+                        </svg>
+                        <span class="nav-text">Animal Registry</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <a href="../../settings/html/pvo-settings.html" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
+                        </path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span class="nav-text">Settings</span>
+                </a>
+                <button id="logout-btn" class="nav-item logout-item" onclick="window.location.href='pvo-login.html'">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    <span class="nav-text">Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN WORKSPACE -->
+        <main class="main-content">
+            <header class="header">
+                <h1>ANIMAL REGISTRY</h1>
+            </header>
+
+            <!-- TOOLBAR CONTAINER (ONLY CONTENT SHOWN ON PAGE) -->
+            <div class="registry-toolbar-container">
+                <div class="search-input">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Search registered owners...">
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-action btn-add" id="openAddOwnerModal">
+                        <i class="fa-solid fa-plus"></i> Add New Owner
+                    </button>
+                    <button class="btn-action btn-excel" id="exportExcel">
+                        <i class="fa-solid fa-file-excel"></i> Export Excel
+                    </button>
+                    <button class="btn-action btn-print" id="printRegistry">
+                        <i class="fa-solid fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ADD OWNER MODAL POPUP -->
+    <div class="modal-overlay" id="addOwnerModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-id-card"></i> Register New Animal & Owner</h2>
+                <button class="close-modal-btn" id="closeModal">&times;</button>
+            </div>
+
+            <form id="ownerRegistrationForm" class="modal-body">
+                <!-- OWNER PHOTO UPLOAD / CAMERA SECTION -->
+                <div class="form-section photo-upload-section">
+                    <label class="section-label">Owner Photo</label>
+                    <div class="photo-preview-box" id="photoPreview">
+                        <i class="fa-solid fa-user-circle placeholder-icon"></i>
+                    </div>
+                    <div class="photo-action-btns">
+                        <label for="ownerPhotoInput" class="btn-photo-action">
+                            <i class="fa-solid fa-upload"></i> Upload Image
+                        </label>
+                        <input type="file" id="ownerPhotoInput" accept="image/*" hidden>
+                        <button type="button" class="btn-photo-action" id="openCameraBtn">
+                            <i class="fa-solid fa-camera"></i> Open Camera
+                        </button>
+                    </div>
+                </div>
+
+                <!-- REGISTRATION METADATA & ATOMIZED OWNER INFO -->
+                <div class="form-section">
+                    <h3 class="form-subtitle">Owner Demographics & Identification</h3>
+
+                    <div class="form-grid dual-grid mb-10">
+                        <div class="input-group">
+                            <label for="regId">Registration ID (System Generated)</label>
+                            <input type="text" id="regId" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label for="contactNumber">Contact / Mobile No.</label>
+                            <input type="tel" id="contactNumber" placeholder="09XX-XXX-XXXX" required>
+                        </div>
+                    </div>
+
+                    <label class="input-sub-label">Owner Name (Parsed)</label>
+                    <div class="form-grid owner-name-grid">
+                        <div class="input-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" placeholder="e.g. Dela Cruz" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" placeholder="e.g. Juan" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="middleName">Middle Name</label>
+                            <input type="text" id="middleName" placeholder="e.g. Santos">
+                        </div>
+                        <div class="input-group">
+                            <label for="suffix">Suffix</label>
+                            <select id="suffix">
+                                <option value="">N/A</option>
+                                <option value="Jr.">Jr.</option>
+                                <option value="Sr.">Sr.</option>
+                                <option value="III">III</option>
+                                <option value="IV">IV</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ATOMIZED GEOGRAPHIC ADDRESS -->
+                <div class="form-section">
+                    <h3 class="form-subtitle">Geographic Address Breakdown</h3>
+                    <div class="form-grid quad-grid">
+                        <div class="input-group">
+                            <label for="region">Region</label>
+                            <input type="text" id="region" value="Region VI (Western Visayas)" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label for="province">Province</label>
+                            <input type="text" id="province" value="Iloilo" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label for="municipality">City / Municipality</label>
+                            <select id="municipality" required>
+                                <option value="" disabled selected>Select Municipality</option>
+                                <option value="Iloilo City">Iloilo City</option>
+                                <option value="Santa Barbara">Santa Barbara</option>
+                                <option value="Pavia">Pavia</option>
+                                <option value="Oton">Oton</option>
+                                <option value="Cabatuan">Cabatuan</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="barangay">Barangay</label>
+                            <input type="text" id="barangay" placeholder="e.g. Poblacion Zone 1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid dual-grid mt-10">
+                        <div class="input-group">
+                            <label for="streetAddress">Street / House No. / Sitios</label>
+                            <input type="text" id="streetAddress" placeholder="e.g. Block 4 Lot 12, Rose St.">
+                        </div>
+                        <div class="input-group">
+                            <label for="zipCode">ZIP Code</label>
+                            <input type="text" id="zipCode" placeholder="e.g. 5000">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANIMAL INFORMATION SECTION -->
+<div class="form-section">
+    <h3 class="form-subtitle">Animal Profile</h3>
+    <div class="form-grid quad-grid">
+        <div class="input-group">
+            <label for="animalName">Animal Name</label>
+            <input type="text" id="animalName" placeholder="e.g. Browny" required>
+        </div>
+        <div class="input-group">
+            <label for="species">Species</label>
+            <select id="species" required>
+                <option value="" disabled selected>Select species</option>
+                <option value="Dog">Dog (Canine)</option>
+                <option value="Cat">Cat (Feline)</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <!-- DYNAMICALLY TOGGLED SPECIFY SPECIES INPUT -->
+        <div class="input-group hidden" id="otherSpeciesGroup">
+            <label for="otherSpecies">Specify Species</label>
+            <input type="text" id="otherSpecies" placeholder="e.g. Bird, Livestock, Rabbit">
+        </div>
+        <div class="input-group">
+            <label for="breed">Breed</label>
+            <input type="text" id="breed" placeholder="e.g. Aspin, Native Cat">
+        </div>
+        <div class="input-group">
+            <label for="sex">Sex</label>
+            <select id="sex" required>
+                <option value="" disabled selected>Select sex</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-grid tri-grid mt-10">
+        <div class="input-group">
+            <label for="neuteredStatus">Reproductive Status</label>
+            <select id="neuteredStatus" required>
+                <option value="Intact">Intact</option>
+                <option value="Castrated">Castrated (Male)</option>
+                <option value="Spayed">Spayed (Female)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="vaccinationStatus">Vaccination Status</label>
+            <select id="vaccinationStatus" required>
+                <option value="Vaccinated">Vaccinated</option>
+                <option value="Unvaccinated">Unvaccinated</option>
+                <option value="Overdue">Overdue / Booster Needed</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="lastVaccinated">Last Vaccination Date</label>
+            <input type="date" id="lastVaccinated">
+        </div>
+    </div>
+</div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-modal btn-cancel" id="cancelModalBtn">Cancel</button>
+                    <button type="submit" class="btn-modal btn-submit"><i class="fa-solid fa-floppy-disk"></i> Save
+                        Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Script Integration -->
+    <script src="../../assets/js/pvo/pvo-animal-registry.js"></script>
+</body>
+</html>

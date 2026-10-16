@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Interface</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span class="logo-text">CRIS System</span>
+        </div>
+        <button class="toggle-btn" aria-label="Toggle Sidebar">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-hospital-user"></i>
+          <span>Patients</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>Reports</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-gear"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <i class="fa-solid fa-circle-user"></i>
+          <div class="user-info">
+            <span class="user-name">Administrator</span>
+            <span class="user-role">System Admin</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="top-header">
+        <h1>Dashboard</h1>
+        <div class="header-actions">
+          <button class="btn btn-secondary">
+            <i class="fa-solid fa-download"></i> Export Data
+          </button>
+          <button class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> New Record
+          </button>
+        </div>
+      </header>
+
+      <!-- Patient Data Table Section -->
+      <section class="card-section">
+        <div class="card-header">
+          <h2>Recent Medical Records</h2>
+          <div class="filter-controls">
+            <div class="checkbox-row">
+              <label>
+                <input type="checkbox" id="filterActive" checked>
+                <span>Active Cases</span>
+              </label>
+              <label>
+                <input type="checkbox" id="filterPending">
+                <span>Pending Review</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="history-table abtc-table">
+            <thead>
+              <tr>
+                <th>Patient ID</th>
+                <th>Date Registered</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#REC-2026-001</td>
+                <td>2026-08-15</td>
+                <td>Category III</td>
+                <td><span class="status-badge active">Active</span></td>
+                <td>
+                  <button class="action-btn" aria-label="View Details"><i class="fa-solid fa-eye"></i></button>
+                  <button class="action-btn" aria-label="Edit Record"><i class="fa-solid fa-pen"></i></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
