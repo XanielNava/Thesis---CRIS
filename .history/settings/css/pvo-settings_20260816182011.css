@@ -1,0 +1,96 @@
+:root {
+  /* Added Missing Sidebar & Layout Variables */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 72px;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --text-light: #FFFFFF;
+
+  /* Color Palette */
+  --sunset-orange: #EA6113;
+  --sunset-gold: #F88F22;
+  --sunset-yellow: #FBB931;
+  --sunset-cream: #FFE3B3;
+
+  /* Text Colors */
+  --text-dark: #412110;
+  --text-muted: #8B7355;
+
+  /* Background Colors */
+  --sidebar-bg: #1a234e;
+  --main-bg: #FFFAF0;
+  --card-bg: #FFFFFF;
+
+  /* Border & Input */
+  --border-color: #E2E8F0;
+  --input-border: #D4C4B0;
+  --input-bg: #FFFBF6;
+
+  /* Status Colors */
+  --success-color: #10B981;
+  --warning-color: #F59E0B;
+  --danger-color: #EF4444;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.15);
+
+  /* Spacing & Sizing */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Transitions */
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Card Hardware Acceleration Fix */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  border-top: 4px solid var(--sunset-orange);
+  box-shadow: var(--shadow-sm);
+  padding: 24px 26px 28px;
+  transform: translateY(0);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  will-change: transform, box-shadow;
+}
+
+/* Corrected Mobile Media Query Selectors */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    height: auto;
+    flex-direction: row;
+    padding: 12px 16px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sidebar-header {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
+    width: auto;
+  }
+
+  .toggle-btn {
+    display: none !important; /* Hide collapse toggle on mobile screens */
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .nav-item {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}

@@ -12,6 +12,13 @@ let activePersonnelName = "Duty Staff";
 let currentPrefillDocId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Trimmed value of a field by id ('' if the field does not exist)
+    const getVal = (id) => document.getElementById(id)?.value.trim() ?? '';
+    const setVal = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value ?? '';
+    };
+
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             activeFacilityUid = user.uid;
@@ -35,29 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             activePersonnelName = (detectedName || user.displayName || user.email || "Duty Staff").trim();
-            
+
             try {
                 const parsed = JSON.parse(activePersonnelName);
-                activePersonnelName = parsed.name || parsed.fullName || activePersonnelName;
+                activePersonnelName = String(parsed.name || parsed.fullName || activePersonnelName).trim();
             } catch (e) {}
 
-            activePersonnelName = activePersonnelName.trim();
             sessionStorage.setItem("activePersonnelName", activePersonnelName);
 
-            const applyPersonnelName = () => {
-                const physicianInput = document.getElementById("physician");
-                if (physicianInput) physicianInput.value = activePersonnelName;
-            };
+            setVal('physician', activePersonnelName);
 
-            applyPersonnelName();
-            setTimeout(applyPersonnelName, 150);
-
-            const consultField = document.getElementById('consultDateTime');
-            if (consultField && !consultField.value) {
-                const now = new Date();
-                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                consultField.value = now.toISOString().slice(0, 16);
-            }
+            setDefaultConsultTime();
 
             await previewRecordNumber(user.uid);
             
@@ -74,18 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Helper function to dynamically toggle pill buttons
-    function setPillActive(groupName, value) {
-        const group = document.querySelector(`.pill-group[data-name="${groupName}"]`);
-        if (!group) return;
-
-        const targetPill = Array.from(group.querySelectorAll('.pill')).find(
-            pill => pill.dataset.value.toLowerCase() === String(value).toLowerCase()
-        );
-
-        if (targetPill) {
-            group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-            targetPill.classList.add('active');
+    // Fills the consultation field with the current local date/time if it is empty
+    function setDefaultConsultTime() {
+        const consultField = document.getElementById('consultDateTime');
+        if (consultField && !consultField.value) {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            consultField.value = now.toISOString().slice(0, 16);
         }
     }
 
@@ -98,19 +88,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
 
-                // 1. Patient Demographics
-                if (document.getElementById('lastName')) document.getElementById('lastName').value = data.lastName || '';
-                if (document.getElementById('firstName')) document.getElementById('firstName').value = data.firstName || data.name || '';
-                if (document.getElementById('middleName')) document.getElementById('middleName').value = data.middleName || '';
-                if (document.getElementById('age')) document.getElementById('age').value = data.age || '';
-                if (document.getElementById('sex')) document.getElementById('sex').value = data.sex || 'Male';
-                if (document.getElementById('contactNo')) document.getElementById('contactNo').value = data.contactNo || data.mobileNumber || '';
-
-                // 2. Address Details
-                if (document.getElementById('houseStreet')) document.getElementById('houseStreet').value = data.houseStreet || data.street || '';
-                if (document.getElementById('barangay')) document.getElementById('barangay').value = data.barangay || '';
-                if (document.getElementById('cityMunicipality')) document.getElementById('cityMunicipality').value = data.cityMunicipality || data.municipality || '';
-                if (document.getElementById('province')) document.getElementById('province').value = data.province || 'Iloilo';
+                // 1. Patient demographics and 2. address
+                const prefillFields = {
+                    lastName: data.lastName,
+                    firstName: data.firstName || data.name,
+                    middleName: data.middleName,
+                    age: data.age,
+                    sex: data.sex,
+                    contactNo: data.contactNo || data.mobileNumber,
+                    houseStreet: data.houseStreet || data.street,
+                    barangay: data.barangay,
+                    cityMunicipality: data.cityMunicipality || data.municipality,
+                    province: data.province || 'Iloilo'
+                };
+                Object.entries(prefillFields).forEach(([id, value]) => setVal(id, value));
 
                 // 3. Exposure & Bite Details
                 let targetBiteArea = '';
@@ -124,36 +115,37 @@ document.addEventListener('DOMContentLoaded', () => {
                     targetBiteArea = data.biteArea || data.biteAreaDescription || '';
                 }
 
-                if (document.getElementById('biteArea')) {
-                    document.getElementById('biteArea').value = targetBiteArea;
-                }
+                setVal('biteArea', targetBiteArea);
 
-                // Animal Type Select & Other Wrap Toggle
+                // Animal type (anything other than dog/cat goes under "Other")
                 const rawAnimal = data.animalType || (data.exposure ? data.exposure.animalType : '') || '';
                 const animalSelect = document.getElementById('animalType');
-                const animalOtherWrap = document.getElementById('animalOtherWrap');
-                const animalOtherInput = document.getElementById('animalOther');
-
-                if (animalSelect) {
-                    if (rawAnimal.toLowerCase().includes('dog')) {
+                if (animalSelect && rawAnimal) {
+                    const animalKey = rawAnimal.toLowerCase();
+                    if (animalKey.includes('dog')) {
                         animalSelect.value = 'Dog';
-                        if (animalOtherWrap) animalOtherWrap.hidden = true;
-                    } else if (rawAnimal.toLowerCase().includes('cat')) {
+                    } else if (animalKey.includes('cat')) {
                         animalSelect.value = 'Cat';
-                        if (animalOtherWrap) animalOtherWrap.hidden = true;
-                    } else if (rawAnimal) {
+                    } else {
                         animalSelect.value = 'Other';
-                        if (animalOtherWrap) animalOtherWrap.hidden = false;
-                        if (animalOtherInput) animalOtherInput.value = rawAnimal;
+                        setVal('animalOther', rawAnimal);
                     }
+                    toggleAnimalOther();
                 }
 
-                // 4. Pill Buttons Auto-Activation
+                // 4. Status of animal
+                // Status of animal (older intake records only stored a caged Yes/No/Unknown value)
                 const cagedVal = data.animalCaged || (data.exposure ? data.exposure.animalCaged : '');
-                if (cagedVal) setPillActive('animalCaged', cagedVal);
+                const cagedLabels = { yes: 'Caged', no: 'Not caged', unknown: 'Unknown' };
+                setVal('animalStatus', data.animalStatus || cagedLabels[String(cagedVal).toLowerCase()]);
 
+                // Previous immunization now lives in Past Medical History
                 const vaccVal = data.priorVaccination || data.previouslyVaccinated;
-                if (vaccVal) setPillActive('priorVaccination', vaccVal);
+                if (String(vaccVal).toLowerCase() === 'yes') {
+                    setCheckRow('pastHistory', 'immunization', true, {
+                        details: data.lastVaccDate ? `Last vaccinated ${data.lastVaccDate}` : ''
+                    });
+                }
 
                 // 5. First Aid / Wound Care mapping
                 if (data.firstAid) {
@@ -209,45 +201,81 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Pill Button Logic
+    // Pill Button Logic (single-select groups)
     document.querySelectorAll('.pill-group').forEach((group) => {
-        const isMulti = group.classList.contains('multi');
-        group.querySelectorAll('.pill').forEach((pill) => {
-            pill.addEventListener('click', () => {
-                if (isMulti) {
-                    pill.classList.toggle('active');
-                } else {
-                    group.querySelectorAll('.pill').forEach((p) => p.classList.remove('active'));
-                    pill.classList.add('active');
+        group.addEventListener('click', (e) => {
+            const pill = e.target.closest('.pill');
+            if (!pill) return;
 
-                    if (group.dataset.name === 'exposureCategory') recalculatePepSchedule();
-                }
-            });
+            group.querySelectorAll('.pill').forEach((p) => p.classList.toggle('active', p === pill));
+            if (group.dataset.name === 'exposureCategory') recalculatePepSchedule();
         });
     });
 
     function getPillValue(name) {
-        const group = document.querySelector(`.pill-group[data-name="${name}"]`);
-        if (!group) return '';
-        const active = group.querySelector('.pill.active');
+        const active = document.querySelector(`.pill-group[data-name="${name}"] .pill.active`);
         return active ? active.dataset.value : '';
     }
 
-    function getPillValues(name) {
-        const group = document.querySelector(`.pill-group[data-name="${name}"]`);
-        if (!group) return [];
-        return Array.from(group.querySelectorAll('.pill.active')).map((p) => p.dataset.value);
+    // Checkbox Rows (paper-form checkboxes; ticking a row enables its detail fields)
+    function syncCheckRow(row) {
+        const checked = row.querySelector('input[type="checkbox"]').checked;
+        row.querySelectorAll('[data-field]').forEach((el) => {
+            el.disabled = !checked;
+            if (!checked) el.value = '';
+        });
+    }
+
+    function setCheckRow(group, value, checked, fields = {}) {
+        const row = document.querySelector(`.check-row[data-group="${group}"][data-value="${value}"]`);
+        if (!row) return;
+        row.querySelector('input[type="checkbox"]').checked = checked;
+        syncCheckRow(row);
+        Object.entries(fields).forEach(([name, val]) => {
+            const field = row.querySelector(`[data-field="${name}"]`);
+            if (field && checked) field.value = val;
+        });
+    }
+
+    // Returns { value: { fieldName: fieldValue } } for every ticked row in a group
+    function getCheckedMap(group) {
+        const result = {};
+        document.querySelectorAll(`.check-row[data-group="${group}"]`).forEach((row) => {
+            if (!row.querySelector('input[type="checkbox"]').checked) return;
+            const fields = {};
+            row.querySelectorAll('[data-field]').forEach((el) => {
+                fields[el.dataset.field] = el.value.trim();
+            });
+            result[row.dataset.value] = fields;
+        });
+        return result;
+    }
+
+    document.querySelectorAll('.check-row').forEach((row) => {
+        row.querySelector('input[type="checkbox"]').addEventListener('change', () => syncCheckRow(row));
+        syncCheckRow(row);
+    });
+
+    // Birthday -> Age
+    const birthdayInput = document.getElementById('birthday');
+    const ageInput = document.getElementById('age');
+    if (birthdayInput && ageInput) {
+        birthdayInput.addEventListener('change', () => {
+            if (!birthdayInput.value) return;
+            const [y, m, d] = birthdayInput.value.split('-').map(Number);
+            const today = new Date();
+            let years = today.getFullYear() - y;
+            const hadBirthday = today.getMonth() + 1 > m || (today.getMonth() + 1 === m && today.getDate() >= d);
+            if (!hadBirthday) years--;
+            ageInput.value = Math.max(years, 0);
+        });
     }
 
     // PEP Schedule Engine
+    const PEP_DAYS = [0, 3, 7, 14, 28];
     const consultDateTimeInput = document.getElementById("consultDateTime");
-    const scheduleHelpText = document.getElementById("scheduleHelpText");
-
     const dateInputDay0 = document.getElementById("dateInputDay0");
-    const dateInputDay3 = document.getElementById("dateInputDay3");
-    const dateInputDay7 = document.getElementById("dateInputDay7");
-    const dateInputDay14 = document.getElementById("dateInputDay14");
-    const dateInputDay28 = document.getElementById("dateInputDay28");
+    const scheduleHelpText = document.getElementById("scheduleHelpText");
 
     function formatDateForInput(dateObj) {
         const y = dateObj.getFullYear();
@@ -264,40 +292,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function recalculatePepSchedule(fromDay0Input = false) {
         const category = getPillValue('exposureCategory');
-        let baseDateVal = '';
-
-        if (fromDay0Input && dateInputDay0 && dateInputDay0.value) {
-            baseDateVal = dateInputDay0.value;
-        } 
-        else if (consultDateTimeInput && consultDateTimeInput.value) {
-            baseDateVal = consultDateTimeInput.value.split('T')[0];
-        }
+        const baseDateVal = (fromDay0Input && dateInputDay0 && dateInputDay0.value)
+            ? dateInputDay0.value
+            : (consultDateTimeInput ? consultDateTimeInput.value.split('T')[0] : '');
 
         if (!baseDateVal) return;
 
         const [year, month, day] = baseDateVal.split('-').map(Number);
         const baseDate = new Date(year, month - 1, day);
+        const isCategoryI = category === 'I';
 
-        if (dateInputDay0) dateInputDay0.value = formatDateForInput(baseDate);
-        if (dateInputDay3) dateInputDay3.value = formatDateForInput(addDays(baseDate, 3));
-        if (dateInputDay7) dateInputDay7.value = formatDateForInput(addDays(baseDate, 7));
-        if (dateInputDay14) dateInputDay14.value = formatDateForInput(addDays(baseDate, 14));
-        if (dateInputDay28) dateInputDay28.value = formatDateForInput(addDays(baseDate, 28));
+        PEP_DAYS.forEach((offset) => {
+            setVal(`dateInputDay${offset}`, formatDateForInput(addDays(baseDate, offset)));
 
-        const cards = [
-            document.getElementById("cardDay0"),
-            document.getElementById("cardDay3"),
-            document.getElementById("cardDay7"),
-            document.getElementById("cardDay14"),
-            document.getElementById("cardDay28")
-        ];
+            const card = document.getElementById(`cardDay${offset}`);
+            if (card) {
+                card.classList.toggle('disabled', isCategoryI);
+                card.classList.toggle('active', !isCategoryI);
+            }
+        });
 
-        if (category === "I") {
-            cards.forEach(card => card && card.classList.replace('active', 'disabled'));
-            if (scheduleHelpText) scheduleHelpText.innerHTML = `<span style="color:#e03131; font-weight:bold;">Category I Exposure:</span> PEP is generally not required according to DOH/WHO protocols.`;
-        } else {
-            cards.forEach(card => card && card.classList.replace('disabled', 'active'));
-            if (scheduleHelpText) scheduleHelpText.innerHTML = `<span style="color:#2b8a3e; font-weight:bold;">Category ${category || 'II/III'} PEP Active:</span> Target dates auto-calculated relative to Day 0.`;
+        if (scheduleHelpText) {
+            scheduleHelpText.innerHTML = isCategoryI
+                ? `<strong class="text-danger">Category I Exposure:</strong> PEP is generally not required according to DOH/WHO protocols.`
+                : `<strong class="text-success">Category ${category || 'II/III'} PEP Active:</strong> Target dates auto-calculated relative to Day 0.`;
         }
     }
 
@@ -306,11 +324,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const animalType = document.getElementById('animalType');
     const animalOtherWrap = document.getElementById('animalOtherWrap');
-    if (animalType && animalOtherWrap) {
-        animalType.addEventListener('change', () => {
-            animalOtherWrap.hidden = animalType.value !== 'Other';
-        });
+
+    function toggleAnimalOther() {
+        if (animalOtherWrap) animalOtherWrap.hidden = animalType.value !== 'Other';
     }
+
+    if (animalType) animalType.addEventListener('change', toggleAnimalOther);
 
     // Photo Upload
     const uploadBox = document.getElementById('uploadBox');
@@ -354,6 +373,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Reset Form (keeps the read-only record number and attending physician)
+    const resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            if (!confirm('Clear everything entered on this form?')) return;
+
+            const recordNoField = document.getElementById('recordNo');
+            const physicianField = document.getElementById('physician');
+            const keptRecordNo = recordNoField ? recordNoField.value : '';
+            const keptPhysician = physicianField ? physicianField.value : '';
+
+            document.getElementById('itrForm').reset();
+
+            if (recordNoField) recordNoField.value = keptRecordNo;
+            if (physicianField) physicianField.value = keptPhysician;
+
+            document.querySelectorAll('.pill.active').forEach((p) => p.classList.remove('active'));
+            document.querySelectorAll('.check-row').forEach(syncCheckRow);
+            toggleAnimalOther();
+            if (removePhoto) removePhoto.click();
+
+            setDefaultConsultTime();
+            recalculatePepSchedule();
+        });
+    }
+
     // Form Submission
     const itrForm = document.getElementById('itrForm');
     if (itrForm) {
@@ -361,9 +406,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             if (!activeFacilityUid) return alert("Session Expired: Please log in again.");
-            if (!itrForm.checkValidity()) return itrForm.reportValidity();
+            if (!itrForm.reportValidity()) return;
 
             const submitBtn = itrForm.querySelector('button[type="submit"]');
+            const submitBtnHtml = submitBtn ? submitBtn.innerHTML : '';
             if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving Patient Record...`;
@@ -382,23 +428,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     transaction.set(counterDocRef, { currentSequence: nextIndex }, { merge: true });
                 });
 
-                const selectedAnimal = animalType.value === 'Other' ? document.getElementById('animalOther').value : animalType.value;
+                const selectedAnimal = animalType.value === 'Other' ? getVal('animalOther') : animalType.value;
                 const exposureCatValue = getPillValue('exposureCategory');
-                const fullItrDisplayString = document.getElementById('recordNo').value;
+                const fullItrDisplayString = getVal('recordNo');
 
-                const lName = document.getElementById('lastName')?.value.trim() || '';
-                const fName = document.getElementById('firstName')?.value.trim() || '';
-                const mName = document.getElementById('middleName')?.value.trim() || '';
-                const parsedFullName = `${lName}, ${fName}${mName ? ' ' + mName : ''}`.trim();
+                const lName = getVal('lastName');
+                const fName = getVal('firstName');
+                const mName = getVal('middleName');
+                const suffix = getVal('suffix');
+                const parsedFullName = `${lName}, ${fName}${mName ? ' ' + mName : ''}${suffix ? ' ' + suffix : ''}`.trim();
 
-                const houseStr = document.getElementById('houseStreet')?.value.trim() || '';
-                const brgy = document.getElementById('barangay')?.value.trim() || '';
-                const city = document.getElementById('cityMunicipality')?.value.trim() || '';
-                const prov = document.getElementById('province')?.value.trim() || '';
+                const houseStr = getVal('houseStreet');
+                const brgy = getVal('barangay');
+                const city = getVal('cityMunicipality');
+                const prov = getVal('province');
                 const parsedAddress = [houseStr, brgy, city, prov].filter(val => val !== '').join(', ');
 
-                const selectedRigType = document.getElementById('rigType')?.value || '';
-                const enteredRigDose = document.getElementById('rigDose')?.value.trim() || '';
+                // Physician's order checklist (ticked rows only) and the past medical history checklist
+                const physicianOrders = getCheckedMap('physicianOrder');
+                const pastHistory = getCheckedMap('pastHistory');
+
+                // Keep the legacy rigType / rigDose / immunoglobulin fields populated for other pages
+                const rigOrders = [['erig', 'ERIG'], ['hrig', 'HRIG']].filter(([key]) => physicianOrders[key]);
+                const selectedRigType = rigOrders.map(([, label]) => label).join(' + ');
+                const enteredRigDose = rigOrders
+                    .map(([key]) => physicianOrders[key].maxDose ? `${physicianOrders[key].maxDose} mL` : '')
+                    .filter(Boolean)
+                    .join(' + ');
 
                 const patientDataPayload = {
                     recordNo: generatedCustomId,
@@ -413,59 +469,69 @@ document.addEventListener('DOMContentLoaded', () => {
                     lastName: lName,
                     firstName: fName,
                     middleName: mName,
+                    suffix: suffix,
                     name: parsedFullName,
                     fullName: parsedFullName,
                     exposureType: `${selectedAnimal} Exposure`,
                     classification: exposureCatValue ? `Category ${exposureCatValue}` : "Unclassified",
 
-                    exposureDate: document.getElementById('exposureDate').value,
-                    consultDateTime: document.getElementById('consultDateTime').value,
-                    age: document.getElementById('age').value,
-                    sex: document.getElementById('sex').value,
-                    contactNo: document.getElementById('contactNo').value,
+                    exposureDate: getVal('exposureDate'),
+                    consultDateTime: getVal('consultDateTime'),
+                    birthday: getVal('birthday'),
+                    age: getVal('age'),
+                    sex: getVal('sex'),
+                    civilStatus: getVal('civilStatus'),
+                    religion: getVal('religion'),
+                    contactNo: getVal('contactNo'),
+                    spouseName: getVal('spouseName'),
+                    parentName: getVal('parentName'),
+                    phic: {
+                        categories: getCheckedMap('phic'),
+                        membership: getPillValue('phicMembership')
+                    },
                     houseStreet: houseStr,
                     barangay: brgy,
                     cityMunicipality: city,
                     province: prov,
                     address: parsedAddress, 
-                    physician: document.getElementById('physician').value || activePersonnelName,
+                    physician: getVal('physician') || activePersonnelName,
 
-                    biteArea: document.getElementById('biteArea').value,
+                    biteArea: getVal('biteArea'),
                     animalType: selectedAnimal,
-                    animalCaged: getPillValue('animalCaged'),
+                    animalStatus: getVal('animalStatus'),
+                    woundTypes: getCheckedMap('woundType'),
+                    incidentTime: getVal('exposureTime'),
+                    incidentPlace: getVal('incidentPlace'),
                     exposureCategory: exposureCatValue,
-                    priorVaccination: getPillValue('priorVaccination'),
-                    lastVaccDate: document.getElementById('lastVaccDate').value,
+                    priorVaccination: pastHistory.immunization ? 'Yes' : '',
 
-                    bp: document.getElementById('bp').value,
-                    temp: document.getElementById('temp').value,
-                    pulse: document.getElementById('pulse').value,
-                    resp: document.getElementById('resp').value,
-                    o2sat: document.getElementById('o2sat').value,
-                    weight: document.getElementById('weight').value,
+                    bp: getVal('bp'),
+                    temp: getVal('temp'),
+                    pulse: getVal('pulse'),
+                    resp: getVal('resp'),
+                    o2sat: getVal('o2sat'),
+                    weight: getVal('weight'),
+                    height: getVal('height'),
 
-                    comorbidities: document.getElementById('comorbidities').value,
-                    allergies: document.getElementById('allergies').value,
-                    medications: document.getElementById('medications').value,
+                    pastMedicalHistory: pastHistory,
+                    allergies: pastHistory.allergy?.details || '',
+                    comorbidities: pastHistory.medicalProblems?.details || '',
 
-                    woundCare: document.getElementById('woundCare').value,
-                    vaccineBrand: document.getElementById('vaccineBrand').value,
-                    route: document.getElementById('route').value,
+                    diagnosis: getVal('diagnosis'),
+                    physicianOrders: physicianOrders,
+                    woundCare: getVal('woundCare'),
+                    vaccineBrand: getVal('vaccineBrand'),
+                    route: getVal('route'),
                     
                     rigType: selectedRigType,
                     rigDose: enteredRigDose,
                     immunoglobulin: selectedRigType ? `${selectedRigType}${enteredRigDose ? ' - ' + enteredRigDose : ''}` : (enteredRigDose || 'None'),
 
-                    vaccSchedule: getPillValues('vaccSchedule'),
-                    remarks: document.getElementById('remarks').value,
+                    remarks: getVal('remarks'),
 
-                    pepScheduleDates: {
-                        day0: dateInputDay0 ? dateInputDay0.value : '',
-                        day3: dateInputDay3 ? dateInputDay3.value : '',
-                        day7: dateInputDay7 ? dateInputDay7.value : '',
-                        day14: dateInputDay14 ? dateInputDay14.value : '',
-                        day28: dateInputDay28 ? dateInputDay28.value : ''
-                    },
+                    pepScheduleDates: Object.fromEntries(
+                        PEP_DAYS.map((offset) => [`day${offset}`, getVal(`dateInputDay${offset}`)])
+                    ),
 
                     woundPhotoData: capturedBase64Photo || null,
                     historyLogs: [
@@ -499,7 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("Database Error: " + error.message);
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save treatment record`;
+                    submitBtn.innerHTML = submitBtnHtml;
                 }
             }
         });

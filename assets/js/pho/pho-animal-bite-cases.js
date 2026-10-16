@@ -2,231 +2,305 @@
 // pho-animal-bite-cases.js - PHO Animal Bite Cases Ledger Controller
 // ==============================================================================
 
-// 1. Direct CDN Imports from Firebase Web SDK 10.8.0
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { auth, db } from '../firebase/firebase-config.js';
 import { 
-    getFirestore, 
     collection, 
-    getDocs, 
-    connectFirestoreEmulator 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { 
-    getAuth, 
-    connectAuthEmulator 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    getDocs 
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-// 2. Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
-    authDomain: "cris-database-da989.firebaseapp.com",
-    databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "cris-database-da989",
-    storageBucket: "cris-database-da989.firebasestorage.app",
-    messagingSenderId: "627885439681",
-    appId: "1:627885439681:web:3c657d64c0aad9b4913240",
-    measurementId: "G-0X99BH7GW4"
-};
+// Global App Variables
+let rowsPerPage = 40;
+let currentPage = 1;
+let allLegacyCases = [];
+let filteredCases = [];
+let availableYears = new Set();
+let facilitiesMap = new Map();
 
-// 3. Initialize Firebase Services
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// 🧪 4. LOCAL EMULATOR CONNECTION (Environment Aware)
-if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    connectFirestoreEmulator(db, '127.0.0.1', 8080);
-    connectAuthEmulator(auth, 'http://127.0.0.1:9099');
-}
-
-// ================= SIDEBAR TOGGLE ENGINE =================
-function setupSidebar() {
-    const sidebarToggle = document.getElementById("sidebarToggle");
-    const sidebar = document.getElementById("sidebar");
-
-    if (sidebarToggle && sidebar) {
-        const wasCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
-        if (wasCollapsed) {
-            sidebar.classList.add("collapsed");
+/* 1. FETCH & MAP FACILITIES FROM DATABASE */
+async function loadFacilitiesRegistry() {
+    facilitiesMap.clear();
+    try {
+        let facSnap = await getDocs(collection(db, "facilities"));
+        if (facSnap.empty) {
+            facSnap = await getDocs(collection(db, "pho-database", "main", "facility-management"));
         }
 
-        sidebarToggle.addEventListener("click", function() {
-            sidebar.classList.toggle("collapsed");
-            const isCollapsed = sidebar.classList.contains("collapsed");
-            localStorage.setItem("sidebarCollapsed", isCollapsed);
-        });
+        if (facSnap && !facSnap.empty) {
+            facSnap.forEach(docSnap => {
+                const data = docSnap.data();
+                const id = docSnap.id;
+
+                let displayName = data.facilityName || data.name || data.abtcName || "";
+
+                if (!displayName && data.acronym) {
+                    displayName = data.acronym;
+                }
+
+                if (data.address && typeof data.address === 'object') {
+                    const addr = data.address;
+                    const locParts = [addr.barangay, addr.city || addr.municipality].filter(Boolean).join(", ");
+                    if (displayName && data.acronym) {
+                        displayName = `${displayName} (${data.acronym})`;
+                    } else if (!displayName && locParts) {
+                        displayName = data.acronym ? `${data.acronym} - ${locParts}` : locParts;
+                    }
+                }
+
+                if (!displayName) {
+                    displayName = data.municipality || data.city || id;
+                }
+
+                facilitiesMap.set(id, displayName);
+            });
+        }
+    } catch (err) {
+        // Handled
     }
 }
 
-// --- Global App Variables ---
-let rowsPerPage = 36;
-let currentPage = 1;
-let allCases = [];
-let filteredCases = [];
+/* 2. RESOLVE FACILITY NAME HELPER */
+function resolveFacilityName(data, rawId = "") {
+    const targetId = data.facilityId || data.facility_id || rawId;
+    if (targetId && facilitiesMap.has(targetId)) {
+        return facilitiesMap.get(targetId);
+    }
 
-/* LOAD DATA FROM FIRESTORE */
+    if (data.facilityName) return data.facilityName;
+    if (data.name) return data.name;
+    if (data.acronym) return data.acronym;
+
+    if (data.address && typeof data.address === 'object') {
+        const addr = data.address;
+        const loc = [addr.barangay, addr.city || addr.municipality].filter(Boolean).join(", ");
+        if (loc) return data.acronym ? `${data.acronym} - ${loc}` : loc;
+    }
+
+    if (data.municipality) return data.municipality;
+    if (data.city) return data.city;
+    if (data.abtc) return data.abtc;
+
+    return rawId || "Unassigned Facility";
+}
+
+/* 3. LOAD DATA FROM FIRESTORE */
 async function loadCases() {
     const tbody = document.getElementById("casesTableBody");
-    
-    if (!tbody) {
-        console.error("❌ Element 'casesTableBody' not found in HTML");
-        return;
-    }
+    if (!tbody) return;
 
     tbody.innerHTML = `
         <tr>
             <td colspan="24">
-                <div style="padding: 30px; text-align: center; color: #888;">
-                    <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: #EA6113; margin-bottom: 10px;"></i>
-                    <p><strong>Accessing Database Logs</strong></p>
-                    <span style="font-size: 12px;">Retrieving provincial medical metrics over secure socket...</span>
+                <div style="padding: 35px; text-align: center; color: #7E8B9B;">
+                    <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: #EA6113; margin-bottom: 12px;"></i>
+                    <p style="font-weight: 700; color: #412110; margin-bottom: 4px;">Loading Provincial Case Ledger...</p>
+                    <span style="font-size: 12px;">Synchronizing official animal bite records</span>
                 </div>
             </td>
         </tr>
     `;
 
     try {
-        console.log("🔄 Loading cases from pho-database/main/legacy-summary...");
-        
+        await loadFacilitiesRegistry();
+
+        allLegacyCases = [];
+        availableYears.clear();
+
         let legacyCollection = collection(db, "pho-database", "main", "legacy-summary");
         let snapshot = await getDocs(legacyCollection);
 
         if (snapshot.empty) {
-            console.warn("⚠️ Subcollection empty, trying top-level pho_rabies_cases...");
             legacyCollection = collection(db, "pho_rabies_cases");
             snapshot = await getDocs(legacyCollection);
         }
-        
-        console.log(`📊 Firestore returned ${snapshot.size} documents`);
-        
-        if (snapshot.empty) {
-            allCases = [];
-            filteredCases = [];
-            renderTable();
-            return;
+
+        let orderCounter = 0;
+        if (snapshot && !snapshot.empty) {
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+
+                const rawName = (data.rawData && data.rawData[0]) || data.abtc || data.facilityName || "";
+                if (!rawName || typeof rawName !== "string") return;
+                
+                const cleanName = rawName.trim();
+                if (
+                    cleanName === "" || 
+                    cleanName.toLowerCase().includes("abtc / health") || 
+                    cleanName.toLowerCase() === "abtc" ||
+                    cleanName.toLowerCase() === "facility" ||
+                    cleanName.toLowerCase().includes("health facility")
+                ) {
+                    return;
+                }
+
+                orderCounter++;
+                const entryYear = Number(data.year) || (data.rawData && data.rawData[0] && !isNaN(Number(data.rawData[0])) ? Number(data.rawData[0]) : null);
+                if (entryYear) availableYears.add(entryYear);
+
+                const facilityTitle = data.rawData && Array.isArray(data.rawData)
+                    ? (cleanName || resolveFacilityName(data, docSnap.id))
+                    : resolveFacilityName(data, docSnap.id);
+
+                if (data.rawData && Array.isArray(data.rawData)) {
+                    const row = data.rawData;
+                    allLegacyCases.push({
+                        id: docSnap.id,
+                        abtc: facilityTitle,
+                        year: entryYear,
+                        maleCases: Number(row[1] || 0),
+                        femaleCases: Number(row[2] || 0),
+                        ageLt15: Number(row[3] || 0),
+                        ageGt15: Number(row[4] || 0),
+                        bitingDog: Number(row[5] || 0),
+                        bitingCat: Number(row[6] || 0),
+                        bitingOthers: Number(row[7] || 0),
+                        humanCat1: Number(row[8] || 0),
+                        humanCat2: Number(row[9] || 0),
+                        humanCatNew: Number(row[10] || 0),
+                        humanCatBooster: Number(row[11] || 0),
+                        hr: Number(row[12] || 0),
+                        petTcv: Number(row[13] || 0),
+                        petHrig: Number(row[14] || 0),
+                        petErig: Number(row[15] || 0),
+                        total: Number(row[16] || 0),
+                        remarksCompII: Number(row[17] || 0),
+                        remarksCompIII: Number(row[18] || 0),
+                        remarksIncompleteII: Number(row[19] || 0),
+                        remarksIncompleteIII: Number(row[20] || 0),
+                        remarksNoneII: Number(row[21] || 0),
+                        remarksNoneIII: Number(row[22] || 0),
+                        rep: Number(row[23] || 0),
+                        documentOrder: data.documentOrder || orderCounter
+                    });
+                } else {
+                    allLegacyCases.push({
+                        id: docSnap.id,
+                        abtc: facilityTitle,
+                        year: entryYear,
+                        maleCases: Number(data.maleCases || 0),
+                        femaleCases: Number(data.femaleCases || 0),
+                        ageLt15: Number(data.ageLessThan15 || data.ageLt15 || 0),
+                        ageGt15: Number(data.ageGreaterThan15 || data.ageGt15 || 0),
+                        bitingDog: Number(data.bitingDog || 0),
+                        bitingCat: Number(data.bitingCat || 0),
+                        bitingOthers: Number(data.bitingOthers || 0),
+                        humanCat1: Number(data.humanCat1 || 0),
+                        humanCat2: Number(data.humanCat2 || 0),
+                        humanCatNew: Number(data.humanCatNew || 0),
+                        humanCatBooster: Number(data.humanCatBooster || 0),
+                        hr: Number(data.hr || data.humanDeaths || 0),
+                        petTcv: Number(data.petTcv || data.tcv || 0),
+                        petHrig: Number(data.petHrig || data.hrig || 0),
+                        petErig: Number(data.petErig || data.erig || 0),
+                        total: Number(data.total || data.totalCases || 0),
+                        remarksCompII: Number(data.remarksCompII || 0),
+                        remarksCompIII: Number(data.remarksCompIII || 0),
+                        remarksIncompleteII: Number(data.remarksIncompleteII || 0),
+                        remarksIncompleteIII: Number(data.remarksIncompleteIII || 0),
+                        remarksNoneII: Number(data.remarksNoneII || 0),
+                        remarksNoneIII: Number(data.remarksNoneIII || 0),
+                        rep: Number(data.rep || 0),
+                        documentOrder: data.documentOrder || orderCounter
+                    });
+                }
+            });
         }
 
-        allCases = [];
-        let orderCounter = 0;
-        
-        snapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            orderCounter++;
-            
-            if (data.rawData && Array.isArray(data.rawData)) {
-                const row = data.rawData;
-                allCases.push({
-                    id: docSnap.id,
-                    abtc: row[0] || docSnap.id || "Unknown",
-                    year: data.year || new Date().getFullYear(),
-                    
-                    maleCases: Number(row[1] || 0),
-                    femaleCases: Number(row[2] || 0),
-                    ageLt15: Number(row[3] || 0),
-                    ageGt15: Number(row[4] || 0),
-                    
-                    bitingDog: Number(row[5] || 0),
-                    bitingCat: Number(row[6] || 0),
-                    bitingOthers: Number(row[7] || 0),
-                    
-                    humanCat1: Number(row[8] || 0),
-                    humanCat2: Number(row[9] || 0),
-                    humanCatNew: Number(row[10] || 0),
-                    humanCatBooster: Number(row[11] || 0),
-                    
-                    hr: Number(row[12] || 0),
-                    petTcv: Number(row[13] || 0),
-                    petHrig: Number(row[14] || 0),
-                    petErig: Number(row[15] || 0),
-                    
-                    total: Number(row[16] || 0),
-                    
-                    remarksCompII: Number(row[17] || 0),
-                    remarksCompIII: Number(row[18] || 0),
-                    remarksIncompleteII: Number(row[19] || 0),
-                    remarksIncompleteIII: Number(row[20] || 0),
-                    remarksNoneII: Number(row[21] || 0),
-                    remarksNoneIII: Number(row[22] || 0),
-                    
-                    rep: Number(row[23] || 0),
-                    documentOrder: data.documentOrder || orderCounter
-                });
-            } else {
-                allCases.push({
-                    id: docSnap.id,
-                    abtc: data.facilityName || data.municipality || docSnap.id || "Unknown",
-                    year: data.year || new Date().getFullYear(),
-                    
-                    maleCases: Number(data.maleCases || 0),
-                    femaleCases: Number(data.femaleCases || 0),
-                    ageLt15: Number(data.ageLessThan15 || data.ageLt15 || 0),
-                    ageGt15: Number(data.ageGreaterThan15 || data.ageGt15 || 0),
-                    
-                    bitingDog: Number(data.bitingDog || 0),
-                    bitingCat: Number(data.bitingCat || 0),
-                    bitingOthers: Number(data.bitingOthers || 0),
-                    
-                    humanCat1: Number(data.humanCat1 || 0),
-                    humanCat2: Number(data.humanCat2 || 0),
-                    humanCatNew: Number(data.humanCatNew || 0),
-                    humanCatBooster: Number(data.humanCatBooster || 0),
-                    
-                    hr: Number(data.hr || 0),
-                    petTcv: Number(data.petTcv || 0),
-                    petHrig: Number(data.petHrig || 0),
-                    petErig: Number(data.petErig || 0),
-                    
-                    total: Number(data.total || data.totalCases || 0),
-                    
-                    remarksCompII: Number(data.remarksCompII || 0),
-                    remarksCompIII: Number(data.remarksCompIII || 0),
-                    remarksIncompleteII: Number(data.remarksIncompleteII || 0),
-                    remarksIncompleteIII: Number(data.remarksIncompleteIII || 0),
-                    remarksNoneII: Number(data.remarksNoneII || 0),
-                    remarksNoneIII: Number(data.remarksNoneIII || 0),
-                    
-                    rep: Number(data.rep || 0),
-                    documentOrder: data.documentOrder || orderCounter
-                });
-            }
-        });
-
-        allCases.sort((a, b) => a.documentOrder - b.documentOrder);
-        filteredCases = [...allCases];
-
-        console.log(`✅ Loaded ${allCases.length} facility records`);
-        renderTable();
+        populateYearSelect();
+        applyFilters();
 
     } catch (error) {
-        console.error("❌ Error loading cases:", error);
         tbody.innerHTML = `
             <tr>
-                <td colspan="24" style="text-align:center; padding: 20px; color: #d32f2f;">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    <strong>Failed to Load Dataset</strong>
-                    <p style="font-size:12px; color:#888;">${error.message}</p>
+                <td colspan="24" style="text-align:center; padding: 35px; color: #64748b;">
+                    <i class="fa-solid fa-folder-open" style="font-size:26px; opacity:0.4; margin-bottom: 8px;"></i>
+                    <p style="font-weight: 700; color: #412110;">No matching bite records found</p>
+                    <span style="font-size: 12px;">Database is empty or disconnected</span>
                 </td>
             </tr>
         `;
+        updateKpiSummary({ total: 0, tcv: 0, hr: 0, compII: 0, compIII: 0 });
     }
 }
 
-/* RENDER TABLE */
+/* 4. POPULATE YEAR DROPDOWN */
+function populateYearSelect() {
+    const yearSelect = document.getElementById("yearSelectFilter");
+    if (!yearSelect) return;
+
+    const sortedYears = Array.from(availableYears).sort((a, b) => b - a);
+    yearSelect.innerHTML = `<option value="All">All Surveillance Years</option>`;
+    
+    sortedYears.forEach(year => {
+        const option = document.createElement("option");
+        option.value = year;
+        option.textContent = `${year}`;
+        yearSelect.appendChild(option);
+    });
+
+    yearSelect.onchange = applyFilters;
+}
+
+/* 5. FILTER LOGIC */
+function applyFilters() {
+    const query = (document.getElementById("caseSearch")?.value || "").toLowerCase().trim();
+    const selectedYear = document.getElementById("yearSelectFilter")?.value || "All";
+
+    let result = allLegacyCases;
+
+    if (selectedYear !== "All") {
+        result = result.filter(c => String(c.year) === String(selectedYear));
+    }
+
+    if (query) {
+        result = result.filter(c => {
+            const name = String(c.abtc || "").toLowerCase();
+            const yr = String(c.year || "");
+            return name.includes(query) || yr.includes(query);
+        });
+    }
+
+    filteredCases = result;
+    currentPage = 1;
+    renderTable();
+}
+
+/* 6. FORMAT CELLS */
+function formatCell(val, isAlert = false) {
+    const num = Number(val || 0);
+    if (num === 0) {
+        return `<span class="val-zero">0</span>`;
+    }
+    if (isAlert && num > 0) {
+        return `<span class="val-alert">${num.toLocaleString()}</span>`;
+    }
+    return `<span class="val-nonzero">${num.toLocaleString()}</span>`;
+}
+
+/* 7. RENDER TABLE */
 function renderTable() {
     const tbody = document.getElementById("casesTableBody");
+    const countInfo = document.getElementById("recordCountInfo");
     if (!tbody) return;
 
     const totalRecords = filteredCases.length;
     const totalPages = Math.ceil(totalRecords / rowsPerPage);
+    const selectedYear = document.getElementById("yearSelectFilter")?.value || "All";
+
+    if (countInfo) {
+        countInfo.textContent = `Showing ${totalRecords} reporting ABTC facilities / records for ${selectedYear}`;
+    }
 
     if (totalRecords === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="24" style="text-align:center; padding: 25px;">
-                    <i class="fa-solid fa-folder-open" style="font-size:24px; opacity:0.5;"></i>
-                    <p style="margin-top:8px;">No Bite Reports Found</p>
+                <td colspan="24" style="text-align:center; padding: 35px; color: #64748b;">
+                    <i class="fa-solid fa-folder-open" style="font-size:26px; opacity:0.4; margin-bottom: 8px;"></i>
+                    <p style="font-weight: 700; color: #412110;">No matching bite records found</p>
+                    <span style="font-size: 12px;">Try adjusting your search query or year filter</span>
                 </td>
             </tr>
         `;
+        updateKpiSummary({ total: 0, tcv: 0, hr: 0, compII: 0, compIII: 0 });
         createPagination(0);
         return;
     }
@@ -239,41 +313,39 @@ function renderTable() {
     const end = start + rowsPerPage;
     const records = filteredCases.slice(start, end);
 
-    // Build row elements clearly to maintain table structure
     let tableRows = [];
 
     records.forEach(caseData => {
         tableRows.push(`
             <tr>
-                <td><strong>${caseData.abtc ?? "N/A"}</strong></td>
-                <td>${caseData.maleCases ?? 0}</td>
-                <td>${caseData.femaleCases ?? 0}</td>
-                <td>${caseData.ageLt15 ?? 0}</td>
-                <td>${caseData.ageGt15 ?? 0}</td>
-                <td>${caseData.bitingDog ?? 0}</td>
-                <td>${caseData.bitingCat ?? 0}</td>
-                <td>${caseData.bitingOthers ?? 0}</td>
-                <td>${caseData.humanCat1 ?? 0}</td>
-                <td>${caseData.humanCat2 ?? 0}</td>
-                <td>${caseData.humanCatNew ?? 0}</td>
-                <td>${caseData.humanCatBooster ?? 0}</td>
-                <td>${caseData.hr ?? 0}</td>
-                <td>${caseData.petTcv ?? 0}</td>
-                <td>${caseData.petHrig ?? 0}</td>
-                <td>${caseData.petErig ?? 0}</td>
-                <td>${caseData.total ?? 0}</td>
-                <td>${caseData.remarksCompII ?? 0}</td>
-                <td>${caseData.remarksCompIII ?? 0}</td>
-                <td>${caseData.remarksIncompleteII ?? 0}</td>
-                <td>${caseData.remarksIncompleteIII ?? 0}</td>
-                <td>${caseData.remarksNoneII ?? 0}</td>
-                <td>${caseData.remarksNoneIII ?? 0}</td>
-                <td>${caseData.rep ?? 0}</td>
+                <td class="sticky-col"><strong>${caseData.abtc || "N/A"}</strong></td>
+                <td>${formatCell(caseData.maleCases)}</td>
+                <td>${formatCell(caseData.femaleCases)}</td>
+                <td>${formatCell(caseData.ageLt15)}</td>
+                <td>${formatCell(caseData.ageGt15)}</td>
+                <td>${formatCell(caseData.bitingDog)}</td>
+                <td>${formatCell(caseData.bitingCat)}</td>
+                <td>${formatCell(caseData.bitingOthers)}</td>
+                <td>${formatCell(caseData.humanCat1)}</td>
+                <td>${formatCell(caseData.humanCat2)}</td>
+                <td>${formatCell(caseData.humanCatNew)}</td>
+                <td>${formatCell(caseData.humanCatBooster)}</td>
+                <td>${formatCell(caseData.hr, true)}</td>
+                <td>${formatCell(caseData.petTcv)}</td>
+                <td>${formatCell(caseData.petHrig)}</td>
+                <td>${formatCell(caseData.petErig)}</td>
+                <td><strong>${formatCell(caseData.total)}</strong></td>
+                <td>${formatCell(caseData.remarksCompII)}</td>
+                <td>${formatCell(caseData.remarksCompIII)}</td>
+                <td>${formatCell(caseData.remarksIncompleteII)}</td>
+                <td>${formatCell(caseData.remarksIncompleteIII)}</td>
+                <td>${formatCell(caseData.remarksNoneII)}</td>
+                <td>${formatCell(caseData.remarksNoneIII)}</td>
+                <td>${formatCell(caseData.rep)}</td>
             </tr>
         `);
     });
 
-    // Compute Totals across all filtered cases
     let totals = {
         male: 0, female: 0, ageLt15: 0, ageGt15: 0,
         dog: 0, cat: 0, others: 0,
@@ -284,34 +356,34 @@ function renderTable() {
     };
 
     filteredCases.forEach(c => {
-        totals.male += Number(c.maleCases ?? 0);
-        totals.female += Number(c.femaleCases ?? 0);
-        totals.ageLt15 += Number(c.ageLt15 ?? 0);
-        totals.ageGt15 += Number(c.ageGt15 ?? 0);
-        totals.dog += Number(c.bitingDog ?? 0);
-        totals.cat += Number(c.bitingCat ?? 0);
-        totals.others += Number(c.bitingOthers ?? 0);
-        totals.cat1 += Number(c.humanCat1 ?? 0);
-        totals.cat2 += Number(c.humanCat2 ?? 0);
-        totals.catNew += Number(c.humanCatNew ?? 0);
-        totals.catBooster += Number(c.humanCatBooster ?? 0);
-        totals.hr += Number(c.hr ?? 0);
-        totals.tcv += Number(c.petTcv ?? 0);
-        totals.hrig += Number(c.petHrig ?? 0);
-        totals.erig += Number(c.petErig ?? 0);
-        totals.total += Number(c.total ?? 0);
-        totals.compII += Number(c.remarksCompII ?? 0);
-        totals.compIII += Number(c.remarksCompIII ?? 0);
-        totals.incII += Number(c.remarksIncompleteII ?? 0);
-        totals.incIII += Number(c.remarksIncompleteIII ?? 0);
-        totals.noneII += Number(c.remarksNoneII ?? 0);
-        totals.noneIII += Number(c.remarksNoneIII ?? 0);
-        totals.rep += Number(c.rep ?? 0);
+        totals.male += Number(c.maleCases || 0);
+        totals.female += Number(c.femaleCases || 0);
+        totals.ageLt15 += Number(c.ageLt15 || 0);
+        totals.ageGt15 += Number(c.ageGt15 || 0);
+        totals.dog += Number(c.bitingDog || 0);
+        totals.cat += Number(c.bitingCat || 0);
+        totals.others += Number(c.bitingOthers || 0);
+        totals.cat1 += Number(c.humanCat1 || 0);
+        totals.cat2 += Number(c.humanCat2 || 0);
+        totals.catNew += Number(c.humanCatNew || 0);
+        totals.catBooster += Number(c.humanCatBooster || 0);
+        totals.hr += Number(c.hr || 0);
+        totals.tcv += Number(c.petTcv || 0);
+        totals.hrig += Number(c.petHrig || 0);
+        totals.erig += Number(c.petErig || 0);
+        totals.total += Number(c.total || 0);
+        totals.compII += Number(c.remarksCompII || 0);
+        totals.compIII += Number(c.remarksCompIII || 0);
+        totals.incII += Number(c.remarksIncompleteII || 0);
+        totals.incIII += Number(c.remarksIncompleteIII || 0);
+        totals.noneII += Number(c.remarksNoneII || 0);
+        totals.noneIII += Number(c.remarksNoneIII || 0);
+        totals.rep += Number(c.rep || 0);
     });
 
     tableRows.push(`
-        <tr style="background-color: #FFE3B3; font-weight: bold; border-top: 2px solid #EA6113;">
-            <td>TOTAL</td>
+        <tr class="total-row">
+            <td class="sticky-col">PROVINCIAL TOTAL</td>
             <td>${totals.male.toLocaleString()}</td>
             <td>${totals.female.toLocaleString()}</td>
             <td>${totals.ageLt15.toLocaleString()}</td>
@@ -323,7 +395,7 @@ function renderTable() {
             <td>${totals.cat2.toLocaleString()}</td>
             <td>${totals.catNew.toLocaleString()}</td>
             <td>${totals.catBooster.toLocaleString()}</td>
-            <td>${totals.hr.toLocaleString()}</td>
+            <td class="${totals.hr > 0 ? 'text-danger' : ''}">${totals.hr.toLocaleString()}</td>
             <td>${totals.tcv.toLocaleString()}</td>
             <td>${totals.hrig.toLocaleString()}</td>
             <td>${totals.erig.toLocaleString()}</td>
@@ -339,24 +411,33 @@ function renderTable() {
     `);
 
     tbody.innerHTML = tableRows.join("\n");
+    updateKpiSummary(totals);
     createPagination(totalPages);
 }
 
-/* SEARCH FILTER */
-const caseSearch = document.getElementById("caseSearch");
-if (caseSearch) {
-    caseSearch.addEventListener("input", (e) => {
-        const query = e.target.value.toLowerCase().trim();
+/* 8. UPDATE TOP KPI SUMMARY MINI-CARDS */
+function updateKpiSummary(totals) {
+    const kpiBites = document.getElementById("kpiTotalBites");
+    const kpiTcv = document.getElementById("kpiTotalTcv");
+    const kpiHr = document.getElementById("kpiTotalHr");
+    const kpiPep = document.getElementById("kpiPepRate");
 
-        filteredCases = allCases.filter(caseData => {
-            const abtcField = String(caseData.abtc ?? "").toLowerCase();
-            const yearField = String(caseData.year ?? "").toLowerCase();
-            return abtcField.includes(query) || yearField.includes(query);
-        });
+    if (kpiBites) kpiBites.textContent = (totals.total || 0).toLocaleString();
+    if (kpiTcv) kpiTcv.textContent = (totals.tcv || 0).toLocaleString();
+    if (kpiHr) kpiHr.textContent = (totals.hr || 0).toLocaleString();
+    
+    if (kpiPep) {
+        const completed = (totals.compII || 0) + (totals.compIII || 0);
+        const totalBites = totals.total || 0;
+        const rate = totalBites > 0 ? ((completed / totalBites) * 100).toFixed(1) : "0.0";
+        kpiPep.textContent = `${rate}%`;
+    }
+}
 
-        currentPage = 1;
-        renderTable();
-    });
+/* SEARCH EVENT LISTENER */
+const caseSearchInput = document.getElementById("caseSearch");
+if (caseSearchInput) {
+    caseSearchInput.addEventListener("input", applyFilters);
 }
 
 /* PAGINATION BUILDER */
@@ -388,7 +469,7 @@ function createPagination(totalPages) {
     pagination.appendChild(next);
 }
 
-/* EXPORT TO EXCEL (Full Dataset Export) */
+/* EXPORT TO EXCEL */
 const excelBtn = document.getElementById("excelBtn");
 if (excelBtn) {
     excelBtn.addEventListener("click", () => {
@@ -403,8 +484,8 @@ if (excelBtn) {
         }
 
         const exportData = filteredCases.map(item => ({
-            "ABTC / Municipality": item.abtc,
-            "Year": item.year,
+            "ABTC / Health Facility": item.abtc,
+            "Surveillance Year": item.year,
             "Male": item.maleCases,
             "Female": item.femaleCases,
             "Age <15": item.ageLt15,
@@ -416,8 +497,8 @@ if (excelBtn) {
             "Category II": item.humanCat2,
             "New Patients": item.humanCatNew,
             "Booster": item.humanCatBooster,
-            "HR": item.hr,
-            "TCV": item.petTcv,
+            "Human Rabies (HR)": item.hr,
+            "TCV Administered": item.petTcv,
             "RIG (HRIG)": item.petHrig,
             "RIG (ERIG)": item.petErig,
             "Total Cases": item.total,
@@ -427,17 +508,17 @@ if (excelBtn) {
             "Incomplete Cat III": item.remarksIncompleteIII,
             "No Tx Cat II": item.remarksNoneII,
             "No Tx Cat III": item.remarksNoneIII,
-            "PEP / Repeat": item.rep
+            "REP": item.rep
         }));
 
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Animal Bite Cases");
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Animal Bite Registry");
         XLSX.writeFile(workbook, `PHO_Animal_Bite_Cases_${new Date().toISOString().split('T')[0]}.xlsx`);
     });
 }
 
-/* PRINT FUNCTION */
+/* PRINT HANDLER */
 const printBtn = document.getElementById("printBtn");
 if (printBtn) {
     printBtn.addEventListener("click", () => {
@@ -447,7 +528,5 @@ if (printBtn) {
 
 /* INITIAL LOAD */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 Animal Bite Cases ledger initializing...");
-    setupSidebar();
     loadCases();
 });

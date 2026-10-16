@@ -1,81 +1,113 @@
-// pho-dash.js - PHO Dashboard, Calendar & Heatmap Controller
+// ==============================================================================
+// pho-dash.js - PHO Dashboard Controller (Dynamic Legacy & Date Filtration)
+// ==============================================================================
 
-// 1. Direct CDN Imports
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { auth, db } from '../firebase/firebase-config.js';
 import { 
-    getFirestore, 
     collection, 
     doc, 
+    getDoc,
     getDocs, 
     query, 
     where, 
-    setDoc,
-    getCountFromServer, 
-    collectionGroup,
-    connectFirestoreEmulator
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    setDoc
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { 
-    getAuth, 
-    connectAuthEmulator 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-// 2. Firebase Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
-  authDomain: "cris-database-da989.firebaseapp.com",
-  databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "cris-database-da989",
-  storageBucket: "cris-database-da989.firebasestorage.app",
-  messagingSenderId: "627885439681",
-  appId: "1:627885439681:web:3c657d64c0aad9b4913240",
-  measurementId: "G-0X99BH7GW4"
-};
-
-// 3. Safe Initialize Firebase & Emulators
-let app, db, auth;
-let firebaseAvailable = false;
-
-try {
-    app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    auth = getAuth(app);
-
-    try {
-        connectFirestoreEmulator(db, '127.0.0.1', 8080);
-        connectAuthEmulator(auth, 'http://127.0.0.1:9099');
-    } catch (emuErr) {
-        console.warn("Emulators already initialized or unreachable:", emuErr.message);
-    }
-    firebaseAvailable = true;
-} catch (fbErr) {
-    console.error("Firebase Initialization Failed. Running in offline/fallback mode.", fbErr);
-}
+    onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 // Global Calendar State
 let currentDate = new Date();
 let selectedDate = ""; 
 let temporaryModalYear = currentDate.getFullYear();
 const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-// In-Memory Storage Fallback if Database Connection fails
+const fullMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const localEvents = new Map();
 
-// ================= SIDEBAR TOGGLE ENGINE =================
-function setupSidebar() {
-    const sidebarToggle = document.getElementById("sidebarToggle");
-    const sidebar = document.getElementById("sidebar");
+// Global Chart & Cache State
+let trendChartInstance = null;
+let cachedLegacyRecords = [];
+let availableSurveillanceYears = new Set();
 
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener("click", function() {
-            sidebar.classList.toggle("collapsed");
-            const isCollapsed = sidebar.classList.contains("collapsed");
-            localStorage.setItem("sidebarCollapsed", isCollapsed);
+// ================= DYNAMIC AUTH & USER PROFILE LOADER =================
+function initAuthWatcher() {
+    try {
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                await loadUserProfile(user);
+            } else {
+                setDefaultProfileUI();
+            }
         });
+    } catch (err) {
+        setDefaultProfileUI();
+    }
+}
 
-        const wasCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
-        if (wasCollapsed) {
-            sidebar.classList.add("collapsed");
+function setDefaultProfileUI() {
+    const topProfileName = document.getElementById("topProfileName");
+    const topProfileRole = document.getElementById("topProfileRole");
+    const welcomeGreeting = document.getElementById("welcomeGreeting");
+    if (topProfileName) topProfileName.textContent = "Authorized User";
+    if (topProfileRole) topProfileRole.textContent = "Staff";
+    if (welcomeGreeting) welcomeGreeting.textContent = "Hello, Authorized Personnel";
+}
+
+async function loadUserProfile(user) {
+    const topProfileName = document.getElementById("topProfileName");
+    const topProfileRole = document.getElementById("topProfileRole");
+    const welcomeGreeting = document.getElementById("welcomeGreeting");
+    const topProfileIcon = document.getElementById("topProfileIcon");
+
+    try {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        let displayName = user.displayName || "";
+        let role = "Administrator";
+
+        if (userDocSnap && userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            const fullNameParts = [
+                userData.firstName,
+                userData.middleName ? `${userData.middleName[0]}.` : "",
+                userData.lastName,
+                userData.suffix
+            ].filter(Boolean);
+
+            if (fullNameParts.length > 0) {
+                displayName = fullNameParts.join(" ");
+            }
+            role = userData.position || userData.designation || userData.role || role;
         }
+
+        if (!displayName) {
+            displayName = user.email ? user.email.split('@')[0] : "Authorized Personnel";
+        }
+
+        if (topProfileName) topProfileName.textContent = displayName;
+        if (topProfileRole) topProfileRole.textContent = role;
+        if (welcomeGreeting) welcomeGreeting.textContent = `Hello, ${displayName}`;
+
+        if (topProfileIcon) {
+            const initials = displayName
+                .split(" ")
+                .map(n => n[0])
+                .filter(Boolean)
+                .slice(0, 2)
+                .join("")
+                .toUpperCase();
+            
+            topProfileIcon.textContent = initials || "U";
+            topProfileIcon.style.display = "flex";
+            topProfileIcon.style.alignItems = "center";
+            topProfileIcon.style.justifyContent = "center";
+            topProfileIcon.style.fontWeight = "700";
+            topProfileIcon.style.color = "#412110";
+            topProfileIcon.style.fontSize = "12px";
+        }
+    } catch (err) {
+        setDefaultProfileUI();
     }
 }
 
@@ -97,11 +129,9 @@ async function renderCalendar() {
         });
     }
 
-    // JS getDay(): 0 = Sun, 1 = Mon, ..., 6 = Sat
     const firstDay = new Date(year, month, 1).getDay();
     const lastDate = new Date(year, month + 1, 0).getDate();
 
-    // Render lead offset elements (Empty cells before Day 1)
     for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement("div");
         empty.className = "calendar-date empty";
@@ -113,23 +143,23 @@ async function renderCalendar() {
     
     const eventsSet = new Set();
 
-    if (firebaseAvailable) {
-        try {
-            const monthEventsQuery = query(
-                collection(db, "calendar-events"),
-                where("date", ">=", startMonthStr),
-                where("date", "<=", endMonthStr)
-            );
-            const monthSnap = await getDocs(monthEventsQuery);
+    try {
+        const monthEventsQuery = query(
+            collection(db, "calendar-events"),
+            where("date", ">=", startMonthStr),
+            where("date", "<=", endMonthStr)
+        );
+        const monthSnap = await getDocs(monthEventsQuery);
+        if (monthSnap) {
             monthSnap.forEach(docSnap => {
                 const d = docSnap.data();
                 if (d.description && d.description.trim() !== "") {
                     eventsSet.add(d.date);
                 }
             });
-        } catch (err) {
-            console.warn("Firestore calendar query offline. Falling back to local data.", err);
         }
+    } catch (err) {
+        // Fallback
     }
 
     const today = new Date();
@@ -185,23 +215,23 @@ async function renderCalendar() {
                 eventInput.value = localEvents.get(selectedDate) || ""; 
             }
 
-            if (firebaseAvailable) {
-                try {
-                    const q = query(collection(db, "calendar-events"), where("date", "==", selectedDate));
-                    const querySnapshot = await getDocs(q);
-                    
-                    let hasData = false;
+            try {
+                const q = query(collection(db, "calendar-events"), where("date", "==", selectedDate));
+                const querySnapshot = await getDocs(q);
+                
+                let hasData = false;
+                if (querySnapshot) {
                     querySnapshot.forEach((docSnap) => {
                         if (eventInput) eventInput.value = docSnap.data().description || "";
                         hasData = true;
                     });
-
-                    if (isPastDate && !hasData && eventInput) {
-                        eventInput.placeholder = "🔒 No announcements were recorded for this date.";
-                    }
-                } catch (error) {
-                    console.warn("Database reading error for selected date:", error);
                 }
+
+                if (isPastDate && !hasData && eventInput) {
+                    eventInput.placeholder = "🔒 No announcements were recorded for this date.";
+                }
+            } catch (error) {
+                // Ignore
             }
         });
 
@@ -273,23 +303,21 @@ function setupCalendarControls() {
 
             localEvents.set(selectedDate, text);
 
-            if (firebaseAvailable) {
-                try {
-                    const docRef = doc(db, "calendar-events", selectedDate);
-                    await setDoc(docRef, {
-                        category: "Announcement",
-                        created: new Date(),
-                        date: selectedDate,
-                        description: text,
-                        title: text.split('\n')[0] || "New Announcement"
-                    }, { merge: true });
-                } catch (error) {
-                    console.error("Firestore Save Failed:", error);
-                }
+            try {
+                const docRef = doc(db, "calendar-events", selectedDate);
+                await setDoc(docRef, {
+                    category: "Announcement",
+                    created: new Date(),
+                    date: selectedDate,
+                    description: text,
+                    title: text.split('\n')[0] || "New Announcement"
+                }, { merge: true });
+                alert("Announcement saved successfully!");
+                renderCalendar();
+            } catch (error) {
+                alert("Saved locally (Cloud connection offline): " + error.message);
+                renderCalendar();
             }
-
-            alert("Announcement saved successfully!");
-            renderCalendar();
         };
     }
 }
@@ -324,148 +352,424 @@ function renderModalMonths() {
 // ================= STATS & FIRESTORE DATA LOADERS =================
 async function loadHumanPopulation() {
     const popElem = document.getElementById('humanPopulation');
-    if (!popElem || !firebaseAvailable) return;
+    if (!popElem) return;
 
     try {
         const querySnapshot = await getDocs(collection(db, "pho-database", "main", "population-data"));
         let municipalTotal = 0;
         let iloiloSummaryTotal = 0;
 
-        querySnapshot.forEach((docSnap) => {
-            const docIdUpper = docSnap.id.trim().toUpperCase();
-            const data = docSnap.data();
-            const rawVal = data.totalPopulation ?? data.population ?? data.count ?? data.iloiloPopulation ?? data.value ?? 0;
-            const cleanVal = typeof rawVal === 'string' ? Number(rawVal.replace(/,/g, '')) : Number(rawVal || 0);
+        if (querySnapshot && !querySnapshot.empty) {
+            querySnapshot.forEach((docSnap) => {
+                const docIdUpper = docSnap.id.trim().toUpperCase();
+                const data = docSnap.data();
+                const rawVal = data.totalPopulation ?? data.population ?? data.count ?? data.iloiloPopulation ?? data.value ?? 0;
+                const cleanVal = typeof rawVal === 'string' ? Number(rawVal.replace(/,/g, '')) : Number(rawVal || 0);
 
-            if (docIdUpper === "ILOILO" || docIdUpper === "ILOILO_TOTAL") {
-                iloiloSummaryTotal = cleanVal;
-            } else {
-                municipalTotal += cleanVal;
+                if (docIdUpper === "ILOILO" || docIdUpper === "ILOILO_TOTAL") {
+                    iloiloSummaryTotal = cleanVal;
+                } else {
+                    municipalTotal += cleanVal;
+                }
+            });
+        }
+
+        const finalPopulation = iloiloSummaryTotal > 0 ? iloiloSummaryTotal : municipalTotal;
+        popElem.textContent = finalPopulation > 0 ? finalPopulation.toLocaleString() : "0";
+    } catch (error) {
+        popElem.textContent = "0";
+    }
+}
+
+// ================= DATE & LEGACY PARSING HELPER =================
+function extractDateDetails(data) {
+    let year = null;
+    let month = null;
+
+    if (data.year && !isNaN(Number(data.year))) {
+        year = Number(data.year);
+    }
+    if (data.month !== undefined && data.month !== null && !isNaN(Number(data.month))) {
+        const m = Number(data.month);
+        month = m >= 1 && m <= 12 ? m - 1 : (m >= 0 && m <= 11 ? m : null);
+    }
+
+    const rawDate = data.date || data.createdAt || data.reportDate || data.timestamp;
+    if (rawDate) {
+        if (typeof rawDate.toDate === 'function') {
+            const dt = rawDate.toDate();
+            if (!year) year = dt.getFullYear();
+            if (month === null) month = dt.getMonth();
+        } else {
+            const dt = new Date(rawDate);
+            if (!isNaN(dt.getTime())) {
+                if (!year) year = dt.getFullYear();
+                if (month === null) month = dt.getMonth();
+            }
+        }
+    }
+
+    if ((!year || month === null) && data.rawData && Array.isArray(data.rawData)) {
+        for (let i = 0; i < data.rawData.length; i++) {
+            const item = String(data.rawData[i]).trim();
+            if (!year && /^(20\d\d)$/.test(item)) {
+                year = Number(item);
+            }
+            if (month === null) {
+                const mIdx = shortMonths.findIndex(sm => sm.toLowerCase() === item.substring(0, 3).toLowerCase());
+                if (mIdx !== -1) {
+                    month = mIdx;
+                }
+            }
+        }
+    }
+
+    return { year, month };
+}
+
+// ================= SURVEILLANCE & METRICS REFRESH =================
+async function fetchAllSurveillanceRecords() {
+    try {
+        let snap = null;
+        try {
+            snap = await getDocs(collection(db, "pho-database", "main", "legacy-summary"));
+            if (!snap || snap.empty) {
+                snap = await getDocs(collection(db, "pho_rabies_cases"));
+            }
+        } catch (dbErr) {
+            // Handled
+        }
+
+        cachedLegacyRecords = [];
+        availableSurveillanceYears.clear();
+
+        if (snap && !snap.empty) {
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                
+                const rawName = (data.rawData && data.rawData[0]) || data.abtc || data.facilityName || "";
+                if (typeof rawName === 'string' && (rawName.toLowerCase().includes("facility") || rawName.toLowerCase().includes("abtc / health"))) {
+                    return;
+                }
+
+                const { year, month } = extractDateDetails(data);
+                if (year) availableSurveillanceYears.add(year);
+
+                if (data.rawData && Array.isArray(data.rawData)) {
+                    const row = data.rawData;
+                    const is24Col = row.length >= 17;
+                    
+                    const biteCases = is24Col ? (Number(row[16]) || (Number(row[1]) + Number(row[2])) || 0) : (Number(row[1]) || 0);
+                    const vaccinated = is24Col ? (Number(row[13]) || 0) : (Number(row[4]) || 0);
+                    const deaths = is24Col ? (Number(row[12]) || 0) : (Number(row[2]) || 0);
+                    const compII = is24Col ? (Number(row[17]) || 0) : 0;
+                    const compIII = is24Col ? (Number(row[18]) || 0) : 0;
+
+                    cachedLegacyRecords.push({
+                        year,
+                        month,
+                        biteCases,
+                        vaccinated,
+                        deaths,
+                        completedPEP: compII + compIII
+                    });
+                } else {
+                    cachedLegacyRecords.push({
+                        year,
+                        month,
+                        biteCases: Number(data.total || data.totalCases || data.biteCases || 0),
+                        vaccinated: Number(data.tcv || data.petTcv || data.vaccinated || 0),
+                        deaths: Number(data.hr || data.humanDeaths || 0),
+                        completedPEP: Number(data.remarksCompII || 0) + Number(data.remarksCompIII || 0)
+                    });
+                }
+            });
+        }
+
+        populateFilters();
+        updateDashboardWithFilters();
+
+    } catch (err) {
+        console.error("❌ Error initializing dataset:", err);
+    }
+}
+
+function populateFilters() {
+    const yearSelect = document.getElementById("dashYearFilter");
+    const monthSelect = document.getElementById("dashMonthFilter");
+    const currentRealYear = new Date().getFullYear();
+
+    if (yearSelect) {
+        yearSelect.innerHTML = "";
+
+        const optAll = document.createElement("option");
+        optAll.value = "All";
+        optAll.textContent = "All Years";
+        yearSelect.appendChild(optAll);
+
+        const optCurrent = document.createElement("option");
+        optCurrent.value = "current_year";
+        optCurrent.textContent = `Current Year (${currentRealYear})`;
+        yearSelect.appendChild(optCurrent);
+
+        const sortedYears = Array.from(availableSurveillanceYears).sort((a, b) => b - a);
+        sortedYears.forEach(yr => {
+            if (yr !== currentRealYear) {
+                const opt = document.createElement("option");
+                opt.value = yr;
+                opt.textContent = `${yr}`;
+                yearSelect.appendChild(opt);
             }
         });
 
-        const finalPopulation = iloiloSummaryTotal > 0 ? iloiloSummaryTotal : municipalTotal;
-        popElem.textContent = finalPopulation.toLocaleString();
-    } catch (error) {
-        console.warn("Could not fetch Human Population:", error);
+        yearSelect.onchange = updateDashboardWithFilters;
+    }
+
+    if (monthSelect) {
+        monthSelect.innerHTML = `
+            <option value="All">All Months</option>
+            <option value="current">Current Month</option>
+            <option value="0">January</option>
+            <option value="1">February</option>
+            <option value="2">March</option>
+            <option value="3">April</option>
+            <option value="4">May</option>
+            <option value="5">June</option>
+            <option value="6">July</option>
+            <option value="7">August</option>
+            <option value="8">September</option>
+            <option value="9">October</option>
+            <option value="10">November</option>
+            <option value="11">December</option>
+        `;
+        monthSelect.onchange = updateDashboardWithFilters;
     }
 }
 
-async function loadAbtcReportingStatus() {
-    const reportingRatioEl = document.getElementById('abtcReporting');
-    const percentageEl = document.querySelector('.sub-stat-percentage');
+function updateDashboardWithFilters() {
+    const yearSelect = document.getElementById("dashYearFilter");
+    const monthSelect = document.getElementById("dashMonthFilter");
 
-    if (!reportingRatioEl || !firebaseAvailable) return;
+    const selectedYear = yearSelect ? yearSelect.value : "All";
+    const selectedMonth = monthSelect ? monthSelect.value : "current";
 
-    try {
-        const facSnap = await getCountFromServer(collection(db, "facilities"));
-        const totalFacilities = facSnap.data().count;
+    updateDashboardData(selectedYear, selectedMonth);
+}
 
-        if (totalFacilities === 0) {
-            reportingRatioEl.textContent = "0 / 0";
-            if (percentageEl) percentageEl.textContent = "0.0% Completed";
-            return;
+async function updateDashboardData(selectedYear, selectedMonth) {
+    const deathsEl = document.getElementById("humanRabiesCases");
+    const pepRateEl = document.getElementById("pepCompletionRate");
+    const pepRatioBadge = document.getElementById("pepRatioBadge");
+
+    const monthlyPatientsCountEl = document.getElementById("monthlyPatientsCount");
+    const monthlyPatientsBadge = document.getElementById("monthlyPatientsBadge");
+    const monthlyPatientsTitle = document.getElementById("monthlyPatientsTitle");
+
+    const now = new Date();
+    const currentRealYear = now.getFullYear();
+    const currentRealMonth = now.getMonth();
+
+    let targetYear = null;
+    if (selectedYear === "current_year") {
+        targetYear = currentRealYear;
+    } else if (selectedYear !== "All") {
+        targetYear = Number(selectedYear);
+    }
+
+    let targetMonth = null;
+    if (selectedMonth === "current") {
+        targetMonth = currentRealMonth;
+    } else if (selectedMonth !== "All") {
+        targetMonth = Number(selectedMonth);
+    }
+
+    let matchedRecords = cachedLegacyRecords;
+
+    if (targetYear !== null) {
+        matchedRecords = matchedRecords.filter(r => r.year === targetYear);
+    }
+
+    const monthlyBites = new Array(12).fill(0);
+    const monthlyVaccinated = new Array(12).fill(0);
+    const monthlyMortality = new Array(12).fill(0);
+
+    let totalBites = 0;
+    let totalVaccinated = 0;
+    let totalDeaths = 0;
+    let totalCompletedPEP = 0;
+    let focusedPeriodPatients = 0;
+
+    matchedRecords.forEach(r => {
+        if (r.month !== null && r.month >= 0 && r.month < 12) {
+            monthlyBites[r.month] += r.biteCases;
+            monthlyVaccinated[r.month] += r.vaccinated;
+            monthlyMortality[r.month] += r.deaths;
         }
 
-        const currentPeriod = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+        const monthMatches = targetMonth === null || r.month === targetMonth;
 
-        const repQuery = query(
-            collectionGroup(db, "submitted-reports"),
-            where("reportPeriod", "==", currentPeriod)
-        );
-        const repSnap = await getDocs(repQuery);
-
-        const submittedFacilitiesSet = new Set();
-        repSnap.forEach(docSnap => {
-            const data = docSnap.data();
-            if (data.facilityId) submittedFacilitiesSet.add(data.facilityId);
-        });
-
-        const submittedCount = submittedFacilitiesSet.size;
-        reportingRatioEl.textContent = `${submittedCount} / ${totalFacilities}`;
-
-        if (percentageEl) {
-            const pct = ((submittedCount / totalFacilities) * 100).toFixed(1);
-            percentageEl.textContent = `${pct}% Completed`;
+        if (monthMatches) {
+            totalBites += r.biteCases;
+            totalVaccinated += r.vaccinated;
+            totalDeaths += r.deaths;
+            totalCompletedPEP += r.completedPEP;
         }
-    } catch (error) {
-        console.warn("Could not load ABTC Reporting status:", error);
+
+        if (r.month === (targetMonth !== null ? targetMonth : currentRealMonth)) {
+            focusedPeriodPatients += r.biteCases;
+        }
+    });
+
+    const displayMonthIdx = targetMonth !== null ? targetMonth : currentRealMonth;
+    const displayYearLabel = targetYear !== null ? targetYear : currentRealYear;
+
+    if (monthlyPatientsCountEl) {
+        monthlyPatientsCountEl.textContent = focusedPeriodPatients.toLocaleString();
+    }
+    if (monthlyPatientsBadge) {
+        monthlyPatientsBadge.textContent = `${shortMonths[displayMonthIdx]} ${displayYearLabel}`;
+    }
+    if (monthlyPatientsTitle) {
+        monthlyPatientsTitle.textContent = `${fullMonths[displayMonthIdx]} Patients`;
+    }
+
+    if (deathsEl) deathsEl.textContent = totalDeaths.toLocaleString();
+
+    if (pepRateEl) {
+        if (totalBites > 0) {
+            const completionPct = ((totalCompletedPEP / totalBites) * 100).toFixed(1);
+            pepRateEl.textContent = `${completionPct}%`;
+            if (pepRatioBadge) pepRatioBadge.textContent = `${totalCompletedPEP.toLocaleString()} of ${totalBites.toLocaleString()} Completed`;
+        } else {
+            pepRateEl.textContent = "0.0%";
+            if (pepRatioBadge) pepRatioBadge.textContent = "0 of 0 Completed";
+        }
+    }
+
+    if (trendChartInstance) {
+        trendChartInstance.data.datasets[0].data = monthlyBites;
+        trendChartInstance.data.datasets[1].data = monthlyVaccinated;
+        trendChartInstance.data.datasets[2].data = monthlyMortality;
+
+        const maxVal = Math.max(...monthlyBites, ...monthlyVaccinated, ...monthlyMortality);
+        trendChartInstance.options.scales.y.max = maxVal > 0 ? undefined : 10;
+        trendChartInstance.update();
     }
 }
 
-async function loadHumanRabiesCases() {
-    const rabiesCasesEl = document.getElementById('humanRabiesCases');
-    if (!rabiesCasesEl || !firebaseAvailable) return;
-
-    try {
-        const rabiesQuery = query(
-            collection(db, "patient-database"),
-            where("treatmentStatus", "==", "Died")
-        );
-        const countSnap = await getCountFromServer(rabiesQuery);
-        rabiesCasesEl.textContent = countSnap.data().count;
-    } catch (error) {
-        console.warn("Could not load Human Rabies Cases:", error);
-    }
-}
-
-// ================= TREND CHART ENGINE =================
+// ================= CHART INITIALIZATION =================
 function initChart() {
     const canvas = document.getElementById('incidentTrendChart');
     if (!canvas || typeof Chart === 'undefined') return;
 
     const ctx = canvas.getContext('2d');
-    new Chart(ctx, {
+    trendChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            labels: shortMonths,
             datasets: [
                 {
                     label: 'Animal Bite Cases',
-                    data: [120, 150, 180, 170, 160, 210, 240, 200, 190, 220, 230, 250],
+                    data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     borderColor: '#F88F22',
                     backgroundColor: 'transparent',
-                    tension: 0.3
+                    borderWidth: 2.5,
+                    tension: 0,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 },
                 {
-                    label: 'No. of Vaccinated Patients',
-                    data: [100, 130, 160, 150, 140, 190, 220, 180, 170, 200, 210, 230],
+                    label: 'Vaccinated Patients (TCV)',
+                    data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     borderColor: '#EA6113',
                     backgroundColor: 'transparent',
-                    tension: 0.3
+                    borderWidth: 2.5,
+                    tension: 0,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 },
                 {
                     label: 'Mortality',
-                    data: [1, 0, 2, 1, 0, 1, 3, 0, 1, 2, 1, 0],
+                    data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     borderColor: '#d32f2f',
                     backgroundColor: 'transparent',
-                    tension: 0.3
+                    borderWidth: 2,
+                    tension: 0,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
             plugins: {
-                legend: { display: false }
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#111625',
+                    padding: 10,
+                    cornerRadius: 8,
+                    titleFont: { family: 'Lato', size: 12, weight: 'bold' },
+                    bodyFont: { family: 'Lato', size: 11 },
+                    displayColors: true,
+                    callbacks: {
+                        afterBody: function(tooltipItems) {
+                            const bites = tooltipItems.find(t => t.dataset.label === 'Animal Bite Cases')?.raw || 0;
+                            const vaccinated = tooltipItems.find(t => t.dataset.label === 'Vaccinated Patients (TCV)')?.raw || 0;
+                            if (bites > 0) {
+                                const coverage = ((vaccinated / bites) * 100).toFixed(1);
+                                return `\nVaccine Coverage: ${coverage}%`;
+                            }
+                            return '';
+                        }
+                    }
+                }
             },
             scales: {
-                y: { beginAtZero: true }
+                y: { 
+                    min: 0,
+                    max: 10,
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                    ticks: { 
+                        stepSize: 2,
+                        font: { family: 'Lato', size: 11 } 
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { family: 'Lato', size: 11 } }
+                }
             }
         }
     });
+
+    const metricFilter = document.getElementById("chartMetricFilter");
+    if (metricFilter) {
+        metricFilter.addEventListener("change", (e) => {
+            const val = e.target.value;
+            trendChartInstance.data.datasets.forEach((dataset, index) => {
+                if (val === "all") {
+                    dataset.hidden = false;
+                } else {
+                    dataset.hidden = String(index) !== val;
+                }
+            });
+            trendChartInstance.update();
+        });
+    }
 }
 
 // ================= LIFECYCLE ATTACHMENT =================
 document.addEventListener("DOMContentLoaded", function() {
-    setupSidebar();
+    initAuthWatcher();
     setupCalendarControls();
     renderCalendar();
     initChart();
 
-    if (firebaseAvailable) {
-        loadHumanPopulation();
-        loadAbtcReportingStatus();
-        loadHumanRabiesCases();
-    }
+    loadHumanPopulation();
+    fetchAllSurveillanceRecords();
 });

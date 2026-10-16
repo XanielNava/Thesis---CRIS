@@ -1,7 +1,15 @@
 // firebase-config.js
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
-import { getFirestore, connectFirestoreEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+import { 
+    initializeFirestore, 
+    memoryLocalCache, 
+    connectFirestoreEmulator,
+    setLogLevel 
+} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 import { getAuth, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+
+// Silence verbose internal connection warnings
+setLogLevel('silent');
 
 const firebaseConfig = {
     apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
@@ -13,25 +21,28 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
 
-// 🎛️ SWITCHES
-const USE_EMULATOR = true; 
-const USE_NGROK = false; 
+// In-Memory cache only (prevents ghost cache from reappearing)
+export const db = initializeFirestore(app, {
+    localCache: memoryLocalCache()
+});
+
+export const auth = getAuth(app);
+
+// ==============================================================================
+// 🎛️ EMULATOR ON / OFF TOGGLE SWITCH
+// ==============================================================================
+// true = ON (Local Emulator) | false = OFF (Live Cloud Firebase)
+const USE_EMULATOR = true;
 
 if (USE_EMULATOR) {
-    if (USE_NGROK) {
-        // Point to your active ngrok URL (update domain string if ngrok generates a new one)
-        connectFirestoreEmulator(db, 'isotope-editor-levitate.ngrok-free.dev', 443, { ssl: true });
-        console.log("🌐 Connected to Firestore via ngrok Tunnel");
-    } else {
-        // Local testing on port 8088
+    try {
         connectFirestoreEmulator(db, '127.0.0.1', 8088);
-        console.log("🧪 Connected to Local Firestore Emulator");
+        connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+        console.log("🧪 Connected to Local Firebase Emulator (Firestore: 8088, Auth: 9099)");
+    } catch (err) {
+        // Prevent duplicate attachment on fast refresh
     }
-
-    connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 } else {
-    console.log("🚀 Connected to Live Firebase Database");
+    console.log("☁️ Connected to Live Cloud Firebase");
 }
