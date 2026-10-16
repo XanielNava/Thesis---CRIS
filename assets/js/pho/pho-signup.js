@@ -2,7 +2,7 @@
 // CRIS PHO MODULE - SIGNUP CONTROLLER (pho-signup.js)
 // ==========================================================================
 
-import { auth, db } from '../main/firebase-config.js';
+import { auth, db } from '../firebase/firebase-config.js';
 import { 
     createUserWithEmailAndPassword 
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";

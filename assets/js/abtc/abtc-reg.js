@@ -526,12 +526,3 @@ function executeCombinedFilters() {
 if (searchBox) searchBox.addEventListener("input", executeCombinedFilters);
 if (filterExposure) filterExposure.addEventListener("change", executeCombinedFilters);
 if (filterCategory) filterCategory.addEventListener("change", executeCombinedFilters);
-
-document.getElementById("logout-btn")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    if (confirm("Are you sure you want to switch personnel profiles?")) {
-        sessionStorage.removeItem("activeDesignation");
-        sessionStorage.removeItem("activePersonnelName");
-        window.location.href = 'abtc-profiles.html';
-    }
-});

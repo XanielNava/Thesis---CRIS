@@ -1,5 +1,5 @@
 // ==============================================================================
-// pho-dash.js - PHO Dashboard Controller (Zeroed / Surveillance Only)
+// pho-dash.js - PHO Dashboard Controller (Dynamic Legacy & Date Filtration)
 // ==============================================================================
 
 import { auth, db } from '../firebase/firebase-config.js';
@@ -13,8 +13,7 @@ import {
     setDoc
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { 
-    onAuthStateChanged,
-    signOut 
+    onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 // Global Calendar State
@@ -28,6 +27,7 @@ const localEvents = new Map();
 // Global Chart & Cache State
 let trendChartInstance = null;
 let cachedLegacyRecords = [];
+let availableSurveillanceYears = new Set();
 
 // ================= DYNAMIC AUTH & USER PROFILE LOADER =================
 function initAuthWatcher() {
@@ -381,6 +381,52 @@ async function loadHumanPopulation() {
     }
 }
 
+// ================= DATE & LEGACY PARSING HELPER =================
+function extractDateDetails(data) {
+    let year = null;
+    let month = null;
+
+    if (data.year && !isNaN(Number(data.year))) {
+        year = Number(data.year);
+    }
+    if (data.month !== undefined && data.month !== null && !isNaN(Number(data.month))) {
+        const m = Number(data.month);
+        month = m >= 1 && m <= 12 ? m - 1 : (m >= 0 && m <= 11 ? m : null);
+    }
+
+    const rawDate = data.date || data.createdAt || data.reportDate || data.timestamp;
+    if (rawDate) {
+        if (typeof rawDate.toDate === 'function') {
+            const dt = rawDate.toDate();
+            if (!year) year = dt.getFullYear();
+            if (month === null) month = dt.getMonth();
+        } else {
+            const dt = new Date(rawDate);
+            if (!isNaN(dt.getTime())) {
+                if (!year) year = dt.getFullYear();
+                if (month === null) month = dt.getMonth();
+            }
+        }
+    }
+
+    if ((!year || month === null) && data.rawData && Array.isArray(data.rawData)) {
+        for (let i = 0; i < data.rawData.length; i++) {
+            const item = String(data.rawData[i]).trim();
+            if (!year && /^(20\d\d)$/.test(item)) {
+                year = Number(item);
+            }
+            if (month === null) {
+                const mIdx = shortMonths.findIndex(sm => sm.toLowerCase() === item.substring(0, 3).toLowerCase());
+                if (mIdx !== -1) {
+                    month = mIdx;
+                }
+            }
+        }
+    }
+
+    return { year, month };
+}
+
 // ================= SURVEILLANCE & METRICS REFRESH =================
 async function fetchAllSurveillanceRecords() {
     try {
@@ -391,17 +437,23 @@ async function fetchAllSurveillanceRecords() {
                 snap = await getDocs(collection(db, "pho_rabies_cases"));
             }
         } catch (dbErr) {
-            // Offline
+            // Handled
         }
 
         cachedLegacyRecords = [];
-        const yearsSet = new Set();
+        availableSurveillanceYears.clear();
 
         if (snap && !snap.empty) {
             snap.forEach(docSnap => {
                 const data = docSnap.data();
-                const yearVal = Number(data.year) || (data.rawData && data.rawData[0] && !isNaN(Number(data.rawData[0])) ? Number(data.rawData[0]) : null);
-                if (yearVal) yearsSet.add(yearVal);
+                
+                const rawName = (data.rawData && data.rawData[0]) || data.abtc || data.facilityName || "";
+                if (typeof rawName === 'string' && (rawName.toLowerCase().includes("facility") || rawName.toLowerCase().includes("abtc / health"))) {
+                    return;
+                }
+
+                const { year, month } = extractDateDetails(data);
+                if (year) availableSurveillanceYears.add(year);
 
                 if (data.rawData && Array.isArray(data.rawData)) {
                     const row = data.rawData;
@@ -414,7 +466,8 @@ async function fetchAllSurveillanceRecords() {
                     const compIII = is24Col ? (Number(row[18]) || 0) : 0;
 
                     cachedLegacyRecords.push({
-                        year: yearVal,
+                        year,
+                        month,
                         biteCases,
                         vaccinated,
                         deaths,
@@ -422,7 +475,8 @@ async function fetchAllSurveillanceRecords() {
                     });
                 } else {
                     cachedLegacyRecords.push({
-                        year: yearVal,
+                        year,
+                        month,
                         biteCases: Number(data.total || data.totalCases || data.biteCases || 0),
                         vaccinated: Number(data.tcv || data.petTcv || data.vaccinated || 0),
                         deaths: Number(data.hr || data.humanDeaths || 0),
@@ -432,30 +486,63 @@ async function fetchAllSurveillanceRecords() {
             });
         }
 
-        const yearSelect = document.getElementById("dashYearFilter");
-        const monthSelect = document.getElementById("dashMonthFilter");
+        populateFilters();
+        updateDashboardWithFilters();
 
-        if (yearSelect) {
-            yearSelect.innerHTML = '<option value="All">All Surveillance Years</option>';
-            
-            Array.from(yearsSet).sort((a, b) => b - a).forEach(yr => {
+    } catch (err) {
+        console.error("❌ Error initializing dataset:", err);
+    }
+}
+
+function populateFilters() {
+    const yearSelect = document.getElementById("dashYearFilter");
+    const monthSelect = document.getElementById("dashMonthFilter");
+    const currentRealYear = new Date().getFullYear();
+
+    if (yearSelect) {
+        yearSelect.innerHTML = "";
+
+        const optAll = document.createElement("option");
+        optAll.value = "All";
+        optAll.textContent = "All Years";
+        yearSelect.appendChild(optAll);
+
+        const optCurrent = document.createElement("option");
+        optCurrent.value = "current_year";
+        optCurrent.textContent = `Current Year (${currentRealYear})`;
+        yearSelect.appendChild(optCurrent);
+
+        const sortedYears = Array.from(availableSurveillanceYears).sort((a, b) => b - a);
+        sortedYears.forEach(yr => {
+            if (yr !== currentRealYear) {
                 const opt = document.createElement("option");
                 opt.value = yr;
                 opt.textContent = `${yr}`;
                 yearSelect.appendChild(opt);
-            });
+            }
+        });
 
-            yearSelect.onchange = updateDashboardWithFilters;
-        }
+        yearSelect.onchange = updateDashboardWithFilters;
+    }
 
-        if (monthSelect) {
-            monthSelect.onchange = updateDashboardWithFilters;
-        }
-
-        await updateDashboardWithFilters();
-
-    } catch (err) {
-        console.error("❌ Error initializing dataset:", err);
+    if (monthSelect) {
+        monthSelect.innerHTML = `
+            <option value="All">All Months</option>
+            <option value="current">Current Month</option>
+            <option value="0">January</option>
+            <option value="1">February</option>
+            <option value="2">March</option>
+            <option value="3">April</option>
+            <option value="4">May</option>
+            <option value="5">June</option>
+            <option value="6">July</option>
+            <option value="7">August</option>
+            <option value="8">September</option>
+            <option value="9">October</option>
+            <option value="10">November</option>
+            <option value="11">December</option>
+        `;
+        monthSelect.onchange = updateDashboardWithFilters;
     }
 }
 
@@ -478,7 +565,30 @@ async function updateDashboardData(selectedYear, selectedMonth) {
     const monthlyPatientsBadge = document.getElementById("monthlyPatientsBadge");
     const monthlyPatientsTitle = document.getElementById("monthlyPatientsTitle");
 
-    // Pure 0 baseline
+    const now = new Date();
+    const currentRealYear = now.getFullYear();
+    const currentRealMonth = now.getMonth();
+
+    let targetYear = null;
+    if (selectedYear === "current_year") {
+        targetYear = currentRealYear;
+    } else if (selectedYear !== "All") {
+        targetYear = Number(selectedYear);
+    }
+
+    let targetMonth = null;
+    if (selectedMonth === "current") {
+        targetMonth = currentRealMonth;
+    } else if (selectedMonth !== "All") {
+        targetMonth = Number(selectedMonth);
+    }
+
+    let matchedRecords = cachedLegacyRecords;
+
+    if (targetYear !== null) {
+        matchedRecords = matchedRecords.filter(r => r.year === targetYear);
+    }
+
     const monthlyBites = new Array(12).fill(0);
     const monthlyVaccinated = new Array(12).fill(0);
     const monthlyMortality = new Array(12).fill(0);
@@ -487,33 +597,40 @@ async function updateDashboardData(selectedYear, selectedMonth) {
     let totalVaccinated = 0;
     let totalDeaths = 0;
     let totalCompletedPEP = 0;
-
-    const activeCurrentMonthIndex = selectedMonth === "current" ? new Date().getMonth() : Number(selectedMonth);
-    const targetMonthLabel = shortMonths[activeCurrentMonthIndex];
-
-    // Tally strictly from the uploaded surveillance reports
-    let matchedRecords = cachedLegacyRecords;
-    if (selectedYear !== "All") {
-        matchedRecords = cachedLegacyRecords.filter(r => String(r.year) === String(selectedYear));
-    }
+    let focusedPeriodPatients = 0;
 
     matchedRecords.forEach(r => {
-        totalBites += r.biteCases;
-        totalVaccinated += r.vaccinated;
-        totalDeaths += r.deaths;
-        totalCompletedPEP += r.completedPEP;
+        if (r.month !== null && r.month >= 0 && r.month < 12) {
+            monthlyBites[r.month] += r.biteCases;
+            monthlyVaccinated[r.month] += r.vaccinated;
+            monthlyMortality[r.month] += r.deaths;
+        }
+
+        const monthMatches = targetMonth === null || r.month === targetMonth;
+
+        if (monthMatches) {
+            totalBites += r.biteCases;
+            totalVaccinated += r.vaccinated;
+            totalDeaths += r.deaths;
+            totalCompletedPEP += r.completedPEP;
+        }
+
+        if (r.month === (targetMonth !== null ? targetMonth : currentRealMonth)) {
+            focusedPeriodPatients += r.biteCases;
+        }
     });
 
-    // Update KPI Cards
+    const displayMonthIdx = targetMonth !== null ? targetMonth : currentRealMonth;
+    const displayYearLabel = targetYear !== null ? targetYear : currentRealYear;
+
     if (monthlyPatientsCountEl) {
-        monthlyPatientsCountEl.textContent = "0";
+        monthlyPatientsCountEl.textContent = focusedPeriodPatients.toLocaleString();
     }
     if (monthlyPatientsBadge) {
-        const displayYear = selectedYear === "All" ? new Date().getFullYear() : selectedYear;
-        monthlyPatientsBadge.textContent = `${targetMonthLabel} ${displayYear}`;
+        monthlyPatientsBadge.textContent = `${shortMonths[displayMonthIdx]} ${displayYearLabel}`;
     }
     if (monthlyPatientsTitle) {
-        monthlyPatientsTitle.textContent = `${fullMonths[activeCurrentMonthIndex]} Patients`;
+        monthlyPatientsTitle.textContent = `${fullMonths[displayMonthIdx]} Patients`;
     }
 
     if (deathsEl) deathsEl.textContent = totalDeaths.toLocaleString();
@@ -529,7 +646,6 @@ async function updateDashboardData(selectedYear, selectedMonth) {
         }
     }
 
-    // Update Trend Chart
     if (trendChartInstance) {
         trendChartInstance.data.datasets[0].data = monthlyBites;
         trendChartInstance.data.datasets[1].data = monthlyVaccinated;

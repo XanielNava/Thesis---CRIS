@@ -228,3 +228,62 @@
     color: #F87171;
     background: rgba(239, 68, 68, 0.1);
 }
+
+
+.logout-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.logout-modal-content {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    width: 320px;
+    max-width: calc(100% - 40px);
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.logout-modal-content h3 {
+    margin-top: 0;
+    color: #412110;
+}
+
+.logout-modal-content p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.logout-modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.logout-modal-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.logout-no {
+    background: #eee;
+    color: #333;
+}
+
+.logout-yes {
+    background: #EA6113;
+    color: white;
+}
+
+.logout-modal-actions button:hover {
+    opacity: 0.85;
+}
