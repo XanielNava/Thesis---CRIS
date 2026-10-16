@@ -1,24 +1,11 @@
-// PVO Login.js - CDN VERSION (Works in any browser)
-// import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-// import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-// import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-
-// const firebaseConfig = {
-//   apiKey: "AIzaSyBfqjfJoGz591aI8TJjhIS3T4OEvQxX11Y",
-//   authDomain: "cris-database-da989.firebaseapp.com",
-//   databaseURL: "https://cris-database-da989-default-rtdb.asia-southeast1.firebasedatabase.app",
-//   projectId: "cris-database-da989",
-//   storageBucket: "cris-database-da989.firebasestorage.app",
-//   messagingSenderId: "627885439681",
-//   appId: "1:627885439681:web:3c657d64c0aad9b4913240",
-//   measurementId: "G-0X99BH7GW4"
-// };
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
+import { auth, db } from '../firebase/firebase-config.js';
+import { 
+    signInWithEmailAndPassword 
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { 
+    doc, 
+    getDoc 
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 // ✅ Read the user's REAL designation from Firestore
 async function getUserDesignation(uid) {
@@ -62,10 +49,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     // 5. Redirect based on role (you can customize this)
     if (loginDesignation === 'Administrator') {
-      window.location.href = '../src/pvo-dash.html';
+      window.location.href = 'pvo-dash.html';
     } else {
       // Veterinary Officer, Health Officer, etc.
-      window.location.href = '../src/pvo-dash.html';
+      window.location.href = 'pvo-dash.html';
     }
 
   } catch (error) {
