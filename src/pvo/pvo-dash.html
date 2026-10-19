@@ -12,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+    <link rel="module" href="../../assets/js/pvo/pvo-firebase.js">
     
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -144,19 +145,19 @@
                         <div class="stat-card">
                             <small>CONFIRMED RABIES CASES</small>
                             <h2 id="confirmedRabiesCases" class="text-danger-custom">0</h2>
-                            <span class="stat-badge warning">Target: Zero Rabies</span>
+                            <span class="stat-badge warning"></span>
                         </div>
 
                         <div class="stat-card">
                             <small>VACCINATION COVERAGE (%)</small>
                             <h2 id="vaccinationCoverage">0%</h2>
-                            <span class="stat-badge success">Target: 70%+</span>
+                            <span class="stat-badge success"></span>
                         </div>
 
                         <div class="stat-card">
                             <small>ANIMALS UNDER OBSERVATION</small>
                             <h2 id="animalsObserved">0</h2>
-                            <span class="stat-badge info">14-Day Quarantine</span>
+                            <span class="stat-badge info"></span>
                         </div>
                     </div>
 
@@ -196,7 +197,7 @@
                                             <th>Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="recentCasesBody">
+                                    <!-- <tbody id="recentCasesBody">
                                         <tr>
                                             <td>Jul 27, 2026</td>
                                             <td>Pavia</td>
@@ -225,7 +226,7 @@
                                             <td><span class="epi-tag cat-1">Category I</span></td>
                                             <td><span class="badge badge-success">Cleared</span></td>
                                         </tr>
-                                    </tbody>
+                                    </tbody> -->
                                 </table>
                             </div>
                         </div>
