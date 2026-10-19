@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration Dashboard | CRIS</title>
+    <link rel="stylesheet" href="../../assets/css/pho/pho-abtc-management.css">
+</head>
+<body>
+
+<div class="app-layout" id="appLayout">
+
+    <!-- ==================== SIDEBAR (Universal Master Sidebar, Admin variant) ==================== -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-header">
+            <div class="brand-logo">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
+            </div>
+            <div class="brand-info">
+                <span class="brand-title">Community-Centric Rabies Information Systems</span>
+                <span class="brand-badge">Admin Module</span>
+            </div>
+            <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar" aria-expanded="true">
+                <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="sidebar-nav">
+
+            <div class="nav-group">
+                <span class="nav-label">Overview</span>
+                <a href="#overview" class="nav-item active" data-section="overview" title="Dashboard">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </div>
+
+            <div class="nav-group">
+                <span class="nav-label">Management</span>
+                <a href="#facilities" class="nav-item" data-section="facilities" title="Facility Management">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M10 21v-4h4v4"/></svg>
+                    <span class="nav-text">Facilities</span>
+                </a>
+                <a href="#users" class="nav-item" data-section="users" title="User Accounts">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M1 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/><path d="M17 11l2 2 4-4"/></svg>
+                    <span class="nav-text">User Accounts</span>
+                </a>
+            </div>
+
+            <div class="nav-group">
+                <span class="nav-label">Support &amp; Monitoring</span>
+                <a href="#complaints" class="nav-item" data-section="complaints" title="Complaints &amp; Support">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span class="nav-text">Complaints</span>
+                </a>
+                <a href="#audit" class="nav-item" data-section="audit" title="Audit Logs">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg>
+                    <span class="nav-text">Audit Logs</span>
+                </a>
+            </div>
+
+            <div class="nav-group">
+                <span class="nav-label">Configuration</span>
+                <a href="#settings" class="nav-item" data-section="settings" title="System Settings">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <span class="nav-text">System Settings</span>
+                </a>
+            </div>
+
+        </div>
+
+        <div class="sidebar-footer">
+            <button id="logoutBtn" class="nav-item logout-item" type="button" title="Logout">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span class="nav-text">Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content" id="mainContent">
+
+        <header class="page-header">
+            <div>
+                <h1 id="pageTitle">Dashboard</h1>
+                <p class="page-subtitle" id="pageSubtitle">Overview of registered facilities and system accounts.</p>
+            </div>
+            <div class="admin-chip">
+                <span class="avatar">AD</span>
+                <div>
+                    <strong>System Administrator</strong>
+                    <small>Super Admin</small>
+                </div>
+            </div>
+        </header>
+
+        <!-- ---------- A. SYSTEM OVERVIEW ---------- -->
+        <section id="overview" class="dash-section active" data-title="Dashboard" data-subtitle="Overview of registered facilities and system accounts.">
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon icon-blue">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M10 21v-4h4v4"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <span class="stat-label">Total ABTC Facilities</span>
+                        <span class="stat-value" id="statTotalFacilities">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon icon-orange">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M1 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/><path d="M17 11l2 2 4-4"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <span class="stat-label">Active User Accounts</span>
+                        <span class="stat-value" id="statActiveUsers">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon icon-green">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <span class="stat-label">Active Facilities</span>
+                        <span class="stat-value" id="statActiveFacilities">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon icon-amber">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <span class="stat-label">Pending Approvals</span>
+                        <span class="stat-value" id="statPending">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon icon-red">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <span class="stat-label">Suspended / Deactivated</span>
+                        <span class="stat-value" id="statSuspended">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Pending Facility Approvals</h2>
+                        <a href="#facilities" class="link-btn" data-section="facilities">View all</a>
+                    </div>
+                    <ul class="simple-list" id="pendingList"></ul>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Recent Administrative Activity</h2>
+                        <a href="#audit" class="link-btn" data-section="audit">View audit logs</a>
+                    </div>
+                    <ul class="simple-list" id="recentActivity"></ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ---------- B. FACILITY MANAGEMENT ---------- -->
+        <section id="facilities" class="dash-section" data-title="Facility Management" data-subtitle="Review, approve, and manage registered ABTC facilities.">
+            <div class="panel">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="search" id="facilitySearch" placeholder="Search by name, ID, or district">
+                    </div>
+                    <div class="toolbar-group">
+                        <select id="facilityStatusFilter" aria-label="Filter by status">
+                            <option value="">All statuses</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Suspended">Suspended</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Facility Name</th>
+                                <th>District</th>
+                                <th>Contact</th>
+                                <th>Registered</th>
+                                <th>Status</th>
+                                <th class="col-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="facilityTableBody"></tbody>
+                    </table>
+                </div>
+                <p class="empty-state hidden" id="facilityEmpty">No facilities match your filters.</p>
+            </div>
+        </section>
+
+        <!-- ---------- C. USER MANAGEMENT ---------- -->
+        <section id="users" class="dash-section" data-title="User Accounts" data-subtitle="Create authorized accounts, assign roles, and manage account status.">
+            <div class="panel">
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <div class="search-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="search" id="userSearch" placeholder="Search by name or email">
+                        </div>
+                        <select id="userRoleFilter" aria-label="Filter by role">
+                            <option value="">All roles</option>
+                            <option value="Super Admin">Super Admin</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Facility Manager">Facility Manager</option>
+                            <option value="Viewer">Viewer</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="addUserBtn" type="button">+ Add Account</button>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Last Login</th>
+                                <th class="col-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div>
+                <p class="empty-state hidden" id="userEmpty">No accounts match your filters.</p>
+            </div>
+        </section>
+
+        <!-- ---------- D. COMPLAINTS AND SUPPORT ---------- -->
+        <section id="complaints" class="dash-section" data-title="Complaints &amp; Support" data-subtitle="Review and track issues reported by users about the system and its modules.">
+            <div class="panel">
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <select id="complaintStatusFilter" aria-label="Filter by complaint status">
+                            <option value="">All statuses</option>
+                            <option value="Open">Open</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Reported By</th>
+                                <th>Module</th>
+                                <th>Description</th>
+                                <th>Submitted</th>
+                                <th>Status</th>
+                                <th>Update Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="complaintTableBody"></tbody>
+                    </table>
+                </div>
+                <p class="empty-state hidden" id="complaintEmpty">No complaints match your filter.</p>
+            </div>
+        </section>
+
+        <!-- ---------- E. AUDIT LOGS ---------- -->
+        <section id="audit" class="dash-section" data-title="Audit Logs" data-subtitle="Track significant administrative activity across the system.">
+            <div class="panel">
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <div class="search-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="search" id="auditSearch" placeholder="Search logs">
+                        </div>
+                        <select id="auditActionFilter" aria-label="Filter by action">
+                            <option value="">All actions</option>
+                            <option value="Account Created">Account Created</option>
+                            <option value="Account Updated">Account Updated</option>
+                            <option value="Account Activated">Account Activated</option>
+                            <option value="Account Deactivated">Account Deactivated</option>
+                            <option value="Role Changed">Role Changed</option>
+                            <option value="Facility Approved">Facility Approved</option>
+                            <option value="Facility Activated">Facility Activated</option>
+                            <option value="Facility Updated">Facility Updated</option>
+                            <option value="Facility Deactivated">Facility Deactivated</option>
+                            <option value="Facility Suspended">Facility Suspended</option>
+                            <option value="Complaint Status Updated">Complaint Status Updated</option>
+                            <option value="Settings Updated">Settings Updated</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date &amp; Time</th>
+                                <th>Action</th>
+                                <th>Affected Account / Facility</th>
+                                <th>Performed By</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditTableBody"></tbody>
+                    </table>
+                </div>
+                <p class="empty-state hidden" id="auditEmpty">No log entries match your filters.</p>
+            </div>
+        </section>
+
+        <!-- ---------- F. SYSTEM SETTINGS ---------- -->
+        <section id="settings" class="dash-section" data-title="System Settings" data-subtitle="System-wide configuration and reference data.">
+            <form id="settingsForm" class="settings-form">
+                <div class="settings-grid">
+                    <div class="panel">
+                        <div class="panel-header"><h2>General Configuration</h2></div>
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="setSystemName">System name</label>
+                                <input id="setSystemName" value="Community-Centric Rabies Information Systems">
+                            </div>
+                            <div class="field">
+                                <label for="setSupportEmail">Support email</label>
+                                <input id="setSupportEmail" type="email" value="support@example.com">
+                            </div>
+                            <div class="field">
+                                <label for="setSession">Session timeout (minutes)</label>
+                                <input id="setSession" type="number" min="5" max="240" value="30">
+                            </div>
+                            <label class="check-row">
+                                <input type="checkbox" checked> Require administrator approval for new facility registrations
+                            </label>
+                            <label class="check-row">
+                                <input type="checkbox" checked> Log every role change to the audit trail
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header"><h2>Reference Data</h2></div>
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="setAnimals">Animal types</label>
+                                <textarea id="setAnimals" rows="3">Dog, Cat, Monkey, Other</textarea>
+                                <small>Comma-separated list used in case forms.</small>
+                            </div>
+                            <div class="field">
+                                <label for="setBite">Bite exposure categories</label>
+                                <textarea id="setBite" rows="3">Category I, Category II, Category III</textarea>
+                            </div>
+                            <div class="field">
+                                <label for="setFacilityTypes">Facility types</label>
+                                <textarea id="setFacilityTypes" rows="2">ABTC, Satellite Clinic</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="reset" class="btn btn-ghost">Reset</button>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </div>
+            </form>
+        </section>
+
+    </main>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- User create / edit -->
+<div class="modal-overlay" id="userModal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
+        <div class="modal-header">
+            <h3 id="userModalTitle">Create authorized account</h3>
+            <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
+        </div>
+        <form id="userForm" class="modal-form">
+            <input type="hidden" id="userId">
+            <div class="field">
+                <label for="userName">Full name</label>
+                <input id="userName" required>
+            </div>
+            <div class="field">
+                <label for="userEmail">Email</label>
+                <input id="userEmail" type="email" required>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="userRole">Role</label>
+                    <select id="userRole">
+                        <option value="Super Admin">Super Admin</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Facility Manager">Facility Manager</option>
+                        <option value="Viewer" selected>Viewer</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="userStatus">Status</label>
+                    <select id="userStatus">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Facility edit -->
+<div class="modal-overlay" id="facilityModal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="facilityModalTitle">
+        <div class="modal-header">
+            <h3 id="facilityModalTitle">Edit facility</h3>
+            <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
+        </div>
+        <form id="facilityForm" class="modal-form">
+            <input type="hidden" id="facilityId">
+            <div class="field">
+                <label for="facName">Facility name</label>
+                <input id="facName" required>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="facDistrict">District</label>
+                    <input id="facDistrict">
+                </div>
+                <div class="field">
+                    <label for="facPhone">Phone</label>
+                    <input id="facPhone">
+                </div>
+            </div>
+            <div class="field">
+                <label for="facEmail">Contact email</label>
+                <input id="facEmail" type="email">
+            </div>
+            <div class="field">
+                <label for="facStatus">Status</label>
+                <select id="facStatus">
+                    <option value="Pending">Pending</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Suspended">Suspended</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Logout confirmation -->
+<div class="logout-modal" id="logoutModal" aria-hidden="true">
+    <div class="logout-modal-content">
+        <h3>Log out?</h3>
+        <p>You will be returned to the login page.</p>
+        <div class="logout-modal-actions">
+            <button type="button" class="logout-no" data-close>Cancel</button>
+            <button type="button" class="logout-yes" id="logoutConfirm">Logout</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="../../"></script>
+</body>
+</html>
