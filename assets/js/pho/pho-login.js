@@ -13,7 +13,7 @@ import {
 
 // Retrieve user designation from 'pho-users'
 async function getUserDesignation(uid) {
-    const userDocRef = doc(db, "pho-users", uid);
+    const userDocRef = doc(db, "users", uid);
     const userDocSnap = await getDoc(userDocRef);
 
     if (!userDocSnap.exists()) {
@@ -58,13 +58,18 @@ if (loginForm) {
                 throw new Error("Incorrect designation selected for this account.");
             }
 
-            // 4. Save Session State
+           // 4. Save Session State
             localStorage.setItem('userDesignation', dbDesignationRaw);
             localStorage.setItem('userEmail', user.email);
             localStorage.setItem('userUid', user.uid);
 
-            // 5. Redirect to PHO Dashboard
-            window.location.href = 'pho-dash.html';
+            // 5. Redirect to Dashboard (use lowercase comparisons)
+            if (dbDesignation === 'administrator') {
+                // Adjust this path to where admin_dash.html is located
+                window.location.href = '../../../src/pho_admin/admin_dash.html'; // or '../pho_admin/admin_dash.html'
+            } else if (dbDesignation === 'Health Officer' || dbDesignation === 'Provincial Health Officer') {
+                window.location.href = 'pho-dash.html';
+            }
 
         } catch (error) {
             console.error("Login Error:", error);

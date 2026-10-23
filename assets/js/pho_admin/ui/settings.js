@@ -526,7 +526,7 @@
         }
 
         if (e.target.closest('#logoutConfirm')) {
-            window.location.href = 'admin-login.html'; // adjust to your login page
+            window.location.href = '../../../src/pho/pho-login.html'; // adjust to your login page
             return;
         }
 
