@@ -6,7 +6,6 @@
     <title>Facility Management | CRIS Administration</title>
     <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
     <link rel="stylesheet" href="../../assets/css/pho_admin/pho_admin2.css">
-    
 
     <script>
     (function () {
@@ -19,8 +18,7 @@
             document.documentElement.setAttribute('data-theme', 'light');
         }
     })();
-</script>
-
+    </script>
 </head>
 <body>
 
@@ -28,7 +26,6 @@
 
     <!-- ==================== SIDEBAR ==================== -->
     <aside class="sidebar" id="sidebar">
-
         <div class="sidebar-header">
             <div class="brand-logo">
                 <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
@@ -45,7 +42,6 @@
         </div>
 
         <div class="sidebar-nav">
-
             <div class="nav-group">
                 <span class="nav-label">Overview</span>
                 <a href="admin_dash.html" class="nav-item" title="Dashboard">
@@ -81,11 +77,10 @@
             <div class="nav-group">
                 <span class="nav-label">Configuration</span>
                 <a href="settings.html" class="nav-item" title="System Settings">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     <span class="nav-text">System Settings</span>
                 </a>
             </div>
-
         </div>
 
         <div class="sidebar-footer">
@@ -101,7 +96,7 @@
 
         <header class="page-header">
             <div>
-                <h1>Facility Management</h1>
+                <h1>Facility Account Management</h1>
                 <p class="page-subtitle">Review, approve, and manage registered ABTC facilities.</p>
             </div>
             <div class="admin-chip">
@@ -118,13 +113,13 @@
                 <div class="toolbar">
                     <div class="search-box">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input type="search" id="facilitySearch" placeholder="Search by name, ID, or district">
+                        <input type="search" id="facilitySearch" placeholder="Search by name, ID, or municipality">
                     </div>
                     <div class="toolbar-group">
                         <select id="facilityStatusFilter" aria-label="Filter by status">
                             <option value="">All statuses</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Active">Active</option>
+                            <option value="Pending">Pending Applications</option>
+                            <option value="Active">Active Facilities</option>
                             <option value="Inactive">Inactive</option>
                             <option value="Suspended">Suspended</option>
                         </select>
@@ -137,17 +132,19 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Facility Name</th>
-                                <th>District</th>
-                                <th>Contact</th>
-                                <th>Registered</th>
+                                <th>Location</th>
+                                <th>Contact Person</th>
+                                <th>Submission Date</th>
                                 <th>Status</th>
                                 <th class="col-actions">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="facilityTableBody"></tbody>
+                        <tbody id="facilityTableBody">
+                            <tr><td colspan="7" style="text-align:center; padding: 20px;">Loading facilities...</td></tr>
+                        </tbody>
                     </table>
                 </div>
-                <p class="empty-state hidden" id="facilityEmpty">No facilities match your filters.</p>
+                <p class="empty-state hidden" id="facilityEmpty">No facilities match your search or filter.</p>
             </div>
         </section>
 
@@ -156,12 +153,30 @@
 
 <!-- ==================== MODALS ==================== -->
 
-<!-- Facility edit -->
-<div class="modal-overlay" id="facilityModal" aria-hidden="true">
+<!-- 1. Review & Verification Modal -->
+<div class="modal-overlay" id="reviewModal" aria-hidden="true" style="display: none;">
+    <div class="modal-box review-modal-box" role="dialog" aria-modal="true">
+        <div class="modal-header">
+            <h3>Review Facility Application</h3>
+            <button type="button" class="icon-btn" data-close-review aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body" id="reviewModalBody">
+            <!-- Dynamic content injected by facilities.js -->
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" data-close-review>Cancel</button>
+            <button type="button" class="btn btn-danger" id="btnRejectApp">Reject Application</button>
+            <button type="button" class="btn btn-primary" id="btnApproveApp">Approve &amp; Commission</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Facility Edit Modal (For Existing Active Facilities) -->
+<div class="modal-overlay" id="facilityModal" aria-hidden="true" style="display: none;">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="facilityModalTitle">
         <div class="modal-header">
             <h3 id="facilityModalTitle">Edit facility</h3>
-            <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
+            <button type="button" class="icon-btn" data-close-edit aria-label="Close">&times;</button>
         </div>
         <form id="facilityForm" class="modal-form">
             <input type="hidden" id="facilityId">
@@ -171,7 +186,7 @@
             </div>
             <div class="grid-2">
                 <div class="field">
-                    <label for="facDistrict">District</label>
+                    <label for="facDistrict">Municipality / City</label>
                     <input id="facDistrict">
                 </div>
                 <div class="field">
@@ -186,27 +201,26 @@
             <div class="field">
                 <label for="facStatus">Status</label>
                 <select id="facStatus">
-                    <option value="Pending">Pending</option>
                     <option value="Active">Active</option>
                     <option value="Inactive">Inactive</option>
                     <option value="Suspended">Suspended</option>
                 </select>
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+                <button type="button" class="btn btn-ghost" data-close-edit>Cancel</button>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- ==================== LOGOUT CONFIRMATION ==================== -->
-<div class="logout-modal" id="logoutModal" aria-hidden="true">
+<!-- 3. Logout Modal -->
+<div class="logout-modal" id="logoutModal" aria-hidden="true" style="display: none;">
     <div class="logout-modal-content">
         <h3>Log out?</h3>
         <p>You will be returned to the login page.</p>
         <div class="logout-modal-actions">
-            <button type="button" class="logout-no" data-close>Cancel</button>
+            <button type="button" class="logout-no" data-close-logout>Cancel</button>
             <button type="button" class="logout-yes" id="logoutConfirm">Logout</button>
         </div>
     </div>
@@ -214,6 +228,9 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="../../assets/js/pho_admin/ui/facilities.js"></script>
+<!-- Controller linked as single module -->
+<script type="module" src="../../assets/js/pho_admin/ui/facilities-ui.js"></script>
+<script type="module" src="../../assets/js/pho_admin/db/facilities-db.js"></script>
+
 </body>
 </html>

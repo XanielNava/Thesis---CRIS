@@ -1553,3 +1553,163 @@ html[data-theme="dark"] .logout-no {
         flex-wrap: wrap;
     }
 }
+/* Review Modal Sizing & Layout */
+.review-modal-box {
+    max-width: 620px;
+    width: 90%;
+    border-radius: 12px;
+    padding: 24px;
+    background: #ffffff;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* Facility Overview Banner */
+.review-facility-banner {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 16px 0 20px 0;
+}
+
+.banner-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.banner-meta {
+    display: flex;
+    gap: 8px;
+    font-size: 0.88rem;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.banner-sub {
+    font-size: 0.88rem;
+    color: #64748b;
+}
+
+/* Review Sections */
+.review-section {
+    margin-bottom: 18px;
+}
+
+.review-section-header {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed #e2e8f0;
+    padding-bottom: 4px;
+}
+
+.review-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 16px;
+}
+
+.review-item {
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.review-item .label,
+.review-doc-row .label {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-bottom: 2px;
+}
+
+.review-item .value {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.review-item code {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    color: #0f172a;
+}
+
+/* Document Button Link */
+.review-doc-row {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.btn-doc-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    width: fit-content;
+    transition: all 0.2s ease;
+}
+
+.btn-doc-link:hover {
+    background: #dbeafe;
+    color: #1e40af;
+    border-color: #93c5fd;
+}
+
+/* Tags & Helpers */
+.tag-success {
+    color: #166534;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.tag-warning {
+    color: #854d0e;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.text-muted {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+/* Modal Actions Footer */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 18px;
+}

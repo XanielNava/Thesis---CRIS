@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRIS - ABTC Facility Setup</title>
+    <title>CRIS - ABTC Facility Setup & Application</title>
     <link rel="stylesheet" href="../../assets/css/abtc/abtc-setup.css">
     <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
@@ -20,18 +20,18 @@
 
         <main class="main-content">
             <header class="header">
-                <h1>ABTC SYSTEM INITIALIZATION</h1>
+                <h1>ABTC FACILITY REGISTRATION</h1>
                 <div class="user-profile-top">
                     <div class="profile-info">
-                        <strong>Workspace Setup</strong><br>
+                        <strong>Facility Application</strong><br>
                     </div>
                 </div>
             </header>
 
             <div class="content-grid single-layout">
                 <section class="card">
-                    <h3 class="card-title"><span class="icon">🏥</span> Add Animal Bite Treatment Center</h3>
-                    <p class="card-subtitle">Initialize and register a new workspace for your facility to begin tracking exposure records.</p>
+                    <h3 class="card-title"><span class="icon">🏥</span> Register Animal Bite Treatment Center</h3>
+                    <p class="card-subtitle">Submit your facility credentials and accreditation for PHO regulatory validation.</p>
 
                     <form id="abtcSetupForm">
                         
@@ -41,21 +41,21 @@
                             <div class="field-group">
                                 <div class="field full">
                                     <label for="abtcName">Facility name *</label>
-                                    <input type="text" id="abtcName" placeholder="e.g. Mandaue City ABTC" required>
+                                    <input type="text" id="abtcName" placeholder="e.g. Pototan ABTC / RHU" required>
                                 </div>
                                 <div class="field">
                                     <label for="abtcCode">Facility Code / Acronym *</label>
-                                    <input type="text" id="abtcCode" placeholder="e.g. MCABC" required>
+                                    <input type="text" id="abtcCode" placeholder="e.g. PABTC" required>
                                 </div>
                                 <div class="field">
                                     <label for="abtcType">Facility Type *</label>
                                     <select id="abtcType" required>
                                         <option value="">Select Type</option>
-                                        <option>Public Hospital</option>
-                                        <option>Private Hospital</option>
-                                        <option>Barangay Health Station</option>
-                                        <option>Rural Health Unit</option>
-                                        <option>Health Center</option>
+                                        <option value="Rural Health Unit">Rural Health Unit</option>
+                                        <option value="Public Hospital">Public Hospital</option>
+                                        <option value="Private Hospital">Private Hospital</option>
+                                        <option value="Private ABTC">Private ABTC</option>
+                                        <option value="Barangay Health Station">Barangay Health Station</option>
                                     </select>
                                 </div>
                             </div>
@@ -67,63 +67,98 @@
                             <div class="field-group">
                                 <div class="field">
                                     <label for="abtcStreet">Street Address / Building No. *</label>
-                                    <input type="text" id="abtcStreet" placeholder="e.g. 123 Quezon St." required>
+                                    <input type="text" id="abtcStreet" placeholder="e.g. Rizal Street" required>
                                 </div>
                                 <div class="field">
                                     <label for="abtcBarangay">Barangay *</label>
-                                    <input type="text" id="abtcBarangay" placeholder="e.g. Barangay Central" required>
+                                    <input type="text" id="abtcBarangay" placeholder="e.g. Barangay Poblacion" required>
                                 </div>
                                 <div class="field">
                                     <label for="abtcCity">City / Municipality *</label>
-                                    <input type="text" id="abtcCity" placeholder="e.g. Mandaue City" required>
+                                    <input type="text" id="abtcCity" placeholder="e.g. Pototan" required>
                                 </div>
                                 <div class="field">
                                     <label for="abtcProvince">Province *</label>
-                                    <input type="text" id="abtcProvince" placeholder="e.g. Cebu" required>
+                                    <input type="text" id="abtcProvince" placeholder="e.g. Iloilo" required>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- SECTION 3: Contact Information -->
+                        <!-- SECTION 3: Lead Contact Information -->
                         <div class="form-section">
-                            <h4 class="section-divider">Contact Information</h4>
+                            <h4 class="section-divider">Lead Contact & Officer Information</h4>
                             <div class="field-group">
                                 <div class="field">
-                                    <label for="abtcContactPerson">Contact Person *</label>
+                                    <label for="abtcContactPerson">Point of Contact / Lead Doctor *</label>
                                     <input type="text" id="abtcContactPerson" placeholder="e.g. Dr. Juan Dela Cruz" required>
                                 </div>
                                 <div class="field">
-                                    <label for="abtcPosition">Position</label>
-                                    <input type="text" id="abtcPosition" placeholder="e.g. Medical Officer">
+                                    <label for="abtcPosition">Official Position *</label>
+                                    <input type="text" id="abtcPosition" placeholder="e.g. Municipal Health Officer" required>
                                 </div>
                                 <div class="field">
                                     <label for="abtcPhone">Contact Number *</label>
                                     <input type="tel" id="abtcPhone" placeholder="e.g. 0917 123 4567" required>
                                 </div>
                                 <div class="field">
-                                    <label for="abtcEmail">Facility Email Address *</label>
-                                    <input type="email" id="abtcEmail" placeholder="abtc@facility.gov.ph" required>
+                                    <label for="abtcEmail">Official Facility Email *</label>
+                                    <input type="email" id="abtcEmail" placeholder="abtc.pototan@iloilo.gov.ph" required>
                                 </div>
                             </div>
                         </div>
-<!-- Put this block right before the <div class="form-actions"> block in your abtcSetupForm -->
-<!-- SECTION 4: System Credentials -->
+
+                        <!-- SECTION 4: Regulatory Compliance & Verification (Option A) -->
                         <div class="form-section">
-                            <h4 class="section-divider">System Credentials</h4>
+                            <h4 class="section-divider">Regulatory Compliance & Verification</h4>
+                            <div class="field-group">
+                                <div class="field">
+                                    <label for="abtcDohLto">DOH LTO / Accreditation Number *</label>
+                                    <input type="text" id="abtcDohLto" placeholder="e.g. LTO-06-2026-0142" required>
+                                </div>
+                                <div class="field">
+                                    <label for="abtcPrcLicense">Facility Head PRC License Number *</label>
+                                    <input type="text" id="abtcPrcLicense" placeholder="e.g. 0123456" required>
+                                </div>
+                                <div class="field">
+                                    <label for="abtcOwnership">Ownership Classification *</label>
+                                    <select id="abtcOwnership" required>
+                                        <option value="">Select Ownership</option>
+                                        <option value="Public / LGU-Operated">Public / LGU-Operated (RHU / District Hospital)</option>
+                                        <option value="Private ABTC">Private ABTC</option>
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label for="abtcDocsFolderUrl">Document Drive / Cloud Folder Link *</label>
+                                    <input type="url" id="abtcDocsFolderUrl" placeholder="https://drive.google.com/drive/folders/..." required>
+                                    <small style="color: #64748b; font-size: 0.85em; display: block; margin-top: 4px;">Link to viewable scanned copies of DOH LTO, MOA, and PRC credentials.</small>
+                                </div>
+                                <div class="field full" style="margin-top: 10px;">
+                                    <label style="display: flex; gap: 8px; align-items: center; cursor: pointer; font-weight: normal;">
+                                        <input type="checkbox" id="abtcColdChainCheck" required style="width: auto; margin: 0;">
+                                        <span>I confirm this facility operates dedicated 2°C to 8°C cold-chain storage with daily temperature monitoring.</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 5: System Access Credentials -->
+                        <div class="form-section">
+                            <h4 class="section-divider">System Access Credentials</h4>
                             <div class="field-group">
                                 <div class="field">
                                     <label for="abtcPassword">Account Password *</label>
-                                    <input type="password" id="abtcPassword" placeholder="Create a master password (min 6 characters)" required>
+                                    <input type="password" id="abtcPassword" placeholder="Create master password (min 6 characters)" required>
                                 </div>
                                 <div class="field">
                                     <label for="confirmAbtcPassword">Confirm Password *</label>
-                                    <input type="password" id="confirmAbtcPassword" placeholder="Re-enter your master password" required>
+                                    <input type="password" id="confirmAbtcPassword" placeholder="Re-enter master password" required>
                                 </div>
                             </div>
                         </div>
+
                         <div class="form-actions">
-                            <button type="button" class="btn-cancel" onclick="window.location.href='abtc-login.html'">Cancel Setup</button>
-                            <button type="submit" class="btn-submit">Initialize Workspace</button>
+                            <button type="button" class="btn-cancel" onclick="window.location.href='abtc-login.html'">Cancel</button>
+                            <button type="submit" class="btn-submit">Submit Application for Review</button>
                         </div>
                     </form>
                 </section>

@@ -29,7 +29,7 @@ onAuthStateChanged(auth, async (user) => {
         console.log("Active Facility Session Tracked:", globalActiveFacilityId);
         
         try {
-            const facilityDocRef = doc(db, "facilities", user.uid);
+            const facilityDocRef = doc(db, "users", user.uid);
             const facilitySnap = await getDoc(facilityDocRef);
             
             if (facilitySnap.exists()) {

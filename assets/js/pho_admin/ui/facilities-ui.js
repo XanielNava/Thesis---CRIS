@@ -105,23 +105,23 @@
        3. SAMPLE DATA (in-memory only)
        ====================================================================== */
 
-    const CURRENT_ADMIN = 'Alex Morgan (Super Admin)';
+    // const CURRENT_ADMIN = 'Alex Morgan (Super Admin)';
 
-    const facilities = [
-        { id: 'ABTC-001', name: 'Sample Central ABTC',   district: 'District 1', email: 'central@example.com',   phone: '0900-000-0001', status: 'Active',    registered: '2026-01-15' },
-        { id: 'ABTC-002', name: 'Sample Riverside ABTC', district: 'District 2', email: 'riverside@example.com', phone: '0900-000-0002', status: 'Pending',   registered: '2026-10-14' },
-        { id: 'ABTC-003', name: 'Sample Northgate ABTC', district: 'District 3', email: 'northgate@example.com', phone: '0900-000-0003', status: 'Suspended', registered: '2026-03-02' },
-        { id: 'ABTC-004', name: 'Sample Coastal ABTC',   district: 'District 4', email: 'coastal@example.com',   phone: '0900-000-0004', status: 'Inactive',  registered: '2026-05-20' },
-        { id: 'ABTC-005', name: 'Sample Hillside ABTC',  district: 'District 5', email: 'hillside@example.com',  phone: '0900-000-0005', status: 'Pending',   registered: '2026-10-17' }
-    ];
+    // const facilities = [
+    //     { id: 'ABTC-001', name: 'Sample Central ABTC',   district: 'District 1', email: 'central@example.com',   phone: '0900-000-0001', status: 'Active',    registered: '2026-01-15' },
+    //     { id: 'ABTC-002', name: 'Sample Riverside ABTC', district: 'District 2', email: 'riverside@example.com', phone: '0900-000-0002', status: 'Pending',   registered: '2026-10-14' },
+    //     { id: 'ABTC-003', name: 'Sample Northgate ABTC', district: 'District 3', email: 'northgate@example.com', phone: '0900-000-0003', status: 'Suspended', registered: '2026-03-02' },
+    //     { id: 'ABTC-004', name: 'Sample Coastal ABTC',   district: 'District 4', email: 'coastal@example.com',   phone: '0900-000-0004', status: 'Inactive',  registered: '2026-05-20' },
+    //     { id: 'ABTC-005', name: 'Sample Hillside ABTC',  district: 'District 5', email: 'hillside@example.com',  phone: '0900-000-0005', status: 'Pending',   registered: '2026-10-17' }
+    // ];
 
-    const audit = [
-        { id: 'A-005', timestamp: '2026-10-17 15:20', action: 'Facility Updated',   affected: 'Sample Hillside ABTC (ABTC-005)',  performedBy: CURRENT_ADMIN, details: 'Facility information updated' },
-        { id: 'A-004', timestamp: '2026-10-16 10:02', action: 'Role Changed',       affected: 'Sam Lee (U-003)',                  performedBy: CURRENT_ADMIN, details: 'Admin → Facility Manager' },
-        { id: 'A-003', timestamp: '2026-10-14 09:44', action: 'Facility Suspended', affected: 'Sample Northgate ABTC (ABTC-003)', performedBy: CURRENT_ADMIN, details: 'Status changed from Active to Suspended' },
-        { id: 'A-002', timestamp: '2026-10-10 13:31', action: 'Account Created',    affected: 'Taylor Cruz (U-004)',              performedBy: CURRENT_ADMIN, details: 'Role assigned: Viewer' },
-        { id: 'A-001', timestamp: '2026-01-15 08:00', action: 'Facility Approved',  affected: 'Sample Central ABTC (ABTC-001)',   performedBy: CURRENT_ADMIN, details: 'Status changed from Pending to Active' }
-    ];
+    // const audit = [
+    //     { id: 'A-005', timestamp: '2026-10-17 15:20', action: 'Facility Updated',   affected: 'Sample Hillside ABTC (ABTC-005)',  performedBy: CURRENT_ADMIN, details: 'Facility information updated' },
+    //     { id: 'A-004', timestamp: '2026-10-16 10:02', action: 'Role Changed',       affected: 'Sam Lee (U-003)',                  performedBy: CURRENT_ADMIN, details: 'Admin → Facility Manager' },
+    //     { id: 'A-003', timestamp: '2026-10-14 09:44', action: 'Facility Suspended', affected: 'Sample Northgate ABTC (ABTC-003)', performedBy: CURRENT_ADMIN, details: 'Status changed from Active to Suspended' },
+    //     { id: 'A-002', timestamp: '2026-10-10 13:31', action: 'Account Created',    affected: 'Taylor Cruz (U-004)',              performedBy: CURRENT_ADMIN, details: 'Role assigned: Viewer' },
+    //     { id: 'A-001', timestamp: '2026-01-15 08:00', action: 'Facility Approved',  affected: 'Sample Central ABTC (ABTC-001)',   performedBy: CURRENT_ADMIN, details: 'Status changed from Pending to Active' }
+    // ];
 
     /* ======================================================================
        4. ACTIONS
