@@ -1,13 +1,12 @@
-// abtc-reg.js - Patient Registry Library Controller (patient-database Unified Stream)
+// abtc-reg.js - Patient Registry Library Controller (Conformed to 'patients')
 import { 
     collection, onSnapshot, query, where, doc, getDoc, deleteDoc, updateDoc, arrayUnion 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
-// Import shared central instances
 import { auth, db } from '../firebase/firebase-config.js';
 
-let activeFacilityId = null;
+let activeFacilityId = sessionStorage.getItem("activeFacilityId") || null;
 let libraryCache = [];
 
 const tableBody = document.getElementById("patientRegistryTableBody");
@@ -22,12 +21,10 @@ const closeBtnFooter = document.getElementById("drawerCloseBtnFooter");
 const printBtn = document.getElementById("printRecordBtn");
 const profileContainer = document.getElementById("profileInfoText");
 
-// Lightbox Controls
 const woundLightbox = document.getElementById("woundLightbox");
 const lightboxImg = document.getElementById("lightboxImg");
 const closeLightboxBtn = document.getElementById("closeLightboxBtn");
 
-// Edit Controls
 let currentActiveDocId = null;
 let isEditMode = false;
 const toggleEditBtn = document.getElementById("toggleEditBtn");
@@ -39,50 +36,51 @@ function safeSetText(id, value) {
     if (el) el.innerText = (value !== undefined && value !== null && value !== "") ? value : "N/A";
 }
 
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        activeFacilityId = user.uid;
-        
+async function initRegistryHeader() {
+    const userRole = sessionStorage.getItem("activeDesignation") || "Nurse";
+    const activePersonnel = sessionStorage.getItem("activePersonnelName") || "Attending Personnel";
+
+    let facilityName = sessionStorage.getItem("activeFacilityName");
+    if (!facilityName && activeFacilityId) {
         try {
-            const userRole = sessionStorage.getItem("activeDesignation") || localStorage.getItem("activeDesignation") || "Nurse";
-            let activePersonnel = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
-
-            let facilityName = sessionStorage.getItem("cachedFacilityName");
-            if (!facilityName) {
-                const facilitySnapshot = await getDoc(doc(db, "facilities", user.uid));
-                if (facilitySnapshot.exists()) {
-                    facilityName = facilitySnapshot.data().facilityName || "WESTERN VISAYAS MEDICAL CENTER";
-                    sessionStorage.setItem("cachedFacilityName", facilityName);
-                }
+            const facilitySnapshot = await getDoc(doc(db, "facilities", activeFacilityId));
+            if (facilitySnapshot.exists()) {
+                facilityName = facilitySnapshot.data().facilityName || "WESTERN VISAYAS MEDICAL CENTER";
+                sessionStorage.setItem("activeFacilityName", facilityName);
             }
-
-            const titleElement = document.getElementById("dashboardTitle");
-            if (titleElement && facilityName) {
-                titleElement.innerText = `${facilityName.toUpperCase()} PATIENT REGISTRY`;
-            }
-
-            const activeStaffMember = activePersonnel || "Attending Personnel";
-            const displayRoleLabel = userRole === "Owner" ? "Administrator / Owner" : "Personnel";
-            
-            if (profileContainer) {
-                profileContainer.innerHTML = `<strong>${activeStaffMember}</strong><br><span>${displayRoleLabel}</span>`;
-            }
-        } catch (error) {
-            console.error("Header rendering error:", error);
+        } catch (e) {
+            console.warn("Facility name read bypassed:", e);
         }
-
-        streamFacilityRecords(user.uid);
-    } else {
-        window.location.href = "abtc-login.html";
     }
-});
 
-// ----------------------------------------------------
-// Stream patient-database collection (Registered + Mobile Pending Intake Reports)
-// ----------------------------------------------------
-function streamFacilityRecords(facilityId) {
-    // Listen to all documents in patient-database
-    const allPatientsQuery = query(collection(db, "patient-database"));
+    const titleElement = document.getElementById("dashboardTitle");
+    if (titleElement && facilityName) {
+        titleElement.innerText = `${facilityName.toUpperCase()} PATIENT REGISTRY`;
+    }
+
+    if (profileContainer) {
+        profileContainer.innerHTML = `<strong>${activePersonnel}</strong><br><span>${userRole}</span>`;
+    }
+}
+
+initRegistryHeader();
+
+if (auth) {
+    onAuthStateChanged(auth, async (user) => {
+        if (user && !activeFacilityId) {
+            activeFacilityId = user.uid;
+            sessionStorage.setItem("activeFacilityId", activeFacilityId);
+        }
+        streamFacilityRecords();
+    });
+} else {
+    streamFacilityRecords();
+}
+
+function streamFacilityRecords() {
+    const allPatientsQuery = activeFacilityId
+        ? query(collection(db, "patients"), where("facilityId", "==", activeFacilityId))
+        : query(collection(db, "patients"));
 
     onSnapshot(allPatientsQuery, (snapshot) => {
         libraryCache = [];
@@ -91,10 +89,8 @@ function streamFacilityRecords(facilityId) {
             const data = docSnap.data();
             const docId = docSnap.id;
 
-            // Determine if record is an unregistered mobile intake report
             const isPendingAppReport = data.abtcClaimed === false || !data.facilityId || data.status === "Pending" || docId.startsWith("BITE-");
 
-            // Normalize nested mobile app fields if present
             const patientObj = data.patient || {};
             const animalObj = data.animal || {};
             const exposureObj = data.exposure || {};
@@ -110,19 +106,14 @@ function streamFacilityRecords(facilityId) {
             const normalizedAge = data.age || patientObj.age || data.ageYears || '';
             const normalizedSex = data.sex || patientObj.sex || 'Male';
             const normalizedContact = data.contactNo || data.mobileNumber || patientObj.contactNo || '';
-            
             const normalizedAnimalType = data.animalType || animalObj.species || exposureObj.animalType || '';
-            const normalizedCaged = data.animalCaged || animalObj.caged || 'No';
+            const normalizedCaged = data.animalStatus || data.animalCaged || animalObj.caged || 'No';
 
             libraryCache.push({
                 id: docId,
-                sourceCollection: "patient-database",
+                sourceCollection: "patients",
                 isPending: isPendingAppReport,
-                
-                // Root properties
                 ...data,
-
-                // Normalized helper properties
                 firstName: normalizedFirstName,
                 lastName: normalizedLastName,
                 fullName: normalizedFullName || "Unknown Patient",
@@ -209,7 +200,7 @@ function renderLibraryTable(dataList) {
             
             if (confirm(`Are you sure you want to delete record for ${targetName}?`)) {
                 try {
-                    await deleteDoc(doc(db, "patient-database", targetId));
+                    await deleteDoc(doc(db, "patients", targetId));
                     alert("Patient record deleted successfully.");
                 } catch (err) {
                     alert("Delete Error: " + err.message);
@@ -221,9 +212,6 @@ function renderLibraryTable(dataList) {
     });
 }
 
-// ----------------------------------------------------
-// ITR-aligned drawer: checklist definitions (mirror the checklists in itr.html)
-// ----------------------------------------------------
 const DETAILS = [{ name: 'details', label: 'Details', type: 'text' }];
 const CONSENT = { name: 'consentBy', label: 'Consent from', type: 'text', placeholder: 'Name' };
 
@@ -285,7 +273,6 @@ const CHECK_DEFS = {
     ]
 };
 
-// [view container id, edit container id]
 const CHECK_CONTAINERS = {
     phic: ['lblPhic', 'editPhic'],
     woundType: ['lblWoundTypes', 'editWoundTypes'],
@@ -358,7 +345,6 @@ function renderCheckEdit(group, map) {
     }).join('');
 }
 
-// Same shape ITR saves: { value: { fieldName: fieldValue } } for ticked rows only
 function collectCheckGroup(group) {
     const result = {};
     document.querySelectorAll(`#${CHECK_CONTAINERS[group][1]} .drawer-check-row`).forEach((row) => {
@@ -370,7 +356,6 @@ function collectCheckGroup(group) {
     return result;
 }
 
-// Ticking a row enables its detail fields (same behaviour as the ITR form)
 Object.values(CHECK_CONTAINERS).forEach(([, editId]) => {
     document.getElementById(editId)?.addEventListener('change', (e) => {
         if (!e.target.matches('input[type="checkbox"]')) return;
@@ -390,7 +375,6 @@ if (editAnimalTypeEl && editAnimalOtherEl) {
     });
 }
 
-// Records saved before the ITR revision only have flat fields; map them into the new shape for display/editing
 function getPastHistoryMap(file) {
     if (file.pastMedicalHistory) return file.pastMedicalHistory;
     const map = {};
@@ -422,22 +406,19 @@ function openDocumentDrawer(docId) {
     toggleMode(false);
 
     const hasNameParts = !!(file.lastName || file.firstName);
-    const hasAddressParts = !!(file.houseStreet || file.barangay || file.cityMunicipality || file.province);
+    const hasAddressParts = !!(file.address?.houseStreet || file.houseStreet || file.barangay);
     const orders = getOrdersMap(file);
     const category = getCategoryCode(file);
     const schedule = file.pepScheduleDates || {};
 
     const caseId = file.itrDisplayNo || file.caseId || file.recordNo || file.patientId || file.id;
-    const na = (v) => (v !== undefined && v !== null && v !== "") ? v : "N/A";
     const withUnit = (v, unit) => (v !== undefined && v !== null && v !== "") ? `${v}${unit}` : "N/A";
 
-    // 1. Record details
     safeSetText("drawerIdLabel", `RECORD: ${caseId}`);
     safeSetText("lblRecordNo", caseId);
     safeSetText("lblConsultDateTime", file.consultDateTime ? file.consultDateTime.replace("T", " ") : "");
     safeSetText("lblPhysician", file.physician || file.recordedBy || "");
 
-    // 2. Patient's information
     safeSetText("lblFullName", file.fullName);
     safeSetText("lblBirthday", file.birthday);
     safeSetText("lblAgeSex", `${file.age ?? "N/A"} Yrs / ${file.sex ?? "N/A"}`);
@@ -446,47 +427,42 @@ function openDocumentDrawer(docId) {
     safeSetText("lblContact", file.contactNo || file.mobileNumber);
     safeSetText("lblSpouse", file.spouseName);
     safeSetText("lblParent", file.parentName);
-    safeSetText("lblAddress", file.address || file.municipality);
+    safeSetText("lblAddress", file.address?.fullAddress || file.address || file.municipality);
 
     renderCheckView("phic", file.phic?.categories);
     safeSetText("lblPhicMembership", file.phic?.membership);
 
-    // 3. Vital signs
-    safeSetText("lblWeight", withUnit(file.weight, " kg"));
-    safeSetText("lblHeight", withUnit(file.height, " ft"));
-    safeSetText("lblTemp", withUnit(file.temp, " °C"));
-    safeSetText("lblPulse", withUnit(file.pulse, " bpm"));
-    safeSetText("lblResp", withUnit(file.resp, " cpm"));
-    safeSetText("lblBp", file.bp);
-    safeSetText("lblO2", withUnit(file.o2sat, "%"));
+    const vitals = file.vitalSigns || {};
+    safeSetText("lblWeight", withUnit(vitals.weightKg || file.weight, " kg"));
+    safeSetText("lblHeight", withUnit(vitals.heightFt || file.height, " ft"));
+    safeSetText("lblTemp", withUnit(vitals.tempC || file.temp, " °C"));
+    safeSetText("lblPulse", withUnit(vitals.pulseBpm || file.pulse, " bpm"));
+    safeSetText("lblResp", withUnit(vitals.respCpm || file.resp, " cpm"));
+    safeSetText("lblBp", vitals.bp || file.bp);
+    safeSetText("lblO2", withUnit(vitals.o2sat || file.o2sat, "%"));
 
-    // 4. Chief complaint - nature of incident
-    safeSetText("lblAnimalType", file.animalType);
-    safeSetText("lblAnimalStatus", file.animalStatus);
-    renderCheckView("woundType", file.woundTypes);
-    safeSetText("lblExposureDate", file.exposureDate);
-    safeSetText("lblExposureTime", file.incidentTime);
-    safeSetText("lblIncidentPlace", file.incidentPlace);
-    safeSetText("lblBiteArea", Array.isArray(file.biteArea) ? file.biteArea.join(", ") : file.biteArea);
+    safeSetText("lblAnimalType", file.exposure?.animalType || file.animalType);
+    safeSetText("lblAnimalStatus", file.exposure?.animalStatus || file.animalStatus);
+    renderCheckView("woundType", file.exposure?.woundTypes || file.woundTypes);
+    safeSetText("lblExposureDate", file.exposure?.date || file.exposureDate);
+    safeSetText("lblExposureTime", file.exposure?.time || file.incidentTime);
+    safeSetText("lblIncidentPlace", file.exposure?.place || file.incidentPlace);
+    safeSetText("lblBiteArea", Array.isArray(file.exposure?.biteArea) ? file.exposure.biteArea.join(", ") : (file.biteArea || "N/A"));
 
-    // 5. Past medical history
     renderCheckView("pastHistory", getPastHistoryMap(file));
 
-    // 6. Orders & treatment given
     safeSetText("lblDiagnosis", file.diagnosis);
     safeSetText("lblCategory", category ? `Category ${category}` : "Unclassified");
     renderCheckView("physicianOrder", orders);
     safeSetText("lblWoundCare", file.woundCare);
     safeSetText("lblRemarks", file.remarks || "None");
 
-    // Immunoglobulin text from records created before the ITR revision
     const legacyRigField = document.getElementById("legacyRigField");
     const isLegacyRecord = !file.physicianOrders;
     const legacyRig = file.immunoglobulin && file.immunoglobulin !== "None" ? file.immunoglobulin : "";
     if (legacyRigField) legacyRigField.hidden = !(isLegacyRecord && legacyRig);
     safeSetText("lblLegacyRig", legacyRig);
 
-    // Vaccination schedule
     PEP_DAYS.forEach((d) => {
         safeSetText(`lblDay${d}`, schedule[`day${d}`] || "---");
         document.getElementById(`cardSchedDay${d}`)?.classList.toggle("disabled", category === "I");
@@ -499,7 +475,6 @@ function openDocumentDrawer(docId) {
     }
     safeSetText("lblCompletedDoses", completedDosesText);
 
-    // Wound Assessment Photo
     const imgElement = document.getElementById("imgWoundPhoto");
     const noPhotoText = document.getElementById("noPhotoText");
     if (imgElement && noPhotoText) {
@@ -520,7 +495,6 @@ function openDocumentDrawer(docId) {
         }
     }
 
-    // Timeline Logs
     const timelineContainer = document.getElementById("lblHistoryTimeline");
     if (timelineContainer) {
         timelineContainer.innerHTML = "";
@@ -560,11 +534,9 @@ function openDocumentDrawer(docId) {
         }
     }
 
-    // ---- Populate edit-mode controls ----
     setEditVal("editConsultDateTime", file.consultDateTime);
     setEditVal("editPhysician", file.physician || file.recordedBy);
 
-    // Older records only have a full name / one-line address: park them in the first field so a save doesn't blank them
     setEditVal("editLastName", file.lastName);
     setEditVal("editFirstName", hasNameParts ? file.firstName : (file.fullName !== "Unknown Patient" ? file.fullName : ""));
     setEditVal("editMiddleName", file.middleName);
@@ -577,32 +549,33 @@ function openDocumentDrawer(docId) {
     setEditVal("editContact", file.contactNo || file.mobileNumber);
     setEditVal("editSpouse", file.spouseName);
     setEditVal("editParent", file.parentName);
-    setEditVal("editHouseStreet", hasAddressParts ? file.houseStreet : (file.address || ""));
-    setEditVal("editBarangay", file.barangay);
-    setEditVal("editCity", file.cityMunicipality);
-    setEditVal("editProvince", file.province);
+    setEditVal("editHouseStreet", file.address?.houseStreet || (hasAddressParts ? file.houseStreet : (file.address || "")));
+    setEditVal("editBarangay", file.address?.barangay || file.barangay);
+    setEditVal("editCity", file.address?.cityMunicipality || file.cityMunicipality);
+    setEditVal("editProvince", file.address?.province || file.province);
 
     renderCheckEdit("phic", file.phic?.categories);
     setEditVal("editPhicMembership", file.phic?.membership);
 
-    setEditVal("editWeight", file.weight);
-    setEditVal("editHeight", file.height);
-    setEditVal("editTemp", file.temp);
-    setEditVal("editPulse", file.pulse);
-    setEditVal("editResp", file.resp);
-    setEditVal("editBp", file.bp);
-    setEditVal("editO2", file.o2sat);
+    setEditVal("editWeight", vitals.weightKg || file.weight);
+    setEditVal("editHeight", vitals.heightFt || file.height);
+    setEditVal("editTemp", vitals.tempC || file.temp);
+    setEditVal("editPulse", vitals.pulseBpm || file.pulse);
+    setEditVal("editResp", vitals.respCpm || file.resp);
+    setEditVal("editBp", vitals.bp || file.bp);
+    setEditVal("editO2", vitals.o2sat || file.o2sat);
 
-    const knownAnimal = ["Dog", "Cat"].includes(file.animalType);
-    setEditVal("editAnimalType", knownAnimal || !file.animalType ? (file.animalType || "Dog") : "Other");
-    setEditVal("editAnimalOther", knownAnimal || !file.animalType ? "" : file.animalType);
-    if (editAnimalOtherEl) editAnimalOtherEl.hidden = knownAnimal || !file.animalType ? true : false;
-    setEditVal("editAnimalStatus", file.animalStatus);
-    renderCheckEdit("woundType", file.woundTypes);
-    setEditVal("editExposureDate", file.exposureDate);
-    setEditVal("editExposureTime", file.incidentTime);
-    setEditVal("editIncidentPlace", file.incidentPlace);
-    setEditVal("editBiteArea", Array.isArray(file.biteArea) ? file.biteArea.join(", ") : file.biteArea);
+    const rawAnimalType = file.exposure?.animalType || file.animalType;
+    const knownAnimal = ["Dog", "Cat"].includes(rawAnimalType);
+    setEditVal("editAnimalType", knownAnimal || !rawAnimalType ? (rawAnimalType || "Dog") : "Other");
+    setEditVal("editAnimalOther", knownAnimal || !rawAnimalType ? "" : rawAnimalType);
+    if (editAnimalOtherEl) editAnimalOtherEl.hidden = knownAnimal || !rawAnimalType ? true : false;
+    setEditVal("editAnimalStatus", file.exposure?.animalStatus || file.animalStatus);
+    renderCheckEdit("woundType", file.exposure?.woundTypes || file.woundTypes);
+    setEditVal("editExposureDate", file.exposure?.date || file.exposureDate);
+    setEditVal("editExposureTime", file.exposure?.time || file.incidentTime);
+    setEditVal("editIncidentPlace", file.exposure?.place || file.incidentPlace);
+    setEditVal("editBiteArea", Array.isArray(file.exposure?.biteArea) ? file.exposure.biteArea.join(", ") : (file.biteArea || ""));
 
     renderCheckEdit("pastHistory", getPastHistoryMap(file));
 
@@ -619,7 +592,6 @@ function openDocumentDrawer(docId) {
     }
 }
 
-
 function toggleMode(forceEdit = null) {
     isEditMode = forceEdit !== null ? forceEdit : !isEditMode;
     if (isEditMode) {
@@ -634,7 +606,6 @@ function toggleMode(forceEdit = null) {
 }
 
 if (toggleEditBtn) toggleEditBtn.addEventListener("click", () => toggleMode());
-
 if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
 if (closeBtnFooter) closeBtnFooter.addEventListener("click", closeDrawer);
 if (overlay) overlay.addEventListener("click", closeDrawer);
@@ -666,7 +637,6 @@ if (saveRecordBtn) {
         const file = libraryCache.find(item => item.id === currentActiveDocId) || {};
         const isLegacyRecord = !file.physicianOrders;
 
-        // Name / address are rebuilt exactly the way itr.js builds them
         const lName = getEditVal("editLastName");
         const fName = getEditVal("editFirstName");
         const mName = getEditVal("editMiddleName");
@@ -688,11 +658,9 @@ if (saveRecordBtn) {
         const physicianOrders = collectCheckGroup("physicianOrder");
 
         const updatedData = {
-            // Record details
             consultDateTime: getEditVal("editConsultDateTime"),
             physician: getEditVal("editPhysician"),
 
-            // Patient's information
             lastName: lName,
             firstName: fName,
             middleName: mName,
@@ -700,49 +668,59 @@ if (saveRecordBtn) {
             fullName: parsedFullName,
             name: parsedFullName,
             birthday: getEditVal("editBirthday"),
-            age: getEditVal("editAge"),
+            age: Number(getEditVal("editAge")),
             sex: getEditVal("editSex") || "Male",
             civilStatus: getEditVal("editCivilStatus"),
             religion: getEditVal("editReligion"),
             contactNo: getEditVal("editContact"),
             spouseName: getEditVal("editSpouse"),
             parentName: getEditVal("editParent"),
-            houseStreet: houseStr,
-            barangay: brgy,
-            cityMunicipality: city,
-            province: prov,
-            address: parsedAddress,
+
+            address: {
+                houseStreet: houseStr,
+                barangay: brgy,
+                cityMunicipality: city,
+                province: prov,
+                fullAddress: parsedAddress
+            },
+
             phic: {
                 categories: collectCheckGroup("phic"),
                 membership: getEditVal("editPhicMembership")
             },
 
-            // Vital signs
-            weight: getEditVal("editWeight"),
-            height: getEditVal("editHeight"),
-            temp: getEditVal("editTemp"),
-            pulse: getEditVal("editPulse"),
-            resp: getEditVal("editResp"),
-            bp: getEditVal("editBp"),
-            o2sat: getEditVal("editO2"),
+            vitalSigns: {
+                weightKg: parseFloat(getEditVal("editWeight")) || null,
+                heightFt: parseFloat(getEditVal("editHeight")) || null,
+                tempC: parseFloat(getEditVal("editTemp")) || null,
+                pulseBpm: parseInt(getEditVal("editPulse"), 10) || null,
+                respCpm: parseInt(getEditVal("editResp"), 10) || null,
+                bp: getEditVal("editBp") || null,
+                o2sat: parseInt(getEditVal("editO2"), 10) || null
+            },
 
-            // Chief complaint - nature of incident
+            exposure: {
+                animalType: selectedAnimal,
+                animalStatus: getEditVal("editAnimalStatus"),
+                woundTypes: collectCheckGroup("woundType"),
+                date: getEditVal("editExposureDate"),
+                time: getEditVal("editExposureTime"),
+                place: getEditVal("editIncidentPlace"),
+                biteArea: getEditVal("editBiteArea"),
+                category: categoryCode ? `Category ${categoryCode}` : "Unclassified"
+            },
+
             animalType: selectedAnimal,
             exposureType: `${selectedAnimal} Exposure`,
             animalStatus: getEditVal("editAnimalStatus"),
-            woundTypes: collectCheckGroup("woundType"),
             exposureDate: getEditVal("editExposureDate"),
-            incidentTime: getEditVal("editExposureTime"),
-            incidentPlace: getEditVal("editIncidentPlace"),
             biteArea: getEditVal("editBiteArea"),
 
-            // Past medical history (+ the legacy flat fields other pages still read)
             pastMedicalHistory: pastHistory,
             allergies: pastHistory.allergy?.details || "",
             comorbidities: pastHistory.medicalProblems?.details || "",
             priorVaccination: pastHistory.immunization ? "Yes" : "",
 
-            // Orders & treatment
             diagnosis: getEditVal("editDiagnosis"),
             exposureCategory: categoryCode,
             classification: categoryCode ? `Category ${categoryCode}` : "Unclassified",
@@ -754,7 +732,6 @@ if (saveRecordBtn) {
             pepScheduleDates: Object.fromEntries(PEP_DAYS.map((d) => [`day${d}`, getEditVal(`editDay${d}`)]))
         };
 
-        // Legacy immunoglobulin fields (same derivation as itr.js). Older records keep their original text unless RIG is ticked.
         const rigOrders = [["erig", "ERIG"], ["hrig", "HRIG"]].filter(([key]) => physicianOrders[key]);
         if (rigOrders.length || !isLegacyRecord) {
             const rigType = rigOrders.map(([, label]) => label).join(" + ");
@@ -767,7 +744,7 @@ if (saveRecordBtn) {
             updatedData.immunoglobulin = rigType ? `${rigType}${rigDose ? " - " + rigDose : ""}` : (rigDose || "None");
         }
 
-        const editor = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName") || "Attending Personnel";
+        const editor = sessionStorage.getItem("activePersonnelName") || "Attending Personnel";
         updatedData.historyLogs = arrayUnion({
             action: "Record Edited",
             timestamp: new Date().toISOString(),
@@ -776,7 +753,7 @@ if (saveRecordBtn) {
         });
 
         try {
-            await updateDoc(doc(db, "patient-database", currentActiveDocId), updatedData);
+            await updateDoc(doc(db, "patients", currentActiveDocId), updatedData);
             alert("Patient record updated successfully!");
             toggleMode(false);
         } catch (err) {
@@ -785,8 +762,6 @@ if (saveRecordBtn) {
     });
 }
 
-
-// Filter and search logic
 function executeCombinedFilters() {
     const searchValue = searchBox ? searchBox.value.toLowerCase().trim() : "";
     const selectedType = filterExposure ? filterExposure.value : "";
@@ -804,7 +779,6 @@ function executeCombinedFilters() {
         const matchesType = !selectedType || (item.exposureType || "").includes(selectedType) || (item.animalType && selectedType.includes(item.animalType));
         const matchesCategory = !selectedCategory || (item.classification || "").includes(selectedCategory);
 
-        // Hide app pending reports by default if search bar is empty
         if (searchValue === "" && item.isPending) {
             return false;
         }

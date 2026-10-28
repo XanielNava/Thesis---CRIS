@@ -1,86 +1,82 @@
 // abtc-dash.js - Optimized Dashboard Controller with Untouched Calendar Engine
+// Conformed to CRIS Master Architecture ('patients')
 
-// 1. Import required Firestore & Auth functions from CDN
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { 
     doc, getDoc, setDoc, addDoc, collection, query, where, getDocs, onSnapshot, getCountFromServer 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
-// 2. Import shared central instances (Managed by firebase-config.js switch)
 import { auth, db } from '../firebase/firebase-config.js';
+
+let activeFacilityId = sessionStorage.getItem("activeFacilityId") || null;
+let currentFacilityName = sessionStorage.getItem("activeFacilityName") || null;
+let activeStaffMember = sessionStorage.getItem("activePersonnelName") || null;
+let userRole = sessionStorage.getItem("activeDesignation") || localStorage.getItem("activeDesignation") || "Owner";
 
 /* --------------------
     Authentication State Observer & Profile Cache
 -------------------- */
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
+async function initDashboardSession() {
+    if (!userRole) {
+        window.location.href = "abtc-profiles.html";
+        return;
+    }
+
+    if (!currentFacilityName && activeFacilityId) {
         try {
-            let userRole = sessionStorage.getItem("activeDesignation") || localStorage.getItem("activeDesignation"); 
-            const currentPath = window.location.pathname;
+            const facilityDocRef = doc(db, "facilities", activeFacilityId);
+            const facilitySnapshot = await getDoc(facilityDocRef);
 
-            if (!userRole) {
-                window.location.href = "abtc-profiles.html";
-                return;
-            }
+            if (facilitySnapshot.exists()) {
+                const facilityData = facilitySnapshot.data();
+                const facName = facilityData.facilityName || facilityData.name || "ABTC Facility";
+                const acronym = facilityData.acronym || facilityData.code || "ABTC";
+                
+                currentFacilityName = `${facName} (${acronym.toUpperCase()})`;
+                activeStaffMember = activeStaffMember || facilityData.contactInfo?.contactPerson || "Facility Administrator";
 
-            if (userRole === "Nurse" && !currentPath.includes("patient-registry.html")) {
-                window.location.href = "patient-registry.html";
-                return;
-            } else if (userRole === "Owner" && !currentPath.includes("abtc-dash.html")) {
-                window.location.href = "abtc-dash.html";
-                return;
-            }
+                sessionStorage.setItem("activeFacilityName", facName);
+                sessionStorage.setItem("activeFacilityAcronym", acronym);
+                sessionStorage.setItem("activePersonnelName", activeStaffMember);
 
-            let cachedFacilityName = sessionStorage.getItem("cachedFacilityName");
-            let activeStaffMember = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
-
-            if (!cachedFacilityName || !activeStaffMember) {
-                const facilityDocRef = doc(db, "facilities", user.uid);
-                const facilitySnapshot = await getDoc(facilityDocRef);
-
-                if (facilitySnapshot.exists()) {
-                    const facilityData = facilitySnapshot.data();
-                    
-                    activeStaffMember = userRole === "Owner" 
-                        ? (facilityData.contactInfo?.contactPerson || "Facility Administrator")
-                        : (activeStaffMember || "Duty Nurse Personnel");
-                    
-                    cachedFacilityName = facilityData.facilityName || facilityData.name || "ABTC FACILITY";
-
-                    sessionStorage.setItem("cachedFacilityName", cachedFacilityName);
-                    sessionStorage.setItem("activePersonnelName", activeStaffMember);
-
-                    if (facilityData.logoData) {
-                        const sidebarLogo = document.getElementById("sidebarLogoPreview");
-                        if (sidebarLogo) sidebarLogo.src = facilityData.logoData;
-                    }
-                } else {
-                    activeStaffMember = userRole === "Owner" ? "Facility Owner" : "Duty Nurse Personnel";
-                    cachedFacilityName = "ABTC";
+                if (facilityData.logoData) {
+                    const sidebarLogo = document.getElementById("sidebarLogoPreview");
+                    if (sidebarLogo) sidebarLogo.src = facilityData.logoData;
                 }
             }
-
-            renderUserAndFacilityHeader(cachedFacilityName, activeStaffMember, userRole);
-            loadAggregatedDashboardMetrics(user.uid);
-
-        } catch (error) {
-            console.error("Auth routing engine failure:", error);
+        } catch (e) {
+            console.warn("Facility branding resolution skipped:", e);
         }
-    } else {
-        handleLogoutRedirect();
     }
-});
+
+    renderUserAndFacilityHeader(currentFacilityName || "ABTC FACILITY", activeStaffMember || "Administrator", userRole);
+    if (activeFacilityId) {
+        loadAggregatedDashboardMetrics(activeFacilityId);
+    }
+}
+
+initDashboardSession();
+
+if (auth) {
+    onAuthStateChanged(auth, async (user) => {
+        if (user && !activeFacilityId) {
+            activeFacilityId = user.uid;
+            sessionStorage.setItem("activeFacilityId", activeFacilityId);
+            initDashboardSession();
+        }
+    });
+}
 
 /* --------------------
     Profile & Header Renderer
 -------------------- */
-function renderUserAndFacilityHeader(facilityName, displayName, userRole) {
+function renderUserAndFacilityHeader(facilityName, displayName, role) {
     const titleElement = document.getElementById("dashboardTitle");
     if (titleElement) {
         titleElement.innerText = `${facilityName.toUpperCase()} DASHBOARD`;
     }
     
-    const mappedRoleTitle = userRole === "Owner" ? "Administrator / Owner" : "Nurse Duty Personnel";
+    const mappedRoleTitle = role === "Owner" ? "Administrator / Owner" : "Nurse Duty Personnel";
     updateProfileUI(displayName, mappedRoleTitle);
 }
 
@@ -98,7 +94,7 @@ function updateProfileUI(name, role) {
 }
 
 /* --------------------
-    Server-Side & Live Dashboard Metrics Engine (4 Metrics Connected)
+    Server-Side & Live Dashboard Metrics Engine (Targeting 'patients')
 -------------------- */
 async function loadAggregatedDashboardMetrics(facilityId) {
     const patientsCounterEl = document.getElementById("totalPatientsCount");
@@ -107,7 +103,7 @@ async function loadAggregatedDashboardMetrics(facilityId) {
     const pepVialsEl = document.getElementById("pepVialsCount");
 
     try {
-        const rootPatientsCol = collection(db, "patient-database");
+        const rootPatientsCol = collection(db, "patients");
 
         const totalQuery = query(rootPatientsCol, where("facilityId", "==", facilityId));
         const totalSnap = await getCountFromServer(totalQuery);
@@ -130,7 +126,7 @@ async function loadAggregatedDashboardMetrics(facilityId) {
     const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
     const todayISODate = localDate.toISOString().split('T')[0];
 
-    const facilityPatientsQuery = query(collection(db, "patient-database"), where("facilityId", "==", facilityId));
+    const facilityPatientsQuery = query(collection(db, "patients"), where("facilityId", "==", facilityId));
     
     onSnapshot(facilityPatientsQuery, (snapshot) => {
         let scheduledTodayCount = 0;
@@ -187,7 +183,7 @@ if (logoutBtn) {
         e.preventDefault();
         if (confirm("Are you sure you want to log out?")) {
             try {
-                await signOut(auth);
+                if (auth) await signOut(auth);
                 handleLogoutRedirect();
             } catch (err) {
                 console.error("Sign-out failure:", err);

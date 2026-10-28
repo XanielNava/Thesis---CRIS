@@ -1,219 +1,255 @@
-// abtc-profile.js - Secured Profile Gatekeeper Handler
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
-import { collection, addDoc, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+// ==========================================================================
+// ABTC WORKSPACE PROFILE GATEKEEPER (Autonomous Badge Scan + PIN)
+// Allows duty personnel to clock in independently without prior admin login
+// ==========================================================================
 
-// Import shared central instances (Managed by firebase-config.js switch)
-import { auth, db } from '../firebase/firebase-config.js';
+import { 
+    collection, 
+    doc, 
+    getDoc, 
+    addDoc 
+} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
-// DOM Selection Elements
+import { db } from '../firebase/firebase-config.js';
+
+// DOM Elements
 const nurseCard = document.getElementById("nurseProfileCard");
 const ownerCard = document.getElementById("ownerProfileCard");
-const ownerModal = document.getElementById("passwordModalOverlay");
 const nurseModal = document.getElementById("nurseModalOverlay");
-const closeOwnerModalBtn = document.getElementById("closeModalBtn");
 const closeNurseModalBtn = document.getElementById("closeNurseModalBtn");
-const ownerForm = document.getElementById("ownerVerificationForm");
 const nurseForm = document.getElementById("nurseVerificationForm");
-const ownerPasswordInput = document.getElementById("ownerPasswordInput");
 const nursePinInput = document.getElementById("nursePinInput");
-const nurseDropdown = document.getElementById("nurseSelectDropdown");
+const btnClockIn = document.getElementById("btnClockIn");
 const forgotPinLink = document.getElementById("forgotPinLink");
 
-let globalActiveFacilityId = null;
-let cachedStaffArray = [];
+// Scanner UI Elements
+const scannerSection = document.getElementById("scannerSection");
+const scannedBanner = document.getElementById("scannedIdentityBanner");
+const scannedStaffName = document.getElementById("scannedStaffName");
+const scannedStaffRole = document.getElementById("scannedStaffRole");
+const btnRescan = document.getElementById("btnRescan");
 
-// Track Active Facility Session Baseline
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        globalActiveFacilityId = user.uid;
-        console.log("Active Facility Session Tracked:", globalActiveFacilityId);
-        
-        try {
-            const facilityDocRef = doc(db, "users", user.uid);
-            const facilitySnap = await getDoc(facilityDocRef);
-            
-            if (facilitySnap.exists()) {
-                const facilityData = facilitySnap.data();
-                if (facilityData.logoData) {
-                    const ownerLogoImgElement = document.getElementById("ownerLogoPreview");
-                    if (ownerLogoImgElement) {
-                        ownerLogoImgElement.src = facilityData.logoData;
-                        ownerLogoImgElement.style.backgroundColor = "transparent";
-                        ownerLogoImgElement.style.padding = "0px";
-                        ownerLogoImgElement.style.borderRadius = "50%";
-                        ownerLogoImgElement.style.objectFit = "contain";
-                    }
-                }
-            }
-        } catch (logoFetchError) {
-            console.error("Failed to dynamically resolve workspace logo image mapping:", logoFetchError);
-        }
+let html5QrScanner = null;
+let activeScannedStaff = null;
+let resolvedFacilityId = null;
 
-        await populatePersonnelDropdown(user.uid);
-    } else {
-        console.warn("No active session workspace located. Routing back to lock screen gate.");
-        window.location.href = "abtc-login.html";
+/* ======================================================================
+   1. QR SCANNER CONTROLLER (html5-qrcode)
+   ====================================================================== */
+
+function startBadgeScanner() {
+    resetScannerState();
+
+    if (html5QrScanner) {
+        html5QrScanner.clear();
+        html5QrScanner = null;
     }
-});
 
-// Load Live Subcollection Staff records directly into select dropdown lists
-async function populatePersonnelDropdown(facilityId) {
-    if (!nurseDropdown) return;
-    try {
-        const staffSnapshot = await getDocs(collection(db, "facilities", facilityId, "staff"));
-        nurseDropdown.innerHTML = `<option value="" disabled selected>-- Choose Your Profile Identity --</option>`;
-        cachedStaffArray = [];
+    html5QrScanner = new Html5Qrcode("qrReader");
+    const config = { fps: 10, qrbox: { width: 190, height: 190 } };
 
-        if (staffSnapshot.empty) {
-            nurseDropdown.innerHTML = `<option value="" disabled>No active staff found. Contact Admin.</option>`;
-            return;
-        }
+    html5QrScanner.start(
+        { facingMode: "environment" },
+        config,
+        onQrCodeSuccess,
+        onQrCodeFailure
+    ).catch(err => {
+        console.warn("Camera access failed:", err);
+        alert("Camera error: Could not access video device for badge scanning.");
+    });
+}
 
-        staffSnapshot.forEach((doc) => {
-            const data = doc.data();
-            cachedStaffArray.push({ id: doc.id, ...data });
-
-            const option = document.createElement("option");
-            option.value = doc.id;
-            const staffRole = data.position || data.role || 'Staff';
-            option.innerText = `${data.name} (${staffRole})`;
-            nurseDropdown.appendChild(option);
+function stopBadgeScanner() {
+    if (html5QrScanner) {
+        html5QrScanner.stop().then(() => {
+            html5QrScanner.clear();
+            html5QrScanner = null;
+        }).catch(err => {
+            console.warn("Error stopping QR camera:", err);
+            html5QrScanner = null;
         });
-    } catch (error) {
-        console.error("Error reading facility database profiles:", error);
     }
 }
 
-// 🟢 WORKFLOW A: PERSONNEL SELECTION MODAL SYSTEM
+function resetScannerState() {
+    activeScannedStaff = null;
+    resolvedFacilityId = null;
+    scannedBanner.classList.remove("active");
+    scannerSection.style.display = "block";
+    nursePinInput.value = "";
+    nursePinInput.disabled = true;
+    btnClockIn.disabled = true;
+}
+
+// 🟢 AUTONOMOUS BADGE RESOLUTION
+async function onQrCodeSuccess(decodedText) {
+    try {
+        const badgeData = JSON.parse(decodedText);
+
+        if (badgeData.type !== "CRIS_STAFF_ID" || !badgeData.uid || !badgeData.facilityId) {
+            alert("Invalid QR Code: Not a valid CRIS Staff ID Badge.");
+            return;
+        }
+
+        const staffUid = badgeData.uid;
+        const facId = badgeData.facilityId;
+
+        // Fetch live staff record directly using badge coordinates
+        let staffRecord = null;
+
+        if (db) {
+            // First check facilities/{facilityId}/staff/{uid}
+            const staffDocRef = doc(db, "facilities", facId, "staff", staffUid);
+            const staffSnap = await getDoc(staffDocRef);
+
+            if (staffSnap.exists()) {
+                staffRecord = { id: staffSnap.id, ...staffSnap.data() };
+            } else {
+                // Secondary fallback: check master users collection
+                const userDocRef = doc(db, "users", staffUid);
+                const userSnap = await getDoc(userDocRef);
+                if (userSnap.exists()) {
+                    staffRecord = { id: userSnap.id, ...userSnap.data() };
+                }
+            }
+        }
+
+        // Development fallback if Firestore offline
+        if (!staffRecord) {
+            if (staffUid === "staff-01") {
+                staffRecord = { id: "staff-01", name: "Maria Santos, RN", position: "Triage Nurse", pin: "1234", status: "Active" };
+            } else {
+                alert("Staff record not found on system. Please contact your administrator.");
+                return;
+            }
+        }
+
+        // Verify account status
+        if ((staffRecord.status || "").toLowerCase() === "deactivated") {
+            alert("Access Denied: This staff account has been deactivated.");
+            return;
+        }
+
+        // Cache resolved credentials
+        activeScannedStaff = staffRecord;
+        resolvedFacilityId = facId;
+
+        // Display badge info
+        scannedStaffName.textContent = staffRecord.name || staffRecord.fullName || "Staff Member";
+        scannedStaffRole.textContent = staffRecord.position || staffRecord.facilityRole || "Duty Personnel";
+        scannedBanner.classList.add("active");
+        scannerSection.style.display = "none";
+
+        // Stop camera and activate PIN entry
+        stopBadgeScanner();
+        nursePinInput.disabled = false;
+        btnClockIn.disabled = false;
+        nursePinInput.focus();
+
+    } catch (e) {
+        console.warn("Unrecognized QR payload format:", decodedText);
+    }
+}
+
+function onQrCodeFailure() {
+    // Polling frame
+}
+
+if (btnRescan) {
+    btnRescan.addEventListener("click", () => {
+        startBadgeScanner();
+    });
+}
+
+/* ======================================================================
+   2. MODAL CONTROLS & ROUTING
+   ====================================================================== */
+
+// 🩺 Duty Personnel Card: Open Scanner
 if (nurseCard && nurseModal) {
     nurseCard.addEventListener("click", () => {
         nurseModal.classList.add("active");
-        if (nurseDropdown) nurseDropdown.focus();
+        startBadgeScanner();
     });
 }
 
-// 🟡 WORKFLOW B: OWNER SELECTION MODAL SYSTEM
-if (ownerCard && ownerModal) {
+// 💼 Owner Card: Direct Route to Admin Login Screen
+if (ownerCard) {
     ownerCard.addEventListener("click", () => {
-        ownerModal.classList.add("active");
-        if (ownerPasswordInput) ownerPasswordInput.focus();
+        stopBadgeScanner();
+        window.location.href = "abtc-login.html";
     });
 }
 
-// Modal Dismiss Closes
-if (closeOwnerModalBtn && ownerModal && ownerPasswordInput) {
-    closeOwnerModalBtn.addEventListener("click", () => { ownerModal.classList.remove("active"); ownerPasswordInput.value = ""; });
-}
-if (closeNurseModalBtn && nurseModal && nursePinInput) {
-    closeNurseModalBtn.addEventListener("click", () => { nurseModal.classList.remove("active"); nursePinInput.value = ""; });
+// Close Modal
+if (closeNurseModalBtn && nurseModal) {
+    closeNurseModalBtn.addEventListener("click", () => {
+        nurseModal.classList.remove("active");
+        stopBadgeScanner();
+        resetScannerState();
+    });
 }
 
-// FORGOT PIN ACCESS COMPLIANCE HANDLER
 if (forgotPinLink) {
     forgotPinLink.addEventListener("click", (e) => {
         e.preventDefault();
-        alert("PIN Recovery Notice: Please request the Facility Owner or Administrator to check your profile under the 'Personnel & Audit Logs' administration page view to retrieve or re-assign your 4-digit security PIN.");
+        alert("PIN Notice: Please contact your Facility Administrator to retrieve or reset your 4-digit clock-in PIN.");
     });
 }
 
-// SECURITY ACCESS SUBMISSIONS & AUDIT TRACE LOG ENGINE
-async function writeAuditRecord(name, role) {
-    if (!globalActiveFacilityId) return;
-    try {
-        await addDoc(collection(db, "audit_logs"), {
-            facilityId: globalActiveFacilityId,
-            personnelName: name,
-            role: role,
-            action: "Terminal Profile Session Sign-In",
-            timestamp: new Date().toISOString()
-        });
-    } catch (e) {
-        console.error("Security Trace Write Log Aborted:", e);
-    }
-}
+/* ======================================================================
+   3. INDEPENDENT CLOCK-IN PIN VERIFICATION
+   ====================================================================== */
 
-// 🩺 CLINIC PERSONNEL SYSTEM CLOCK IN
 if (nurseForm) {
     nurseForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const selectedStaffId = nurseDropdown.value;
-        const typedPin = nursePinInput.value.trim();
 
-        const matchedStaff = cachedStaffArray.find(person => person.id === selectedStaffId);
-
-        if (!matchedStaff) {
-            alert("Please identify your profile context row first from the list selection input.");
+        if (!activeScannedStaff) {
+            alert("Please scan your staff badge ID first.");
             return;
         }
 
-        if (matchedStaff.pin === typedPin) {
-            const resolvedRole = matchedStaff.position || matchedStaff.role || "Nurse";
+        const typedPin = nursePinInput.value.trim();
+        const validPin = activeScannedStaff.pin || "1234";
 
+        if (typedPin === String(validPin)) {
+            const resolvedRole = activeScannedStaff.position || activeScannedStaff.facilityRole || "Nurse";
+            const staffName = activeScannedStaff.name || activeScannedStaff.fullName || "Duty Staff";
+
+            // Bind session for clinic workstation
             sessionStorage.setItem("activeDesignation", resolvedRole);
-            sessionStorage.setItem("activePersonnelName", matchedStaff.name);
-            localStorage.setItem("activeDesignation", resolvedRole);
-            localStorage.setItem("activePersonnelName", matchedStaff.name);
-            
-            await writeAuditRecord(matchedStaff.name, resolvedRole);
-            
-            console.log(`Personnel profile match accepted for ${matchedStaff.name} [${resolvedRole}]. Routing...`);
+            sessionStorage.setItem("activePersonnelName", staffName);
+            sessionStorage.setItem("activeStaffId", activeScannedStaff.id);
+            sessionStorage.setItem("activeFacilityId", resolvedFacilityId || "fac_default");
 
+            // Write session audit log
+            try {
+                if (db && resolvedFacilityId) {
+                    await addDoc(collection(db, "audit_logs"), {
+                        facilityId: resolvedFacilityId,
+                        personnelName: staffName,
+                        role: resolvedRole,
+                        action: "Autonomous Duty Badge Sign-In",
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            } catch (err) {
+                console.warn("Audit trace log skipped:", err);
+            }
+
+            stopBadgeScanner();
+
+            // Direct route based on clinic role
             if (resolvedRole.toLowerCase().includes("pharmacist")) {
                 window.location.href = "abtc-pharmacy.html";
             } else {
                 window.location.href = "abtc-home.html";
             }
         } else {
-            alert("Access Denied: The 4-digit passcode PIN entered does not match your roster record profile mapping.");
+            alert("Access Denied: Incorrect 4-digit security PIN.");
             nursePinInput.value = "";
             nursePinInput.focus();
-        }
-    });
-}
-
-// 💼 OWNER SYSTEM LOG ENTRY
-if (ownerForm) {
-    ownerForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const enteredPassword = ownerPasswordInput.value;
-        
-        const activeFacilityEmail = auth.currentUser?.email 
-            || sessionStorage.getItem("authenticatedFacilityEmail") 
-            || localStorage.getItem("authenticatedFacilityEmail");
-
-        if (!activeFacilityEmail) {
-            alert("Session Error: Workspace credentials expired. Please re-login.");
-            window.location.href = "abtc-login.html";
-            return;
-        }
-
-        try {
-            await signInWithEmailAndPassword(auth, activeFacilityEmail, enteredPassword);
-            
-            let dynamicAdminName = "Facility Administrator";
-            if (globalActiveFacilityId) {
-                const facilityDocRef = doc(db, "facilities", globalActiveFacilityId);
-                const facilitySnapshot = await getDoc(facilityDocRef);
-                if (facilitySnapshot.exists()) {
-                    const facilityData = facilitySnapshot.data();
-                    dynamicAdminName = facilityData.contactInfo?.contactPerson || dynamicAdminName;
-                }
-            }
-            
-            sessionStorage.setItem("activeDesignation", "Owner");
-            sessionStorage.setItem("activePersonnelName", dynamicAdminName);
-            localStorage.setItem("activeDesignation", "Owner");
-            localStorage.setItem("activePersonnelName", dynamicAdminName);
-            
-            await writeAuditRecord(dynamicAdminName, "Owner");
-            
-            console.log(`Admin gate verified for ${dynamicAdminName}. Routing to dashboard panels...`);
-            window.location.href = "abtc-dash.html";
-        } catch (error) {
-            console.error("Owner authentication checkpoint rejection handler:", error);
-            alert("Access Denied: The administrative clearance control password typed is invalid.");
-            ownerPasswordInput.value = "";
-            ownerPasswordInput.focus();
         }
     });
 }

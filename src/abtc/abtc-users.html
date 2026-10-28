@@ -14,188 +14,221 @@
     <link rel="stylesheet" href="../../assets/css/abtc/abtc-users.css">
     <link rel="stylesheet" href="../../assets/css/abtc/abtc-master.css">
     <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
+
+    <!-- Client-side QR Code Generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
 <div class="container">
-<script>
+    <script>
         if (localStorage.getItem("sidebarCollapsed") === "true") {
             document.querySelector(".container").classList.add("collapsed");
         }
     </script>
-<!-- PROFESSIONAL SAAS SIDEBAR (ABTC MODULE — PERSONNEL ACTIVE) -->
-<aside class="sidebar" id="sidebar">
-  <script>
-        if (localStorage.getItem("sidebarCollapsed") === "true") {
-            document.getElementById("sidebar").classList.add("collapsed");
-            document.querySelector(".container")?.classList.add("collapsed");
-        }
-    </script>
-    <div class="sidebar-header">
-        <div class="brand-logo">
-            <img src="../../assets/images/logo-login.png" alt="CRIS Logo">
-        </div>
-        <div class="brand-info">
-            <span class="brand-title">Community-Centric Rabies Intelligence Information Systems</span>
-            <span class="brand-badge">ABTC Module</span>
-        </div>
-        <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
-            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M15 18l-6-6 6-6"/>
-            </svg>
-        </button>
-    </div>
 
-    <div class="sidebar-nav">
-        <div class="nav-group">
-            <span class="nav-label">Analytics</span>
-            <a href="abtc-dash.html" class="nav-item">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
-                <span class="nav-text">Dashboard</span>
-            </a>
-            <a href="abtc-reports.html" class="nav-item">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span class="nav-text">Reports & Drafts</span>
-            </a>
-        </div>
-    </div>
-
-    <div class="sidebar-footer">
-        <a href="abtc-users.html" class="nav-item active">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <span class="nav-text">Personnel & History</span>
-        </a>
-        <a href="abtc-setting.html" class="nav-item">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            <span class="nav-text">Settings</span>
-        </a>
-        <button class="nav-item logout-item" onclick="showLogoutModal()">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            <span class="nav-text">Logout</span>
-        </button>
-    </div>
-</aside>
-
-  <!-- =====================================================
-       MAIN INTERFACE AREA
-       ===================================================== -->
-  <main class="main-content">
-    
-    <!-- HEADER BANNER -->
-    <header class="header">
-      <div class="header-title">
-        <h1>User Administration</h1>
-        <span>Monitor security check-ins and personnel shift authorization records</span>
-      </div>
-      <div class="user-profile-top">
-        <div class="profile-info" id="profileInfoText">
-          <strong>Active Session</strong><br>
-          <span>Administrator</span>
-        </div>
-        <div class="profile-icon"><i class="fa-solid fa-user-shield"></i></div>
-      </div>
-    </header>
-
-    <div class="settings-main">
-
-      <div class="settings-grid">
-
-        <!-- CARD 1: Personnel Management Panel -->
-        <section class="card full-width-card">
-          <h2 class="card-title"><i class="fa-solid fa-user-gear"></i> Personnel Roster Management</h2>
-          <p class="card-subtitle">Register and monitor your clinical staff details for system accountability traces.</p>
-
-          <div class="personnel-layout">
-            
-            <!-- Form to Add Personnel -->
-            <div class="personnel-form-column">
-              <h3 class="section-subheading"><i class="fa-solid fa-user-plus"></i> Add New Personnel</h3>
-              <div class="field-group form-stack">
-                <div class="field">
-                  <label for="fullName">Full Name</label>
-                  <input type="text" id="fullName" placeholder="e.g. Juan Dela Cruz">
-                </div>
-                <div class="field">
-                  <label for="personnelEmail">Email Address</label>
-                  <input type="email" id="personnelEmail" placeholder="e.g. you@abtc.gov.ph">
-                </div>
-                <div class="field">
-                  <label for="position">Position / Designation Role</label>
-                  <select id="position" class="form-select-input">
-                    <option value="" disabled selected>-- Select Position --</option>
-                    <option value="Nurse">Nurse / Duty Personnel</option>
-                    <option value="Pharmacist">Pharmacist / Vaccine Custodian</option>
-                    <option value="Physician">Attending Physician</option>
-                    <option value="Encoder">Data Encoder</option>
-                  </select>
-                </div>
-                <!-- FOR ACCOUNTABILITY PIN ENTRY -->
-                <div class="field">
-                  <label for="personnelPin">4-Digit Security Access PIN</label>
-                  <input type="password" id="personnelPin" placeholder="e.g. 1234" maxlength="4" pattern="[0-9]{4}" inputmode="numeric">
-                </div>
-              </div>
-              <div class="card-actions btn-spacer">
-                <button type="button" id="addPersonnelBtn" class="btn btn-primary full-btn"><i class="fa-solid fa-plus"></i> Add Personnel</button>
-              </div>
+    <!-- PROFESSIONAL SAAS SIDEBAR (ABTC MODULE — PERSONNEL ACTIVE) -->
+    <aside class="sidebar" id="sidebar">
+        <script>
+            if (localStorage.getItem("sidebarCollapsed") === "true") {
+                document.getElementById("sidebar").classList.add("collapsed");
+                document.querySelector(".container")?.classList.add("collapsed");
+            }
+        </script>
+        <div class="sidebar-header">
+            <div class="brand-logo">
+                <img src="../../assets/images/logo-login.png" alt="CRIS Logo">
             </div>
-
-            <!-- Active Personnel Roster Table -->
-            <div class="personnel-table-column">
-              <h3 class="section-subheading"><i class="fa-solid fa-address-book"></i> Active Personnel Roster</h3>
-              <div class="table-scroll-container">
-                <table class="roster-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Position</th>
-                      <th>Email</th>
-                      <th class="text-center">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="personnelTableBody">
-                    <tr>
-                      <td colspan="4" class="table-empty-notice"><i class="fa-solid fa-spinner fa-spin"></i> Loading roster records...</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            <div class="brand-info">
+                <span class="brand-title">Community-Centric Rabies Intelligence Information Systems</span>
+                <span class="brand-badge">ABTC Module</span>
             </div>
+            <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
+                <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </button>
+        </div>
 
-          </div>
-        </section>
+        <div class="sidebar-nav">
+            <div class="nav-group">
+                <span class="nav-label">Analytics</span>
+                <a href="abtc-dash.html" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="abtc-reports.html" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span class="nav-text">Reports & Drafts</span>
+                </a>
+            </div>
+        </div>
 
-        <!-- CARD 2: Dedicated Login History Log -->
-        <section class="card full-width-card">
-          <h2 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Login History</h2>
-          <p class="card-subtitle">Immutable, real-time logging records of user account clock-ins tracking terminal sessions.</p>
-          
-          <div class="table-scroll-container log-container-bounded">
-            <table class="roster-table">
-              <thead>
-                <tr>
-                  <th>Timestamp / Date</th>
-                  <th>Personnel Account</th>
-                  <th>Designation Role</th>
-                  <th>Action Triggered</th>
-                  <th>Terminal Access Status</th>
-                </tr>
-              </thead>
-              <tbody id="auditLogTableBody">
-                <tr>
-                  <td colspan="5" class="table-empty-notice"><i class="fa-solid fa-spinner fa-spin"></i> Loading access history logs...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+        <div class="sidebar-footer">
+            <a href="abtc-users.html" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span class="nav-text">Personnel & History</span>
+            </a>
+            <a href="abtc-setting.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span class="nav-text">Settings</span>
+            </a>
+            <button class="nav-item logout-item" onclick="showLogoutModal()">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span class="nav-text">Logout</span>
+            </button>
+        </div>
+    </aside>
 
-      </div>
-    </div>
-  </main>
+    <!-- MAIN INTERFACE AREA -->
+    <main class="main-content">
+        <!-- HEADER BANNER -->
+        <header class="header">
+            <div class="header-title">
+                <h1>User Administration</h1>
+                <span>Monitor security check-ins and personnel shift authorization records</span>
+            </div>
+            <div class="user-profile-top">
+                <div class="profile-info" id="profileInfoText">
+                    <strong>Active Session</strong><br>
+                    <span>Administrator</span>
+                </div>
+                <div class="profile-icon"><i class="fa-solid fa-user-shield"></i></div>
+            </div>
+        </header>
+
+        <div class="settings-main">
+            <div class="settings-grid">
+
+                <!-- CARD 1: Personnel Management Panel -->
+                <section class="card full-width-card">
+                    <h2 class="card-title"><i class="fa-solid fa-user-gear"></i> Personnel Roster Management</h2>
+                    <p class="card-subtitle">Register and monitor your clinical staff details for system accountability traces.</p>
+
+                    <div class="personnel-layout">
+                        <!-- Form to Add Personnel -->
+                        <div class="personnel-form-column">
+                            <h3 class="section-subheading"><i class="fa-solid fa-user-plus"></i> Add New Personnel</h3>
+                            <div class="field-group form-stack">
+                                <div class="field">
+                                    <label for="fullName">Full Name</label>
+                                    <input type="text" id="fullName" placeholder="e.g. Maria Santos, RN">
+                                </div>
+                                <div class="field">
+                                    <label for="personnelEmail">Email Address</label>
+                                    <input type="email" id="personnelEmail" placeholder="e.g. maria.santos@abtc.gov.ph or personal@gmail.com">
+                                    <span class="field-hint">Institutional or personal email accepted. Deactivation can be handled below if staff leaves.</span>
+                                </div>
+                                <div class="field">
+                                    <label for="position">Position / Designation Role</label>
+                                    <select id="position" class="form-select-input">
+                                        <option value="" disabled selected>-- Select Position --</option>
+                                        <option value="Nurse">Nurse / Duty Personnel</option>
+                                        <option value="Pharmacist">Pharmacist / Vaccine Custodian</option>
+                                        <option value="Physician">Attending Physician</option>
+                                        <option value="Encoder">Data Encoder</option>
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label for="personnelPin">4-Digit Security Access PIN</label>
+                                    <input type="password" id="personnelPin" placeholder="e.g. 1234" maxlength="4" pattern="[0-9]{4}" inputmode="numeric">
+                                </div>
+                            </div>
+                            <div class="card-actions btn-spacer">
+                                <button type="button" id="addPersonnelBtn" class="btn btn-primary full-btn"><i class="fa-solid fa-plus"></i> Add Personnel</button>
+                            </div>
+                        </div>
+
+                        <!-- Active Personnel Roster Table -->
+                        <div class="personnel-table-column">
+                            <h3 class="section-subheading"><i class="fa-solid fa-address-book"></i> Active Personnel Roster</h3>
+                            <div class="table-scroll-container">
+                                <table class="roster-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Position</th>
+                                            <th>Email</th>
+                                            <th>Status</th>
+                                            <th class="roster-action-cell" style="min-width: 250px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="personnelTableBody">
+                                        <tr>
+                                            <td colspan="5" class="table-empty-notice"><i class="fa-solid fa-spinner fa-spin"></i> Loading roster records...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CARD 2: Login History Log -->
+                <section class="card full-width-card">
+                    <h2 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Login History</h2>
+                    <p class="card-subtitle">Immutable, real-time logging records of user account clock-ins tracking terminal sessions.</p>
+                    
+                    <div class="table-scroll-container log-container-bounded">
+                        <table class="roster-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp / Date</th>
+                                    <th>Personnel Account</th>
+                                    <th>Designation Role</th>
+                                    <th>Action Triggered</th>
+                                    <th>Terminal Access Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditLogTableBody">
+                                <tr>
+                                    <td colspan="5" class="table-empty-notice"><i class="fa-solid fa-spinner fa-spin"></i> Loading access history logs...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
 </div>
 
-<!-- Dedicated modular script handler linking Firebase functions -->
+<!-- PRINTABLE BADGE PREVIEW MODAL -->
+<div id="badgeModal" class="badge-modal-overlay">
+    <div class="badge-modal-box">
+        <h3 class="badge-modal-title">
+            <i class="fa-solid fa-id-card-clip"></i> Official Staff ID Badge
+        </h3>
+        
+        <!-- Printable Area -->
+        <div id="printableIdArea" class="staff-id-card">
+            <div class="id-card-header">
+                <span class="sys-title">CRIS Clinical Access</span>
+                <span class="fac-name" id="badgeFacilityName">Animal Bite Treatment Center</span>
+            </div>
+
+            <!-- QR Target Container -->
+            <div class="id-qr-wrapper">
+                <div id="badgeQrCodeContainer"></div>
+            </div>
+
+            <div class="id-card-staff-name" id="badgeStaffName">Staff Member</div>
+            <div class="id-card-staff-role" id="badgeStaffRole">Nurse / Duty Personnel</div>
+
+            <div class="id-card-footer">
+                <span>Scan QR at Workstation &bull; Enter 4-Digit PIN</span>
+            </div>
+        </div>
+
+        <div class="badge-modal-buttons">
+            <button type="button" class="btn-close-modal" id="closeBadgeModalBtn">Close</button>
+            <button type="button" class="btn-print" id="printBadgeBtn"><i class="fa-solid fa-print"></i> Print Badge</button>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
 <script type="module" src="../../assets/js/abtc/abtc-users.js"></script>
 <script type="module" src="../../assets/js/main/sidebar.js"></script>
 
@@ -205,13 +238,8 @@
         <p>Are you sure you want to log out?</p>
 
         <div class="logout-modal-actions">
-            <button class="logout-no" onclick="closeLogoutModal()">
-                No
-            </button>
-
-            <button class="logout-yes" onclick="confirmLogout()">
-                Yes, Logout
-            </button>
+            <button class="logout-no" onclick="closeLogoutModal()">No</button>
+            <button class="logout-yes" onclick="confirmLogout()">Yes, Logout</button>
         </div>
     </div>
 </div>

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Profile - CRIS</title>
-    <!-- Combined application style and custom profile module style sheets -->
     <link rel="stylesheet" href="../../assets/css/main/login.css">
     <link rel="stylesheet" href="../../assets/css/abtc/abtc-profiles.css">
     <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
@@ -12,12 +11,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Fast HTML5 QR Code Webcam Scanner -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 
 <body>
+    <!-- HEADER -->
     <header class="header">
         <div class="header-content">
-            <img src="../../assets/images/logo-login.png" alt="CRIS logo" class="logo" style="height: 40px; width: auto;">
+            <img src="../../assets/images/logo-login.png" alt="CRIS logo" class="logo header-brand-logo">
             <h1>CRIS: Community-Centric Rabies Intelligence System</h1>
             <button class="burger" onclick="openMenu()">☰ Menu</button>
         </div>
@@ -25,91 +29,99 @@
 
     <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
+    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
         <button class="close-btn" onclick="closeMenu()">✕</button>
         <nav>
-            <a href="../index.html">Home</a>
-            <a href="../src/pvo-login.html" class="active">Admin Access Portal</a>
-            <a href="../src/cris-reports.html">Reports</a>
-            <a href="../src/about-cris.html">About CRIS</a>
+            <a href="../../index.html">Home</a>
+            <a href="abtc-login.html" class="active">Admin Access Portal</a>
+            <a href="cris-reports.html">Reports</a>
+            <a href="about-cris.html">About CRIS</a>
         </nav>
     </aside>
 
-    <main class="main" style="flex-direction: column;">
+    <!-- MAIN SELECTION VIEW -->
+    <main class="main profiles-main">
         <h2 class="profile-title">Welcome Back</h2>
         <p class="profile-subtitle">Select your profile designation context to clock in</p>
 
-        <!-- =====================================================
-             DYNAMIC DASHBOARD PROFILE GRID (With Hover Animation Hooks)
-             ===================================================== -->
-        <div class="logo-container profile-options-container" style="display: flex; justify-content: center; align-items: stretch; gap: 60px; width: 100%; max-width: 900px; margin: 40px auto;">
+        <!-- PROFILE OPTIONS GRID -->
+        <div class="logo-container profile-options-container">
             
-            <!-- 🩺 CLINIC PERSONNEL PROFILE CARD (ABTC) -->
-            <div class="logo-link profile-option" id="nurseProfileCard" style="cursor: pointer; flex: 1; max-width: 320px;">
-                <div class="logo-box" style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100%; text-align: center;">
-                    <div style="width: 240px; height: 240px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                        <img src="../../assets/images/abtc-logo.png" alt="Animal Bite Treatment Center Seal" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            <!-- 🩺 CLINIC PERSONNEL PROFILE CARD -->
+            <div class="logo-link profile-option profile-card-option" id="nurseProfileCard">
+                <div class="logo-box profile-box">
+                    <div class="profile-logo-frame">
+                        <img src="../../assets/images/abtc-logo.png" alt="Animal Bite Treatment Center Seal" class="profile-seal-img">
                     </div>
-                    <p style="margin: 0; font-weight: 700; font-size: 16px; color: #333; min-height: 48px;">
+                    <p class="profile-role-title">
                         Duty Personnel<br>
-                        <span class="profile-role-subtext" style="font-size: 13px; color: #666; font-weight: 400;">Nurse / Pharmacist Duty Login</span>
+                        <span class="profile-role-subtext">Scan Badge ID or PIN Login</span>
                     </p>
                 </div>
             </div>
 
-            <!-- 💼 OWNER PROFILE CARD (PVO) -->
-            <div class="logo-link profile-option" id="ownerProfileCard" style="cursor: pointer; flex: 1; max-width: 320px;">
-                <div class="logo-box" style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100%; text-align: center;">
-                    <div style="width: 240px; height: 240px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                        <img id="ownerLogoPreview" src="../../assets/images/cris-icon-no-background.png" alt="Provincial Veterinary Office Seal" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            <!-- 💼 OWNER PROFILE CARD -->
+            <div class="logo-link profile-option profile-card-option" id="ownerProfileCard">
+                <div class="logo-box profile-box">
+                    <div class="profile-logo-frame">
+                        <img id="ownerLogoPreview" src="../../assets/images/cris-icon-no-background.png" alt="Provincial Veterinary Office Seal" class="profile-seal-img">
                     </div>
-                    <p style="margin: 0; font-weight: 700; font-size: 16px; color: #333; min-height: 48px;">
+                    <p class="profile-role-title">
                         Owner / Administrator<br>
-                        <span class="profile-role-subtext" style="font-size: 13px; color: #666; font-weight: 400;">Owner Master Login</span>
+                        <span class="profile-role-subtext">Owner Master Login</span>
                     </p>
                 </div>
             </div>
 
         </div>
+
+        <!-- Back Button Underneath Profile Cards -->
+        <div class="profile-bottom-nav">
+            <a href="../../index.html" class="btn-profile-back" title="Return to Portal Selection">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Portals
+            </a>
+        </div>
     </main>
 
-    <!-- 🩺 🔒 PERSONNEL DUTY PIN VERIFICATION MODAL -->
+    <!-- 🩺 PERSONNEL DUTY QR / PIN CLOCK-IN MODAL (SCAN-ONLY) -->
     <div class="modal-overlay" id="nurseModalOverlay">
-        <div class="password-modal">
-            <h3>Personnel Duty Verification</h3>
-            <p class="modal-description">Select your profile name from the facility register and enter your 4-digit security clock-in PIN.</p>
-            
-            <form id="nurseVerificationForm">
-                <select id="nurseSelectDropdown" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px; margin-bottom: 15px; outline: none; background-color: #fff;">
-                    <option value="" disabled selected>-- Loading Duty Personnel Roster --</option>
-                </select>
+        <div class="password-modal" style="max-width: 420px;">
+            <h3>Duty Personnel Clock-In</h3>
+            <p class="modal-description">Hold your CRIS Staff ID Badge up to the scanner, then enter your security PIN.</p>
 
-                <input type="password" id="nursePinInput" placeholder="Enter 4-Digit PIN" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" required>
+            <!-- SCANNER SECTION -->
+            <div id="scannerSection">
+                <div class="qr-camera-container">
+                    <div id="qrReader"></div>
+                </div>
+            </div>
+
+            <!-- SCANNED STAFF IDENTITY SUMMARY (Appears upon scan) -->
+            <div class="scanned-identity-banner" id="scannedIdentityBanner">
+                <i class="fa-solid fa-id-badge id-badge-icon"></i>
+                <div>
+                    <span class="id-meta-name" id="scannedStaffName">Staff Member</span>
+                    <span class="id-meta-role" id="scannedStaffRole">Duty Role</span>
+                </div>
+                <button type="button" class="btn-rescan" id="btnRescan">Rescan</button>
+            </div>
+
+            <!-- CLOCK-IN SUBMISSION FORM -->
+            <form id="nurseVerificationForm">
+                <input type="password" id="nursePinInput" placeholder="Enter 4-Digit Security PIN" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" disabled required>
                 
-                <div style="text-align: right; margin-bottom: 20px; margin-top: -10px;">
-                    <a href="#" id="forgotPinLink" style="font-size: 12px; color: #EA6113; text-decoration: none; font-weight: bold;">Forgot Security PIN?</a>
+                <div class="forgot-pin-wrap">
+                    <a href="#" id="forgotPinLink" class="forgot-pin-link">Forgot Security PIN?</a>
                 </div>
 
                 <div class="modal-buttons">
                     <button type="button" class="modal-btn btn-cancel" id="closeNurseModalBtn">Cancel</button>
-                    <button type="submit" class="modal-btn btn-submit">Clock In</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 💼 🔒 OWNER SECURITY BARRIER PASSWORD MODAL -->
-    <div class="modal-overlay" id="passwordModalOverlay">
-        <div class="password-modal">
-            <h3>Administrator Verification</h3>
-            <p class="modal-description">Please enter the owner master credential token password to gain entry to the analytical tracking matrix module dashboards.</p>
-            
-            <form id="ownerVerificationForm">
-                <select>
-                <input type="password" id="ownerPasswordInput" placeholder="Enter Owner Password" required>
-                <div class="modal-buttons">
-                    <button type="button" class="modal-btn btn-cancel" id="closeModalBtn">Cancel</button>
-                    <button type="submit" class="modal-btn btn-submit">Verify Identity</button>
+                    <button type="submit" class="modal-btn btn-submit" id="btnClockIn" disabled>Clock In</button>
                 </div>
             </form>
         </div>
@@ -117,7 +129,7 @@
 
     <footer class="footer"></footer>
 
-    <!-- Connected JavaScript module handler script -->
+    <!-- Connected Controller -->
     <script type="module" src="../../assets/js/abtc/abtc-profile.js"></script>
 </body>
 </html>

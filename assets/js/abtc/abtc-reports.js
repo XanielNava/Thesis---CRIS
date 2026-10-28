@@ -1,61 +1,67 @@
 // reports.js - ABTC Facility Reports Compiler & Central PHO Submission Engine
+// Conformed to CRIS Master Architecture ('patients')
+
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { 
     doc, getDoc, collection, query, where, getDocs, addDoc 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
-// Import shared central instances (Managed by firebase-config.js switch)
 import { auth, db } from '../firebase/firebase-config.js';
 
-let activeFacilityId = null;
-let currentFacilityName = "ABTC Facility";
-let currentPersonnelName = "Facility Administrator";
+let activeFacilityId = sessionStorage.getItem("activeFacilityId") || null;
+let currentFacilityName = sessionStorage.getItem("activeFacilityName") || "ABTC Facility";
+let currentPersonnelName = sessionStorage.getItem("activePersonnelName") || "Facility Administrator";
 let aggregatedMetrics = {};
 
 /* --------------------
     1. Authentication & Session Setup
 -------------------- */
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        activeFacilityId = user.uid;
+async function initReportsSession() {
+    const userRole = sessionStorage.getItem("activeDesignation") || "Owner";
 
+    if (activeFacilityId) {
         try {
-            const userRole = sessionStorage.getItem("activeDesignation") || localStorage.getItem("activeDesignation") || "Owner";
-            let cachedName = sessionStorage.getItem("cachedFacilityName");
-            let cachedStaff = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
+            const facilityDocRef = doc(db, "facilities", activeFacilityId);
+            const facilitySnapshot = await getDoc(facilityDocRef);
 
-            if (!cachedName || !cachedStaff) {
-                const facilityDocRef = doc(db, "facilities", user.uid);
-                const facilitySnapshot = await getDoc(facilityDocRef);
+            if (facilitySnapshot.exists()) {
+                const data = facilitySnapshot.data();
+                const facName = data.facilityName || data.name || "ABTC Facility";
+                const acronym = data.acronym || data.code || "ABTC";
 
-                if (facilitySnapshot.exists()) {
-                    const data = facilitySnapshot.data();
-                    cachedName = data.facilityName || data.name || "ABTC Facility";
-                    cachedStaff = userRole === "Owner" ? (data.contactInfo?.contactPerson || "Facility Administrator") : (cachedStaff || "Duty Personnel");
+                currentFacilityName = `${facName} (${acronym.toUpperCase()})`;
+                currentPersonnelName = sessionStorage.getItem("activePersonnelName") || data.contactInfo?.contactPerson || "Facility Administrator";
 
-                    sessionStorage.setItem("cachedFacilityName", cachedName);
-                    sessionStorage.setItem("activePersonnelName", cachedStaff);
+                sessionStorage.setItem("activeFacilityName", facName);
+                sessionStorage.setItem("activeFacilityAcronym", acronym);
 
-                    if (data.logoData) {
-                        const sidebarLogo = document.getElementById("sidebarLogoPreview");
-                        if (sidebarLogo) sidebarLogo.src = data.logoData;
-                    }
+                if (data.logoData) {
+                    const sidebarLogo = document.getElementById("sidebarLogoPreview");
+                    if (sidebarLogo) sidebarLogo.src = data.logoData;
                 }
             }
-
-            currentFacilityName = cachedName || "ABTC Facility";
-            currentPersonnelName = cachedStaff || "Facility Administrator";
-
-            renderHeaderUI(userRole);
-            await loadAndCompileReportData();
-
-        } catch (error) {
-            console.error("Reports session initialization failure:", error);
+        } catch (e) {
+            console.warn("Reports branding read bypassed:", e);
         }
-    } else {
-        window.location.href = "abtc-login.html";
     }
-});
+
+    renderHeaderUI(userRole);
+    if (activeFacilityId) {
+        await loadAndCompileReportData();
+    }
+}
+
+initReportsSession();
+
+if (auth) {
+    onAuthStateChanged(auth, async (user) => {
+        if (user && !activeFacilityId) {
+            activeFacilityId = user.uid;
+            sessionStorage.setItem("activeFacilityId", activeFacilityId);
+            initReportsSession();
+        }
+    });
+}
 
 function renderHeaderUI(userRole) {
     const titleEl = document.getElementById("facilityHeaderTitle");
@@ -74,7 +80,7 @@ function renderHeaderUI(userRole) {
 }
 
 /* --------------------
-    2. Load Patient Data & Compile Tally Matrix
+    2. Load Patient Data & Compile Tally Matrix (Targeting 'patients')
 -------------------- */
 async function loadAndCompileReportData() {
     const tableBody = document.getElementById("casesTableBody");
@@ -82,7 +88,7 @@ async function loadAndCompileReportData() {
 
     try {
         const patientQuery = query(
-            collection(db, "patient-database"), 
+            collection(db, "patients"), 
             where("facilityId", "==", activeFacilityId)
         );
 
@@ -112,17 +118,17 @@ async function loadAndCompileReportData() {
             if (ageNum < 15) totals.under15++;
             else totals.over15++;
 
-            const animal = (patient.animalType || "").toLowerCase();
+            const animal = (patient.exposure?.animalType || patient.animalType || "").toLowerCase();
             if (animal.includes("dog")) totals.dog++;
             else if (animal.includes("cat")) totals.cat++;
             else totals.others++;
 
-            const category = (patient.classification || patient.exposureCategory || "").toUpperCase();
+            const category = (patient.exposure?.category || patient.classification || patient.exposureCategory || "").toUpperCase();
             const isBooster = patient.priorVaccination === "Yes" || patient.isBooster === true;
 
-            if (category.includes("CAT I") || category === "CATEGORY I") totals.cat1++;
-            else if (category.includes("CAT II") || category === "CATEGORY II") totals.cat2++;
-            else if (category.includes("CAT III") || category === "CATEGORY III") {
+            if (category.includes("CAT I") || category === "CATEGORY I" || category === "I") totals.cat1++;
+            else if (category.includes("CAT II") || category === "CATEGORY II" || category === "II") totals.cat2++;
+            else if (category.includes("CAT III") || category === "CATEGORY III" || category === "III") {
                 if (isBooster) totals.cat3Booster++;
                 else totals.cat3New++;
             }
@@ -141,8 +147,8 @@ async function loadAndCompileReportData() {
                 totals.totalDoses++;
             }
 
-            const status = (patient.treatmentStatus || "").toLowerCase();
-            const isCat3 = category.includes("III");
+            const status = (patient.status || patient.treatmentStatus || "").toLowerCase();
+            const isCat3 = category.includes("III") || category === "III";
 
             if (status.includes("complete")) {
                 if (isCat3) totals.compCat3++; else totals.compCat2++;
@@ -162,9 +168,6 @@ async function loadAndCompileReportData() {
     }
 }
 
-/* --------------------
-    3. Render Compiled Row to Table
--------------------- */
 function renderReportTableRow(tableBody, t) {
     tableBody.innerHTML = `
         <tr>
@@ -197,7 +200,7 @@ function renderReportTableRow(tableBody, t) {
 }
 
 /* --------------------
-    4. Submit Report Draft to PHO (Centralized abtc-reports Collection)
+    3. Submit Report Draft to PHO
 -------------------- */
 const submitPhoBtn = document.getElementById("submitPhoBtn");
 if (submitPhoBtn) {
@@ -215,7 +218,6 @@ if (submitPhoBtn) {
             submitPhoBtn.style.pointerEvents = "none";
             submitPhoBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
 
-            // Flatten metrics payload directly into the report root so PHO tables can parse it instantly
             const reportPayload = {
                 facilityId: activeFacilityId,
                 facilityName: currentFacilityName,
@@ -223,7 +225,6 @@ if (submitPhoBtn) {
                 reportPeriod: reportMonthYear,
                 totalCasesReported: aggregatedMetrics.rep || 0,
                 
-                // Flat attributes mapping table columns directly
                 abtc: currentFacilityName,
                 maleCases: aggregatedMetrics.male || 0,
                 femaleCases: aggregatedMetrics.female || 0,
@@ -253,10 +254,7 @@ if (submitPhoBtn) {
                 submittedAt: new Date().toISOString()
             };
 
-            // 1. Save to the main centralized collection for PHO ledger queries
             await addDoc(collection(db, "abtc-reports"), reportPayload);
-
-            // 2. Also keep a local backup copy inside the facility subcollection
             await addDoc(collection(db, "facilities", activeFacilityId, "submitted-reports"), reportPayload);
 
             alert(`Success! Report for ${reportMonthYear} has been officially submitted to PHO.`);

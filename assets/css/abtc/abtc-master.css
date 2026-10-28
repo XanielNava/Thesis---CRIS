@@ -199,3 +199,9 @@
 .container.collapsed .sidebar-collapse-btn i {
   transform: rotate(180deg) !important;
 }
+.stock-status-badge.status-fifo-next {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    font-weight: 700;
+}

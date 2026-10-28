@@ -452,3 +452,267 @@ body {
     padding: 16px;
   }
 }
+/* ==========================================================================
+   CRIS ABTC USERS & BADGE PRINT STYLES
+   ========================================================================== */
+
+/* Badge Action Buttons */
+.btn-badge-action {
+    background-color: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-badge-action:hover {
+    background-color: #1d4ed8;
+}
+
+.roster-action-cell {
+    min-width: 170px;
+    text-align: center;
+}
+
+/* Badge Preview Modal Container */
+.badge-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+}
+
+.badge-modal-overlay.active {
+    display: flex;
+}
+
+.badge-modal-box {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    width: 360px;
+    max-width: 90vw;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    text-align: center;
+}
+
+.badge-modal-title {
+    margin-top: 0;
+    color: #1f2937;
+    font-size: 17px;
+}
+
+.badge-modal-title i {
+    color: #ea6113;
+}
+
+/* Printable Staff ID Badge Card (Portrait CR-80 Standard ID) */
+.staff-id-card {
+    width: 260px;
+    margin: 0 auto 16px auto;
+    background: #ffffff;
+    border: 2px solid #ea6113;
+    border-radius: 12px;
+    padding: 16px;
+    box-sizing: border-box;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    font-family: 'Lato', sans-serif;
+}
+
+.id-card-header {
+    border-bottom: 2px solid #f3f4f6;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.id-card-header .sys-title {
+    font-size: 11px;
+    font-weight: 900;
+    color: #ea6113;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+}
+
+.id-card-header .fac-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-top: 2px;
+    display: block;
+}
+
+.id-qr-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px auto;
+    padding: 8px;
+    background: #ffffff;
+    border-radius: 8px;
+}
+
+.id-card-staff-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: #111827;
+    margin: 6px 0 2px 0;
+}
+
+.id-card-staff-role {
+    font-size: 12px;
+    color: #4b5563;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.id-card-footer {
+    border-top: 1px dashed #d1d5db;
+    padding-top: 8px;
+    font-size: 10px;
+    color: #6b7280;
+}
+
+/* Modal Controls */
+.badge-modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.btn-print {
+    background-color: #ea6113;
+    color: #ffffff;
+    padding: 9px 18px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-print:hover {
+    background-color: #d1530e;
+}
+
+.btn-close-modal {
+    background-color: #e5e7eb;
+    color: #374151;
+    padding: 9px 16px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-close-modal:hover {
+    background-color: #d1d5db;
+}
+
+/* Browser Print Isolation */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #printableIdArea, #printableIdArea * {
+        visibility: visible;
+    }
+    #printableIdArea {
+        position: absolute;
+        left: 50%;
+        top: 50px;
+        transform: translateX(-50%);
+        border: 1px solid #111111;
+        box-shadow: none;
+    }
+    .badge-modal-overlay {
+        background: transparent;
+    }
+    .badge-modal-buttons, .badge-modal-title {
+        display: none !important;
+    }
+}
+/* Status Badges */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.status-pill.status-active {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.status-pill.status-deactivated {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Action Button: Deactivate / Activate */
+.btn-toggle-status {
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-toggle-status:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+}
+
+.btn-toggle-status.deactivate:hover {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border-color: #fca5a5;
+}
+
+.btn-toggle-status.activate:hover {
+    background-color: #dcfce7;
+    color: #15803d;
+    border-color: #86efac;
+}
+
+/* Form Helper Notice */
+.field-hint {
+    font-size: 11.5px;
+    color: #6b7280;
+    margin-top: 4px;
+    display: block;
+}

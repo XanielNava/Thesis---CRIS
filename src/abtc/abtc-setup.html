@@ -6,6 +6,7 @@
     <title>CRIS - ABTC Facility Setup & Application</title>
     <link rel="stylesheet" href="../../assets/css/abtc/abtc-setup.css">
     <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -61,9 +62,9 @@
                             </div>
                         </div>
 
-                        <!-- SECTION 2: Address Details -->
+                        <!-- SECTION 2: Address Details & Automated Geo-Coordinates -->
                         <div class="form-section">
-                            <h4 class="section-divider">Address Details</h4>
+                            <h4 class="section-divider">Address Details & Spatial Coordinates</h4>
                             <div class="field-group">
                                 <div class="field">
                                     <label for="abtcStreet">Street Address / Building No. *</label>
@@ -79,7 +80,26 @@
                                 </div>
                                 <div class="field">
                                     <label for="abtcProvince">Province *</label>
-                                    <input type="text" id="abtcProvince" placeholder="e.g. Iloilo" required>
+                                    <input type="text" id="abtcProvince" value="Iloilo" required>
+                                </div>
+
+                                <!-- 📍 AUTOMATED SPATIAL COORDINATES -->
+                                <div class="field">
+                                    <label for="abtcLatitude">Latitude</label>
+                                    <input type="text" id="abtcLatitude" placeholder="e.g. 10.9382" readonly style="background-color: #f8fafc; font-weight: 700;">
+                                </div>
+                                <div class="field">
+                                    <label for="abtcLongitude">Longitude</label>
+                                    <input type="text" id="abtcLongitude" placeholder="e.g. 122.6289" readonly style="background-color: #f8fafc; font-weight: 700;">
+                                </div>
+
+                                <div class="field full" style="margin-top: 4px;">
+                                    <button type="button" id="btnDetectGpsSetup" style="background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 13px; font-weight: 700; padding: 8px 14px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                                        <i class="fa-solid fa-location-crosshairs"></i> Auto-Detect Facility GPS Coordinates
+                                    </button>
+                                    <small id="setupGeoStatus" style="display: block; margin-top: 6px; font-size: 11.5px; color: #64748b;">
+                                        Coordinates will auto-resolve from your municipality & province if GPS is not enabled.
+                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -107,7 +127,7 @@
                             </div>
                         </div>
 
-                        <!-- SECTION 4: Regulatory Compliance & Verification (Option A) -->
+                        <!-- SECTION 4: Regulatory Compliance & Verification -->
                         <div class="form-section">
                             <h4 class="section-divider">Regulatory Compliance & Verification</h4>
                             <div class="field-group">

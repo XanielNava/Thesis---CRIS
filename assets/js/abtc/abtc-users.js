@@ -1,26 +1,43 @@
-// abtc-users.js - Dedicated Administration and Immutable Auditing Handler Engine
+// abtc-users.js - Dedicated Administration, ID Badge QR Generation, Status Safeguards, and Auditing Handler
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { 
-    doc, collection, addDoc, deleteDoc, query, where, onSnapshot 
+    doc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, onSnapshot 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
-// Import shared central instances (Managed by firebase-config.js switch)
 import { auth, db } from '../firebase/firebase-config.js';
 
-let currentFacilityId = null;
+let currentFacilityId = sessionStorage.getItem("activeFacilityId") || "fac_default";
+let currentFacilityName = sessionStorage.getItem("activeFacilityName") || "Animal Bite Treatment Center";
 
-// Ensure authentication loop boundaries are honored
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        currentFacilityId = user.uid;
-        console.log("Admin security terminal context mounted for workspace ID:", currentFacilityId);
-        
-        startLiveStaffRosterStream(currentFacilityId);
-        startLiveAuditLogsStream(currentFacilityId);
-    } else {
-        window.location.href = "abtc-login.html";
+// Initialize View & Streams
+async function initWorkspace() {
+    if (db && currentFacilityId !== "fac_default") {
+        try {
+            const facSnap = await getDoc(doc(db, "facilities", currentFacilityId));
+            if (facSnap.exists()) {
+                currentFacilityName = facSnap.data().facilityName || currentFacilityName;
+            }
+        } catch (e) {
+            console.warn("Facility metadata soft fetch:", e);
+        }
     }
-});
+
+    startLiveStaffRosterStream(currentFacilityId);
+    startLiveAuditLogsStream(currentFacilityId);
+}
+
+// Track active session
+if (auth) {
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            if (!currentFacilityId || currentFacilityId === "fac_default") {
+                currentFacilityId = user.uid;
+            }
+        }
+    });
+}
+
+initWorkspace();
 
 // Helper: Dynamic Badge Resolver
 function getRoleBadgeMarkup(role) {
@@ -39,6 +56,67 @@ function getRoleBadgeMarkup(role) {
     return `<span class="badge-nurse">${role}</span>`;
 }
 
+// Helper: Status Pill Resolver
+function getStatusPillMarkup(status) {
+    const isDeactivated = (status || "").toLowerCase() === "deactivated";
+    if (isDeactivated) {
+        return `<span class="status-pill status-deactivated"><i class="fa-solid fa-ban"></i> Deactivated</span>`;
+    }
+    return `<span class="status-pill status-active"><i class="fa-solid fa-circle-check"></i> Active</span>`;
+}
+
+// ==========================================================
+// BADGE QR GENERATOR MODAL CONTROLLER
+// ==========================================================
+const badgeModal = document.getElementById("badgeModal");
+const closeBadgeModalBtn = document.getElementById("closeBadgeModalBtn");
+const printBadgeBtn = document.getElementById("printBadgeBtn");
+const qrContainer = document.getElementById("badgeQrCodeContainer");
+
+function openBadgeModal(staffId, staffName, staffRole, staffStatus) {
+    if (!badgeModal || !qrContainer) return;
+
+    if ((staffStatus || "").toLowerCase() === "deactivated") {
+        alert("Cannot issue badge: This staff profile is currently Deactivated. Please activate the profile first.");
+        return;
+    }
+
+    document.getElementById("badgeStaffName").textContent = staffName;
+    document.getElementById("badgeStaffRole").textContent = staffRole;
+    document.getElementById("badgeFacilityName").textContent = currentFacilityName;
+
+    qrContainer.innerHTML = "";
+
+    const payload = JSON.stringify({
+        uid: staffId,
+        facilityId: currentFacilityId,
+        type: "CRIS_STAFF_ID"
+    });
+
+    new QRCode(qrContainer, {
+        text: payload,
+        width: 140,
+        height: 140,
+        colorDark: "#111827",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+    });
+
+    badgeModal.classList.add("active");
+}
+
+if (closeBadgeModalBtn && badgeModal) {
+    closeBadgeModalBtn.addEventListener("click", () => {
+        badgeModal.classList.remove("active");
+    });
+}
+
+if (printBadgeBtn) {
+    printBadgeBtn.addEventListener("click", () => {
+        window.print();
+    });
+}
+
 // ==========================================================
 // PIPELINE 1: WRITE NEW PERSONNEL RECORDS
 // ==========================================================
@@ -51,17 +129,12 @@ if (addPersonnelBtn) {
         const pinInput = document.getElementById("personnelPin");
 
         const name = nameInput.value.trim();
-        const email = emailInput.value.trim();
+        const email = emailInput.value.trim().toLowerCase();
         const position = positionInput.value.trim();
         const pin = pinInput.value.trim();
 
         if (!name || !email || !position || !pin) {
             alert("Please completely fill out all the staff parameter inputs, including the security PIN.");
-            return;
-        }
-
-        if (!currentFacilityId) {
-            alert("Session Error: Administrative workspace identification lost. Please re-login.");
             return;
         }
 
@@ -72,22 +145,34 @@ if (addPersonnelBtn) {
 
         try {
             const staffSubcollectionRef = collection(db, "facilities", currentFacilityId, "staff");
-            await addDoc(staffSubcollectionRef, {
+            const newDocRef = await addDoc(staffSubcollectionRef, {
                 name: name,
                 email: email,
                 position: position,
                 pin: pin,
+                status: "Active", // Default operational status
                 createdAt: new Date().toISOString()
             });
 
-            alert(`Successfully enrolled ${name} (${position}) into your active roster configuration.`);
-            
+            // Write audit trail
+            await addDoc(collection(db, "audit_logs"), {
+                facilityId: currentFacilityId,
+                personnelName: sessionStorage.getItem("activePersonnelName") || "Administrator",
+                role: "Admin",
+                action: `Enrolled New Staff: ${name} (${position})`,
+                timestamp: new Date().toISOString()
+            });
+
+            // Automatically open printable ID badge
+            openBadgeModal(newDocRef.id, name, position, "Active");
+
+            // Reset inputs
             nameInput.value = ""; 
             emailInput.value = ""; 
             positionInput.value = ""; 
             pinInput.value = "";
         } catch (error) {
-            console.error("Failed to append staff node record row:", error);
+            console.error("Failed to append staff record:", error);
             alert("Database write error: Unable to save personnel configuration changes.");
         }
     });
@@ -106,28 +191,87 @@ function startLiveStaffRosterStream(facilityId) {
         staffTableBody.innerHTML = ""; 
         
         if (snapshot.empty) {
-            staffTableBody.innerHTML = `<tr><td colspan="4" class="text-center table-empty-notice">No active staff records mapped yet.</td></tr>`;
+            staffTableBody.innerHTML = `<tr><td colspan="5" class="text-center table-empty-notice">No active staff records mapped yet.</td></tr>`;
             return;
         }
 
         snapshot.forEach((staffDoc) => {
             const staff = staffDoc.data();
+            const staffStatus = staff.status || "Active";
+            const isDeactivated = staffStatus.toLowerCase() === "deactivated";
+
             const row = document.createElement("tr");
 
             row.innerHTML = `
                 <td><strong>${staff.name}</strong></td>
                 <td>${getRoleBadgeMarkup(staff.position)}</td>
                 <td>${staff.email}</td>
-                <td class="text-center">
-                    <button class="btn-delete btn-delete-inline" data-id="${staffDoc.id}">Remove</button>
+                <td>${getStatusPillMarkup(staffStatus)}</td>
+                <td class="roster-action-cell">
+                    <button class="btn-badge-action" data-id="${staffDoc.id}" data-name="${staff.name}" data-role="${staff.position}" data-status="${staffStatus}">
+                        <i class="fa-solid fa-qrcode"></i> Badge
+                    </button>
+                    <button class="btn-toggle-status ${isDeactivated ? 'activate' : 'deactivate'}" data-id="${staffDoc.id}" data-status="${staffStatus}" data-name="${staff.name}">
+                        <i class="fa-solid ${isDeactivated ? 'fa-check' : 'fa-user-slash'}"></i> ${isDeactivated ? 'Activate' : 'Deactivate'}
+                    </button>
+                    <button class="btn-delete btn-delete-inline" data-id="${staffDoc.id}" data-name="${staff.name}">Remove</button>
                 </td>
             `;
 
+            // Badge preview handler
+            row.querySelector(".btn-badge-action")?.addEventListener("click", (e) => {
+                const btn = e.currentTarget;
+                openBadgeModal(
+                    btn.getAttribute("data-id"),
+                    btn.getAttribute("data-name"),
+                    btn.getAttribute("data-role"),
+                    btn.getAttribute("data-status")
+                );
+            });
+
+            // Status toggle handler
+            row.querySelector(".btn-toggle-status")?.addEventListener("click", async (e) => {
+                const btn = e.currentTarget;
+                const targetId = btn.getAttribute("data-id");
+                const currentStat = btn.getAttribute("data-status") || "Active";
+                const staffName = btn.getAttribute("data-name");
+                const newStatus = currentStat.toLowerCase() === "active" ? "Deactivated" : "Active";
+
+                if (confirm(`Change status of ${staffName} to ${newStatus}?`)) {
+                    try {
+                        const targetRef = doc(db, "facilities", facilityId, "staff", targetId);
+                        await updateDoc(targetRef, { status: newStatus });
+
+                        await addDoc(collection(db, "audit_logs"), {
+                            facilityId: facilityId,
+                            personnelName: sessionStorage.getItem("activePersonnelName") || "Administrator",
+                            role: "Admin",
+                            action: `Updated Staff Status for ${staffName} -> ${newStatus}`,
+                            timestamp: new Date().toISOString()
+                        });
+                    } catch (err) {
+                        console.error("Status update error:", err);
+                        alert("Could not update staff status: " + err.message);
+                    }
+                }
+            });
+
+            // Removal handler
             row.querySelector(".btn-delete")?.addEventListener("click", async (e) => {
-                const targetDocId = e.target.getAttribute("data-id");
-                if (confirm(`Are you sure you want to remove ${staff.name} from your active database tracking?`)) {
+                const targetDocId = e.currentTarget.getAttribute("data-id");
+                const staffName = e.currentTarget.getAttribute("data-name");
+
+                if (confirm(`Permanently remove ${staffName} from the facility roster?`)) {
                     try {
                         await deleteDoc(doc(db, "facilities", facilityId, "staff", targetDocId));
+
+                        await addDoc(collection(db, "audit_logs"), {
+                            facilityId: facilityId,
+                            personnelName: sessionStorage.getItem("activePersonnelName") || "Administrator",
+                            role: "Admin",
+                            action: `Removed Staff Member: ${staffName}`,
+                            timestamp: new Date().toISOString()
+                        });
                     } catch (err) {
                         console.error("Staff removal failure:", err);
                     }
@@ -183,22 +327,5 @@ function startLiveAuditLogsStream(facilityId) {
     }, (error) => {
         console.error("Audit log real-time stream failed:", error);
         auditTableBody.innerHTML = `<tr><td colspan="5" class="stream-error-notice">Security Authorization Error: Unable to stream session trails.</td></tr>`;
-    });
-}
-
-// ==========================================================
-// LOGOUT INTERCEPTOR (TAB-ISOLATED EXIT)
-// ==========================================================
-const logoutBtn = document.getElementById("logout-btn");
-if (logoutBtn) {
-    logoutBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (confirm("Are you sure you want to close this admin workspace session log on this tab?")) {
-            sessionStorage.removeItem("activeDesignation");
-            sessionStorage.removeItem("activePersonnelName");
-            localStorage.removeItem("activeDesignation");
-            localStorage.removeItem("activePersonnelName");
-            window.location.href = 'abtc-profiles.html';
-        }
     });
 }

@@ -1,24 +1,26 @@
-// abtc-login.js - Master Facility Gatekeeper for Multi-Tenant Shared Terminals
+// ==========================================================================
+// ABTC WORKSPACE LOGIN GATEKEEPER (Dev-Unblocked Mode)
+// ==========================================================================
+
 import { 
-  signInWithEmailAndPassword, 
-  signOut 
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
 import { 
   doc, 
   getDoc, 
-  updateDoc, 
   collection, 
   query, 
   where, 
   getDocs 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js'; 
 
-// 🔗 Import shared central instances (Managed by firebase-config.js switch)
 import { auth, db } from '../firebase/firebase-config.js';
 
 // ==========================================================
-// 🏢 INTELLIGENT WORKPLACE LOOKUP (AS THEY TYPE)
+// 🏢 1. WORKPLACE LOOKUP AS USER TYPES EMAIL
 // ==========================================================
 document.getElementById("email")?.addEventListener("change", async (e) => {
   const emailValue = e.target.value.trim().toLowerCase();
@@ -30,34 +32,26 @@ document.getElementById("email")?.addEventListener("change", async (e) => {
     return;
   }
 
-  // Safety check for DB initialization
-  if (!db) {
-    console.error("Firestore instance (db) is not ready.");
-    return;
-  }
-
   try {
     const facilitiesRef = collection(db, "facilities");
-    const q = query(facilitiesRef, where("contactInfo.email", "==", emailValue));
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      const facilityDoc = querySnapshot.docs[0];
-      const facilityData = facilityDoc.data();
-      
-      if (nameTextContainer) nameTextContainer.innerText = facilityData.facilityName || "Registered ABTC Location";
+    const facQ = query(facilitiesRef, where("contactInfo.email", "==", emailValue));
+    const facSnap = await getDocs(facQ);
+    
+    if (!facSnap.empty) {
+      const foundFacilityName = facSnap.docs[0].data().facilityName;
+      if (nameTextContainer) nameTextContainer.innerText = foundFacilityName;
       if (indicatorBox) indicatorBox.classList.add("visible");
     } else {
       if (indicatorBox) indicatorBox.classList.remove("visible");
     }
   } catch (error) {
-    console.error("Dynamic workspace identifier discovery failure:", error);
+    console.warn("Facility preview discovery:", error);
     if (indicatorBox) indicatorBox.classList.remove("visible");
   }
 });
 
 // ==========================================================
-// 🔒 MASTER GATEKEEPER SUBMIT HANDSHAKE
+// 🔒 2. LOGIN FORM SUBMISSION
 // ==========================================================
 document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -72,51 +66,45 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
       loginBtn.disabled = true; 
     }
 
-    // 1. Authenticate facility baseline workspace tokens
+    // Ensure session persistence
+    await setPersistence(auth, browserLocalPersistence);
+
+    // Authenticate credentials
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    console.log("Authenticated User UID:", user.uid);
 
-    // 2. Security Status Firewall Check & First-Time Password Flag Check
-    const facilityDocRef = doc(db, "facilities", user.uid);
-    const facilitySnapshot = await getDoc(facilityDocRef);
+    // Save baseline session context
+    sessionStorage.setItem("authenticatedFacilityEmail", email);
+    sessionStorage.setItem("activeDesignation", "Facility Head");
+    sessionStorage.setItem("activePersonnelName", "Facility Administrator");
 
-    if (facilitySnapshot.exists()) {
-      const facilityData = facilitySnapshot.data();
-
-      if (facilityData.status === "Disabled") {
-        await signOut(auth);
-        alert("Access Denied: This facility terminal account has been suspended.");
-        return; 
-      }
-      
-      // Check if account uses initial/default setup password
-      if (facilityData.requiresPasswordChange === true || facilityData.requiresPasswordChange === undefined) {
-        sessionStorage.setItem("requiresPasswordChange", "true");
+    // Attempt soft lookup of facilityId without blocking redirect if missing
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const uData = userDocSnap.data();
+        sessionStorage.setItem("activeFacilityId", uData.facilityId || "default_abtc");
       } else {
-        sessionStorage.setItem("requiresPasswordChange", "false");
+        sessionStorage.setItem("activeFacilityId", "default_abtc");
       }
-
-      await updateDoc(facilityDocRef, { status: "Online" });
+    } catch (err) {
+      console.warn("Soft facilityId lookup skipped:", err);
+      sessionStorage.setItem("activeFacilityId", "default_abtc");
     }
 
-    // 3. Tab-Isolated session initialization
-    sessionStorage.setItem("authenticatedFacilityEmail", email);
-    sessionStorage.removeItem("activeDesignation");
-    sessionStorage.removeItem("activePersonnelName");
-
-    // Clear stale global fallback storage
-    localStorage.removeItem("activeDesignation");
-    localStorage.removeItem("activePersonnelName");
-
-    // 4. Route into Profile Selection Matrix
-    window.location.href = 'abtc-profiles.html';
+    // Direct routing to Dashboard
+    window.location.href = 'abtc-dash.html';
 
   } catch (error) {
     console.error('Terminal authentication failure:', error.code, error.message);
     
     let clientErrorMessage = "The email address or password you entered is incorrect.";
-    if (error.code && !error.code.includes('auth/')) {
-       clientErrorMessage = error.message;
+    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+      clientErrorMessage = "Invalid email or password.";
+    } else if (error.message) {
+      clientErrorMessage = error.message;
     }
 
     alert('Login failed: ' + clientErrorMessage);

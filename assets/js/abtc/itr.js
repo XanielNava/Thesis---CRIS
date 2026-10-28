@@ -1,223 +1,76 @@
-// itr.js - Individual Treatment Record Registration Controller (patient-database exclusive)
+// itr.js - Individual Treatment Record Registration Controller
+// Conformed to CRIS Master 13-Collection Architecture
+
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { 
     doc, getDoc, deleteDoc, collection, addDoc, runTransaction, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-// Import shared central instances (Managed by firebase-config.js switch)
 import { auth, db } from '../firebase/firebase-config.js';
 
-let activeFacilityUid = null;
-let activePersonnelName = "Duty Staff";
+// Session credentials derived from QR badge verification
+let activeFacilityUid = sessionStorage.getItem("activeFacilityId") || null;
+let activePersonnelName = sessionStorage.getItem("activePersonnelName") || "Duty Staff";
 let currentPrefillDocId = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Trimmed value of a field by id ('' if the field does not exist)
-    const getVal = (id) => document.getElementById(id)?.value.trim() ?? '';
+document.addEventListener('DOMContentLoaded', async () => {
+    // -------------------------------------------------------------------------
+    // 1. DOM REFERENCES & SAFE DECLARATIONS
+    // -------------------------------------------------------------------------
+    const getVal = (id) => document.getElementById(id)?.value?.trim() ?? '';
     const setVal = (id, value) => {
         const el = document.getElementById(id);
         if (el) el.value = value ?? '';
     };
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            activeFacilityUid = user.uid;
-            
-            let detectedName = sessionStorage.getItem("activePersonnelName") || 
-                               localStorage.getItem("activePersonnelName") || 
-                               localStorage.getItem("activePersonnel");
+    const PEP_DAYS = [0, 3, 7, 14, 28];
+    const consultDateTimeInput = document.getElementById("consultDateTime");
+    const dateInputDay0 = document.getElementById("dateInputDay0");
+    const scheduleHelpText = document.getElementById("scheduleHelpText");
+    const birthdayInput = document.getElementById('birthday');
+    const ageInput = document.getElementById('age');
+    const animalType = document.getElementById('animalType');
+    const animalOtherWrap = document.getElementById('animalOtherWrap');
+    const uploadBox = document.getElementById('uploadBox');
+    const woundPhoto = document.getElementById('woundPhoto');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+    const uploadPreviewWrap = document.getElementById('uploadPreviewWrap');
+    const uploadPreview = document.getElementById('uploadPreview');
+    const removePhoto = document.getElementById('removePhoto');
+    const resetBtn = document.getElementById('resetBtn');
+    const itrForm = document.getElementById('itrForm');
 
-            if (!detectedName) {
-                try {
-                    const userSnap = await getDoc(doc(db, "users", user.uid));
-                    if (userSnap.exists()) {
-                        detectedName = userSnap.data().name || userSnap.data().fullName;
-                    } else {
-                        const facSnap = await getDoc(doc(db, "facilities", user.uid));
-                        if (facSnap.exists()) detectedName = facSnap.data().personnelName;
-                    }
-                } catch (err) {
-                    console.warn("Firestore user profile fetch error:", err);
-                }
-            }
+    let capturedBase64Photo = null;
 
-            activePersonnelName = (detectedName || user.displayName || user.email || "Duty Staff").trim();
-
-            try {
-                const parsed = JSON.parse(activePersonnelName);
-                activePersonnelName = String(parsed.name || parsed.fullName || activePersonnelName).trim();
-            } catch (e) {}
-
-            sessionStorage.setItem("activePersonnelName", activePersonnelName);
-
-            setVal('physician', activePersonnelName);
-
-            setDefaultConsultTime();
-
-            await previewRecordNumber(user.uid);
-            
-            // Check if there is a prefillId query parameter from patient-database pending intake queue
-            const urlParams = new URLSearchParams(window.location.search);
-            currentPrefillDocId = urlParams.get("prefillId");
-            if (currentPrefillDocId) {
-                await loadPrefilledAppData(currentPrefillDocId);
-            }
-
-            recalculatePepSchedule();
-        } else {
-            window.location.href = "abtc-login.html";
-        }
-    });
-
-    // Fills the consultation field with the current local date/time if it is empty
+    // -------------------------------------------------------------------------
+    // 2. HELPER FUNCTIONS
+    // -------------------------------------------------------------------------
     function setDefaultConsultTime() {
-        const consultField = document.getElementById('consultDateTime');
-        if (consultField && !consultField.value) {
+        if (consultDateTimeInput && !consultDateTimeInput.value) {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            consultField.value = now.toISOString().slice(0, 16);
+            consultDateTimeInput.value = now.toISOString().slice(0, 16);
         }
     }
 
-    // Function to fetch and auto-fill from patient-database with full nested map support
-    async function loadPrefilledAppData(docId) {
-        try {
-            const docRef = doc(db, "patient-database", docId);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-
-                // 1. Patient demographics and 2. address
-                const prefillFields = {
-                    lastName: data.lastName,
-                    firstName: data.firstName || data.name,
-                    middleName: data.middleName,
-                    age: data.age,
-                    sex: data.sex,
-                    contactNo: data.contactNo || data.mobileNumber,
-                    houseStreet: data.houseStreet || data.street,
-                    barangay: data.barangay,
-                    cityMunicipality: data.cityMunicipality || data.municipality,
-                    province: data.province || 'Iloilo'
-                };
-                Object.entries(prefillFields).forEach(([id, value]) => setVal(id, value));
-
-                // 3. Exposure & Bite Details
-                let targetBiteArea = '';
-                if (Array.isArray(data.biteArea) && data.biteArea.length > 0) {
-                    targetBiteArea = data.biteArea[0];
-                } else if (data.exposure && Array.isArray(data.exposure.bodySites) && data.exposure.bodySites.length > 0) {
-                    targetBiteArea = data.exposure.bodySites[0];
-                } else if (data.exposure && data.exposure.areaDescription) {
-                    targetBiteArea = data.exposure.areaDescription;
-                } else {
-                    targetBiteArea = data.biteArea || data.biteAreaDescription || '';
-                }
-
-                setVal('biteArea', targetBiteArea);
-
-                // Animal type (anything other than dog/cat goes under "Other")
-                const rawAnimal = data.animalType || (data.exposure ? data.exposure.animalType : '') || '';
-                const animalSelect = document.getElementById('animalType');
-                if (animalSelect && rawAnimal) {
-                    const animalKey = rawAnimal.toLowerCase();
-                    if (animalKey.includes('dog')) {
-                        animalSelect.value = 'Dog';
-                    } else if (animalKey.includes('cat')) {
-                        animalSelect.value = 'Cat';
-                    } else {
-                        animalSelect.value = 'Other';
-                        setVal('animalOther', rawAnimal);
-                    }
-                    toggleAnimalOther();
-                }
-
-                // 4. Status of animal
-                // Status of animal (older intake records only stored a caged Yes/No/Unknown value)
-                const cagedVal = data.animalCaged || (data.exposure ? data.exposure.animalCaged : '');
-                const cagedLabels = { yes: 'Caged', no: 'Not caged', unknown: 'Unknown' };
-                setVal('animalStatus', data.animalStatus || cagedLabels[String(cagedVal).toLowerCase()]);
-
-                // Previous immunization now lives in Past Medical History
-                const vaccVal = data.priorVaccination || data.previouslyVaccinated;
-                if (String(vaccVal).toLowerCase() === 'yes') {
-                    setCheckRow('pastHistory', 'immunization', true, {
-                        details: data.lastVaccDate ? `Last vaccinated ${data.lastVaccDate}` : ''
-                    });
-                }
-
-                // 5. First Aid / Wound Care mapping
-                if (data.firstAid) {
-                    const woundCareInput = document.getElementById('woundCare');
-                    if (woundCareInput) {
-                        let careSummary = [];
-                        if (data.firstAid.washedWithSoapAndWater === "Yes" || data.firstAid.washed === true) {
-                            careSummary.push(`Washed with soap & water (${data.firstAid.washMinutes || '5'} mins)`);
-                        }
-                        if (data.firstAid.substanceApplied) {
-                            careSummary.push(`Applied ${data.firstAid.substanceApplied}`);
-                        }
-                        woundCareInput.value = careSummary.join(". ") || "Washed and treated";
-                    }
-                }
-
-                console.log("Successfully prefilled fields from patient-database for ID:", docId);
-            } else {
-                console.warn("No prefill document found in patient-database with ID:", docId);
-            }
-        } catch (err) {
-            console.error("Error loading prefilled app data from patient-database:", err);
-        }
+    function formatDateForInput(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
     }
 
-    async function previewRecordNumber(uid) {
-        const recordNoField = document.getElementById('recordNo');
-        if (!recordNoField) return;
-
-        try {
-            let facilityAcronym = sessionStorage.getItem("cachedFacilityAcronym");
-            
-            if (!facilityAcronym) {
-                const facilitySnap = await getDoc(doc(db, "facilities", uid));
-                if (facilitySnap.exists()) {
-                    const facilityData = facilitySnap.data();
-                    facilityAcronym = facilityData.acronym || facilityData.code || "ABTC";
-                    sessionStorage.setItem("cachedFacilityAcronym", facilityAcronym);
-                } else {
-                    facilityAcronym = "ABTC";
-                }
-            }
-
-            const counterSnap = await getDoc(doc(db, "facility_counters", uid));
-            const nextIndex = counterSnap.exists() ? ((counterSnap.data().currentSequence || 0) + 1) : 1;
-            const paddedSeq = String(nextIndex).padStart(3, '0');
-            const year = new Date().getFullYear();
-            
-            recordNoField.value = `${facilityAcronym.toUpperCase()} - ${year} - ${paddedSeq}`;
-        } catch (err) {
-            console.error("Counter preview error:", err);
-            recordNoField.value = `ABTC - 2026 - 001`;
-        }
+    function addDays(baseDate, days) {
+        const result = new Date(baseDate);
+        result.setDate(result.getDate() + days);
+        return result;
     }
-
-    // Pill Button Logic (single-select groups)
-    document.querySelectorAll('.pill-group').forEach((group) => {
-        group.addEventListener('click', (e) => {
-            const pill = e.target.closest('.pill');
-            if (!pill) return;
-
-            group.querySelectorAll('.pill').forEach((p) => p.classList.toggle('active', p === pill));
-            if (group.dataset.name === 'exposureCategory') recalculatePepSchedule();
-        });
-    });
 
     function getPillValue(name) {
         const active = document.querySelector(`.pill-group[data-name="${name}"] .pill.active`);
         return active ? active.dataset.value : '';
     }
 
-    // Checkbox Rows (paper-form checkboxes; ticking a row enables its detail fields)
     function syncCheckRow(row) {
         const checked = row.querySelector('input[type="checkbox"]').checked;
         row.querySelectorAll('[data-field]').forEach((el) => {
@@ -237,57 +90,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Returns { value: { fieldName: fieldValue } } for every ticked row in a group
     function getCheckedMap(group) {
         const result = {};
         document.querySelectorAll(`.check-row[data-group="${group}"]`).forEach((row) => {
             if (!row.querySelector('input[type="checkbox"]').checked) return;
             const fields = {};
             row.querySelectorAll('[data-field]').forEach((el) => {
-                fields[el.dataset.field] = el.value.trim();
+                fields[el.dataset.field] = el.value ? el.value.trim() : '';
             });
             result[row.dataset.value] = fields;
         });
         return result;
     }
 
-    document.querySelectorAll('.check-row').forEach((row) => {
-        row.querySelector('input[type="checkbox"]').addEventListener('change', () => syncCheckRow(row));
-        syncCheckRow(row);
-    });
-
-    // Birthday -> Age
-    const birthdayInput = document.getElementById('birthday');
-    const ageInput = document.getElementById('age');
-    if (birthdayInput && ageInput) {
-        birthdayInput.addEventListener('change', () => {
-            if (!birthdayInput.value) return;
-            const [y, m, d] = birthdayInput.value.split('-').map(Number);
-            const today = new Date();
-            let years = today.getFullYear() - y;
-            const hadBirthday = today.getMonth() + 1 > m || (today.getMonth() + 1 === m && today.getDate() >= d);
-            if (!hadBirthday) years--;
-            ageInput.value = Math.max(years, 0);
-        });
-    }
-
-    // PEP Schedule Engine
-    const PEP_DAYS = [0, 3, 7, 14, 28];
-    const consultDateTimeInput = document.getElementById("consultDateTime");
-    const dateInputDay0 = document.getElementById("dateInputDay0");
-    const scheduleHelpText = document.getElementById("scheduleHelpText");
-
-    function formatDateForInput(dateObj) {
-        const y = dateObj.getFullYear();
-        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const d = String(dateObj.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-    }
-
-    function addDays(baseDate, days) {
-        const result = new Date(baseDate);
-        result.setDate(result.getDate() + days);
-        return result;
+    function toggleAnimalOther() {
+        if (animalOtherWrap && animalType) {
+            animalOtherWrap.hidden = animalType.value !== 'Other';
+        }
     }
 
     function recalculatePepSchedule(fromDay0Input = false) {
@@ -314,31 +133,150 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (scheduleHelpText) {
             scheduleHelpText.innerHTML = isCategoryI
-                ? `<strong class="text-danger">Category I Exposure:</strong> PEP is generally not required according to DOH/WHO protocols.`
-                : `<strong class="text-success">Category ${category || 'II/III'} PEP Active:</strong> Target dates auto-calculated relative to Day 0.`;
+                ? `<strong class="text-danger">Category I Exposure:</strong> PEP is not required according to DOH protocols.`
+                : `<strong class="text-success">Category ${category || 'II/III'} PEP Active:</strong> Target dates auto-calculated.`;
         }
     }
 
-    if (consultDateTimeInput) consultDateTimeInput.addEventListener('change', () => recalculatePepSchedule(false));
-    if (dateInputDay0) dateInputDay0.addEventListener('change', () => recalculatePepSchedule(true));
+    async function previewRecordNumber(facilityId) {
+        const recordNoField = document.getElementById('recordNo');
+        if (!recordNoField) return;
 
-    const animalType = document.getElementById('animalType');
-    const animalOtherWrap = document.getElementById('animalOtherWrap');
+        try {
+            let facilityAcronym = sessionStorage.getItem("activeFacilityAcronym");
+            
+            if (!facilityAcronym && facilityId) {
+                const facilitySnap = await getDoc(doc(db, "facilities", facilityId));
+                if (facilitySnap.exists()) {
+                    const facilityData = facilitySnap.data();
+                    facilityAcronym = facilityData.acronym || facilityData.code || "ABTC";
+                    sessionStorage.setItem("activeFacilityAcronym", facilityAcronym);
+                } else {
+                    facilityAcronym = "ABTC";
+                }
+            }
 
-    function toggleAnimalOther() {
-        if (animalOtherWrap) animalOtherWrap.hidden = animalType.value !== 'Other';
+            const safeAcronym = (facilityAcronym || "ABTC").toUpperCase();
+
+            let nextIndex = 1;
+            try {
+                const counterSnap = await getDoc(doc(db, "facility_counters", facilityId));
+                if (counterSnap.exists()) {
+                    nextIndex = (counterSnap.data().currentSequence || 0) + 1;
+                }
+            } catch (ce) {
+                console.warn("Facility counter fallback:", ce);
+            }
+
+            const paddedSeq = String(nextIndex).padStart(3, '0');
+            const year = new Date().getFullYear();
+            recordNoField.value = `${safeAcronym} - ${year} - ${paddedSeq}`;
+        } catch (err) {
+            console.error("Counter preview error:", err);
+            recordNoField.value = `ABTC - 2026 - 001`;
+        }
     }
 
-    if (animalType) animalType.addEventListener('change', toggleAnimalOther);
+    // -------------------------------------------------------------------------
+    // 3. INITIALIZE STATE
+    // -------------------------------------------------------------------------
+    setVal('physician', activePersonnelName);
+    setDefaultConsultTime();
 
-    // Photo Upload
-    const uploadBox = document.getElementById('uploadBox');
-    const woundPhoto = document.getElementById('woundPhoto');
-    const uploadPrompt = document.getElementById('uploadPrompt');
-    const uploadPreviewWrap = document.getElementById('uploadPreviewWrap');
-    const uploadPreview = document.getElementById('uploadPreview');
-    const removePhoto = document.getElementById('removePhoto');
-    let capturedBase64Photo = null;
+    if (activeFacilityUid) {
+        await previewRecordNumber(activeFacilityUid);
+    }
+
+    if (auth) {
+        onAuthStateChanged(auth, async (user) => {
+            if (user && !activeFacilityUid) {
+                try {
+                    const userSnap = await getDoc(doc(db, "users", user.uid));
+                    if (userSnap.exists() && userSnap.data().facilityId) {
+                        activeFacilityUid = userSnap.data().facilityId;
+                    } else {
+                        activeFacilityUid = user.uid;
+                    }
+                } catch (e) {
+                    activeFacilityUid = user.uid;
+                }
+                sessionStorage.setItem("activeFacilityId", activeFacilityUid);
+                await previewRecordNumber(activeFacilityUid);
+            }
+        });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    currentPrefillDocId = urlParams.get("prefillId");
+    if (currentPrefillDocId) {
+        try {
+            const docRef = doc(db, "patient-database", currentPrefillDocId);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                setVal('lastName', data.lastName);
+                setVal('firstName', data.firstName || data.name);
+                setVal('middleName', data.middleName);
+                setVal('age', data.age);
+                setVal('sex', data.sex);
+                setVal('contactNo', data.contactNo || data.mobileNumber);
+                setVal('houseStreet', data.houseStreet || data.street);
+                setVal('barangay', data.barangay);
+                setVal('cityMunicipality', data.cityMunicipality || data.municipality);
+                setVal('province', data.province || 'Iloilo');
+                setVal('biteArea', Array.isArray(data.biteArea) ? data.biteArea[0] : (data.biteArea || ''));
+            }
+        } catch (err) {
+            console.warn("Intake prefill error:", err);
+        }
+    }
+
+    recalculatePepSchedule();
+
+    // -------------------------------------------------------------------------
+    // 4. EVENT LISTENERS
+    // -------------------------------------------------------------------------
+    if (birthdayInput && ageInput) {
+        birthdayInput.addEventListener('change', () => {
+            if (!birthdayInput.value) return;
+            const [y, m, d] = birthdayInput.value.split('-').map(Number);
+            const today = new Date();
+            let years = today.getFullYear() - y;
+            const hasHadBirthday = 
+                (today.getMonth() + 1 > m) || 
+                (today.getMonth() + 1 === m && today.getDate() >= d);
+            if (!hasHadBirthday) years--;
+            ageInput.value = Math.max(years, 0);
+        });
+
+        ageInput.addEventListener('input', () => {
+            const enteredAge = parseInt(ageInput.value, 10);
+            if (!isNaN(enteredAge) && enteredAge >= 0 && enteredAge <= 120) {
+                if (!birthdayInput.value) {
+                    const currentYear = new Date().getFullYear();
+                    birthdayInput.value = `${currentYear - enteredAge}-01-01`;
+                }
+            }
+        });
+    }
+
+    document.querySelectorAll('.pill-group').forEach((group) => {
+        group.addEventListener('click', (e) => {
+            const pill = e.target.closest('.pill');
+            if (!pill) return;
+            group.querySelectorAll('.pill').forEach((p) => p.classList.toggle('active', p === pill));
+            if (group.dataset.name === 'exposureCategory') recalculatePepSchedule();
+        });
+    });
+
+    document.querySelectorAll('.check-row').forEach((row) => {
+        row.querySelector('input[type="checkbox"]').addEventListener('change', () => syncCheckRow(row));
+        syncCheckRow(row);
+    });
+
+    if (consultDateTimeInput) consultDateTimeInput.addEventListener('change', () => recalculatePepSchedule(false));
+    if (dateInputDay0) dateInputDay0.addEventListener('change', () => recalculatePepSchedule(true));
+    if (animalType) animalType.addEventListener('change', toggleAnimalOther);
 
     if (uploadBox && woundPhoto) {
         uploadBox.addEventListener('click', (e) => {
@@ -347,19 +285,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         woundPhoto.addEventListener('change', () => {
             const file = woundPhoto.files[0];
-            if (file) processImageFile(file);
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    capturedBase64Photo = ev.target.result;
+                    uploadPreview.src = capturedBase64Photo;
+                    uploadPrompt.hidden = true;
+                    uploadPreviewWrap.hidden = false;
+                };
+                reader.readAsDataURL(file);
+            }
         });
-    }
-
-    function processImageFile(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            capturedBase64Photo = e.target.result;
-            uploadPreview.src = capturedBase64Photo;
-            uploadPrompt.hidden = true;
-            uploadPreviewWrap.hidden = false;
-        };
-        reader.readAsDataURL(file);
     }
 
     if (removePhoto) {
@@ -373,18 +309,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Reset Form (keeps the read-only record number and attending physician)
-    const resetBtn = document.getElementById('resetBtn');
     if (resetBtn) {
         resetBtn.addEventListener('click', () => {
-            if (!confirm('Clear everything entered on this form?')) return;
-
+            if (!confirm('Clear all form inputs?')) return;
             const recordNoField = document.getElementById('recordNo');
             const physicianField = document.getElementById('physician');
             const keptRecordNo = recordNoField ? recordNoField.value : '';
             const keptPhysician = physicianField ? physicianField.value : '';
 
-            document.getElementById('itrForm').reset();
+            itrForm.reset();
 
             if (recordNoField) recordNoField.value = keptRecordNo;
             if (physicianField) physicianField.value = keptPhysician;
@@ -399,175 +332,241 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Form Submission
-    const itrForm = document.getElementById('itrForm');
-    if (itrForm) {
-        itrForm.addEventListener('submit', async (e) => {
+    // -------------------------------------------------------------------------
+    // 5. SCHEMA-CONFORMED PERSISTENCE ENGINE
+    // -------------------------------------------------------------------------
+    async function handleTreatmentRecordSave(e) {
+        if (e) {
             e.preventDefault();
+            e.stopPropagation();
+        }
 
-            if (!activeFacilityUid) return alert("Session Expired: Please log in again.");
-            if (!itrForm.reportValidity()) return;
+        const resolvedFacilityId = activeFacilityUid || sessionStorage.getItem("activeFacilityId");
+        if (!resolvedFacilityId) {
+            alert("Session Expired: Please scan your staff badge to re-authenticate.");
+            return false;
+        }
 
-            const submitBtn = itrForm.querySelector('button[type="submit"]');
-            const submitBtnHtml = submitBtn ? submitBtn.innerHTML : '';
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving Patient Record...`;
-            }
+        const lName = getVal('lastName');
+        const fName = getVal('firstName');
+        const ageVal = getVal('age');
+        const sexVal = getVal('sex');
 
+        if (!lName || !fName || !ageVal || !sexVal) {
+            alert("Incomplete Patient Information: Please fill in at least the Last Name, First Name, Age, and Sex.");
+            return false;
+        }
+
+        const submitBtn = itrForm?.querySelector('button[type="submit"]');
+        const submitBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving to Clinical Database...`;
+        }
+
+        try {
+            let acronym = (sessionStorage.getItem("activeFacilityAcronym") || "ABTC").toUpperCase();
+            let generatedCustomId = "";
+
+            // 1. Transactional Counter Management
             try {
-                let acronym = sessionStorage.getItem("cachedFacilityAcronym") || "ABTC";
-                const counterDocRef = doc(db, "facility_counters", activeFacilityUid);
-                let generatedCustomId = "";
-
+                const counterDocRef = doc(db, "facility_counters", resolvedFacilityId);
                 await runTransaction(db, async (transaction) => {
                     const counterDoc = await transaction.get(counterDocRef);
                     let currentSeq = counterDoc.exists() ? (counterDoc.data().currentSequence || 0) : 0;
                     const nextIndex = currentSeq + 1;
-                    generatedCustomId = `${acronym.toUpperCase()}-${String(nextIndex).padStart(3, '0')}`;
-                    transaction.set(counterDocRef, { currentSequence: nextIndex }, { merge: true });
+                    generatedCustomId = `${acronym}-${String(nextIndex).padStart(3, '0')}`;
+                    transaction.set(counterDocRef, { 
+                        currentSequence: nextIndex,
+                        lastUpdated: serverTimestamp() 
+                    }, { merge: true });
                 });
+            } catch (counterError) {
+                console.warn("Counter transaction bypassed, using fallback timestamp ID:", counterError);
+                generatedCustomId = `${acronym}-${Date.now().toString().slice(-4)}`;
+            }
 
-                const selectedAnimal = animalType.value === 'Other' ? getVal('animalOther') : animalType.value;
-                const exposureCatValue = getPillValue('exposureCategory');
-                const fullItrDisplayString = getVal('recordNo');
+            const selectedAnimal = animalType.value === 'Other' ? getVal('animalOther') : animalType.value;
+            const exposureCatValue = getPillValue('exposureCategory');
+            const fullItrDisplayString = getVal('recordNo') || generatedCustomId;
 
-                const lName = getVal('lastName');
-                const fName = getVal('firstName');
-                const mName = getVal('middleName');
-                const suffix = getVal('suffix');
-                const parsedFullName = `${lName}, ${fName}${mName ? ' ' + mName : ''}${suffix ? ' ' + suffix : ''}`.trim();
+            const mName = getVal('middleName');
+            const suffix = getVal('suffix');
+            const parsedFullName = `${lName}, ${fName}${mName ? ' ' + mName : ''}${suffix ? ' ' + suffix : ''}`.trim();
 
-                const houseStr = getVal('houseStreet');
-                const brgy = getVal('barangay');
-                const city = getVal('cityMunicipality');
-                const prov = getVal('province');
-                const parsedAddress = [houseStr, brgy, city, prov].filter(val => val !== '').join(', ');
+            const houseStr = getVal('houseStreet');
+            const brgy = getVal('barangay');
+            const city = getVal('cityMunicipality');
+            const prov = getVal('province');
+            const parsedAddress = [houseStr, brgy, city, prov].filter(val => val !== '').join(', ');
 
-                // Physician's order checklist (ticked rows only) and the past medical history checklist
-                const physicianOrders = getCheckedMap('physicianOrder');
-                const pastHistory = getCheckedMap('pastHistory');
+            const physicianOrders = getCheckedMap('physicianOrder');
+            const pastHistory = getCheckedMap('pastHistory');
 
-                // Keep the legacy rigType / rigDose / immunoglobulin fields populated for other pages
-                const rigOrders = [['erig', 'ERIG'], ['hrig', 'HRIG']].filter(([key]) => physicianOrders[key]);
-                const selectedRigType = rigOrders.map(([, label]) => label).join(' + ');
-                const enteredRigDose = rigOrders
-                    .map(([key]) => physicianOrders[key].maxDose ? `${physicianOrders[key].maxDose} mL` : '')
-                    .filter(Boolean)
-                    .join(' + ');
+            const rigOrders = [['erig', 'ERIG'], ['hrig', 'HRIG']].filter(([key]) => physicianOrders[key]);
+            const selectedRigType = rigOrders.map(([, label]) => label).join(' + ');
+            const enteredRigDose = rigOrders
+                .map(([key]) => physicianOrders[key].maxDose ? `${physicianOrders[key].maxDose} mL` : '')
+                .filter(Boolean)
+                .join(' + ');
 
-                const patientDataPayload = {
-                    recordNo: generatedCustomId,
-                    caseId: generatedCustomId,
-                    patientId: generatedCustomId,
-                    itrDisplayNo: fullItrDisplayString,
-                    facilityId: activeFacilityUid,
-                    facilityAcronym: acronym.toUpperCase(),
-                    recordedBy: activePersonnelName,
-                    createdAt: serverTimestamp(),
-                    
-                    lastName: lName,
-                    firstName: fName,
-                    middleName: mName,
-                    suffix: suffix,
-                    name: parsedFullName,
-                    fullName: parsedFullName,
-                    exposureType: `${selectedAnimal} Exposure`,
-                    classification: exposureCatValue ? `Category ${exposureCatValue}` : "Unclassified",
+            // 2. Exact Architecture Schema Mapping
+            const patientDataPayload = {
+                // Identity & Relational Keys
+                recordNo: generatedCustomId,
+                caseId: generatedCustomId,
+                patientId: generatedCustomId,
+                itrDisplayNo: fullItrDisplayString,
+                facilityId: resolvedFacilityId,
+                facilityAcronym: acronym,
+                status: "Active",
+                currentDayDose: "Day 0",
 
-                    exposureDate: getVal('exposureDate'),
-                    consultDateTime: getVal('consultDateTime'),
-                    birthday: getVal('birthday'),
-                    age: getVal('age'),
-                    sex: getVal('sex'),
-                    civilStatus: getVal('civilStatus'),
-                    religion: getVal('religion'),
-                    contactNo: getVal('contactNo'),
-                    spouseName: getVal('spouseName'),
-                    parentName: getVal('parentName'),
-                    phic: {
-                        categories: getCheckedMap('phic'),
-                        membership: getPillValue('phicMembership')
-                    },
+                // Demographics
+                lastName: lName,
+                firstName: fName,
+                middleName: mName,
+                suffix: suffix,
+                fullName: parsedFullName,
+                name: parsedFullName,
+                birthday: getVal('birthday') || null,
+                age: Number(ageVal),
+                sex: sexVal,
+                civilStatus: getVal('civilStatus'),
+                religion: getVal('religion'),
+                contactNo: getVal('contactNo'),
+                spouseName: getVal('spouseName'),
+                parentName: getVal('parentName'),
+
+                // Address
+                address: {
                     houseStreet: houseStr,
                     barangay: brgy,
                     cityMunicipality: city,
                     province: prov,
-                    address: parsedAddress, 
-                    physician: getVal('physician') || activePersonnelName,
+                    fullAddress: parsedAddress
+                },
 
-                    biteArea: getVal('biteArea'),
-                    animalType: selectedAnimal,
+                // PhilHealth
+                phic: {
+                    categories: getCheckedMap('phic'),
+                    membership: getPillValue('phicMembership') || "None"
+                },
+
+                // Exposure & Clinical Encounter
+                exposure: {
+                    date: getVal('exposureDate'),
+                    time: getVal('exposureTime'),
+                    place: getVal('incidentPlace'),
+                    animalType: selectedAnimal || "Unknown",
                     animalStatus: getVal('animalStatus'),
-                    woundTypes: getCheckedMap('woundType'),
-                    incidentTime: getVal('exposureTime'),
-                    incidentPlace: getVal('incidentPlace'),
-                    exposureCategory: exposureCatValue,
-                    priorVaccination: pastHistory.immunization ? 'Yes' : '',
+                    biteArea: getVal('biteArea'),
+                    category: exposureCatValue ? `Category ${exposureCatValue}` : "Unclassified",
+                    woundTypes: getCheckedMap('woundType')
+                },
 
-                    bp: getVal('bp'),
-                    temp: getVal('temp'),
-                    pulse: getVal('pulse'),
-                    resp: getVal('resp'),
-                    o2sat: getVal('o2sat'),
-                    weight: getVal('weight'),
-                    height: getVal('height'),
+                // Backward-compatibility top-level fields for existing queries
+                exposureType: selectedAnimal ? `${selectedAnimal} Exposure` : "Animal Exposure",
+                classification: exposureCatValue ? `Category ${exposureCatValue}` : "Unclassified",
+                exposureDate: getVal('exposureDate'),
+                consultDateTime: getVal('consultDateTime'),
+                biteArea: getVal('biteArea'),
+                animalType: selectedAnimal,
+                animalStatus: getVal('animalStatus'),
+                physician: getVal('physician') || activePersonnelName,
+                recordedBy: activePersonnelName,
 
-                    pastMedicalHistory: pastHistory,
-                    allergies: pastHistory.allergy?.details || '',
-                    comorbidities: pastHistory.medicalProblems?.details || '',
+                // Vitals (Cast to numeric types)
+                vitalSigns: {
+                    bp: getVal('bp') || null,
+                    weightKg: parseFloat(getVal('weight')) || null,
+                    heightFt: parseFloat(getVal('height')) || null,
+                    tempC: parseFloat(getVal('temp')) || null,
+                    pulseBpm: parseInt(getVal('pulse'), 10) || null,
+                    respCpm: parseInt(getVal('resp'), 10) || null,
+                    o2sat: parseInt(getVal('o2sat'), 10) || null
+                },
 
-                    diagnosis: getVal('diagnosis'),
-                    physicianOrders: physicianOrders,
-                    woundCare: getVal('woundCare'),
-                    vaccineBrand: getVal('vaccineBrand'),
-                    route: getVal('route'),
-                    
-                    rigType: selectedRigType,
-                    rigDose: enteredRigDose,
-                    immunoglobulin: selectedRigType ? `${selectedRigType}${enteredRigDose ? ' - ' + enteredRigDose : ''}` : (enteredRigDose || 'None'),
+                // Past Medical History
+                pastMedicalHistory: pastHistory,
+                allergies: pastHistory.allergy?.details || '',
+                comorbidities: pastHistory.medicalProblems?.details || '',
 
-                    remarks: getVal('remarks'),
+                // Clinical Orders
+                physicianOrders: physicianOrders,
+                woundCare: getVal('woundCare'),
+                vaccineBrand: getVal('vaccineBrand'),
+                route: getVal('route'),
+                rigType: selectedRigType,
+                rigDose: enteredRigDose,
+                remarks: getVal('remarks'),
 
-                    pepScheduleDates: Object.fromEntries(
-                        PEP_DAYS.map((offset) => [`day${offset}`, getVal(`dateInputDay${offset}`)])
-                    ),
+                // PEP Vaccination Dates & Tracking Map
+                pepScheduleDates: {
+                    day0: getVal('dateInputDay0'),
+                    day3: getVal('dateInputDay3'),
+                    day7: getVal('dateInputDay7'),
+                    day14: getVal('dateInputDay14'),
+                    day28: getVal('dateInputDay28')
+                },
+                completedDoses: ["day0"],
 
-                    woundPhotoData: capturedBase64Photo || null,
-                    historyLogs: [
-                        {
-                            action: "Record Created",
-                            timestamp: new Date().toISOString(),
-                            personnel: activePersonnelName,
-                            details: `Processed from intake report and registered under ITR No. ${fullItrDisplayString}.`
-                        }
-                    ]
-                };
+                // Photo Guard
+                woundPhotoData: (capturedBase64Photo && capturedBase64Photo.length < 800000) 
+                    ? capturedBase64Photo 
+                    : null,
 
-                // 1. Save official registered patient record into patient-database
-                await addDoc(collection(db, "patient-database"), patientDataPayload);
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
 
-                // 2. Remove the processed intake draft record from patient-database
-                if (currentPrefillDocId) {
-                    try {
-                        await deleteDoc(doc(db, "patient-database", currentPrefillDocId));
-                        console.log("Deleted processed intake record from patient-database:", currentPrefillDocId);
-                    } catch (cleanupErr) {
-                        console.warn("Could not remove record from patient-database:", cleanupErr);
+                // Audit History Sub-array
+                historyLogs: [
+                    {
+                        action: "Record Registered",
+                        timestamp: new Date().toISOString(),
+                        personnel: activePersonnelName,
+                        details: `Initial consultation completed under ITR No. ${fullItrDisplayString}. Day 0 administered.`
                     }
-                }
+                ]
+            };
 
-                alert(`Success! Record ${generatedCustomId} (${fullItrDisplayString}) for ${parsedFullName} has been stored and registered.`);
-                window.location.href = "abtc-reg.html";
+            // 3. Write to primary patient collection
+            await addDoc(collection(db, "patients"), patientDataPayload);
 
-            } catch (error) {
-                console.error("Firestore persistence error:", error);
-                alert("Database Error: " + error.message);
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = submitBtnHtml;
+            // 4. Remove intake queue item if coming from prefill
+            if (currentPrefillDocId) {
+                try {
+                    await deleteDoc(doc(db, "patients", currentPrefillDocId));
+                } catch (cleanupErr) {
+                    console.warn("Intake queue cleanup bypassed:", cleanupErr);
                 }
             }
-        });
+
+            alert(`Record Saved Successfully!\nITR No: ${fullItrDisplayString}\nPatient: ${parsedFullName}`);
+            window.location.href = "abtc-reg.html";
+
+        } catch (error) {
+            console.error("Firestore persistence error:", error);
+            alert("Database Error: " + error.message);
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = submitBtnHtml;
+            }
+        }
+
+        return false;
+    }
+
+    if (itrForm) {
+        itrForm.addEventListener('submit', handleTreatmentRecordSave);
+
+        const submitBtn = itrForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                handleTreatmentRecordSave(e);
+            });
+        }
     }
 });

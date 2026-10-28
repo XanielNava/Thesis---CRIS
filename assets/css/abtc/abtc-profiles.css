@@ -182,3 +182,244 @@
     transform: scale(1.03);
     box-shadow: 0 4px 10px rgba(234, 97, 19, 0.2);
 }
+/* ==========================================================================
+   CRIS ABTC PROFILES PAGE STYLES
+   ========================================================================== */
+
+/* Main layout overrides */
+.profiles-main {
+    flex-direction: column;
+    align-items: center;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+/* Header brand logo */
+.header-brand-logo {
+    height: 40px;
+    width: auto;
+}
+
+/* Profile Selection Container */
+.profile-options-container {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 60px;
+    width: 100%;
+    max-width: 900px;
+    margin: 35px auto 25px auto;
+}
+
+.profile-card-option {
+    cursor: pointer;
+    flex: 1;
+    max-width: 320px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-card-option:hover {
+    transform: translateY(-4px);
+}
+
+.profile-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    text-align: center;
+}
+
+.profile-logo-frame {
+    width: 240px;
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.profile-seal-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.profile-role-title {
+    margin: 0;
+    font-weight: 700;
+    font-size: 16px;
+    color: #333333;
+    min-height: 48px;
+}
+
+.profile-role-subtext {
+    font-size: 13px;
+    color: #666666;
+    font-weight: 400;
+}
+
+/* Bottom Navigation / Back Button Bar */
+.profile-bottom-nav {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.btn-profile-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: transparent;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4b5563;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-profile-back:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+    border-color: #9ca3af;
+}
+
+.btn-profile-back svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Duty Personnel Roster Dropdown */
+.roster-select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #dddddd;
+    border-radius: 8px;
+    font-size: 15px;
+    margin-bottom: 15px;
+    outline: none;
+    background-color: #ffffff;
+}
+
+/* Forgot PIN Container */
+.forgot-pin-wrap {
+    text-align: right;
+    margin-bottom: 20px;
+    margin-top: -10px;
+}
+
+.forgot-pin-link {
+    font-size: 12px;
+    color: #ea6113;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.forgot-pin-link:hover {
+    text-decoration: underline;
+}
+/* ==========================================================================
+   QR SCANNER & PROFILE GATEKEEPER MODAL STYLES
+   ========================================================================== */
+
+/* Scanner Toggle Tabs inside modal */
+.scanner-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #f3f4f6;
+    padding-bottom: 8px;
+}
+
+.scanner-tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #6b7280;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.scanner-tab-btn.active {
+    background-color: #fff7ed;
+    color: #ea6113;
+}
+
+/* QR Camera Viewport Area */
+.qr-camera-container {
+    width: 100%;
+    min-height: 220px;
+    background-color: #111827;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#qrReader {
+    width: 100% !important;
+    border: none !important;
+}
+
+/* Scanned Profile Banner (Revealed after successful QR read) */
+.scanned-identity-banner {
+    display: none;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    text-align: left;
+    align-items: center;
+    gap: 12px;
+}
+
+.scanned-identity-banner.active {
+    display: flex;
+}
+
+.scanned-identity-banner .id-badge-icon {
+    font-size: 24px;
+    color: #16a34a;
+}
+
+.scanned-identity-banner .id-meta-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: #166534;
+    display: block;
+}
+
+.scanned-identity-banner .id-meta-role {
+    font-size: 12px;
+    color: #4b5563;
+    display: block;
+}
+
+.btn-rescan {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: #ea6113;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}

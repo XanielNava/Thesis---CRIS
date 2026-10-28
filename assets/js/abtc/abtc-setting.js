@@ -1,19 +1,26 @@
 // abtc-setting.js - Core Profile & Workspace Meta Config Controller
-import { onAuthStateChanged, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+// Conformed to CRIS Master Architecture ('facilities/{facilityId}')
 
-// Import shared central instances (Managed by firebase-config.js switch)
+import { 
+    onAuthStateChanged, updatePassword, signOut 
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { 
+    doc, getDoc, updateDoc 
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+// Import shared central instances
 import { auth, db } from '../firebase/firebase-config.js';
 
-let currentFacilityId = null;
+let currentFacilityId = sessionStorage.getItem("activeFacilityId") || null;
 let processedBase64Logo = null;
 
 // =====================================================
 // 1. Fetch and Populate Facility Data
 // =====================================================
 async function loadFacilityData(facilityId) {
+  if (!facilityId) return;
   currentFacilityId = facilityId;
-  console.log(`Fetching Firestore data for document ID: ${facilityId}`);
+  console.log(`Fetching facility settings for document ID: ${facilityId}`);
   
   const docRef = doc(db, "facilities", facilityId);
   
@@ -23,8 +30,15 @@ async function loadFacilityData(facilityId) {
     if (docSnap.exists()) {
       const data = docSnap.data();
       
-      document.getElementById("facilityName").value = data.facilityName || "";
-      document.getElementById("facilityCode").value = data.acronym || "";
+      const facName = data.facilityName || data.name || "";
+      const acronym = data.acronym || data.code || "";
+
+      document.getElementById("facilityName").value = facName;
+      document.getElementById("facilityCode").value = acronym;
+
+      // Update active session branding
+      sessionStorage.setItem("activeFacilityName", facName);
+      sessionStorage.setItem("activeFacilityAcronym", acronym);
 
       if (data.contactInfo) {
         document.getElementById("adminName").value = data.contactInfo.contactPerson || "";
@@ -51,7 +65,7 @@ async function loadFacilityData(facilityId) {
       console.warn(`No document found in Firestore under ID: ${facilityId}`);
     }
   } catch (error) {
-    console.error("Firestore fetch error:", error);
+    console.error("Firestore facility fetch error:", error);
   }
 }
 
@@ -80,11 +94,11 @@ if (logoInputElement) {
 }
 
 // =====================================================
-// 3. Save Facility Changes & Update Password
+// 3. Save Facility Changes & Update Credentials
 // =====================================================
 async function saveFacilityChanges() {
   if (!currentFacilityId) {
-    alert("Error: No active facility identity loaded.");
+    alert("Error: No active facility identity loaded. Please re-authenticate.");
     return;
   }
 
@@ -107,17 +121,31 @@ async function saveFacilityChanges() {
   }
 
   saveBtn.disabled = true;
-  saveBtn.innerText = "Saving...";
+  saveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
 
   try {
+    // 1. Password update if requested
     if (shouldUpdatePassword && auth.currentUser) {
-      await updatePassword(auth.currentUser, newPassword);
+      try {
+        await updatePassword(auth.currentUser, newPassword);
+      } catch (pwErr) {
+        if (pwErr.code === 'auth/requires-recent-login') {
+          alert("Security Notice: Updating your password requires a recent login. Please log out, log in again, and retry.");
+        } else {
+          alert(`Password Update Notice: ${pwErr.message}`);
+        }
+      }
     }
 
+    const facName = document.getElementById("facilityName").value.trim();
+    const facAcronym = document.getElementById("facilityCode").value.trim().toUpperCase();
+
+    // 2. Document update according to schema
     const docRef = doc(db, "facilities", currentFacilityId);
     const updatedData = {
-      facilityName: document.getElementById("facilityName").value.trim(),
-      acronym: document.getElementById("facilityCode").value.trim(),
+      facilityName: facName,
+      acronym: facAcronym,
+      code: facAcronym,
       address: {
         street: document.getElementById("streetAddress").value.trim(),
         barangay: document.getElementById("barangay").value.trim(),
@@ -136,6 +164,11 @@ async function saveFacilityChanges() {
     }
 
     await updateDoc(docRef, updatedData);
+
+    // 3. Immediately sync session variables across all other views
+    sessionStorage.setItem("activeFacilityName", facName);
+    sessionStorage.setItem("activeFacilityAcronym", facAcronym);
+
     alert("Facility profile updated successfully!");
 
     if (processedBase64Logo) {
@@ -151,26 +184,44 @@ async function saveFacilityChanges() {
     alert(`Failed to save configuration changes: ${error.message}`);
   } finally {
     saveBtn.disabled = false;
-    saveBtn.innerText = "Save Changes";
+    saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Changes`;
   }
 }
 
-document.getElementById("saveFacilityBtn").addEventListener("click", saveFacilityChanges);
+document.getElementById("saveFacilityBtn")?.addEventListener("click", saveFacilityChanges);
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    loadFacilityData(user.uid);
-  } else {
-    window.location.href = "abtc-login.html";
-  }
-});
+// Prioritize session facilityId from QR / login
+if (currentFacilityId) {
+    loadFacilityData(currentFacilityId);
+}
 
+if (auth) {
+    onAuthStateChanged(auth, async (user) => {
+        if (user && !currentFacilityId) {
+            try {
+                const userSnap = await getDoc(doc(db, "users", user.uid));
+                if (userSnap.exists() && userSnap.data().facilityId) {
+                    currentFacilityId = userSnap.data().facilityId;
+                } else {
+                    currentFacilityId = user.uid;
+                }
+            } catch (e) {
+                currentFacilityId = user.uid;
+            }
+            sessionStorage.setItem("activeFacilityId", currentFacilityId);
+            loadFacilityData(currentFacilityId);
+        }
+    });
+}
+
+// Intercept logout and clear session
 const logoutBtn = document.getElementById("logout-btn");
 if (logoutBtn) {
     logoutBtn.addEventListener("click", async (e) => {
         e.preventDefault();
         if (confirm("Are you sure you want to exit configurations?")) {
-            await signOut(auth);
+            if (auth) await signOut(auth);
+            sessionStorage.clear();
             localStorage.removeItem("activeDesignation");
             localStorage.removeItem("activePersonnelName");
             window.location.href = 'abtc-login.html';

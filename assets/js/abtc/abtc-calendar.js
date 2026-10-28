@@ -1,25 +1,17 @@
-// abtc-calendar.js - Dynamic PEP Calendar Engine (Root Collection)
+// abtc-calendar.js - Dynamic PEP Calendar Engine (Conformed to 'patients')
 
-// 1. Import required Firestore functions from CDN
 import { 
     collection, onSnapshot, query, where, doc, getDoc, updateDoc 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
-// 2. Import required Auth functions from CDN
-import { 
-    onAuthStateChanged 
-} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
-
-// 3. Import shared Auth & Firestore instances (Managed by firebase-config.js switch)
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { auth, db } from '../firebase/firebase-config.js';
 
-// Global state variables
 let currentDate = new Date();
-let activeFacilityId = null;
+let activeFacilityId = sessionStorage.getItem("activeFacilityId") || null;
 let allDosesList = [];
 let pendingAdministerTarget = null;
 
-// DOM Elements
 const monthYearLabel = document.getElementById("currentMonthYearLabel");
 const calendarDaysGrid = document.getElementById("calendarDaysGrid");
 const upcomingDoseList = document.getElementById("upcomingDoseList");
@@ -44,65 +36,33 @@ const pharmacyInputWrap = document.getElementById("pharmacyInputWrap");
 const confirmPharmacyName = document.getElementById("confirmPharmacyName");
 const btnAcquireVial = document.getElementById("btnAcquireVialTicket");
 
-// Authentication Listener
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        activeFacilityId = user.uid;
-        
-        try {
-            const userRole = sessionStorage.getItem("activeDesignation") || localStorage.getItem("activeDesignation") || "Nurse";
-            let activePersonnel = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
+function initCalendarSession() {
+    const userRole = sessionStorage.getItem("activeDesignation") || "Nurse";
+    const activePersonnel = sessionStorage.getItem("activePersonnelName") || "Duty Personnel";
 
-            if (!activePersonnel) {
-                const facilitySnapshot = await getDoc(doc(db, "facilities", user.uid));
-                if (facilitySnapshot.exists()) {
-                    const facilityData = facilitySnapshot.data();
-                    activePersonnel = userRole === "Owner" ? facilityData.contactInfo?.contactPerson : "Attending Personnel";
-                    sessionStorage.setItem("activePersonnelName", activePersonnel);
-                }
-            }
-
-            const activeStaffMember = activePersonnel || "Duty Personnel";
-            const displayRoleLabel = userRole === "Owner" ? "Administrator / Owner" : "Personnel";
-
-            if (profileContainer) {
-                profileContainer.innerHTML = `<strong>${activeStaffMember}</strong><br><span>${displayRoleLabel}</span>`;
-            }
-        } catch (e) {
-            console.error("Calendar session error:", e);
-        }
-
-        streamPatientSchedules(user.uid);
-    } else {
-        window.location.href = "abtc-login.html";
+    if (profileContainer) {
+        profileContainer.innerHTML = `<strong>${activePersonnel}</strong><br><span>${userRole}</span>`;
     }
-});
 
-function computePepSchedule(day0DateStr) {
-    if (!day0DateStr) return [];
-    const baseDate = new Date(day0DateStr);
-    
-    const intervals = [
-        { label: "Day 0", offset: 0, class: "badge-day0" },
-        { label: "Day 3", offset: 3, class: "badge-day3" },
-        { label: "Day 7", offset: 7, class: "badge-day7" },
-        { label: "Day 14", offset: 14, class: "badge-day14" },
-        { label: "Day 28", offset: 28, class: "badge-day28" }
-    ];
+    if (activeFacilityId) {
+        streamPatientSchedules(activeFacilityId);
+    }
+}
 
-    return intervals.map(item => {
-        const target = new Date(baseDate);
-        target.setDate(target.getDate() + item.offset);
-        return {
-            doseLabel: item.label,
-            badgeClass: item.class,
-            targetDateIso: target.toISOString().split("T")[0]
-        };
+initCalendarSession();
+
+if (auth) {
+    onAuthStateChanged(auth, async (user) => {
+        if (user && !activeFacilityId) {
+            activeFacilityId = user.uid;
+            sessionStorage.setItem("activeFacilityId", activeFacilityId);
+            streamPatientSchedules(activeFacilityId);
+        }
     });
 }
 
 function streamPatientSchedules(facilityId) {
-    const q = query(collection(db, "patient-database"), where("facilityId", "==", facilityId));
+    const q = query(collection(db, "patients"), where("facilityId", "==", facilityId));
 
     onSnapshot(q, (snapshot) => {
         allDosesList = [];
@@ -110,23 +70,36 @@ function streamPatientSchedules(facilityId) {
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             const patientName = data.fullName || data.name || "Unknown Patient";
-            const day0Date = data.exposureDate || data.consultDateTime?.split("T")[0];
+            const pepDates = data.pepScheduleDates || {};
+            const completedDoses = Array.isArray(data.completedDoses) ? data.completedDoses : [];
 
-            if (day0Date) {
-                const schedule = computePepSchedule(day0Date);
-                const completedDoses = data.completedDoses || [];
+            const dayDefs = [
+                { key: "day0", label: "Day 0", class: "badge-day0" },
+                { key: "day3", label: "Day 3", class: "badge-day3" },
+                { key: "day7", label: "Day 7", class: "badge-day7" },
+                { key: "day14", label: "Day 14", class: "badge-day14" },
+                { key: "day28", label: "Day 28", class: "badge-day28" }
+            ];
 
-                schedule.forEach(dose => {
+            dayDefs.forEach(def => {
+                const targetDateIso = pepDates[def.key];
+                if (targetDateIso) {
+                    const isDone = completedDoses.some(d => {
+                        const cleanDone = String(d).replace(/\s+/g, '').toLowerCase();
+                        return cleanDone === def.label.replace(/\s+/g, '').toLowerCase() || cleanDone === def.key;
+                    });
+
                     allDosesList.push({
                         patientId: docSnap.id,
                         patientName: patientName,
-                        doseLabel: dose.doseLabel,
-                        targetDateIso: dose.targetDateIso,
-                        badgeClass: dose.badgeClass,
-                        isDone: completedDoses.includes(dose.doseLabel)
+                        doseLabel: def.label,
+                        doseKey: def.key,
+                        targetDateIso: targetDateIso,
+                        badgeClass: def.class,
+                        isDone: isDone
                     });
-                });
-            }
+                }
+            });
         });
 
         renderCalendarGrid();
@@ -136,7 +109,6 @@ function streamPatientSchedules(facilityId) {
 
 function renderCalendarGrid() {
     if (!calendarDaysGrid || !monthYearLabel) return;
-
     calendarDaysGrid.innerHTML = "";
 
     const year = currentDate.getFullYear();
@@ -148,7 +120,6 @@ function renderCalendarGrid() {
     const firstDayIndex = new Date(year, month, 1).getDay();
     const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
     const prevMonthDays = new Date(year, month, 0).getDate();
-
     const todayIso = new Date().toISOString().split("T")[0];
 
     for (let i = firstDayIndex; i > 0; i--) {
@@ -283,7 +254,7 @@ function openDayDetailsModal(dateIso) {
                     ${item.isDone ? 
                         `<span style="color:#2b8a3e; font-weight:bold; font-size:13px;"><i class="fa-solid fa-check-circle"></i> Done</span>` : 
                         `<button class="btn-enable btn-mark-administered" data-id="${item.patientId}" data-name="${item.patientName}" data-dose="${item.doseLabel}" style="padding: 5px 10px; font-size:12px;">
-                            <i class="fa-solid fa-syringe"></i> Mark Done
+                            <i class="fa-solid fa-syringe"></i> Administer Dose
                          </button>`
                     }
                 </div>
@@ -364,25 +335,22 @@ if (btnAcquireVial) {
 
 if (submitConfirmDoseBtn) {
     submitConfirmDoseBtn.addEventListener("click", async () => {
-        if (!pendingAdministerTarget || !activeFacilityId) return;
+        if (!pendingAdministerTarget) return;
 
         const { patientId, patientName, doseLabel } = pendingAdministerTarget;
         const isPatientPurchased = radioPatientPurchased && radioPatientPurchased.checked;
         const pharmacyName = confirmPharmacyName ? confirmPharmacyName.value.trim() : "";
 
         try {
-            const patientDocRef = doc(db, "patient-database", patientId);
+            const patientDocRef = doc(db, "patients", patientId);
             const patientSnap = await getDoc(patientDocRef);
 
             if (patientSnap.exists()) {
                 const patientData = patientSnap.data();
-                const completed = patientData.completedDoses || [];
-                const history = patientData.historyLogs || [];
+                const completed = Array.isArray(patientData.completedDoses) ? patientData.completedDoses : [];
+                const history = Array.isArray(patientData.historyLogs) ? patientData.historyLogs : [];
 
-                const activeStaff = sessionStorage.getItem("activePersonnelName") 
-                    || localStorage.getItem("activePersonnelName") 
-                    || "Duty Personnel";
-
+                const activeStaff = sessionStorage.getItem("activePersonnelName") || "Duty Personnel";
                 const sourceLabel = isPatientPurchased 
                     ? `Patient-Purchased${pharmacyName ? ' (' + pharmacyName + ')' : ''}`
                     : "Facility Stock";
@@ -410,7 +378,6 @@ if (submitConfirmDoseBtn) {
     });
 }
 
-// Navigation & Session Management
 document.getElementById("prevMonthBtn")?.addEventListener("click", () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
     renderCalendarGrid();
