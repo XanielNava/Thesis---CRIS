@@ -1,37 +1,23 @@
-
 /* ==========================================================================
-   SYSTEM SETTINGS — page script
-   Self-contained: no shared files are required.
-
-   Sections:
-     1. Sidebar (TRANSITIONAL — replace when the master sidebar is finalized)
-     2. Helpers
-     3. Defaults, validation rules, and storage
-     4. Appearance (theme, density, motion)
-     5. State (saved vs. draft)
-     6. Field binding
-     7. Reference lists (chips)
-     8. Tabs
-     9. Validation and actions
-     10. Events
-     11. Initialization
+   SYSTEM SETTINGS — PHO ADMIN PAGE CONTROLLER (settings.js)
+   Synchronizes system defaults & reference data with Firestore + audit_logs
    ========================================================================== */
+
+import { fetchSystemSettingsFromDb, saveSystemSettingsToDb, logoutAdmin } from '../db/settings-db.js';
+
 (function () {
     'use strict';
 
     /* ======================================================================
-       1. SIDEBAR (TRANSITIONAL)
-       Collapse/expand behavior matches sidebar-master.css. The state uses the
-       same localStorage key as the master sidebar, so the preference carries
-       across pages. Remove or replace this section when the sidebar is final.
+       1. SIDEBAR & LOGOUT
        ====================================================================== */
 
     const SIDEBAR_KEY = 'sidebarCollapsed';
-
     const sidebar = document.getElementById('sidebar');
     const appLayout = document.getElementById('appLayout');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const logoutModal = document.getElementById('logoutModal');
+    const logoutConfirm = document.getElementById('logoutConfirm');
 
     function readSidebarState() {
         try {
@@ -44,23 +30,28 @@
     function storeSidebarState(collapsed) {
         try {
             localStorage.setItem(SIDEBAR_KEY, String(collapsed));
-        } catch (e) { /* storage unavailable: state is not persisted */ }
+        } catch (e) { /* Storage unavailable */ }
     }
 
     function applySidebarState(collapsed) {
+        if (!sidebar || !appLayout) return;
         sidebar.classList.toggle('collapsed', collapsed);
         appLayout.classList.toggle('sidebar-collapsed', collapsed);
-        sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        if (sidebarToggle) {
+            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        }
     }
 
-    sidebarToggle.addEventListener('click', function () {
-        const collapsed = !sidebar.classList.contains('collapsed');
-        applySidebarState(collapsed);
-        storeSidebarState(collapsed);
-    });
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function () {
+            const collapsed = !sidebar.classList.contains('collapsed');
+            applySidebarState(collapsed);
+            storeSidebarState(collapsed);
+        });
+    }
 
     /* ======================================================================
-       2. HELPERS
+       2. HELPERS & UTILITIES
        ====================================================================== */
 
     const $ = (selector, root = document) => root.querySelector(selector);
@@ -76,6 +67,7 @@
     let toastTimer = null;
 
     function toast(message) {
+        if (!toastEl) return;
         toastEl.textContent = message;
         toastEl.classList.add('show');
         clearTimeout(toastTimer);
@@ -83,6 +75,7 @@
     }
 
     function openModal(el) {
+        if (!el) return;
         el.classList.add('open');
         el.setAttribute('aria-hidden', 'false');
     }
@@ -94,89 +87,34 @@
     }
 
     /* ======================================================================
-       3. DEFAULTS, VALIDATION RULES, AND STORAGE
+       3. DEFAULT SETTINGS & REFERENCE LISTS
        ====================================================================== */
 
-    const STORAGE_KEY = 'cris-admin-settings';
+    const LOCAL_PREF_KEY = 'cris-admin-settings';
 
     const DEFAULTS = {
-        // General
+        // General (Synced to Firestore)
         systemName: 'Community-Centric Rabies Information Systems',
         shortName: 'CRIS',
-        supportEmail: 'support@example.com',
-        supportPhone: '',
+        supportEmail: 'pho.iloilo.rabies@gmail.com',
+        supportPhone: '(033) 337-2101',
         timezone: 'Asia/Manila',
-        dateFormat: 'MM/DD/YYYY',
-        language: 'en',
 
-        // Appearance
+        // Appearance (Local to this workstation)
         theme: 'light',
         density: 'comfortable',
         reduceMotion: false,
 
-        // Security
-        sessionTimeout: 30,
-        passwordMinLength: 8,
-        require2fa: false,
-        maxFailedLogins: 5,
-        lockoutMinutes: 15,
-
-        // Notifications
-        notifyNewRegistration: true,
-        notifyRoleChange: true,
-        notifyComplaints: true,
-        digestFrequency: 'daily',
-
-        // Facility registration
-        requireApproval: true,
-        allowSelfRegistration: false,
-        defaultFacilityStatus: 'Active',
-        reactivationReview: true,
-
-        // Reference data
-        animalTypes: ['Dog', 'Cat', 'Monkey', 'Other'],
-        biteCategories: ['Category I', 'Category II', 'Category III'],
-        facilityTypes: ['ABTC', 'Satellite Clinic'],
-
-        // Data and audit
-        auditRetentionDays: 365,
-        logRoleChanges: true
-    };
-
-    // Numeric fields and their allowed ranges (inclusive)
-    const RANGES = {
-        sessionTimeout: [5, 240],
-        passwordMinLength: [8, 32],
-        maxFailedLogins: [3, 10],
-        lockoutMinutes: [5, 120],
-        auditRetentionDays: [30, 3650]
+        // Reference Data (Synced to Firestore)
+        animalTypes: ['Dog', 'Cat', 'Monkey', 'Livestock', 'Other'],
+        biteCategories: ['Category I (Touching/Feeding)', 'Category II (Minor Scratches/Abrasions)', 'Category III (Transdermal/Punctures)'],
+        facilityTypes: ['ABTC', 'RHU Satellite Clinic', 'Provincial Hospital', 'Private Hospital']
     };
 
     const LISTS = ['animalTypes', 'biteCategories', 'facilityTypes'];
 
-    function loadStored() {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) return { values: clone(DEFAULTS), savedAt: null };
-
-            const parsed = JSON.parse(raw);
-            return {
-                values: Object.assign(clone(DEFAULTS), parsed.values || {}),
-                savedAt: parsed.savedAt || null
-            };
-        } catch (e) {
-            return { values: clone(DEFAULTS), savedAt: null };
-        }
-    }
-
-    function persist(values, savedAt) {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({ values, savedAt }));
-        } catch (e) { /* storage unavailable: settings apply for this session only */ }
-    }
-
     /* ======================================================================
-       4. APPEARANCE (theme, density, motion)
+       4. WORKSTATION APPEARANCE
        ====================================================================== */
 
     const systemDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
@@ -194,7 +132,6 @@
         document.body.classList.toggle('reduce-motion', !!values.reduceMotion);
     }
 
-    // When the theme is "System", follow changes to the OS setting
     if (systemDark) {
         systemDark.addEventListener('change', function () {
             if (saved.theme === 'system') applyAppearance(saved);
@@ -202,19 +139,17 @@
     }
 
     /* ======================================================================
-       5. STATE (saved values vs. draft being edited)
+       5. STATE MANAGEMENT
        ====================================================================== */
 
-    const stored = loadStored();
-    let saved = stored.values;       // last saved values
-    let savedAt = stored.savedAt;    // ISO timestamp of last save
-    let draft = clone(saved);        // values currently shown in the form
+    let saved = clone(DEFAULTS);
+    let savedAt = null;
+    let draft = clone(DEFAULTS);
 
     const isDirty = () => JSON.stringify(saved) !== JSON.stringify(draft);
 
     /* ======================================================================
-       6. FIELD BINDING
-       Every element with data-key is bound to draft[key].
+       6. FIELD BINDING & SAVE BAR
        ====================================================================== */
 
     const form = document.getElementById('settingsForm');
@@ -238,7 +173,6 @@
 
     function readField(el) {
         if (el.type === 'checkbox') return el.checked;
-        if (el.type === 'number') return el.value === '' ? '' : Number(el.value);
         return el.value;
     }
 
@@ -262,7 +196,7 @@
     }
 
     /* ======================================================================
-       7. REFERENCE LISTS (chips)
+       7. REFERENCE CHIP EDITORS
        ====================================================================== */
 
     function renderChips(listKey) {
@@ -306,7 +240,6 @@
 
     function removeChip(editor, index) {
         const listKey = editor.dataset.list;
-
         if (draft[listKey].length <= 1) {
             toast('At least one item is required in this list.');
             return;
@@ -318,7 +251,7 @@
     }
 
     /* ======================================================================
-       8. TABS
+       8. TAB NAVIGATION
        ====================================================================== */
 
     const nav = document.querySelector('.settings-nav');
@@ -342,7 +275,8 @@
 
         sections.forEach((s) => s.classList.toggle('active', s.dataset.section === name));
         history.replaceState(null, '', '#' + name);
-        document.getElementById('mainContent').scrollTop = 0;
+        const mainContent = document.getElementById('mainContent');
+        if (mainContent) mainContent.scrollTop = 0;
     }
 
     nav.addEventListener('click', function (e) {
@@ -351,12 +285,11 @@
     });
 
     /* ======================================================================
-       9. VALIDATION AND ACTIONS
+       9. VALIDATION & SAVE
        ====================================================================== */
 
     function validate(values) {
         const errors = [];
-
         if (!String(values.systemName).trim()) {
             errors.push(['systemName', 'System name is required.']);
         }
@@ -366,58 +299,64 @@
         if (values.supportEmail && !/^\S+@\S+\.\S+$/.test(values.supportEmail)) {
             errors.push(['supportEmail', 'Enter a valid support email address.']);
         }
-
-        Object.entries(RANGES).forEach(([key, [min, max]]) => {
-            const v = values[key];
-            if (v === '' || Number.isNaN(v) || v < min || v > max) {
-                errors.push([key, `Enter a number from ${min} to ${max}.`]);
-            }
-        });
-
         LISTS.forEach((key) => {
             if (!values[key].length) {
                 errors.push([key, 'Each reference list needs at least one item.']);
             }
         });
-
         return errors;
     }
 
-    function reportErrors(errors) {
-        $$('.is-invalid', form).forEach((el) => el.classList.remove('is-invalid'));
-
-        errors.forEach(([key]) => {
-            const el = $(`[data-key="${key}"]`, form);
-            if (el) el.classList.add('is-invalid');
-        });
-
-        const [firstKey, message] = errors[0];
-        toast(message);
-
-        const field = $(`[data-key="${firstKey}"]`, form) || $(`[data-list="${firstKey}"]`, form);
-        if (field) {
-            const section = field.closest('.settings-section');
-            if (section) showTab(section.dataset.section);
-
-            const target = field.matches('[data-list]') ? $('input', field) : field;
-            if (target) target.focus();
-        }
-    }
-
-    function saveSettings() {
+    async function saveSettings() {
         const errors = validate(draft);
         if (errors.length) {
-            reportErrors(errors);
+            errors.forEach(([key]) => {
+                const el = $(`[data-key="${key}"]`, form);
+                if (el) el.classList.add('is-invalid');
+            });
+            toast(errors[0][1]);
             return;
         }
 
-        saved = clone(draft);
-        savedAt = new Date().toISOString();
-        persist(saved, savedAt);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
 
-        applyAppearance(saved);
-        renderAll();
-        toast('Settings saved.');
+        try {
+            // 1. Sync global settings to Firestore
+            await saveSystemSettingsToDb({
+                systemName: draft.systemName,
+                shortName: draft.shortName,
+                supportEmail: draft.supportEmail,
+                supportPhone: draft.supportPhone,
+                timezone: draft.timezone,
+                animalTypes: draft.animalTypes,
+                biteCategories: draft.biteCategories,
+                facilityTypes: draft.facilityTypes
+            });
+
+            // 2. Persist local appearance preferences
+            localStorage.setItem(LOCAL_PREF_KEY, JSON.stringify({
+                values: {
+                    theme: draft.theme,
+                    density: draft.density,
+                    reduceMotion: draft.reduceMotion
+                },
+                savedAt: new Date().toISOString()
+            }));
+
+            saved = clone(draft);
+            savedAt = new Date().toISOString();
+
+            applyAppearance(saved);
+            renderAll();
+            toast('Settings saved and synchronized with database.');
+
+        } catch (err) {
+            console.error("Save error:", err);
+            toast('Failed to save settings: ' + err.message);
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
+        }
     }
 
     function discardChanges() {
@@ -427,40 +366,10 @@
         toast('Changes discarded.');
     }
 
-    function resetToDefaults() {
-        const confirmed = window.confirm(
-            'Reset all settings to their default values? Nothing changes until you save.'
-        );
-        if (!confirmed) return;
-
-        draft = clone(DEFAULTS);
-        $$('.is-invalid', form).forEach((el) => el.classList.remove('is-invalid'));
-        renderAll();
-        toast('Defaults restored. Save to apply.');
-    }
-
-    function exportSettings() {
-        const payload = {
-            exportedAt: new Date().toISOString(),
-            settings: saved
-        };
-
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'cris-admin-settings.json';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        setTimeout(() => URL.revokeObjectURL(url), 0);
-        toast('Settings exported.');
-    }
-
     function renderAbout() {
-        lastSavedEl.textContent = savedAt ? new Date(savedAt).toLocaleString() : 'Never';
+        if (lastSavedEl) {
+            lastSavedEl.textContent = savedAt ? new Date(savedAt).toLocaleString('en-PH') : 'Never';
+        }
     }
 
     function renderAll() {
@@ -479,7 +388,6 @@
         saveSettings();
     });
 
-    // Enter in a chip input adds the item instead of submitting the form
     form.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter') return;
         const editor = e.target.closest('.chip-add') && e.target.closest('[data-list]');
@@ -490,14 +398,12 @@
     });
 
     document.addEventListener('click', function (e) {
-        // Add a reference item
         const addBtn = e.target.closest('[data-add]');
         if (addBtn) {
             addChip(addBtn.closest('[data-list]'));
             return;
         }
 
-        // Remove a reference item
         const removeBtn = e.target.closest('.chip-remove');
         if (removeBtn) {
             removeChip(removeBtn.closest('[data-list]'), Number(removeBtn.dataset.index));
@@ -509,30 +415,24 @@
             return;
         }
 
-        if (e.target.closest('#resetBtn')) {
-            resetToDefaults();
-            return;
-        }
-
-        if (e.target.closest('#exportBtn')) {
-            exportSettings();
-            return;
-        }
-
-        // Logout flow
         if (e.target.closest('#logoutBtn')) {
             openModal(logoutModal);
             return;
         }
 
         if (e.target.closest('#logoutConfirm')) {
-            window.location.href = '../../../src/pho/pho-login.html'; // adjust to your login page
+            logoutAdmin().then(() => {
+                localStorage.clear();
+                window.location.href = '../pho/pho-login.html';
+            }).catch(() => {
+                window.location.href = '../pho/pho-login.html';
+            });
             return;
         }
 
         const closeBtn = e.target.closest('[data-close]');
         if (closeBtn) {
-            closeModal(closeBtn.closest('.logout-modal'));
+            closeModal(logoutModal);
             return;
         }
 
@@ -542,12 +442,11 @@
     });
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && logoutModal.classList.contains('open')) {
+        if (e.key === 'Escape' && logoutModal && logoutModal.classList.contains('open')) {
             closeModal(logoutModal);
         }
     });
 
-    // Warn before leaving the page with unsaved changes
     window.addEventListener('beforeunload', function (e) {
         if (isDirty()) {
             e.preventDefault();
@@ -556,11 +455,30 @@
     });
 
     /* ======================================================================
-       11. INITIALIZATION
+       11. INITIALIZATION & CLOUD BOOT
        ====================================================================== */
 
-    applySidebarState(readSidebarState());
-    applyAppearance(saved);
-    renderAll();
-    showTab(location.hash.slice(1) || 'general');
+    async function initSettings() {
+        applySidebarState(readSidebarState());
+
+        // 1. Load local preferences
+        let localPrefs = {};
+        try {
+            const raw = localStorage.getItem(LOCAL_PREF_KEY);
+            if (raw) localPrefs = JSON.parse(raw).values || {};
+        } catch (e) {}
+
+        // 2. Fetch live settings from Firestore
+        const cloudSettings = await fetchSystemSettingsFromDb();
+
+        saved = Object.assign(clone(DEFAULTS), cloudSettings || {}, localPrefs);
+        savedAt = cloudSettings?.updatedAt?.toDate ? cloudSettings.updatedAt.toDate().toISOString() : null;
+        draft = clone(saved);
+
+        applyAppearance(saved);
+        renderAll();
+        showTab(location.hash.slice(1) || 'general');
+    }
+
+    initSettings();
 })();

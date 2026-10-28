@@ -1,25 +1,25 @@
-
 /* ==========================================================================
-   SYSTEM OVERVIEW (DASHBOARD) — page script
-   Self-contained: no shared files are required.
-
-   Sections:
-     1. Sidebar (TRANSITIONAL — replace when the master sidebar is finalized)
-     2. Helpers
-     3. Sample data (in-memory only; nothing is persisted)
-     4. Actions
-     5. Rendering
-     6. Events
-     7. Initialization
+   SYSTEM OVERVIEW (DASHBOARD) — PHO ADMIN PAGE CONTROLLER (admin_dash.js)
+   Connected to Firestore: facilities, facility_applications, and users
    ========================================================================== */
+
+import { auth, db } from '../../firebase/firebase-config.js';
+import { 
+    collection, 
+    getDocs, 
+    doc, 
+    writeBatch, 
+    serverTimestamp, 
+    query, 
+    where 
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
 (function () {
     'use strict';
 
     /* ======================================================================
-       1. SIDEBAR (TRANSITIONAL)
-       Collapse/expand behavior matches sidebar-master.css. The state uses the
-       same localStorage key as the master sidebar, so the preference carries
-       across pages. Remove or replace this section when the sidebar is final.
+       1. SIDEBAR & SESSION NAVIGATION
        ====================================================================== */
 
     const SIDEBAR_KEY = 'sidebarCollapsed';
@@ -42,23 +42,41 @@
     function storeSidebarState(collapsed) {
         try {
             localStorage.setItem(SIDEBAR_KEY, String(collapsed));
-        } catch (e) { /* storage unavailable: state is not persisted */ }
+        } catch (e) { /* storage unavailable */ }
     }
 
     function applySidebarState(collapsed) {
+        if (!sidebar || !appLayout) return;
         sidebar.classList.toggle('collapsed', collapsed);
         appLayout.classList.toggle('sidebar-collapsed', collapsed);
-        sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        if (sidebarToggle) {
+            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        }
     }
 
-    sidebarToggle.addEventListener('click', function () {
-        const collapsed = !sidebar.classList.contains('collapsed');
-        applySidebarState(collapsed);
-        storeSidebarState(collapsed);
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function () {
+            const collapsed = !sidebar.classList.contains('collapsed');
+            applySidebarState(collapsed);
+            storeSidebarState(collapsed);
+        });
+    }
+
+    // Session Verification & Boot Entrypoint
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            console.warn("No active session found. Redirecting to login...");
+            window.location.href = '../pho/pho-login.html';
+            return;
+        }
+
+        console.log("Authenticated PHO Admin:", user.email);
+        applySidebarState(readSidebarState());
+        await loadDashboardMetrics();
     });
 
     /* ======================================================================
-       2. HELPERS
+       2. HELPERS & UTILITIES
        ====================================================================== */
 
     const $ = (selector) => document.querySelector(selector);
@@ -67,19 +85,11 @@
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[c]));
 
-    const findById = (list, id) => list.find((item) => item.id === id);
-
-    const nowStamp = () => new Date().toISOString().slice(0, 16).replace('T', ' ');
-
-    function nextId(list, prefix) {
-        const max = list.reduce((m, x) => Math.max(m, parseInt(x.id.split('-')[1], 10) || 0), 0);
-        return `${prefix}-${String(max + 1).padStart(3, '0')}`;
-    }
-
     const toastEl = document.getElementById('toast');
     let toastTimer = null;
 
     function toast(message) {
+        if (!toastEl) return;
         toastEl.textContent = message;
         toastEl.classList.add('show');
         clearTimeout(toastTimer);
@@ -87,116 +97,231 @@
     }
 
     function openModal(el) {
+        if (!el) return;
         el.classList.add('open');
+        el.style.display = 'flex';
         el.setAttribute('aria-hidden', 'false');
     }
 
     function closeModal(el) {
         if (!el) return;
         el.classList.remove('open');
+        el.style.display = 'none';
         el.setAttribute('aria-hidden', 'true');
     }
 
     /* ======================================================================
-       3. SAMPLE DATA (in-memory only)
+       3. FIRESTORE DATA STATE & FETCHING
        ====================================================================== */
 
-    const CURRENT_ADMIN = 'Alex Morgan (Super Admin)';
+    let pendingApplications = [];
+    let activeFacilities = [];
 
-    const facilities = [
-        { id: 'ABTC-001', name: 'Sample Central ABTC',   district: 'District 1', status: 'Active',    registered: '2026-01-15' },
-        { id: 'ABTC-002', name: 'Sample Riverside ABTC', district: 'District 2', status: 'Pending',   registered: '2026-10-14' },
-        { id: 'ABTC-003', name: 'Sample Northgate ABTC', district: 'District 3', status: 'Suspended', registered: '2026-03-02' },
-        { id: 'ABTC-004', name: 'Sample Coastal ABTC',   district: 'District 4', status: 'Inactive',  registered: '2026-05-20' },
-        { id: 'ABTC-005', name: 'Sample Hillside ABTC',  district: 'District 5', status: 'Pending',   registered: '2026-10-17' }
-    ];
+    async function loadDashboardMetrics() {
+        try {
+            // A. Fetch All Facilities
+            const facSnapshot = await getDocs(collection(db, "facilities"));
+            let totalFacCount = 0;
+            let activeFacCount = 0;
+            let suspendedCount = 0;
+            activeFacilities = [];
 
-    const users = [
-        { id: 'U-001', name: 'Alex Morgan', status: 'Active' },
-        { id: 'U-002', name: 'Jamie Reyes', status: 'Active' },
-        { id: 'U-003', name: 'Sam Lee',     status: 'Active' },
-        { id: 'U-004', name: 'Taylor Cruz', status: 'Inactive' }
-    ];
+            facSnapshot.forEach((docSnap) => {
+                totalFacCount++;
+                const data = docSnap.data();
+                const st = (data.status || '').toLowerCase();
 
-    const audit = [
-        { id: 'A-005', timestamp: '2026-10-17 15:20', action: 'Facility Updated',   affected: 'Sample Hillside ABTC (ABTC-005)',  performedBy: CURRENT_ADMIN, details: 'Facility information updated' },
-        { id: 'A-004', timestamp: '2026-10-16 10:02', action: 'Role Changed',       affected: 'Sam Lee (U-003)',                  performedBy: CURRENT_ADMIN, details: 'Admin → Facility Manager' },
-        { id: 'A-003', timestamp: '2026-10-14 09:44', action: 'Facility Suspended', affected: 'Sample Northgate ABTC (ABTC-003)', performedBy: CURRENT_ADMIN, details: 'Status changed from Active to Suspended' },
-        { id: 'A-002', timestamp: '2026-10-10 13:31', action: 'Account Created',    affected: 'Taylor Cruz (U-004)',              performedBy: CURRENT_ADMIN, details: 'Role assigned: Viewer' },
-        { id: 'A-001', timestamp: '2026-01-15 08:00', action: 'Facility Approved',  affected: 'Sample Central ABTC (ABTC-001)',   performedBy: CURRENT_ADMIN, details: 'Status changed from Pending to Active' }
-    ];
+                if (st === 'active') {
+                    activeFacCount++;
+                } else if (st === 'suspended' || st === 'inactive') {
+                    suspendedCount++;
+                }
+
+                activeFacilities.push({
+                    id: docSnap.id,
+                    name: data.facilityName || 'Unnamed Facility',
+                    createdAt: data.createdAt,
+                    ...data
+                });
+            });
+
+            // B. Fetch Active Users (STRICT PHO ADMIN SEPARATION)
+            const usersQuery = query(collection(db, "users"), where("status", "==", "Active"));
+            const userSnapshot = await getDocs(usersQuery);
+
+            let phoActiveCount = 0;
+            userSnapshot.forEach((docSnap) => {
+                const u = docSnap.data();
+                // Exclude any external facility head/staff
+                if (u.facilityId || u.accountType === 'facility' || u.facilityRole) {
+                    return;
+                }
+                phoActiveCount++;
+            });
+
+            // C. Fetch Pending Applications
+            const pendingQuery = query(collection(db, "facility_applications"), where("reviewStatus", "==", "Pending"));
+            const appSnapshot = await getDocs(pendingQuery);
+            
+            pendingApplications = [];
+            appSnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                pendingApplications.push({
+                    id: docSnap.id,
+                    name: data.facilityName || 'Unnamed Facility',
+                    district: `${data.address?.city || ''}${data.address?.province ? ', ' + data.address.province : ''}`,
+                    registered: data.submittedAt?.toDate 
+                        ? data.submittedAt.toDate().toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
+                        : 'Recently',
+                    raw: data
+                });
+            });
+
+            // Render Metrics
+            if ($('#statTotalFacilities')) $('#statTotalFacilities').textContent = totalFacCount;
+            if ($('#statActiveUsers')) $('#statActiveUsers').textContent = phoActiveCount;
+            if ($('#statActiveFacilities')) $('#statActiveFacilities').textContent = activeFacCount;
+            if ($('#statPending')) $('#statPending').textContent = appSnapshot.size;
+            if ($('#statSuspended')) $('#statSuspended').textContent = suspendedCount;
+
+            renderOverviewLists();
+
+        } catch (error) {
+            console.error("Dashboard metric loading error:", error);
+        }
+    }
 
     /* ======================================================================
-       4. ACTIONS
+       4. PANEL RENDERING
        ====================================================================== */
-
-    function logAudit(action, affected, details) {
-        audit.unshift({
-            id: nextId(audit, 'A'),
-            timestamp: nowStamp(),
-            action,
-            affected,
-            performedBy: CURRENT_ADMIN,
-            details
-        });
-    }
-
-    function setFacilityStatus(facility, next) {
-        if (facility.status === next) return;
-
-        const prev = facility.status;
-        facility.status = next;
-
-        const action =
-            next === 'Suspended' ? 'Facility Suspended' :
-            next === 'Inactive'  ? 'Facility Deactivated' :
-            prev === 'Pending'   ? 'Facility Approved' :
-                                   'Facility Activated';
-
-        logAudit(action, `${facility.name} (${facility.id})`, `Status changed from ${prev} to ${next}`);
-    }
-
-    /* ======================================================================
-       5. RENDERING
-       ====================================================================== */
-
-    function renderStats() {
-        const count = (list, fn) => list.filter(fn).length;
-
-        $('#statTotalFacilities').textContent = facilities.length;
-        $('#statActiveUsers').textContent = count(users, (u) => u.status === 'Active');
-        $('#statActiveFacilities').textContent = count(facilities, (f) => f.status === 'Active');
-        $('#statPending').textContent = count(facilities, (f) => f.status === 'Pending');
-        $('#statSuspended').textContent = count(facilities, (f) => f.status === 'Suspended' || f.status === 'Inactive');
-    }
 
     function renderOverviewLists() {
-        const pending = facilities.filter((f) => f.status === 'Pending');
+        // Pending Facility Approvals List
+        const pendingListEl = $('#pendingList');
+        if (pendingListEl) {
+            if (pendingApplications.length === 0) {
+                pendingListEl.innerHTML = '<li><span class="muted" style="padding: 12px; display: block; text-align: center;">No pending approvals. All caught up!</span></li>';
+            } else {
+                pendingListEl.innerHTML = pendingApplications.slice(0, 5).map((f) => `
+                    <li>
+                        <div class="li-main">
+                            <strong>${esc(f.name)}</strong>
+                            <small>${esc(f.district)} &bull; Submitted ${esc(f.registered)}</small>
+                        </div>
+                        <button class="btn btn-success btn-sm" data-action="approve-facility" data-id="${esc(f.id)}">Approve</button>
+                    </li>`).join('');
+            }
+        }
 
-        $('#pendingList').innerHTML = pending.length
-            ? pending.map((f) => `
-                <li>
-                    <div class="li-main">
-                        <strong>${esc(f.name)}</strong>
-                        <small>${esc(f.district)} · Registered ${esc(f.registered)}</small>
-                    </div>
-                    <button class="btn btn-success btn-sm" data-action="approve-facility" data-id="${esc(f.id)}">Approve</button>
-                </li>`).join('')
-            : '<li><span class="muted">No pending approvals.</span></li>';
+        // Recent Activity List (Recent Commissioned Facilities)
+        const activityListEl = $('#recentActivity');
+        if (activityListEl) {
+            if (activeFacilities.length === 0) {
+                activityListEl.innerHTML = '<li><span class="muted" style="padding: 12px; display: block; text-align: center;">No administrative activities recorded yet.</span></li>';
+            } else {
+                const sortedRecent = [...activeFacilities].sort((a, b) => {
+                    const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt instanceof Date ? a.createdAt.getTime() : 0);
+                    const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt instanceof Date ? b.createdAt.getTime() : 0);
+                    return timeB - timeA;
+                }).slice(0, 5);
 
-        $('#recentActivity').innerHTML = audit.slice(0, 5).map((a) => `
-            <li>
-                <div class="li-main">
-                    <strong>${esc(a.action)}</strong>
-                    <small>${esc(a.affected)} · ${esc(a.performedBy)}</small>
-                </div>
-                <small>${esc(a.timestamp)}</small>
-            </li>`).join('');
+                activityListEl.innerHTML = sortedRecent.map((fac) => {
+                    const dateStr = (() => {
+                        if (!fac.createdAt) return 'Recently';
+                        if (typeof fac.createdAt.toDate === 'function') {
+                            return fac.createdAt.toDate().toLocaleDateString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        }
+                        if (fac.createdAt instanceof Date) {
+                            return fac.createdAt.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        }
+                        const parsed = new Date(fac.createdAt);
+                        return !isNaN(parsed) 
+                            ? parsed.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) 
+                            : 'Recently';
+                    })();
+
+                    return `
+                        <li>
+                            <div class="li-main">
+                                <strong style="color: #166534;">Facility Commissioned</strong>
+                                <small>${esc(fac.name)} was activated into the network.</small>
+                            </div>
+                            <small class="muted">${esc(dateStr)}</small>
+                        </li>`;
+                }).join('');
+            }
+        }
     }
 
-    function renderAll() {
-        renderStats();
-        renderOverviewLists();
+    /* ======================================================================
+       5. ATOMIC APPROVAL ACTION
+       ====================================================================== */
+
+    async function approveApplicationFromDash(appId) {
+        const item = pendingApplications.find((a) => a.id === appId);
+        if (!item || !item.raw) return;
+
+        const raw = item.raw;
+        if (!window.confirm(`Approve and commission "${raw.facilityName}" directly from dashboard?`)) return;
+
+        try {
+            const batch = writeBatch(db);
+
+            // 1. Permanent entry in 'facilities'
+            const newFacilityRef = doc(collection(db, "facilities"));
+            const newFacilityId = newFacilityRef.id;
+
+            batch.set(newFacilityRef, {
+                facilityId: newFacilityId,
+                facilityName: raw.facilityName,
+                acronym: raw.acronym || '',
+                facilityType: raw.facilityType || 'ABTC',
+                status: "Active",
+                address: raw.address || {},
+                contactInfo: raw.contactInfo || {},
+                regulatoryData: raw.regulatoryData || {},
+                commissionedBy: auth.currentUser ? auth.currentUser.uid : "admin",
+                createdAt: serverTimestamp()
+            });
+
+            // 2. Activate user
+            if (raw.applicantUid) {
+                const userRef = doc(db, "users", raw.applicantUid);
+                batch.update(userRef, {
+                    status: "Active",
+                    facilityId: newFacilityId,
+                    updatedAt: serverTimestamp()
+                });
+
+                // 3. Link membership
+                const membershipRef = doc(db, "facility_memberships", `${raw.applicantUid}_${newFacilityId}`);
+                batch.set(membershipRef, {
+                    userId: raw.applicantUid,
+                    facilityId: newFacilityId,
+                    facilityRole: "Facility Head",
+                    isActive: true,
+                    assignedDate: serverTimestamp()
+                });
+            }
+
+            // 4. Delete pending application
+            const appRef = doc(db, "facility_applications", appId);
+            batch.delete(appRef);
+
+            // 5. Seed sequence counter
+            const counterRef = doc(db, "facility_counters", newFacilityId);
+            batch.set(counterRef, {
+                currentSequence: 0
+            });
+
+            await batch.commit();
+            toast(`${raw.facilityName} approved.`);
+            await loadDashboardMetrics();
+
+        } catch (err) {
+            console.error("Dashboard quick-approval error:", err);
+            alert("Approval failed: " + err.message);
+        }
     }
 
     /* ======================================================================
@@ -204,53 +329,41 @@
        ====================================================================== */
 
     document.addEventListener('click', function (e) {
-        // Approve a pending facility from the overview list
         const approveBtn = e.target.closest('[data-action="approve-facility"]');
         if (approveBtn) {
-            const facility = findById(facilities, approveBtn.dataset.id);
-            if (facility) {
-                setFacilityStatus(facility, 'Active');
-                toast(`${facility.name} approved.`);
-                renderAll();
-            }
+            approveApplicationFromDash(approveBtn.dataset.id);
             return;
         }
 
-        // Open logout confirmation
         if (e.target.closest('#logoutBtn')) {
             openModal(logoutModal);
             return;
         }
 
-        // Confirm logout
         if (e.target.closest('#logoutConfirm')) {
-            window.location.href = '../../../src/pho/pho-login.html'; // adjust to your login page
+            signOut(auth).then(() => {
+                localStorage.clear();
+                window.location.href = '../pho/pho-login.html';
+            }).catch(() => {
+                window.location.href = '../pho/pho-login.html';
+            });
             return;
         }
 
-        // Close buttons inside the logout modal
         const closeBtn = e.target.closest('[data-close]');
         if (closeBtn) {
-            closeModal(closeBtn.closest('.logout-modal'));
+            closeModal(logoutModal);
             return;
         }
 
-        // Click on the backdrop closes the logout modal
         if (e.target === logoutModal) {
             closeModal(logoutModal);
         }
     });
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && logoutModal.classList.contains('open')) {
+        if (e.key === 'Escape' && logoutModal && logoutModal.classList.contains('open')) {
             closeModal(logoutModal);
         }
     });
-
-    /* ======================================================================
-       7. INITIALIZATION
-       ====================================================================== */
-
-    applySidebarState(readSidebarState());
-    renderAll();
 })();

@@ -116,24 +116,19 @@
         <section id="audit" class="dash-section active">
             <div class="panel">
                 <div class="toolbar">
-                    <div class="toolbar-group">
+                   <div class="toolbar-group">
                         <div class="search-box">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                             <input type="search" id="auditSearch" placeholder="Search logs">
                         </div>
                         <select id="auditActionFilter" aria-label="Filter by action">
                             <option value="">All actions</option>
+                            <option value="Facility Commissioned">Facility Commissioned</option>
+                            <option value="Facility Status Modified">Facility Status Modified</option>
+                            <option value="Facility Rejected">Facility Rejected</option>
                             <option value="Account Created">Account Created</option>
                             <option value="Account Updated">Account Updated</option>
-                            <option value="Account Activated">Account Activated</option>
-                            <option value="Account Deactivated">Account Deactivated</option>
                             <option value="Role Changed">Role Changed</option>
-                            <option value="Facility Approved">Facility Approved</option>
-                            <option value="Facility Activated">Facility Activated</option>
-                            <option value="Facility Updated">Facility Updated</option>
-                            <option value="Facility Deactivated">Facility Deactivated</option>
-                            <option value="Facility Suspended">Facility Suspended</option>
-                            <option value="Complaint Status Updated">Complaint Status Updated</option>
                             <option value="Settings Updated">Settings Updated</option>
                         </select>
                     </div>

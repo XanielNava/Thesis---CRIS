@@ -17,8 +17,7 @@
             document.documentElement.setAttribute('data-theme', 'light');
         }
     })();
-</script>
-
+    </script>
 </head>
 <body>
 
@@ -100,7 +99,7 @@
         <header class="page-header">
             <div>
                 <h1>Complaints &amp; Support</h1>
-                <p class="page-subtitle">Review and track issues reported by users about the system and its modules.</p>
+                <p class="page-subtitle">Review and track issues reported by users across the system.</p>
             </div>
             <div class="admin-chip">
                 <span class="avatar">AD</span>
@@ -114,6 +113,10 @@
         <section id="complaints" class="dash-section active">
             <div class="panel">
                 <div class="toolbar">
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="search" id="complaintSearch" placeholder="Search by user, module, or keyword">
+                    </div>
                     <div class="toolbar-group">
                         <select id="complaintStatusFilter" aria-label="Filter by complaint status">
                             <option value="">All statuses</option>
@@ -138,10 +141,12 @@
                                 <th>Update Status</th>
                             </tr>
                         </thead>
-                        <tbody id="complaintTableBody"></tbody>
+                        <tbody id="complaintTableBody">
+                            <tr><td colspan="7" style="text-align: center; padding: 24px;">Loading complaints...</td></tr>
+                        </tbody>
                     </table>
                 </div>
-                <p class="empty-state hidden" id="complaintEmpty">No complaints match your filter.</p>
+                <p class="empty-state hidden" id="complaintEmpty">No complaints match your search or filter.</p>
             </div>
         </section>
 
@@ -162,6 +167,7 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="../../assets/js/pho_admin/ui/complaints.js"></script>
+<!-- Controller loaded as ES Module -->
+<script type="module" src="../../assets/js/pho_admin/ui/complaints.js"></script>
 </body>
 </html>

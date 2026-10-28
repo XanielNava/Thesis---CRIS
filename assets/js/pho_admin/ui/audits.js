@@ -1,24 +1,15 @@
-
 /* ==========================================================================
-   AUDIT LOGS — page script
-   Self-contained: no shared files are required.
-
-   Sections:
-     1. Sidebar (TRANSITIONAL — replace when the master sidebar is finalized)
-     2. Helpers
-     3. Sample data (in-memory only; nothing is persisted)
-     4. Rendering
-     5. Events
-     6. Initialization
+   AUDIT LOGS — PHO ADMIN PAGE CONTROLLER (audits.js)
+   Renders and filters live administrative audit logs from Firestore
    ========================================================================== */
+
+import { fetchAuditLogsFromDb, logoutAdmin } from '../db/audits-db.js';
+
 (function () {
     'use strict';
 
     /* ======================================================================
-       1. SIDEBAR (TRANSITIONAL)
-       Collapse/expand behavior matches sidebar-master.css. The state uses the
-       same localStorage key as the master sidebar, so the preference carries
-       across pages. Remove or replace this section when the sidebar is final.
+       1. SIDEBAR & LOGOUT
        ====================================================================== */
 
     const SIDEBAR_KEY = 'sidebarCollapsed';
@@ -40,23 +31,28 @@
     function storeSidebarState(collapsed) {
         try {
             localStorage.setItem(SIDEBAR_KEY, String(collapsed));
-        } catch (e) { /* storage unavailable: state is not persisted */ }
+        } catch (e) { /* storage unavailable */ }
     }
 
     function applySidebarState(collapsed) {
+        if (!sidebar || !appLayout) return;
         sidebar.classList.toggle('collapsed', collapsed);
         appLayout.classList.toggle('sidebar-collapsed', collapsed);
-        sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        if (sidebarToggle) {
+            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        }
     }
 
-    sidebarToggle.addEventListener('click', function () {
-        const collapsed = !sidebar.classList.contains('collapsed');
-        applySidebarState(collapsed);
-        storeSidebarState(collapsed);
-    });
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function () {
+            const collapsed = !sidebar.classList.contains('collapsed');
+            applySidebarState(collapsed);
+            storeSidebarState(collapsed);
+        });
+    }
 
     /* ======================================================================
-       2. HELPERS
+       2. HELPERS & MODAL UTILITIES
        ====================================================================== */
 
     const $ = (selector) => document.querySelector(selector);
@@ -66,44 +62,69 @@
     }[c]));
 
     function openModal(el) {
+        if (!el) return;
         el.classList.add('open');
+        el.style.display = 'flex';
         el.setAttribute('aria-hidden', 'false');
     }
 
     function closeModal(el) {
         if (!el) return;
         el.classList.remove('open');
+        el.style.display = 'none';
         el.setAttribute('aria-hidden', 'true');
     }
 
     /* ======================================================================
-       3. SAMPLE DATA (in-memory only)
+       3. LIVE DATA STATE & RENDERING
        ====================================================================== */
 
-    const CURRENT_ADMIN = 'Alex Morgan (Super Admin)';
+    let auditRecords = [];
 
-    const audit = [
-        { id: 'A-005', timestamp: '2026-10-17 15:20', action: 'Facility Updated',   affected: 'Sample Hillside ABTC (ABTC-005)',  performedBy: CURRENT_ADMIN, details: 'Facility information updated' },
-        { id: 'A-004', timestamp: '2026-10-16 10:02', action: 'Role Changed',       affected: 'Sam Lee (U-003)',                  performedBy: CURRENT_ADMIN, details: 'Admin → Facility Manager' },
-        { id: 'A-003', timestamp: '2026-10-14 09:44', action: 'Facility Suspended', affected: 'Sample Northgate ABTC (ABTC-003)', performedBy: CURRENT_ADMIN, details: 'Status changed from Active to Suspended' },
-        { id: 'A-002', timestamp: '2026-10-10 13:31', action: 'Account Created',    affected: 'Taylor Cruz (U-004)',              performedBy: CURRENT_ADMIN, details: 'Role assigned: Viewer' },
-        { id: 'A-001', timestamp: '2026-01-15 08:00', action: 'Facility Approved',  affected: 'Sample Central ABTC (ABTC-001)',   performedBy: CURRENT_ADMIN, details: 'Status changed from Pending to Active' }
-    ];
+    const tableBody = document.getElementById('auditTableBody');
+    const emptyState = document.getElementById('auditEmpty');
+    const searchInput = document.getElementById('auditSearch');
+    const actionFilter = document.getElementById('auditActionFilter');
 
-    /* ======================================================================
-       4. RENDERING
-       ====================================================================== */
+    async function loadAuditLogs() {
+        if (tableBody) {
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px;">Loading audit logs from database...</td></tr>`;
+        }
+
+        try {
+            auditRecords = await fetchAuditLogsFromDb();
+            renderAudit();
+        } catch (error) {
+            console.error("Audit log load error:", error);
+            if (tableBody) {
+                tableBody.innerHTML = `<tr><td colspan="5" style="color: red; text-align: center; padding: 24px;">Failed to load audit logs: ${esc(error.message)}</td></tr>`;
+            }
+        }
+    }
 
     function renderAudit() {
-        const q = $('#auditSearch').value.trim().toLowerCase();
-        const action = $('#auditActionFilter').value;
+        if (!Array.isArray(auditRecords)) auditRecords = [];
 
-        const rows = audit.filter((a) =>
-            (!action || a.action === action) &&
-            (!q || [a.action, a.affected, a.performedBy, a.details].join(' ').toLowerCase().includes(q))
-        );
+        const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+        const selectedAction = actionFilter ? actionFilter.value : '';
 
-        $('#auditTableBody').innerHTML = rows.map((a) => `
+        const rows = auditRecords.filter((a) => {
+            const matchesAction = !selectedAction || a.action.toLowerCase() === selectedAction.toLowerCase();
+            const matchesQuery = !q || [a.action, a.affected, a.performedBy, a.details].join(' ').toLowerCase().includes(q);
+            return matchesAction && matchesQuery;
+        });
+
+        if (!tableBody) return;
+
+        if (rows.length === 0) {
+            tableBody.innerHTML = '';
+            if (emptyState) emptyState.classList.remove('hidden');
+            return;
+        }
+
+        if (emptyState) emptyState.classList.add('hidden');
+
+        tableBody.innerHTML = rows.map((a) => `
             <tr>
                 <td class="mono">${esc(a.timestamp)}</td>
                 <td><strong>${esc(a.action)}</strong></td>
@@ -111,12 +132,10 @@
                 <td>${esc(a.performedBy)}</td>
                 <td class="muted">${esc(a.details)}</td>
             </tr>`).join('');
-
-        $('#auditEmpty').classList.toggle('hidden', rows.length > 0);
     }
 
     /* ======================================================================
-       5. EVENTS
+       4. EVENTS & LOGOUT
        ====================================================================== */
 
     document.addEventListener('click', function (e) {
@@ -128,39 +147,46 @@
 
         // Confirm logout
         if (e.target.closest('#logoutConfirm')) {
-            window.location.href = '../../../src/pho/pho-login.html'; // adjust to your login page
+            logoutAdmin().then(() => {
+                localStorage.clear();
+                window.location.href = '../pho/pho-login.html';
+            }).catch(() => {
+                window.location.href = '../pho/pho-login.html';
+            });
             return;
         }
 
-        // Close buttons inside the logout modal
+        // Close buttons inside logout modal
         const closeBtn = e.target.closest('[data-close]');
         if (closeBtn) {
-            closeModal(closeBtn.closest('.logout-modal'));
+            closeModal(logoutModal);
             return;
         }
 
-        // Click on the backdrop closes the logout modal
+        // Click on backdrop closes modal
         if (e.target === logoutModal) {
             closeModal(logoutModal);
         }
     });
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && logoutModal.classList.contains('open')) {
+        if (e.key === 'Escape' && logoutModal && logoutModal.classList.contains('open')) {
             closeModal(logoutModal);
         }
     });
 
-    ['auditSearch', 'auditActionFilter'].forEach((id) => {
-        const el = document.getElementById(id);
-        el.addEventListener('input', renderAudit);
-        el.addEventListener('change', renderAudit);
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', renderAudit);
+    }
+
+    if (actionFilter) {
+        actionFilter.addEventListener('change', renderAudit);
+    }
 
     /* ======================================================================
-       6. INITIALIZATION
+       5. INITIALIZATION
        ====================================================================== */
 
     applySidebarState(readSidebarState());
-    renderAudit();
+    loadAuditLogs();
 })();

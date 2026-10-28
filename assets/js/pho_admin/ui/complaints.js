@@ -1,24 +1,15 @@
 /* ==========================================================================
-   COMPLAINTS & SUPPORT — page script
-   Self-contained: no shared files are required.
-
-   Sections:
-     1. Sidebar (TRANSITIONAL — replace when the master sidebar is finalized)
-     2. Helpers
-     3. Sample data (in-memory only; nothing is persisted)
-     4. Actions
-     5. Rendering
-     6. Events
-     7. Initialization
+   COMPLAINTS & SUPPORT — PHO ADMIN PAGE CONTROLLER (complaints.js)
+   Live Firestore connection with table filtering & interactive status changes
    ========================================================================== */
+
+import { fetchComplaintsFromDb, updateComplaintStatusInDb, logoutAdmin } from '../db/complaints-db.js';
+
 (function () {
     'use strict';
 
     /* ======================================================================
-       1. SIDEBAR (TRANSITIONAL)
-       Collapse/expand behavior matches sidebar-master.css. The state uses the
-       same localStorage key as the master sidebar, so the preference carries
-       across pages. Remove or replace this section when the sidebar is final.
+       1. SIDEBAR & LOGOUT
        ====================================================================== */
 
     const SIDEBAR_KEY = 'sidebarCollapsed';
@@ -40,23 +31,28 @@
     function storeSidebarState(collapsed) {
         try {
             localStorage.setItem(SIDEBAR_KEY, String(collapsed));
-        } catch (e) { /* storage unavailable: state is not persisted */ }
+        } catch (e) { /* storage unavailable */ }
     }
 
     function applySidebarState(collapsed) {
+        if (!sidebar || !appLayout) return;
         sidebar.classList.toggle('collapsed', collapsed);
         appLayout.classList.toggle('sidebar-collapsed', collapsed);
-        sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        if (sidebarToggle) {
+            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        }
     }
 
-    sidebarToggle.addEventListener('click', function () {
-        const collapsed = !sidebar.classList.contains('collapsed');
-        applySidebarState(collapsed);
-        storeSidebarState(collapsed);
-    });
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function () {
+            const collapsed = !sidebar.classList.contains('collapsed');
+            applySidebarState(collapsed);
+            storeSidebarState(collapsed);
+        });
+    }
 
     /* ======================================================================
-       2. HELPERS
+       2. HELPERS & UTILITIES
        ====================================================================== */
 
     const $ = (selector) => document.querySelector(selector);
@@ -69,19 +65,11 @@
 
     const badge = (text) => `<span class="badge badge-${slug(text)}">${esc(text)}</span>`;
 
-    const findById = (list, id) => list.find((item) => item.id === id);
-
-    const nowStamp = () => new Date().toISOString().slice(0, 16).replace('T', ' ');
-
-    function nextId(list, prefix) {
-        const max = list.reduce((m, x) => Math.max(m, parseInt(x.id.split('-')[1], 10) || 0), 0);
-        return `${prefix}-${String(max + 1).padStart(3, '0')}`;
-    }
-
     const toastEl = document.getElementById('toast');
     let toastTimer = null;
 
     function toast(message) {
+        if (!toastEl) return;
         toastEl.textContent = message;
         toastEl.classList.add('show');
         clearTimeout(toastTimer);
@@ -89,139 +77,173 @@
     }
 
     function openModal(el) {
+        if (!el) return;
         el.classList.add('open');
+        el.style.display = 'flex';
         el.setAttribute('aria-hidden', 'false');
     }
 
     function closeModal(el) {
         if (!el) return;
         el.classList.remove('open');
+        el.style.display = 'none';
         el.setAttribute('aria-hidden', 'true');
     }
 
     /* ======================================================================
-       3. SAMPLE DATA (in-memory only)
+       3. DATA STATE & RENDERING
        ====================================================================== */
 
-    const CURRENT_ADMIN = 'Alex Morgan (Super Admin)';
     const STATUS_OPTIONS = ['Open', 'In Progress', 'Resolved', 'Closed'];
+    let complaints = [];
 
-    const complaints = [
-        { id: 'C-101', user: 'Sam Lee',     module: 'Animal Registry', description: 'Animal records do not save when the vaccination date is left blank.', submitted: '2026-10-15', status: 'Open' },
-        { id: 'C-102', user: 'Jamie Reyes', module: 'Heatmap',         description: 'Map markers do not refresh after a new case is saved.',              submitted: '2026-10-12', status: 'In Progress' },
-        { id: 'C-103', user: 'Taylor Cruz', module: 'Login',           description: 'Password reset email arrives several hours late.',                    submitted: '2026-10-08', status: 'Resolved' }
-    ];
+    const tableBody = document.getElementById('complaintTableBody');
+    const emptyState = document.getElementById('complaintEmpty');
+    const statusFilter = document.getElementById('complaintStatusFilter');
+    const searchInput = document.getElementById('complaintSearch');
 
-    const audit = [
-        { id: 'A-005', timestamp: '2026-10-17 15:20', action: 'Facility Updated',   affected: 'Sample Hillside ABTC (ABTC-005)',  performedBy: CURRENT_ADMIN, details: 'Facility information updated' },
-        { id: 'A-004', timestamp: '2026-10-16 10:02', action: 'Role Changed',       affected: 'Sam Lee (U-003)',                  performedBy: CURRENT_ADMIN, details: 'Admin → Facility Manager' },
-        { id: 'A-003', timestamp: '2026-10-14 09:44', action: 'Facility Suspended', affected: 'Sample Northgate ABTC (ABTC-003)', performedBy: CURRENT_ADMIN, details: 'Status changed from Active to Suspended' },
-        { id: 'A-002', timestamp: '2026-10-10 13:31', action: 'Account Created',    affected: 'Taylor Cruz (U-004)',              performedBy: CURRENT_ADMIN, details: 'Role assigned: Viewer' },
-        { id: 'A-001', timestamp: '2026-01-15 08:00', action: 'Facility Approved',  affected: 'Sample Central ABTC (ABTC-001)',   performedBy: CURRENT_ADMIN, details: 'Status changed from Pending to Active' }
-    ];
+    async function loadComplaints() {
+        if (tableBody) {
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 24px;">Loading complaints from database...</td></tr>`;
+        }
 
-    /* ======================================================================
-       4. ACTIONS
-       ====================================================================== */
-
-    function logAudit(action, affected, details) {
-        audit.unshift({
-            id: nextId(audit, 'A'),
-            timestamp: nowStamp(),
-            action,
-            affected,
-            performedBy: CURRENT_ADMIN,
-            details
-        });
+        try {
+            complaints = await fetchComplaintsFromDb();
+            renderComplaints();
+        } catch (error) {
+            console.error("Failed to load complaints:", error);
+            if (tableBody) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="color: red; text-align: center; padding: 24px;">Failed to load complaints: ${esc(error.message)}</td></tr>`;
+            }
+        }
     }
-
-    function setComplaintStatus(complaint, nextStatus) {
-        if (complaint.status === nextStatus) return;
-
-        complaint.status = nextStatus;
-        logAudit('Complaint Status Updated', `${complaint.id} (${complaint.module})`, `Status set to ${nextStatus}`);
-        toast(`Complaint ${complaint.id} marked as ${nextStatus}.`);
-    }
-
-    /* ======================================================================
-       5. RENDERING
-       ====================================================================== */
 
     function renderComplaints() {
-        const status = $('#complaintStatusFilter').value;
-        const rows = complaints.filter((c) => !status || c.status === status);
+        if (!Array.isArray(complaints)) complaints = [];
 
-        $('#complaintTableBody').innerHTML = rows.map((c) => `
+        const selectedStatus = statusFilter ? statusFilter.value : '';
+        const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+        const rows = complaints.filter((c) => {
+            const matchesStatus = !selectedStatus || c.status.toLowerCase() === selectedStatus.toLowerCase();
+            const matchesQuery = !q || [c.id, c.user, c.userEmail, c.module, c.description].join(' ').toLowerCase().includes(q);
+            return matchesStatus && matchesQuery;
+        });
+
+        if (!tableBody) return;
+
+        if (rows.length === 0) {
+            tableBody.innerHTML = '';
+            if (emptyState) emptyState.classList.remove('hidden');
+            return;
+        }
+
+        if (emptyState) emptyState.classList.add('hidden');
+
+        tableBody.innerHTML = rows.map((c) => `
             <tr>
-                <td class="mono">${esc(c.id)}</td>
-                <td>${esc(c.user)}</td>
-                <td>${esc(c.module)}</td>
+                <td class="mono"><code>${esc(c.id.substring(0, 8))}...</code></td>
+                <td>
+                    <strong>${esc(c.user)}</strong>
+                    ${c.userEmail ? `<small style="display:block; color:#64748b;">${esc(c.userEmail)}</small>` : ''}
+                </td>
+                <td><span class="tag-module">${esc(c.module)}</span></td>
                 <td class="wrap">${esc(c.description)}</td>
                 <td>${esc(c.submitted)}</td>
                 <td>${badge(c.status)}</td>
                 <td>
-                    <select class="inline-select" data-complaint-select data-id="${esc(c.id)}" aria-label="Status for ${esc(c.id)}">
-                        ${STATUS_OPTIONS.map((s) => `<option value="${esc(s)}" ${s === c.status ? 'selected' : ''}>${esc(s)}</option>`).join('')}
+                    <select class="inline-select" data-complaint-select data-id="${esc(c.id)}" data-module="${esc(c.module)}" aria-label="Status for ${esc(c.id)}">
+                        ${STATUS_OPTIONS.map((s) => `<option value="${esc(s)}" ${s.toLowerCase() === c.status.toLowerCase() ? 'selected' : ''}>${esc(s)}</option>`).join('')}
                     </select>
                 </td>
             </tr>`).join('');
-
-        $('#complaintEmpty').classList.toggle('hidden', rows.length > 0);
     }
 
     /* ======================================================================
-       6. EVENTS
+       4. ACTIONS & STATUS UPDATE
        ====================================================================== */
 
-    // Status change from the table
-    document.addEventListener('change', function (e) {
-        if (!e.target.matches('[data-complaint-select]')) return;
+    async function handleStatusChange(dropdown) {
+        const id = dropdown.dataset.id;
+        const moduleName = dropdown.dataset.module;
+        const nextStatus = dropdown.value;
 
-        const complaint = findById(complaints, e.target.dataset.id);
-        if (complaint) {
-            setComplaintStatus(complaint, e.target.value);
+        dropdown.disabled = true;
+
+        try {
+            await updateComplaintStatusInDb(id, moduleName, nextStatus);
+            toast(`Complaint marked as ${nextStatus}.`);
+
+            // Update in-memory item
+            const item = complaints.find(c => c.id === id);
+            if (item) item.status = nextStatus;
+
+            renderComplaints();
+        } catch (error) {
+            console.error("Status update error:", error);
+            alert("Failed to update status: " + error.message);
+            dropdown.disabled = false;
         }
-        renderComplaints();
+    }
+
+    /* ======================================================================
+       5. EVENTS
+       ====================================================================== */
+
+    // Status dropdown change in table
+    document.addEventListener('change', function (e) {
+        const dropdown = e.target.closest('[data-complaint-select]');
+        if (dropdown) {
+            handleStatusChange(dropdown);
+        }
     });
 
+    // Logout
     document.addEventListener('click', function (e) {
-        // Open logout confirmation
         if (e.target.closest('#logoutBtn')) {
             openModal(logoutModal);
             return;
         }
 
-        // Confirm logout
         if (e.target.closest('#logoutConfirm')) {
-            window.location.href = '../../../src/pho/pho-login.html'; // adjust to your login page
+            logoutAdmin().then(() => {
+                localStorage.clear();
+                window.location.href = '../pho/pho-login.html';
+            }).catch(() => {
+                window.location.href = '../pho/pho-login.html';
+            });
             return;
         }
 
-        // Close buttons inside the logout modal
         const closeBtn = e.target.closest('[data-close]');
         if (closeBtn) {
-            closeModal(closeBtn.closest('.logout-modal'));
+            closeModal(logoutModal);
             return;
         }
 
-        // Click on the backdrop closes the logout modal
         if (e.target === logoutModal) {
             closeModal(logoutModal);
         }
     });
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && logoutModal.classList.contains('open')) {
+        if (e.key === 'Escape' && logoutModal && logoutModal.classList.contains('open')) {
             closeModal(logoutModal);
         }
     });
 
-    $('#complaintStatusFilter').addEventListener('change', renderComplaints);
+    if (statusFilter) {
+        statusFilter.addEventListener('change', renderComplaints);
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', renderComplaints);
+    }
 
     /* ======================================================================
-       7. INITIALIZATION
+       6. INITIALIZATION
        ====================================================================== */
 
     applySidebarState(readSidebarState());
-    renderComplaints();
+    loadComplaints();
 })();

@@ -45,9 +45,7 @@ if (setupForm) {
 
         // Regulatory & Compliance Fields (Option A)
         const dohLto = document.getElementById("abtcDohLto").value.trim();
-        const prcLicense = document.getElementById("abtcPrcLicense").value.trim();
         const ownershipType = document.getElementById("abtcOwnership").value;
-        const docsFolderUrl = document.getElementById("abtcDocsFolderUrl").value.trim();
         const hasColdChain = document.getElementById("abtcColdChainCheck").checked;
 
         const submitBtn = e.target.querySelector(".btn-submit") || e.target.querySelector("button[type='submit']");
@@ -70,7 +68,6 @@ if (setupForm) {
                 position: position,
                 designation: "Facility Head",
                 globalRole: "staff",
-                prcLicenseNumber: prcLicense,
                 status: "Pending", // Awaiting PHO administrator approval
                 createdAt: serverTimestamp()
             });
@@ -96,9 +93,7 @@ if (setupForm) {
                 },
                 regulatoryData: {
                     dohLto: dohLto,
-                    prcLicense: prcLicense,
                     ownershipType: ownershipType,
-                    docsFolderUrl: docsFolderUrl,
                     coldChainCompliant: hasColdChain
                 },
                 reviewStatus: "Pending",

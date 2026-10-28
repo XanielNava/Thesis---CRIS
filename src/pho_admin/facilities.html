@@ -126,6 +126,7 @@
                     </div>
                 </div>
 
+              <!-- Replace CONTACT PERSON with FACILITY ADMIN -->
                 <div class="table-wrap">
                     <table class="data-table">
                         <thead>
@@ -133,7 +134,7 @@
                                 <th>ID</th>
                                 <th>Facility Name</th>
                                 <th>Location</th>
-                                <th>Contact Person</th>
+                                <th>Facility Admin</th>
                                 <th>Submission Date</th>
                                 <th>Status</th>
                                 <th class="col-actions">Actions</th>
@@ -161,7 +162,7 @@
             <button type="button" class="icon-btn" data-close-review aria-label="Close">&times;</button>
         </div>
         <div class="modal-body" id="reviewModalBody">
-            <!-- Dynamic content injected by facilities.js -->
+            <!-- Dynamic content injected by facilities-ui.js -->
         </div>
         <div class="modal-actions">
             <button type="button" class="btn btn-ghost" data-close-review>Cancel</button>
@@ -171,35 +172,42 @@
     </div>
 </div>
 
-<!-- 2. Facility Edit Modal (For Existing Active Facilities) -->
+<!-- 2. Facility Details & Status Modal (Governed / Inspection View) -->
 <div class="modal-overlay" id="facilityModal" aria-hidden="true" style="display: none;">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="facilityModalTitle">
         <div class="modal-header">
-            <h3 id="facilityModalTitle">Edit facility</h3>
+            <h3 id="facilityModalTitle">Facility Details &amp; Status</h3>
             <button type="button" class="icon-btn" data-close-edit aria-label="Close">&times;</button>
         </div>
         <form id="facilityForm" class="modal-form">
             <input type="hidden" id="facilityId">
             <div class="field">
-                <label for="facName">Facility name</label>
-                <input id="facName" required>
+                <label for="facName">Facility Name (Governed)</label>
+                <input id="facName" readonly style="background-color: var(--bg-muted, #f1f5f9); cursor: not-allowed;">
             </div>
+            
+            <!-- Facility Head / Owner Field -->
+            <div class="field">
+                <label for="facOwner">Facility Head / Owner</label>
+                <input id="facOwner" readonly style="background-color: var(--bg-muted, #f1f5f9); cursor: not-allowed;">
+            </div>
+
             <div class="grid-2">
                 <div class="field">
                     <label for="facDistrict">Municipality / City</label>
-                    <input id="facDistrict">
+                    <input id="facDistrict" readonly style="background-color: var(--bg-muted, #f1f5f9); cursor: not-allowed;">
                 </div>
                 <div class="field">
-                    <label for="facPhone">Phone</label>
-                    <input id="facPhone">
+                    <label for="facPhone">Official Contact</label>
+                    <input id="facPhone" readonly style="background-color: var(--bg-muted, #f1f5f9); cursor: not-allowed;">
                 </div>
             </div>
             <div class="field">
-                <label for="facEmail">Contact email</label>
-                <input id="facEmail" type="email">
+                <label for="facEmail">Registered Email</label>
+                <input id="facEmail" readonly type="email" style="background-color: var(--bg-muted, #f1f5f9); cursor: not-allowed;">
             </div>
             <div class="field">
-                <label for="facStatus">Status</label>
+                <label for="facStatus">Administrative Status</label>
                 <select id="facStatus">
                     <option value="Active">Active</option>
                     <option value="Inactive">Inactive</option>
@@ -207,8 +215,8 @@
                 </select>
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn btn-ghost" data-close-edit>Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-ghost" data-close-edit>Close</button>
+                <button type="submit" class="btn btn-primary">Save Status</button>
             </div>
         </form>
     </div>
@@ -230,7 +238,5 @@
 
 <!-- Controller linked as single module -->
 <script type="module" src="../../assets/js/pho_admin/ui/facilities-ui.js"></script>
-<script type="module" src="../../assets/js/pho_admin/db/facilities-db.js"></script>
-
 </body>
 </html>
