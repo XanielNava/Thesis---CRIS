@@ -48,7 +48,7 @@ body {
 .logo-section {
   text-align: center;
   margin-bottom: 25px;
-  height: 174.78px; /* Standard height requirement */
+  height: 174.78px;
 }
 
 .logo-image {
@@ -249,11 +249,43 @@ body {
   font-size: 13px;
 }
 
-.btn-submit-pho {
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-export-excel {
+  background: #ffffff;
+  color: #334155;
+  border: 1.5px solid #cbd5e1;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-export-excel i {
+  color: #107c41;
+  font-size: 14px;
+}
+
+.btn-export-excel:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+}
+
+.btn-print-report {
   background: var(--sunset-orange);
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 9px 18px;
   border-radius: 8px;
   font-weight: 700;
   cursor: pointer;
@@ -265,7 +297,7 @@ body {
   box-shadow: 0 4px 10px rgba(234, 97, 19, 0.25);
 }
 
-.btn-submit-pho:hover {
+.btn-print-report:hover {
   background: var(--sidebar-bg);
   transform: translateY(-2px);
 }
@@ -339,4 +371,65 @@ table tbody tr:hover {
   justify-content: flex-end;
   gap: 8px;
   padding-top: 15px;
+}
+
+/* ================= BROWSER PRINT RULES ================= */
+@media print {
+  @page {
+    size: landscape;
+    margin: 12mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .sidebar,
+  #sidebar,
+  .toggle-btn,
+  .header,
+  .topbar,
+  .pagination,
+  #logoutModal {
+    display: none !important;
+  }
+
+  .container,
+  .main-content,
+  .reports-workspace,
+  .reports-card {
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .table-container {
+    overflow: visible !important;
+    border: none !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  table thead th {
+    background: #f1f5f9 !important;
+    color: #000000 !important;
+    position: static !important;
+    font-size: 8pt !important;
+    padding: 4px !important;
+    border: 1px solid #333333 !important;
+  }
+
+  table tbody td {
+    border: 1px solid #333333 !important;
+    padding: 4px 5px !important;
+    font-size: 8.5pt !important;
+    color: #000000 !important;
+  }
 }

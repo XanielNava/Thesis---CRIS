@@ -1,11 +1,13 @@
 // ==========================================================================
-// ABTC WORKSPACE LOGIN GATEKEEPER (Dev-Unblocked Mode)
+// ABTC WORKSPACE LOGIN GATEKEEPER
+// Conformed to CRIS Master Architecture with Deactivation Security Guard
 // ==========================================================================
 
 import { 
   signInWithEmailAndPassword,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  signOut
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
 import { 
@@ -51,7 +53,7 @@ document.getElementById("email")?.addEventListener("change", async (e) => {
 });
 
 // ==========================================================
-// 🔒 2. LOGIN FORM SUBMISSION
+// 🔒 2. LOGIN FORM SUBMISSION WITH DEACTIVATION BLOCKER
 // ==========================================================
 document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -66,39 +68,83 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
       loginBtn.disabled = true; 
     }
 
-    // Ensure session persistence
+    // 1. Ensure local persistence
     await setPersistence(auth, browserLocalPersistence);
 
-    // Authenticate credentials
+    // 2. Authenticate credentials
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    console.log("Authenticated User UID:", user.uid);
 
-    // Save baseline session context
-    sessionStorage.setItem("authenticatedFacilityEmail", email);
-    sessionStorage.setItem("activeDesignation", "Facility Head");
-    sessionStorage.setItem("activePersonnelName", "Facility Administrator");
+    // 3. Resolve user identity and associated facility ID
+    let facilityId = user.uid;
+    let userFullName = "Facility Administrator";
 
-    // Attempt soft lookup of facilityId without blocking redirect if missing
     try {
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);
       if (userDocSnap.exists()) {
         const uData = userDocSnap.data();
-        sessionStorage.setItem("activeFacilityId", uData.facilityId || "default_abtc");
-      } else {
-        sessionStorage.setItem("activeFacilityId", "default_abtc");
+        facilityId = uData.facilityId || user.uid;
+        userFullName = uData.fullName || userFullName;
       }
-    } catch (err) {
-      console.warn("Soft facilityId lookup skipped:", err);
-      sessionStorage.setItem("activeFacilityId", "default_abtc");
+    } catch (uErr) {
+      console.warn("User profile resolution fallback:", uErr);
     }
 
-    // Direct routing to Dashboard
+    // 4. 🚨 STRICT OPERATIONAL STATUS VERIFICATION
+    const facilityDocRef = doc(db, "facilities", facilityId);
+    const facilitySnap = await getDoc(facilityDocRef);
+
+    if (facilitySnap.exists()) {
+      const facData = facilitySnap.data();
+      const facStatus = (facData.status || "Active").toLowerCase();
+
+      // If deactivated, suspended, or inactive by PHO -> BLOCK ACCESS
+      if (facStatus !== "active") {
+        await signOut(auth);
+        sessionStorage.clear();
+        localStorage.removeItem("activeDesignation");
+        localStorage.removeItem("activePersonnelName");
+
+        alert(`Access Denied: The facility "${facData.facilityName || 'ABTC'}" is currently ${facData.status.toUpperCase()} by the Provincial Health Office (PHO). Login is restricted.`);
+        return;
+      }
+
+      // If active, populate full session context
+      const facName = facData.facilityName || "ABTC Facility";
+      const facAcronym = facData.acronym || facData.code || "ABTC";
+      const adminName = facData.contactInfo?.contactPerson || userFullName;
+
+      sessionStorage.setItem("activeFacilityId", facilityId);
+      sessionStorage.setItem("activeFacilityName", facName);
+      sessionStorage.setItem("activeFacilityAcronym", facAcronym);
+      sessionStorage.setItem("authenticatedFacilityEmail", email);
+      sessionStorage.setItem("activeDesignation", "Owner");
+      sessionStorage.setItem("activePersonnelName", adminName);
+
+    } else {
+      // If no facility document exists, check pending application status
+      const appDocRef = doc(db, "facility_applications", `app_${user.uid}`);
+      const appSnap = await getDoc(appDocRef);
+
+      if (appSnap.exists()) {
+        await signOut(auth);
+        sessionStorage.clear();
+        alert("Application Pending: Your facility application is still undergoing review and accreditation by the PHO Administrator.");
+        return;
+      } else {
+        await signOut(auth);
+        sessionStorage.clear();
+        alert("Authentication Error: No approved facility records linked to this account.");
+        return;
+      }
+    }
+
+    // 5. Navigate to Dashboard
     window.location.href = 'abtc-dash.html';
 
   } catch (error) {
-    console.error('Terminal authentication failure:', error.code, error.message);
+    console.error('Authentication failure:', error.code, error.message);
     
     let clientErrorMessage = "The email address or password you entered is incorrect.";
     if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {

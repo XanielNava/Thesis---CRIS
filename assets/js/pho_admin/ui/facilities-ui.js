@@ -1,12 +1,15 @@
 /* ==========================================================================
    FACILITY MANAGEMENT — PHO ADMIN PAGE CONTROLLER (facilities-ui.js)
+   Conformed to Grace Period Retention & Safe Deletion Lifecycle
    ========================================================================== */
 
 import { 
     fetchAllFacilitiesFromDb, 
     commissionFacilityInDb, 
     rejectApplicationInDb, 
-    setFacilityStatusInDb, 
+    setFacilityStatusInDb,
+    deleteFacilityFromDb,
+    DELETION_GRACE_PERIOD_DAYS,
     logoutAdmin 
 } from '../db/facilities-db.js';
 
@@ -56,7 +59,7 @@ import {
     }
 
     /* ======================================================================
-       2. HELPERS & MODAL UTILITIES
+       2. HELPERS & TOAST UTILITIES
        ====================================================================== */
 
     const $ = (selector) => document.querySelector(selector);
@@ -72,7 +75,7 @@ import {
         toastEl.textContent = message;
         toastEl.classList.add('show');
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3000);
     }
 
     function openModal(el) {
@@ -90,7 +93,134 @@ import {
     }
 
     /* ======================================================================
-       3. DATA STATE & RENDERING
+       3. DELETE MODAL DOM INJECTION
+       ====================================================================== */
+
+    let facilityPendingDeletion = null;
+
+    function ensureDeleteModalInDom() {
+        if (document.getElementById("deleteFacilityModal")) return;
+
+        const modalDiv = document.createElement("div");
+        modalDiv.id = "deleteFacilityModal";
+        modalDiv.style.cssText = "display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);";
+        modalDiv.innerHTML = `
+            <div style="background: #ffffff; border-radius: 12px; max-width: 500px; width: 90%; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); border-top: 5px solid #dc2626; font-family: inherit;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <div style="background: #fee2e2; color: #dc2626; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                        ⚠️
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 18px; color: #0f172a;">Permanently Delete Facility</h3>
+                        <small style="color: #64748b; font-size: 12px;">Irreversible administrative operation</small>
+                    </div>
+                </div>
+
+                <div id="deleteModalNotice" style="margin-bottom: 14px; font-size: 13.5px; line-height: 1.5; color: #475569;">
+                    <p style="margin: 0 0 8px 0;">
+                        Are you sure you want to permanently delete <strong id="deleteTargetFacilityName" style="color: #dc2626;"></strong>?
+                    </p>
+                    <div style="background: #ecfdf5; border-left: 3px solid #10b981; padding: 8px 12px; border-radius: 4px; font-size: 12.5px; color: #065f46;">
+                        <strong>✓ Patient Data Safety:</strong> All patient bite consultations and vaccination schedules remain preserved in the central registry for medical continuity.
+                    </div>
+                </div>
+
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 18px;">
+                    <label for="deleteConfirmationInput" style="display: block; font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px;">
+                        Type <strong id="deleteExpectedText" style="color: #0f172a; text-decoration: underline;"></strong> to confirm:
+                    </label>
+                    <input type="text" id="deleteConfirmationInput" placeholder="Enter exact facility name" autocomplete="off"
+                           style="width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; outline: none; transition: border-color 0.2s;">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" id="btnCancelDeleteModal" style="padding: 8px 16px; border-radius: 6px; cursor: pointer; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; font-weight: 600; font-size: 13px;">
+                        Cancel
+                    </button>
+                    <button type="button" id="btnConfirmDeleteFacility" disabled
+                            style="padding: 8px 18px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: not-allowed; border: none; background: #cbd5e1; color: #ffffff; transition: all 0.2s ease;">
+                        Permanently Delete
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+
+        const deleteInput = document.getElementById("deleteConfirmationInput");
+        const btnConfirm = document.getElementById("btnConfirmDeleteFacility");
+        const btnCancel = document.getElementById("btnCancelDeleteModal");
+
+        deleteInput.addEventListener("input", () => {
+            if (!facilityPendingDeletion) return;
+            const typed = deleteInput.value.trim();
+            const expected = facilityPendingDeletion.name.trim();
+
+            if (typed === expected) {
+                btnConfirm.disabled = false;
+                btnConfirm.style.background = "#dc2626";
+                btnConfirm.style.cursor = "pointer";
+                deleteInput.style.borderColor = "#dc2626";
+            } else {
+                btnConfirm.disabled = true;
+                btnConfirm.style.background = "#cbd5e1";
+                btnConfirm.style.cursor = "not-allowed";
+                deleteInput.style.borderColor = "#cbd5e1";
+            }
+        });
+
+        btnCancel.addEventListener("click", closeDeleteVerificationModal);
+
+        btnConfirm.addEventListener("click", async () => {
+            if (!facilityPendingDeletion) return;
+            const { id, name } = facilityPendingDeletion;
+
+            btnConfirm.disabled = true;
+            btnConfirm.textContent = "Purging...";
+
+            try {
+                await deleteFacilityFromDb(id, name);
+                toast(`Facility "${name}" was permanently removed. Patient data remains archived.`);
+                closeDeleteVerificationModal();
+                await loadTableData();
+            } catch (err) {
+                console.error("Deletion error:", err);
+                alert("Deletion Blocked: " + err.message);
+            } finally {
+                btnConfirm.disabled = false;
+                btnConfirm.textContent = "Permanently Delete";
+            }
+        });
+    }
+
+    function openDeleteVerificationModal(facId, facName) {
+        ensureDeleteModalInDom();
+        facilityPendingDeletion = { id: facId, name: facName };
+
+        const modal = document.getElementById("deleteFacilityModal");
+        const targetNameEl = document.getElementById("deleteTargetFacilityName");
+        const expectedEl = document.getElementById("deleteExpectedText");
+        const inputEl = document.getElementById("deleteConfirmationInput");
+        const btnConfirm = document.getElementById("btnConfirmDeleteFacility");
+
+        targetNameEl.textContent = `"${facName}"`;
+        expectedEl.textContent = facName;
+        inputEl.value = "";
+        btnConfirm.disabled = true;
+        btnConfirm.style.background = "#cbd5e1";
+        btnConfirm.style.cursor = "not-allowed";
+
+        modal.style.display = "flex";
+        inputEl.focus();
+    }
+
+    function closeDeleteVerificationModal() {
+        const modal = document.getElementById("deleteFacilityModal");
+        if (modal) modal.style.display = "none";
+        facilityPendingDeletion = null;
+    }
+
+    /* ======================================================================
+       4. DATA STATE & RENDERING
        ====================================================================== */
 
     let facilities = [];
@@ -163,7 +293,24 @@ import {
 
             const isActive = fac.status === "Active";
 
-            // If pending application -> static badge; if commissioned -> interactive dropdown
+            // Calculate grace period cooldown
+            let daysInactive = 0;
+            let canDelete = false;
+            let cooldownBadge = '';
+
+            if (!isActive && fac.deactivatedAt) {
+                const diffMs = Date.now() - fac.deactivatedAt.getTime();
+                daysInactive = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                canDelete = daysInactive >= DELETION_GRACE_PERIOD_DAYS;
+
+                if (!canDelete) {
+                    const remaining = DELETION_GRACE_PERIOD_DAYS - daysInactive;
+                    cooldownBadge = `<small style="display:block; color:#b45309; font-size:11px;"><i class="fa-solid fa-clock"></i> Retention: ${remaining}d left</small>`;
+                } else {
+                    cooldownBadge = `<small style="display:block; color:#dc2626; font-size:11px;"><i class="fa-solid fa-triangle-exclamation"></i> Eligible for purge</small>`;
+                }
+            }
+
             const statusCellHtml = fac.isApplication && fac.status === "Pending"
                 ? `<span class="status-badge status-pending">Pending</span>`
                 : `
@@ -172,9 +319,28 @@ import {
                         <option value="Inactive" ${fac.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
                         <option value="Suspended" ${fac.status === 'Suspended' ? 'selected' : ''}>Suspended</option>
                     </select>
+                    ${cooldownBadge}
                 `;
 
-           row.innerHTML = `
+            // Delete button is enabled only when non-active AND past grace period
+            const deleteBtnHtml = fac.isApplication && fac.status === "Pending" ? '' : `
+                <button class="btn btn-sm btn-delete-facility" 
+                        data-id="${esc(fac.id)}" 
+                        data-name="${esc(fac.facilityName)}"
+                        data-can-delete="${canDelete}"
+                        data-active="${isActive}"
+                        data-days="${daysInactive}"
+                        title="${isActive ? 'Deactivate facility first' : (!canDelete ? `Retention grace period active (${DELETION_GRACE_PERIOD_DAYS - daysInactive}d left)` : 'Permanently remove facility')}"
+                        style="background-color: ${canDelete ? '#fee2e2' : '#f1f5f9'}; 
+                               color: ${canDelete ? '#dc2626' : '#94a3b8'}; 
+                               border: 1px solid ${canDelete ? '#fecaca' : '#e2e8f0'}; 
+                               font-weight: 600; padding: 4px 8px; border-radius: 4px; 
+                               cursor: ${canDelete ? 'pointer' : 'not-allowed'}; display: inline-flex; align-items: center; gap: 4px;">
+                    <i class="fa-solid fa-trash" style="font-size: 11px;"></i> Delete
+                </button>
+            `;
+
+            row.innerHTML = `
                 <td><code>${esc(fac.id.substring(0, 10))}...</code></td>
                 <td>
                     <strong>${esc(fac.facilityName)}</strong>
@@ -187,7 +353,7 @@ import {
                 </td>
                 <td>${esc(formattedDate)}</td>
                 <td>${statusCellHtml}</td>
-                <td class="col-actions">
+                <td class="col-actions" style="display: flex; gap: 6px; align-items: center; justify-content: flex-start;">
                     ${fac.isApplication && fac.status === "Pending" ? `
                         <button class="btn btn-sm btn-primary btn-review" data-id="${esc(fac.id)}">Review</button>
                     ` : `
@@ -198,6 +364,7 @@ import {
                                 data-status="${esc(fac.status)}">
                             ${isActive ? 'Deactivate' : 'Activate'}
                         </button>
+                        ${deleteBtnHtml}
                     `}
                 </td>
             `;
@@ -209,7 +376,7 @@ import {
     }
 
     /* ======================================================================
-       4. ACTION LISTENERS & MODAL HANDLERS
+       5. ACTION LISTENERS
        ====================================================================== */
 
     function attachActionListeners() {
@@ -228,9 +395,11 @@ import {
                 const currentStatus = btn.getAttribute("data-status");
                 const nextStatus = currentStatus === "Active" ? "Inactive" : "Active";
 
-                if (!confirm(`Are you sure you want to change "${name}" to ${nextStatus}?`)) {
-                    return;
-                }
+                const confirmMsg = nextStatus === "Inactive"
+                    ? `Deactivate "${name}"?\n• Access will be immediately locked for administrators and staff.\n• The ${DELETION_GRACE_PERIOD_DAYS}-day retention period will begin.\n• Patient records remain fully intact.`
+                    : `Reactivate "${name}"?\n• Staff and admin login access will be immediately restored.`;
+
+                if (!confirm(confirmMsg)) return;
 
                 btn.disabled = true;
                 try {
@@ -243,6 +412,30 @@ import {
                 } finally {
                     btn.disabled = false;
                 }
+            };
+        });
+
+        // 🗑️ Delete Button Click: Enforce Grace Period Checks
+        document.querySelectorAll(".btn-delete-facility").forEach(btn => {
+            btn.onclick = () => {
+                const id = btn.getAttribute("data-id");
+                const name = btn.getAttribute("data-name");
+                const isActive = btn.getAttribute("data-active") === "true";
+                const canDelete = btn.getAttribute("data-can-delete") === "true";
+                const days = parseInt(btn.getAttribute("data-days") || "0", 10);
+
+                if (isActive) {
+                    alert(`Action Blocked: "${name}" is currently ACTIVE.\n\nTo safeguard epidemiological and medical records, an active facility must first be set to "Inactive" or "Suspended" to enter the ${DELETION_GRACE_PERIOD_DAYS}-day retention cooldown.`);
+                    return;
+                }
+
+                if (!canDelete) {
+                    const remaining = DELETION_GRACE_PERIOD_DAYS - days;
+                    alert(`Retention Grace Period Active: "${name}" has only been inactive for ${days} day(s).\n\nUnder health compliance rules, permanent purge is locked for ${remaining} more day(s) to allow for clinical audits and patient transfers.`);
+                    return;
+                }
+
+                openDeleteVerificationModal(id, name);
             };
         });
     }
@@ -277,6 +470,8 @@ import {
 
         const raw = selectedApplication.raw;
         const reg = raw.regulatoryData || {};
+        const lat = raw.coordinates?.lat ?? raw.location?.latitude ?? 'N/A';
+        const lng = raw.coordinates?.lng ?? raw.location?.longitude ?? 'N/A';
 
         reviewModalBody.innerHTML = `
             <div class="review-facility-banner">
@@ -288,6 +483,9 @@ import {
                 </div>
                 <div class="banner-sub">
                     <strong>Location:</strong> ${esc(raw.address?.street ? raw.address.street + ', ' : '')}${esc(raw.address?.barangay ? raw.address.barangay + ', ' : '')}${esc(raw.address?.city || '')}, ${esc(raw.address?.province || '')}
+                </div>
+                <div class="banner-sub" style="margin-top: 5px; color: #1e40af; font-size: 12.5px;">
+                    <strong>Spatial Coordinates:</strong> ${lat !== 'N/A' ? `Lat: ${lat}, Lng: ${lng}` : '<span style="color:#dc2626;">Missing GPS/Centroid</span>'}
                 </div>
             </div>
 
@@ -327,14 +525,13 @@ import {
         openModal(reviewModal);
     }
 
-  function openInspectModal(facId) {
+    function openInspectModal(facId) {
         const fac = facilities.find(f => f.id === facId);
         if (!fac || !facilityModal) return;
 
         $('#facilityId').value = fac.id;
         $('#facName').value = fac.facilityName;
         
-        // Populate the Owner / Head of Facility
         const ownerEl = $('#facOwner');
         if (ownerEl) {
             ownerEl.value = fac.contactPerson ? `${fac.contactPerson}${fac.position ? ' (' + fac.position + ')' : ''}` : 'N/A';
@@ -349,7 +546,7 @@ import {
     }
 
     /* ======================================================================
-       5. FORM SUBMISSIONS
+       6. FORM SUBMISSIONS
        ====================================================================== */
 
     if (btnApproveApp) {
@@ -358,7 +555,7 @@ import {
             const raw = selectedApplication.raw;
             const appId = selectedApplication.id;
 
-            if (!confirm(`Confirm approval for "${raw.facilityName}"? This will commission the facility and activate its admin account.`)) {
+            if (!confirm(`Confirm approval for "${raw.facilityName}"? This will commission the facility, activate its admin account, and persist its spatial coordinates.`)) {
                 return;
             }
 
@@ -407,7 +604,6 @@ import {
         });
     }
 
-    // Modal Status Save (Details are read-only; only status can be updated)
     if (facilityForm) {
         facilityForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -435,7 +631,7 @@ import {
     }
 
     /* ======================================================================
-       6. EVENTS & MODAL CLOSE
+       7. EVENTS & MODAL CLOSE
        ====================================================================== */
 
     document.querySelectorAll("[data-close-review]").forEach(btn => btn.onclick = () => closeModal(reviewModal));
@@ -466,6 +662,7 @@ import {
             closeModal(reviewModal);
             closeModal(facilityModal);
             closeModal(logoutModal);
+            closeDeleteVerificationModal();
         }
     });
 

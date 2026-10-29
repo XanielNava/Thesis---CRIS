@@ -1,37 +1,58 @@
-// abtc-users.js - Dedicated Administration, ID Badge QR Generation, Status Safeguards, and Auditing Handler
+// ==========================================================================
+// ABTC USERS MODULE - PERSONNEL ROSTER & QR BADGE CONTROLLER (abtc-users.js)
+// Conformed to CRIS Master Architecture with Scoped Facility Activity Logs
+// ==========================================================================
+
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { 
-    doc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, onSnapshot 
+    doc, getDoc, setDoc, collection, addDoc, updateDoc, deleteDoc, query, onSnapshot, serverTimestamp 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 import { auth, db } from '../firebase/firebase-config.js';
 
 let currentFacilityId = sessionStorage.getItem("activeFacilityId") || "fac_default";
 let currentFacilityName = sessionStorage.getItem("activeFacilityName") || "Animal Bite Treatment Center";
+let currentFacilityAcronym = sessionStorage.getItem("activeFacilityAcronym") || "ABTC";
 
-// Initialize View & Streams
+// Initialize View & Metadata
 async function initWorkspace() {
     if (db && currentFacilityId !== "fac_default") {
         try {
             const facSnap = await getDoc(doc(db, "facilities", currentFacilityId));
             if (facSnap.exists()) {
-                currentFacilityName = facSnap.data().facilityName || currentFacilityName;
+                const facData = facSnap.data();
+                currentFacilityName = facData.facilityName || currentFacilityName;
+                currentFacilityAcronym = facData.acronym || facData.code || currentFacilityAcronym;
+
+                sessionStorage.setItem("activeFacilityName", currentFacilityName);
+                sessionStorage.setItem("activeFacilityAcronym", currentFacilityAcronym);
             }
         } catch (e) {
-            console.warn("Facility metadata soft fetch:", e);
+            console.warn("Facility metadata lookup fallback:", e);
         }
     }
 
     startLiveStaffRosterStream(currentFacilityId);
-    startLiveAuditLogsStream(currentFacilityId);
+    startLiveActivityLogsStream(currentFacilityId);
 }
 
-// Track active session
+// Track active session fallback
 if (auth) {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
             if (!currentFacilityId || currentFacilityId === "fac_default") {
-                currentFacilityId = user.uid;
+                try {
+                    const uSnap = await getDoc(doc(db, "users", user.uid));
+                    if (uSnap.exists() && uSnap.data().facilityId) {
+                        currentFacilityId = uSnap.data().facilityId;
+                    } else {
+                        currentFacilityId = user.uid;
+                    }
+                } catch (err) {
+                    currentFacilityId = user.uid;
+                }
+                sessionStorage.setItem("activeFacilityId", currentFacilityId);
+                initWorkspace();
             }
         }
     });
@@ -39,7 +60,7 @@ if (auth) {
 
 initWorkspace();
 
-// Helper: Dynamic Badge Resolver
+// Helper: Dynamic Badge Markup
 function getRoleBadgeMarkup(role) {
     if (!role) return `<span class="badge-nurse">Nurse</span>`;
     const lower = role.toLowerCase();
@@ -56,7 +77,7 @@ function getRoleBadgeMarkup(role) {
     return `<span class="badge-nurse">${role}</span>`;
 }
 
-// Helper: Status Pill Resolver
+// Helper: Status Pill Markup
 function getStatusPillMarkup(status) {
     const isDeactivated = (status || "").toLowerCase() === "deactivated";
     if (isDeactivated) {
@@ -87,9 +108,12 @@ function openBadgeModal(staffId, staffName, staffRole, staffStatus) {
 
     qrContainer.innerHTML = "";
 
+    // ENCODED BADGE PAYLOAD: Includes explicit facilityId and facilityName
     const payload = JSON.stringify({
         uid: staffId,
         facilityId: currentFacilityId,
+        facilityName: currentFacilityName,
+        acronym: currentFacilityAcronym,
         type: "CRIS_STAFF_ID"
     });
 
@@ -118,7 +142,7 @@ if (printBadgeBtn) {
 }
 
 // ==========================================================
-// PIPELINE 1: WRITE NEW PERSONNEL RECORDS
+// PIPELINE 1: ENROLL NEW STAFF (STAMPED WITH FACILITY ID)
 // ==========================================================
 const addPersonnelBtn = document.getElementById("addPersonnelBtn");
 if (addPersonnelBtn) {
@@ -134,7 +158,7 @@ if (addPersonnelBtn) {
         const pin = pinInput.value.trim();
 
         if (!name || !email || !position || !pin) {
-            alert("Please completely fill out all the staff parameter inputs, including the security PIN.");
+            alert("Please completely fill out all staff fields, including the 4-digit security PIN.");
             return;
         }
 
@@ -143,28 +167,58 @@ if (addPersonnelBtn) {
             return;
         }
 
+        addPersonnelBtn.disabled = true;
+        addPersonnelBtn.textContent = "Enrolling...";
+
         try {
             const staffSubcollectionRef = collection(db, "facilities", currentFacilityId, "staff");
-            const newDocRef = await addDoc(staffSubcollectionRef, {
+            
+            const staffPayload = {
+                facilityId: currentFacilityId,
+                facilityName: currentFacilityName,
                 name: name,
+                fullName: name,
                 email: email,
                 position: position,
+                designation: position,
                 pin: pin,
-                status: "Active", // Default operational status
+                status: "Active",
                 createdAt: new Date().toISOString()
-            });
+            };
 
-            // Write audit trail
-            await addDoc(collection(db, "audit_logs"), {
+            const newDocRef = await addDoc(staffSubcollectionRef, staffPayload);
+            const staffUid = newDocRef.id;
+
+            // Mirror staff identity into master users collection
+            try {
+                await setDoc(doc(db, "users", staffUid), {
+                    uid: staffUid,
+                    fullName: name,
+                    email: email,
+                    position: position,
+                    designation: position,
+                    facilityId: currentFacilityId,
+                    facilityName: currentFacilityName,
+                    globalRole: "staff",
+                    status: "Active",
+                    createdAt: serverTimestamp()
+                }, { merge: true });
+            } catch (uErr) {
+                console.warn("Global users mirror bypassed:", uErr);
+            }
+
+            // Write internal facility activity log (Keeps PHO central audit log clean)
+            await addDoc(collection(db, "facilities", currentFacilityId, "activity_logs"), {
                 facilityId: currentFacilityId,
+                facilityName: currentFacilityName,
                 personnelName: sessionStorage.getItem("activePersonnelName") || "Administrator",
                 role: "Admin",
-                action: `Enrolled New Staff: ${name} (${position})`,
+                action: `Enrolled Staff: ${name} (${position})`,
                 timestamp: new Date().toISOString()
             });
 
-            // Automatically open printable ID badge
-            openBadgeModal(newDocRef.id, name, position, "Active");
+            // Automatically display printable ID badge
+            openBadgeModal(staffUid, name, position, "Active");
 
             // Reset inputs
             nameInput.value = ""; 
@@ -173,7 +227,10 @@ if (addPersonnelBtn) {
             pinInput.value = "";
         } catch (error) {
             console.error("Failed to append staff record:", error);
-            alert("Database write error: Unable to save personnel configuration changes.");
+            alert("Database write error: " + error.message);
+        } finally {
+            addPersonnelBtn.disabled = false;
+            addPersonnelBtn.textContent = "Save Personnel Record";
         }
     });
 }
@@ -191,7 +248,7 @@ function startLiveStaffRosterStream(facilityId) {
         staffTableBody.innerHTML = ""; 
         
         if (snapshot.empty) {
-            staffTableBody.innerHTML = `<tr><td colspan="5" class="text-center table-empty-notice">No active staff records mapped yet.</td></tr>`;
+            staffTableBody.innerHTML = `<tr><td colspan="5" class="text-center table-empty-notice">No active staff records mapped to this clinic yet.</td></tr>`;
             return;
         }
 
@@ -202,19 +259,22 @@ function startLiveStaffRosterStream(facilityId) {
 
             const row = document.createElement("tr");
 
+            // Cohesive, unified action buttons
             row.innerHTML = `
-                <td><strong>${staff.name}</strong></td>
-                <td>${getRoleBadgeMarkup(staff.position)}</td>
-                <td>${staff.email}</td>
+                <td><strong>${staff.name || staff.fullName}</strong></td>
+                <td>${getRoleBadgeMarkup(staff.position || staff.designation)}</td>
+                <td>${staff.email || "No email"}</td>
                 <td>${getStatusPillMarkup(staffStatus)}</td>
-                <td class="roster-action-cell">
-                    <button class="btn-badge-action" data-id="${staffDoc.id}" data-name="${staff.name}" data-role="${staff.position}" data-status="${staffStatus}">
+                <td class="roster-action-cell" style="display: flex; gap: 8px; align-items: center;">
+                    <button type="button" class="btn-badge-action" data-id="${staffDoc.id}" data-name="${staff.name || staff.fullName}" data-role="${staff.position || staff.designation}" data-status="${staffStatus}">
                         <i class="fa-solid fa-qrcode"></i> Badge
                     </button>
-                    <button class="btn-toggle-status ${isDeactivated ? 'activate' : 'deactivate'}" data-id="${staffDoc.id}" data-status="${staffStatus}" data-name="${staff.name}">
+                    <button type="button" class="btn-toggle-status ${isDeactivated ? 'activate' : 'deactivate'}" data-id="${staffDoc.id}" data-status="${staffStatus}" data-name="${staff.name || staff.fullName}">
                         <i class="fa-solid ${isDeactivated ? 'fa-check' : 'fa-user-slash'}"></i> ${isDeactivated ? 'Activate' : 'Deactivate'}
                     </button>
-                    <button class="btn-delete btn-delete-inline" data-id="${staffDoc.id}" data-name="${staff.name}">Remove</button>
+                    <button type="button" class="btn-delete btn-delete-inline" data-id="${staffDoc.id}" data-name="${staff.name || staff.fullName}">
+                        <i class="fa-solid fa-trash-can"></i> Remove
+                    </button>
                 </td>
             `;
 
@@ -242,11 +302,17 @@ function startLiveStaffRosterStream(facilityId) {
                         const targetRef = doc(db, "facilities", facilityId, "staff", targetId);
                         await updateDoc(targetRef, { status: newStatus });
 
-                        await addDoc(collection(db, "audit_logs"), {
+                        try {
+                            await updateDoc(doc(db, "users", targetId), { status: newStatus });
+                        } catch (uErr) { /* soft sync */ }
+
+                        // Write to internal facility log
+                        await addDoc(collection(db, "facilities", facilityId, "activity_logs"), {
                             facilityId: facilityId,
+                            facilityName: currentFacilityName,
                             personnelName: sessionStorage.getItem("activePersonnelName") || "Administrator",
                             role: "Admin",
-                            action: `Updated Staff Status for ${staffName} -> ${newStatus}`,
+                            action: `Updated Staff Status: ${staffName} -> ${newStatus}`,
                             timestamp: new Date().toISOString()
                         });
                     } catch (err) {
@@ -261,12 +327,18 @@ function startLiveStaffRosterStream(facilityId) {
                 const targetDocId = e.currentTarget.getAttribute("data-id");
                 const staffName = e.currentTarget.getAttribute("data-name");
 
-                if (confirm(`Permanently remove ${staffName} from the facility roster?`)) {
+                if (confirm(`Permanently remove ${staffName} from this facility roster?`)) {
                     try {
                         await deleteDoc(doc(db, "facilities", facilityId, "staff", targetDocId));
 
-                        await addDoc(collection(db, "audit_logs"), {
+                        try {
+                            await deleteDoc(doc(db, "users", targetDocId));
+                        } catch (uErr) { /* soft sync */ }
+
+                        // Write to internal facility log
+                        await addDoc(collection(db, "facilities", facilityId, "activity_logs"), {
                             facilityId: facilityId,
+                            facilityName: currentFacilityName,
                             personnelName: sessionStorage.getItem("activePersonnelName") || "Administrator",
                             role: "Admin",
                             action: `Removed Staff Member: ${staffName}`,
@@ -284,22 +356,20 @@ function startLiveStaffRosterStream(facilityId) {
 }
 
 // ==========================================================
-// PIPELINE 3: LIVE STREAM AUDIT LOG ACCESS LOGS
+// PIPELINE 3: LIVE STREAM FACILITY INTERNAL ACTIVITY LOGS
 // ==========================================================
-function startLiveAuditLogsStream(facilityId) {
+function startLiveActivityLogsStream(facilityId) {
     const auditTableBody = document.getElementById("auditLogTableBody");
     if (!auditTableBody) return;
     
-    const auditQuery = query(
-        collection(db, "audit_logs"),
-        where("facilityId", "==", facilityId)
-    );
+    // Listen to the local facility subcollection
+    const auditQuery = collection(db, "facilities", facilityId, "activity_logs");
 
     onSnapshot(auditQuery, (snapshot) => {
         auditTableBody.innerHTML = "";
 
         if (snapshot.empty) {
-            auditTableBody.innerHTML = `<tr><td colspan="5" class="text-center table-empty-notice">No security login actions verified on log arrays yet.</td></tr>`;
+            auditTableBody.innerHTML = `<tr><td colspan="5" class="text-center table-empty-notice">No internal activity logs recorded yet.</td></tr>`;
             return;
         }
 
@@ -316,16 +386,16 @@ function startLiveAuditLogsStream(facilityId) {
 
             row.innerHTML = `
                 <td class="log-timestamp">${dateStr}</td>
-                <td><strong>${log.personnelName || "Unknown Staff"}</strong></td>
+                <td><strong>${log.personnelName || "Staff Member"}</strong></td>
                 <td>${getRoleBadgeMarkup(log.role)}</td>
-                <td>${log.action || "System Sign-In"}</td>
-                <td><span class="verified-pass-text">✓ Verified Pass</span></td>
+                <td>${log.action || "Duty Sign-In"}</td>
+                <td><span class="verified-pass-text">✓ Internal Record</span></td>
             `;
 
             auditTableBody.appendChild(row);
         });
     }, (error) => {
-        console.error("Audit log real-time stream failed:", error);
-        auditTableBody.innerHTML = `<tr><td colspan="5" class="stream-error-notice">Security Authorization Error: Unable to stream session trails.</td></tr>`;
+        console.error("Activity log stream failed:", error);
+        auditTableBody.innerHTML = `<tr><td colspan="5" class="stream-error-notice">Unable to load internal activity logs.</td></tr>`;
     });
 }

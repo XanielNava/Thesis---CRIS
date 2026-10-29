@@ -2,7 +2,16 @@
 
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { 
-    collection, doc, getDoc, onSnapshot, query, where, getCountFromServer 
+    collection, 
+    doc, 
+    getDoc, 
+    getDocs, 
+    updateDoc, 
+    addDoc, 
+    onSnapshot, 
+    query, 
+    where, 
+    getCountFromServer 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 import { auth, db } from '../firebase/firebase-config.js';
@@ -15,6 +24,7 @@ const categoryThreeCount = document.getElementById('categoryThreeCount');
 const vialStockCount = document.getElementById('vialStockCount');
 const todayDateBadge = document.getElementById('todayDateBadge');
 const todayScheduleTableBody = document.getElementById('todayScheduleTableBody');
+const changePinBtn = document.getElementById('changePinBtn');
 
 let currentFacilityId = sessionStorage.getItem("activeFacilityId") || null;
 
@@ -28,7 +38,22 @@ if (todayDateBadge) todayDateBadge.textContent = formattedToday;
 async function initDashboard() {
     const activeName = sessionStorage.getItem("activePersonnelName") || "Duty Personnel";
     const activeRole = sessionStorage.getItem("activeDesignation") || "Nurse";
-    if (profileInfoText) profileInfoText.innerHTML = `<strong>${activeName}</strong><br><span>${activeRole}</span>`;
+    
+    if (profileInfoText) {
+        profileInfoText.innerHTML = `<strong>${activeName}</strong><br><span>${activeRole}</span>`;
+    }
+
+    // Show "Change PIN" for any duty staff personnel (Nurse, Staff, Pharmacist, etc.)
+    const isOwnerOrAdmin = activeRole.toLowerCase().includes("owner") || 
+                           (activeRole.toLowerCase() === "admin" && !sessionStorage.getItem("activeStaffUid"));
+
+    if (changePinBtn) {
+        if (isOwnerOrAdmin) {
+            changePinBtn.style.display = "none";
+        } else {
+            changePinBtn.style.display = "inline-flex";
+        }
+    }
 
     await resolveFacilityBranding();
 
@@ -199,5 +224,109 @@ function renderTodayScheduleTable(dosesList) {
         btn.addEventListener('click', () => {
             window.location.href = `abtc-calendar.html?patientId=${btn.getAttribute('data-id')}`;
         });
+    });
+}
+
+/* ==========================================================
+   CHANGE PIN MODAL HANDLER
+   ========================================================== */
+const changePinModal = document.getElementById('changePinModal');
+const closePinModalBtn = document.getElementById('closePinModalBtn');
+const cancelPinBtn = document.getElementById('cancelPinBtn');
+const changePinForm = document.getElementById('changePinForm');
+
+if (changePinBtn && changePinModal) {
+    changePinBtn.addEventListener('click', () => {
+        if (changePinForm) changePinForm.reset();
+        changePinModal.classList.add('active');
+        const firstInput = document.getElementById('currentPinInput');
+        if (firstInput) firstInput.focus();
+    });
+}
+
+function closePinModal() {
+    if (changePinModal) changePinModal.classList.remove('active');
+}
+
+if (closePinModalBtn) closePinModalBtn.addEventListener('click', closePinModal);
+if (cancelPinBtn) cancelPinBtn.addEventListener('click', closePinModal);
+
+if (changePinForm) {
+    changePinForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const currentPinVal = document.getElementById('currentPinInput').value.trim();
+        const newPinVal = document.getElementById('newPinInput').value.trim();
+        const confirmPinVal = document.getElementById('confirmPinInput').value.trim();
+
+        if (newPinVal.length !== 4 || isNaN(newPinVal)) {
+            return alert("New PIN must be exactly 4 numeric digits.");
+        }
+
+        if (newPinVal !== confirmPinVal) {
+            return alert("New PIN and Confirm PIN do not match.");
+        }
+
+        const savePinBtn = document.getElementById('savePinBtn');
+        savePinBtn.disabled = true;
+        savePinBtn.textContent = "Updating...";
+
+        try {
+            let staffDocId = sessionStorage.getItem("activeStaffUid") || sessionStorage.getItem("activeStaffId");
+
+            // Fallback: If UID wasn't stored in session, locate staff record by personnel name
+            if (!staffDocId) {
+                const staffQuery = query(
+                    collection(db, "facilities", currentFacilityId, "staff"),
+                    where("name", "==", sessionStorage.getItem("activePersonnelName") || "")
+                );
+                const querySnap = await getDocs(staffQuery);
+                if (!querySnap.empty) {
+                    staffDocId = querySnap.docs[0].id;
+                    sessionStorage.setItem("activeStaffUid", staffDocId);
+                }
+            }
+
+            if (!staffDocId) {
+                throw new Error("Unable to identify your staff record. Please try logging in again with your badge.");
+            }
+
+            const staffRef = doc(db, "facilities", currentFacilityId, "staff", staffDocId);
+            const staffSnap = await getDoc(staffRef);
+
+            if (!staffSnap.exists()) {
+                throw new Error("Staff record was not found in database.");
+            }
+
+            const staffData = staffSnap.data();
+            if (String(staffData.pin) !== String(currentPinVal)) {
+                savePinBtn.disabled = false;
+                savePinBtn.textContent = "Update PIN";
+                return alert("Current PIN is incorrect.");
+            }
+
+            await updateDoc(staffRef, {
+                pin: newPinVal,
+                pinUpdatedAt: new Date().toISOString()
+            });
+
+            // Write internal facility activity log
+            await addDoc(collection(db, "facilities", currentFacilityId, "activity_logs"), {
+                facilityId: currentFacilityId,
+                personnelName: staffData.name || "Duty Personnel",
+                role: staffData.position || "Nurse",
+                action: "Updated Security PIN",
+                timestamp: new Date().toISOString()
+            });
+
+            alert("Security PIN successfully updated!");
+            closePinModal();
+        } catch (error) {
+            console.error("PIN update error:", error);
+            alert("Failed to update PIN: " + error.message);
+        } finally {
+            savePinBtn.disabled = false;
+            savePinBtn.textContent = "Update PIN";
+        }
     });
 }

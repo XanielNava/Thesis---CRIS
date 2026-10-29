@@ -82,12 +82,18 @@
                     <h1 id="facilityTitleDisplay">Loading ABTC Facility...</h1>
                     <span>Operational Command Center</span>
                 </div>
-                <div class="user-profile-top">
-                    <div class="profile-info" id="profileInfoText">
-                        <strong>Loading...</strong><br>
-                        <span>Duty Staff</span>
+                
+                <div class="header-right-actions">
+                    <button type="button" class="btn-change-pin" id="changePinBtn" title="Change your 4-digit staff PIN">
+                        <i class="fa-solid fa-key"></i> Change PIN
+                    </button>
+                    <div class="user-profile-top">
+                        <div class="profile-info" id="profileInfoText">
+                            <strong>Loading...</strong><br>
+                            <span>Duty Staff</span>
+                        </div>
+                        <div class="profile-icon"><i class="fa-solid fa-user-doctor"></i></div>
                     </div>
-                    <div class="profile-icon"><i class="fa-solid fa-user-doctor"></i></div>
                 </div>
             </header>
 
@@ -198,37 +204,66 @@
         </main>
     </div>
 
-    <script type="module" src="../../assets/js/abtc/abtc-home.js"></script>
-    <script type="module" src="../../assets/js/main/sidebar.js"></script>
-    <div id="logoutModal" class="logout-modal">
-    <div class="logout-modal-content">
-        <h3>Confirm Logout</h3>
-        <p>Are you sure you want to log out?</p>
+    <!-- CHANGE PIN MODAL -->
+    <div id="changePinModal" class="pin-modal-overlay">
+        <div class="pin-modal-card">
+            <div class="pin-modal-header">
+                <h3><i class="fa-solid fa-shield-key"></i> Update Security PIN</h3>
+                <button type="button" class="pin-modal-close" id="closePinModalBtn">&times;</button>
+            </div>
+            <p class="pin-modal-desc">Enter your current 4-digit PIN followed by your new PIN to ensure personal accountability on records.</p>
+            
+            <form id="changePinForm">
+                <div class="pin-form-group">
+                    <label for="currentPinInput">Current 4-Digit PIN</label>
+                    <input type="password" id="currentPinInput" maxlength="4" placeholder="••••" inputmode="numeric" required>
+                </div>
+                
+                <div class="pin-form-group">
+                    <label for="newPinInput">New 4-Digit PIN</label>
+                    <input type="password" id="newPinInput" maxlength="4" placeholder="••••" inputmode="numeric" required>
+                </div>
+                
+                <div class="pin-form-group">
+                    <label for="confirmPinInput">Confirm New PIN</label>
+                    <input type="password" id="confirmPinInput" maxlength="4" placeholder="••••" inputmode="numeric" required>
+                </div>
 
-        <div class="logout-modal-actions">
-            <button class="logout-no" onclick="closeLogoutModal()">
-                No
-            </button>
-
-            <button class="logout-yes" onclick="confirmLogout()">
-                Yes, Logout
-            </button>
+                <div class="pin-modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelPinBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="savePinBtn">Update PIN</button>
+                </div>
+            </form>
         </div>
     </div>
-</div>
 
-<script>
-    function showLogoutModal() {
-        document.getElementById("logoutModal").style.display = "flex";
-    }
+    <script type="module" src="../../assets/js/abtc/abtc-home.js"></script>
+    <script type="module" src="../../assets/js/main/sidebar.js"></script>
+    
+    <div id="logoutModal" class="logout-modal">
+        <div class="logout-modal-content">
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to log out?</p>
 
-    function closeLogoutModal() {
-        document.getElementById("logoutModal").style.display = "none";
-    }
+            <div class="logout-modal-actions">
+                <button class="logout-no" onclick="closeLogoutModal()">No</button>
+                <button class="logout-yes" onclick="confirmLogout()">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
 
-    function confirmLogout() {
-        window.location.href = "abtc-profiles.html";
-    }
-</script>
+    <script>
+        function showLogoutModal() {
+            document.getElementById("logoutModal").style.display = "flex";
+        }
+
+        function closeLogoutModal() {
+            document.getElementById("logoutModal").style.display = "none";
+        }
+
+        function confirmLogout() {
+            window.location.href = "abtc-profiles.html";
+        }
+    </script>
 </body>
 </html>

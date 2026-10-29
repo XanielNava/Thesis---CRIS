@@ -51,7 +51,7 @@ body {
   text-align: center;
   margin-bottom: 25px;
   flex-shrink: 0;
-  height: 174.78px; /* Fixed logo container height */
+  height: 174.78px;
 }
 
 .logo-image {
@@ -81,7 +81,6 @@ body {
   display: inline-block;
 }
 
-/* MENU LAYOUT (SCROLLBAR REMOVAL FIX) */
 .menu {
   flex-grow: 1;
   display: flex;
@@ -90,13 +89,10 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   margin-bottom: 20px;
-  
-  /* Hides default browser scrollbars visually while permitting scroll if screen shrinks */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* Hide scrollbar track for Webkit (Chrome, Safari, Opera) */
 .menu::-webkit-scrollbar {
   display: none;
   width: 0;
@@ -179,6 +175,33 @@ body {
 .header-title span {
   font-size: 12px;
   opacity: 0.9;
+}
+
+.header-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-change-pin {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition-smooth);
+}
+
+.btn-change-pin:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
 }
 
 .user-profile-top {
@@ -412,6 +435,108 @@ body {
 .notice-item strong { display: block; margin-bottom: 4px; color: var(--text-dark); }
 .notice-item p { color: var(--text-muted); margin: 0; line-height: 1.4; }
 
+/* ================= CHANGE PIN MODAL STYLES ================= */
+.pin-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.pin-modal-overlay.active {
+  display: flex;
+}
+
+.pin-modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border-tint);
+  border-radius: 14px;
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.pin-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pin-modal-header h3 {
+  font-size: 16px;
+  color: var(--sidebar-bg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pin-modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.pin-modal-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  line-height: 1.4;
+}
+
+.pin-form-group {
+  margin-bottom: 14px;
+}
+
+.pin-form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dark);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.pin-form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-tint);
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  letter-spacing: 4px;
+  text-align: center;
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.pin-form-group input:focus {
+  border-color: var(--sunset-orange);
+  box-shadow: 0 0 0 3px rgba(234, 97, 19, 0.15);
+}
+
+.pin-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
 /* RESPONSIVE QUERY */
 @media (max-width: 1024px) {
   .metrics { grid-template-columns: repeat(2, 1fr); }
@@ -421,4 +546,6 @@ body {
 @media (max-width: 650px) {
   .metrics { grid-template-columns: 1fr; }
   .action-banner { flex-direction: column; align-items: flex-start; }
+  .header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .header-right-actions { width: 100%; justify-content: space-between; }
 }

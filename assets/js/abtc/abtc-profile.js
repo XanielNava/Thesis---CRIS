@@ -1,6 +1,6 @@
 // ==========================================================================
 // ABTC WORKSPACE PROFILE GATEKEEPER (Autonomous Badge Scan + PIN)
-// Allows duty personnel to clock in independently without prior admin login
+// Conformed to CRIS Master Architecture with Autonomous Facility ID Resolution
 // ==========================================================================
 
 import { 
@@ -31,7 +31,7 @@ const btnRescan = document.getElementById("btnRescan");
 
 let html5QrScanner = null;
 let activeScannedStaff = null;
-let resolvedFacilityId = null;
+let resolvedFacilityMeta = null;
 
 /* ======================================================================
    1. QR SCANNER CONTROLLER (html5-qrcode)
@@ -73,7 +73,7 @@ function stopBadgeScanner() {
 
 function resetScannerState() {
     activeScannedStaff = null;
-    resolvedFacilityId = null;
+    resolvedFacilityMeta = null;
     scannedBanner.classList.remove("active");
     scannerSection.style.display = "block";
     nursePinInput.value = "";
@@ -81,31 +81,52 @@ function resetScannerState() {
     btnClockIn.disabled = true;
 }
 
-// 🟢 AUTONOMOUS BADGE RESOLUTION
+// 🟢 AUTONOMOUS BADGE RESOLUTION: Discovers Facility ID & Checks Status
 async function onQrCodeSuccess(decodedText) {
     try {
         const badgeData = JSON.parse(decodedText);
 
         if (badgeData.type !== "CRIS_STAFF_ID" || !badgeData.uid || !badgeData.facilityId) {
-            alert("Invalid QR Code: Not a valid CRIS Staff ID Badge.");
+            alert("Invalid QR Code: Not an authorized CRIS Staff ID Badge.");
             return;
         }
 
         const staffUid = badgeData.uid;
-        const facId = badgeData.facilityId;
+        const targetFacilityId = badgeData.facilityId;
 
-        // Fetch live staff record directly using badge coordinates
-        let staffRecord = null;
-
+        // 1. 🚨 DISCOVER & VERIFY PARENT FACILITY OPERATIONAL STATUS
+        let facilityData = null;
         if (db) {
-            // First check facilities/{facilityId}/staff/{uid}
-            const staffDocRef = doc(db, "facilities", facId, "staff", staffUid);
+            const facDocRef = doc(db, "facilities", targetFacilityId);
+            const facSnap = await getDoc(facDocRef);
+
+            if (!facSnap.exists()) {
+                alert("Unrecognized Facility: The facility encoded in this badge is not commissioned or has been deleted.");
+                return;
+            }
+
+            facilityData = facSnap.data();
+            const facilityStatus = (facilityData.status || "Active").toLowerCase();
+
+            if (facilityStatus !== "active") {
+                stopBadgeScanner();
+                resetScannerState();
+                alert(`Facility Suspended: Access for "${facilityData.facilityName || 'this facility'}" has been marked as ${facilityData.status.toUpperCase()} by the PHO. Duty clock-in is prohibited.`);
+                return;
+            }
+        }
+
+        // 2. FETCH & VERIFY STAFF MEMBER RECORD
+        let staffRecord = null;
+        if (db) {
+            // Check subcollection first: facilities/{facilityId}/staff/{uid}
+            const staffDocRef = doc(db, "facilities", targetFacilityId, "staff", staffUid);
             const staffSnap = await getDoc(staffDocRef);
 
             if (staffSnap.exists()) {
                 staffRecord = { id: staffSnap.id, ...staffSnap.data() };
             } else {
-                // Secondary fallback: check master users collection
+                // Secondary fallback: master users collection
                 const userDocRef = doc(db, "users", staffUid);
                 const userSnap = await getDoc(userDocRef);
                 if (userSnap.exists()) {
@@ -114,33 +135,32 @@ async function onQrCodeSuccess(decodedText) {
             }
         }
 
-        // Development fallback if Firestore offline
         if (!staffRecord) {
-            if (staffUid === "staff-01") {
-                staffRecord = { id: "staff-01", name: "Maria Santos, RN", position: "Triage Nurse", pin: "1234", status: "Active" };
-            } else {
-                alert("Staff record not found on system. Please contact your administrator.");
-                return;
-            }
-        }
-
-        // Verify account status
-        if ((staffRecord.status || "").toLowerCase() === "deactivated") {
-            alert("Access Denied: This staff account has been deactivated.");
+            alert("Staff record not found on this facility's roster. Please contact your administrator.");
             return;
         }
 
-        // Cache resolved credentials
-        activeScannedStaff = staffRecord;
-        resolvedFacilityId = facId;
+        // 3. VERIFY STAFF ACCOUNT STATUS
+        if ((staffRecord.status || "Active").toLowerCase() === "deactivated") {
+            alert("Access Denied: This staff personnel profile has been deactivated.");
+            return;
+        }
 
-        // Display badge info
+        // Cache resolved credentials for clock-in PIN submission
+        activeScannedStaff = staffRecord;
+        resolvedFacilityMeta = {
+            id: targetFacilityId,
+            name: facilityData?.facilityName || badgeData.facilityName || "ABTC Facility",
+            acronym: facilityData?.acronym || facilityData?.code || badgeData.acronym || "ABTC"
+        };
+
+        // Display resolved badge info
         scannedStaffName.textContent = staffRecord.name || staffRecord.fullName || "Staff Member";
-        scannedStaffRole.textContent = staffRecord.position || staffRecord.facilityRole || "Duty Personnel";
+        scannedStaffRole.textContent = `${staffRecord.position || staffRecord.facilityRole || 'Staff'} • ${resolvedFacilityMeta.name}`;
         scannedBanner.classList.add("active");
         scannerSection.style.display = "none";
 
-        // Stop camera and activate PIN entry
+        // Stop camera and activate PIN input
         stopBadgeScanner();
         nursePinInput.disabled = false;
         btnClockIn.disabled = false;
@@ -173,7 +193,7 @@ if (nurseCard && nurseModal) {
     });
 }
 
-// 💼 Owner Card: Direct Route to Admin Login Screen
+// 💼 Owner Card: Route to Admin Login Screen
 if (ownerCard) {
     ownerCard.addEventListener("click", () => {
         stopBadgeScanner();
@@ -198,15 +218,15 @@ if (forgotPinLink) {
 }
 
 /* ======================================================================
-   3. INDEPENDENT CLOCK-IN PIN VERIFICATION
+   3. INDEPENDENT CLOCK-IN PIN VERIFICATION & SESSION BINDING
    ====================================================================== */
 
 if (nurseForm) {
     nurseForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        if (!activeScannedStaff) {
-            alert("Please scan your staff badge ID first.");
+        if (!activeScannedStaff || !resolvedFacilityMeta) {
+            alert("Please scan an authorized staff badge ID first.");
             return;
         }
 
@@ -217,20 +237,23 @@ if (nurseForm) {
             const resolvedRole = activeScannedStaff.position || activeScannedStaff.facilityRole || "Nurse";
             const staffName = activeScannedStaff.name || activeScannedStaff.fullName || "Duty Staff";
 
-            // Bind session for clinic workstation
-            sessionStorage.setItem("activeDesignation", resolvedRole);
-            sessionStorage.setItem("activePersonnelName", staffName);
+            // Bind full session context for the workstation
+            sessionStorage.setItem("activeFacilityId", resolvedFacilityMeta.id);
+            sessionStorage.setItem("activeFacilityName", resolvedFacilityMeta.name);
+            sessionStorage.setItem("activeFacilityAcronym", resolvedFacilityMeta.acronym);
             sessionStorage.setItem("activeStaffId", activeScannedStaff.id);
-            sessionStorage.setItem("activeFacilityId", resolvedFacilityId || "fac_default");
+            sessionStorage.setItem("activePersonnelName", staffName);
+            sessionStorage.setItem("activeDesignation", resolvedRole);
 
-            // Write session audit log
+            // Record verified audit trail
             try {
-                if (db && resolvedFacilityId) {
+                if (db) {
                     await addDoc(collection(db, "audit_logs"), {
-                        facilityId: resolvedFacilityId,
+                        facilityId: resolvedFacilityMeta.id,
+                        facilityName: resolvedFacilityMeta.name,
                         personnelName: staffName,
                         role: resolvedRole,
-                        action: "Autonomous Duty Badge Sign-In",
+                        action: "Duty Badge Clock-In",
                         timestamp: new Date().toISOString()
                     });
                 }
