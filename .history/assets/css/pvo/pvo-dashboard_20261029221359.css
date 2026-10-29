@@ -7,7 +7,7 @@
     --cris-primary-hover: #bf360c;   /* Darker Sunset Accent */
     --cris-primary-light: #fff3e0;   /* Light Orange Accent Container Fill */
     --cris-primary-gradient: linear-gradient(135deg, #e65100 0%, #f57c00 100%);
-    
+
     /* Universal Dark Navy Sidebar Variables */
     --sidebar-width: 260px;
     --sidebar-collapsed-width: 72px;
@@ -16,21 +16,21 @@
     --cris-nav-text-muted: #8d99ae;  /* Unselected Nav Options */
     --cris-nav-text-subtle: #a0aab8; /* Brand Text Subtle */
     --cris-nav-label: #5c6b73;       /* Category Group Labels */
-    
+
     /* Surface & Background Neutral Tokens */
     --cris-bg-main: #f8f6f0;         /* Soft Off-White Background */
     --cris-card-bg: #ffffff;         /* Elevated Surface Cards */
     --cris-card-subtle-bg: #fdf8f5;  /* Secondary Subtle Warm Background */
-    
+
     /* Epidemiological Status Colors */
     --cris-danger: #d84315;          /* Category III / High Risk */
     --cris-danger-bg: #ffebee;
     --cris-danger-text: #c62828;
-    
+
     --cris-warning: #f57f17;         /* Category II / Quarantine */
     --cris-warning-bg: #fff8e1;
     --cris-warning-text: #e65100;
-    
+
     --cris-success: #2e7d32;         /* Category I / Cleared */
     --cris-success-bg: #e8f5e9;
     --cris-success-text: #2e7d32;
@@ -38,7 +38,7 @@
     --cris-info: #0288d1;            /* Informational / Active Monitoring */
     --cris-info-bg: #e1f5fe;
     --cris-info-text: #0288d1;
-    
+
     /* Typography & Structural Colors */
     --cris-text-dark: #2c3e50;
     --cris-text-heading: #1a1a1a;
@@ -50,7 +50,7 @@
 }
 
 /* ==========================================================================
-   GLOBAL LAYOUT & COLLAPSED SIDEBAR BEHAVIOR
+   GLOBAL LAYOUT
    ========================================================================== */
 * {
     margin: 0;
@@ -71,33 +71,9 @@ body {
     width: 100vw;
 }
 
-/* Collapsed State Handling */
-.container.collapsed .sidebar {
-    width: var(--sidebar-collapsed-width);
-}
-
-.container.collapsed .brand-info,
-.container.collapsed .nav-text,
-.container.collapsed .nav-label {
-    display: none;
-}
-
-.container.collapsed .sidebar-header {
-    justify-content: center;
-    padding: 16px 8px;
-}
-
-.container.collapsed .toggle-btn {
-    transform: rotate(180deg);
-}
-
-.container.collapsed .nav-item {
-    justify-content: center;
-    padding: 12px;
-}
-
 /* ==========================================================================
-   UNIVERSAL SAAS SIDEBAR
+   UNIVERSAL SAAS SIDEBAR (matches the Animal Registry; collapse behavior
+   is provided by sidebar-master.css via the .sidebar.collapsed class)
    ========================================================================== */
 .sidebar {
     width: var(--sidebar-width);
@@ -208,6 +184,11 @@ body {
     font-size: 0.88rem;
     border-radius: 8px;
     transition: all 0.2s ease;
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    text-align: left;
 }
 
 .nav-icon {
@@ -234,14 +215,6 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
-}
-
-.logout-item {
-    background: none;
-    border: none;
-    width: 100%;
-    cursor: pointer;
-    text-align: left;
 }
 
 .logout-item:hover {
@@ -272,9 +245,8 @@ body {
 }
 
 .header h1 {
-    font-size: 1.6rem;
-    letter-spacing: 0.8px;
-    font-weight: 900;
+    margin: 0;
+    font-size: 35px;
 }
 
 .user-profile-top {
@@ -772,7 +744,6 @@ body {
     border-radius: 6px;
     cursor: pointer;
     background: var(--cris-card-subtle-bg);
-
 }
 
 .month-cell:hover, .month-cell.active {
@@ -835,7 +806,7 @@ body {
     .content-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .statistics-container {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -845,7 +816,7 @@ body {
     .statistics-container {
         grid-template-columns: 1fr;
     }
-    
+
     .epi-grid {
         grid-template-columns: 1fr;
     }
@@ -856,3 +827,7 @@ body {
         gap: 12px;
     }
 }
+
+/* ==========================================================================
+   PRINT: keep the sidebar layout identical to the Animal Registry
+   ========================================================================== */
