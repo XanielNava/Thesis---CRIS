@@ -2,22 +2,96 @@
    PROFESSIONAL SAAS SIDEBAR STYLES (EXACT BORDER-LOCKED TOGGLE)
    ========================================================================== */
 
-/* CSS Variable Defaults */
 :root {
     --sidebar-width: 260px;
     --sidebar-collapsed-width: 76px;
     --sidebar-bg: #0d121f;
     --sidebar-border: rgba(255, 255, 255, 0.08);
+}
+
+/* Scoped to the sidebar so these generic names don't override the page's own
+   --text-muted / --text-light / --sunset-* values (this file loads last). */
+.sidebar {
     --text-light: #ffffff;
     --text-muted: #94a3b8;
     --sunset-orange: #EA6113;
     --sunset-gold: #f59e0b;
 }
 
-/* Sidebar Container */
+/* ==========================================================================
+   LAYOUT CONTAINERS & TRANSITION LOCKSTEP (FIXES LEFT GAP & TWITCH)
+   ========================================================================== */
+
+/* PHO Admin Grid Layout */
+#appLayout {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    min-height: 100vh;
+    width: 100%;
+    transition: grid-template-columns 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+#appLayout.sidebar-collapsed {
+    grid-template-columns: var(--sidebar-collapsed-width) 1fr !important;
+}
+
+/* ABTC Flex Container */
+.container {
+    display: flex !important;
+    width: 100% !important;
+    height: 100vh;
+    height: 100dvh;
+    overflow-x: hidden;
+}
+
+/* Main Content Area:
+   - margin-left: 0 !important eliminates legacy fixed offsets (e.g. 280px)
+   - min-width: 0 !important prevents child grid/flex elements from overflowing
+   - padding gives clean spacing from the sidebar */
+.main-content {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    padding: 24px 28px !important;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    transition: width 0.3s cubic-bezier(0.2, 0, 0, 1), padding 0.3s cubic-bezier(0.2, 0, 0, 1);
+    animation: pageContentEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: opacity, transform;
+}
+
+/* Snug padding when the sidebar is in collapsed mode */
+.container.collapsed .main-content,
+#appLayout.sidebar-collapsed .main-content {
+    padding-left: 32px !important;
+}
+
+@keyframes pageContentEnter {
+    from {
+        opacity: 0;
+        transform: translateY(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Accessibility: Disable entry animation for users with reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .main-content {
+        animation: none !important;
+    }
+}
+
+/* ==========================================================================
+   SIDEBAR CONTAINER
+   ========================================================================== */
+
 .sidebar {
     width: var(--sidebar-width);
     height: 100vh;
+    height: 100dvh;
     background-color: var(--sidebar-bg);
     border-right: 1px solid var(--sidebar-border);
     display: flex;
@@ -29,14 +103,18 @@
     user-select: none;
     flex-shrink: 0;
     z-index: 1000 !important;
-    overflow: visible !important; /* Critical: Allows button to float outside */
+    overflow: visible !important;
+    will-change: width;
 }
 
 .sidebar.collapsed {
     width: var(--sidebar-collapsed-width) !important;
 }
 
-/* Sidebar Header & Brand Title */
+/* ==========================================================================
+   SIDEBAR HEADER & BRAND
+   ========================================================================== */
+
 .sidebar-header {
     display: flex;
     align-items: center;
@@ -47,7 +125,7 @@
     width: 100%;
     box-sizing: border-box;
     overflow: visible !important;
-    position: static !important; /* Passes positioning context up to .sidebar */
+    position: static !important;
 }
 
 .brand-logo img {
@@ -64,6 +142,11 @@
     transition: opacity 0.2s ease;
     min-width: 0;
     padding-right: 12px;
+    white-space: nowrap !important;
+}
+
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
 }
 
 .sidebar.collapsed .brand-info {
@@ -91,13 +174,15 @@
     margin-top: 2px;
 }
 
-/* EXACT 50/50 EDGE-LOCKED FLOATING TOGGLE BUTTON */
+/* ==========================================================================
+   BORDER-LOCKED FLOATING TOGGLE BUTTON
+   ========================================================================== */
+
 .toggle-btn {
     position: absolute !important;
-    top: 32px !important; /* Fixed vertical height within header area */
-    right: -16px !important; /* Pulls exactly 16px (half of 32px) over outer sidebar border */
-    transform: translateY(-50%) !important; /* Only centers vertically, avoiding X shifts */
-    
+    top: 32px !important;
+    right: -16px !important;
+    transform: translateY(-50%) !important;
     width: 32px;
     height: 32px;
     background: #111625;
@@ -119,6 +204,12 @@
     transform: translateY(-50%) scale(1.08) !important;
 }
 
+.toggle-btn svg,
+.toggle-btn path,
+.chevron-icon {
+    pointer-events: none !important;
+}
+
 .sidebar.collapsed .chevron-icon {
     transform: rotate(180deg);
 }
@@ -129,7 +220,10 @@
     transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* Sidebar Navigation Items */
+/* ==========================================================================
+   NAVIGATION
+   ========================================================================== */
+
 .sidebar-nav {
     flex: 1;
     display: flex;
@@ -148,7 +242,8 @@
     padding: 0 10px;
     margin-bottom: 6px;
     display: block;
-    white-space: nowrap;
+    white-space: nowrap !important;
+    overflow: hidden;
 }
 
 .sidebar.collapsed .nav-label {
@@ -167,12 +262,19 @@
     border-radius: 8px;
     position: relative;
     transition: background 0.2s ease, color 0.2s ease;
-    white-space: nowrap;
+    white-space: nowrap !important;
     border: none;
     background: transparent;
     cursor: pointer;
     width: 100%;
     box-sizing: border-box;
+    overflow: hidden;
+    font-family: inherit;
+    text-align: left;
+}
+
+.nav-text {
+    white-space: nowrap !important;
     overflow: hidden;
 }
 
@@ -196,7 +298,6 @@
     display: none;
 }
 
-/* Active State Styles */
 .nav-item.active {
     color: var(--text-light);
     background: rgba(234, 97, 19, 0.12);
@@ -214,7 +315,10 @@
     border-radius: 0 4px 4px 0;
 }
 
-/* Footer Section */
+/* ==========================================================================
+   FOOTER & LOGOUT
+   ========================================================================== */
+
 .sidebar-footer {
     padding-top: 16px;
     border-top: 1px solid var(--sidebar-border);
@@ -228,7 +332,6 @@
     color: #F87171;
     background: rgba(239, 68, 68, 0.1);
 }
-
 
 .logout-modal {
     display: none;
@@ -287,24 +390,53 @@
 .logout-modal-actions button:hover {
     opacity: 0.85;
 }
-/* Instantly sets collapsed width before JS or DOMContentLoaded kicks in */
-html.sidebar-pre-collapsed .sidebar {
-    width: var(--sidebar-collapsed-width) !important;
+
+/* ==========================================================================
+   ZERO-FLICKER PRE-COLLAPSE LOCK (removed by sidebar.js after first paint)
+   ========================================================================== */
+
+/* Block transitions until first paint is complete */
+html:not(.sidebar-ready) .sidebar,
+html:not(.sidebar-ready) .sidebar *,
+html:not(.sidebar-ready) #appLayout,
+html:not(.sidebar-ready) .main-content {
     transition: none !important;
 }
 
-html.sidebar-pre-collapsed #appLayout,
-html.sidebar-pre-collapsed .container {
+html.sidebar-pre-collapsed *,
+html.sidebar-pre-collapsed *::before,
+html.sidebar-pre-collapsed *::after {
+    transition: none !important;
+}
+
+html.sidebar-pre-collapsed #appLayout {
     grid-template-columns: var(--sidebar-collapsed-width) 1fr !important;
 }
 
-html.sidebar-pre-collapsed .brand-info,
-html.sidebar-pre-collapsed .nav-label,
-html.sidebar-pre-collapsed .nav-text {
+html.sidebar-pre-collapsed .sidebar {
+    width: var(--sidebar-collapsed-width) !important;
+}
+
+html.sidebar-pre-collapsed .sidebar .sidebar-header {
+    justify-content: center;
+}
+
+html.sidebar-pre-collapsed .sidebar .brand-info,
+html.sidebar-pre-collapsed .sidebar .nav-label,
+html.sidebar-pre-collapsed .sidebar .nav-text {
     display: none !important;
-}/* Add right around line 98 in your sidebar-master.css */
-.toggle-btn svg,
-.toggle-btn path,
-.chevron-icon {
-    pointer-events: none !important;
+}
+
+html.sidebar-pre-collapsed .sidebar .chevron-icon {
+    transform: rotate(180deg) !important;
+}
+
+/* ==========================================================================
+   HEADER BANNER LOAD STABILITY
+   ========================================================================== */
+
+.user-profile-top:has(#profileInfoText[data-header-cache]) {
+    box-sizing: border-box;
+    min-width: 294px;
+    flex-shrink: 0;
 }

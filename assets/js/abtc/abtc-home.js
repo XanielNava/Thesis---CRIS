@@ -43,7 +43,7 @@ async function initDashboard() {
         profileInfoText.innerHTML = `<strong>${activeName}</strong><br><span>${activeRole}</span>`;
     }
 
-    // Show "Change PIN" for any duty staff personnel (Nurse, Staff, Pharmacist, etc.)
+    // Show "Change PIN" for duty staff personnel (Nurse, Staff, Pharmacist, etc.)
     const isOwnerOrAdmin = activeRole.toLowerCase().includes("owner") || 
                            (activeRole.toLowerCase() === "admin" && !sessionStorage.getItem("activeStaffUid"));
 
@@ -228,24 +228,49 @@ function renderTodayScheduleTable(dosesList) {
 }
 
 /* ==========================================================
-   CHANGE PIN MODAL HANDLER
+   CHANGE PIN MODAL & UNIFIED SHOW PIN CONTROLLER
    ========================================================== */
 const changePinModal = document.getElementById('changePinModal');
 const closePinModalBtn = document.getElementById('closePinModalBtn');
 const cancelPinBtn = document.getElementById('cancelPinBtn');
 const changePinForm = document.getElementById('changePinForm');
+const showPinsCheckbox = document.getElementById('showPinsCheckbox');
+
+// Toggle all 3 PIN input fields together
+function toggleAllPinVisibility(shouldShow) {
+    const pinInputs = document.querySelectorAll('.pin-field');
+    pinInputs.forEach(input => {
+        input.type = shouldShow ? 'text' : 'password';
+    });
+}
+
+if (showPinsCheckbox) {
+    showPinsCheckbox.addEventListener('change', (e) => {
+        toggleAllPinVisibility(e.target.checked);
+    });
+}
+
+// Reset modal form and mask fields
+function resetPinModalState() {
+    if (changePinForm) changePinForm.reset();
+    if (showPinsCheckbox) showPinsCheckbox.checked = false;
+    toggleAllPinVisibility(false);
+}
 
 if (changePinBtn && changePinModal) {
     changePinBtn.addEventListener('click', () => {
-        if (changePinForm) changePinForm.reset();
-        changePinModal.classList.add('active');
+        resetPinModalState();
+        changePinModal.classList.add('open', 'active');
         const firstInput = document.getElementById('currentPinInput');
         if (firstInput) firstInput.focus();
     });
 }
 
 function closePinModal() {
-    if (changePinModal) changePinModal.classList.remove('active');
+    if (changePinModal) {
+        changePinModal.classList.remove('open', 'active');
+        resetPinModalState();
+    }
 }
 
 if (closePinModalBtn) closePinModalBtn.addEventListener('click', closePinModal);
@@ -274,7 +299,6 @@ if (changePinForm) {
         try {
             let staffDocId = sessionStorage.getItem("activeStaffUid") || sessionStorage.getItem("activeStaffId");
 
-            // Fallback: If UID wasn't stored in session, locate staff record by personnel name
             if (!staffDocId) {
                 const staffQuery = query(
                     collection(db, "facilities", currentFacilityId, "staff"),
@@ -310,7 +334,6 @@ if (changePinForm) {
                 pinUpdatedAt: new Date().toISOString()
             });
 
-            // Write internal facility activity log
             await addDoc(collection(db, "facilities", currentFacilityId, "activity_logs"), {
                 facilityId: currentFacilityId,
                 personnelName: staffData.name || "Duty Personnel",

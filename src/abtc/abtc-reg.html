@@ -16,19 +16,12 @@
 <body>
 
 <div class="container">
-    <script>
-        if (localStorage.getItem("sidebarCollapsed") === "true") {
-            document.querySelector(".container").classList.add("collapsed");
-        }
-    </script>
-<!-- PROFESSIONAL SAAS SIDEBAR (ABTC MODULE — REGISTRY ACTIVE) -->
+<script>
+    if (localStorage.getItem("sidebarCollapsed") === "true") {
+        document.documentElement.classList.add("sidebar-pre-collapsed");
+    }
+</script>
 <aside class="sidebar" id="sidebar">
-    <script>
-        if (localStorage.getItem("sidebarCollapsed") === "true") {
-            document.getElementById("sidebar").classList.add("collapsed");
-            document.querySelector(".container")?.classList.add("collapsed");
-        }
-    </script>
     <div class="sidebar-header">
         <div class="brand-logo">
             <img src="../../assets/images/logo-login.png" alt="CRIS Logo">
