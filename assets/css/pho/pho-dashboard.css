@@ -13,6 +13,13 @@
     --text-dark: #412110;
     --main-bg: #FFFAF0;
     --transition-smooth: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+
+    /* Sidebar tokens (matches the Animal Registry sidebar) */
+    --cris-primary: #e65100;
+    --cris-navy-dark: #0b132b;
+    --cris-navy-border: #1c2541;
+    --cris-nav-text-muted: #8d99ae;
+    --cris-nav-label: #5c6b73;
 }
 
 * {
@@ -36,26 +43,18 @@ body {
     overflow: hidden;
 }
 
-/* ================= PROFESSIONAL SAAS SIDEBAR ================= */
+/* ================= SIDEBAR (matches the Animal Registry; collapse behavior
+   is provided by sidebar-master.css via the .sidebar.collapsed class) ================= */
 .sidebar {
     width: var(--sidebar-width);
-    height: 100vh;
-    background-color: var(--sidebar-bg);
-    border-right: 1px solid var(--sidebar-border);
+    background-color: var(--cris-navy-dark);
+    color: #ffffff;
     display: flex;
     flex-direction: column;
     padding: 20px 14px;
-    transition: width 0.3s cubic-bezier(0.2, 0, 0, 1);
-    box-sizing: border-box;
-    position: relative !important;
-    user-select: none;
-    flex-shrink: 0;
-    z-index: 1000 !important;
-    overflow: visible !important;
-}
-
-.sidebar.collapsed {
-    width: var(--sidebar-collapsed-width) !important;
+    position: relative;
+    transition: width 0.3s ease;
+    z-index: 100;
 }
 
 .sidebar-header {
@@ -63,89 +62,63 @@ body {
     align-items: center;
     gap: 12px;
     padding-bottom: 20px;
-    margin-bottom: 12px;
-    border-bottom: 1px solid var(--sidebar-border);
-    width: 100%;
-    box-sizing: border-box;
-    overflow: visible !important;
-    position: static !important;
+    border-bottom: 1px solid var(--cris-navy-border);
+    margin-bottom: 16px;
+    position: relative;
 }
 
 .brand-logo img {
     width: 36px;
     height: 36px;
     object-fit: contain;
-    flex-shrink: 0;
 }
 
 .brand-info {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    transition: opacity 0.2s ease;
-    min-width: 0;
-    padding-right: 12px;
-}
-
-.sidebar.collapsed .brand-info {
-    opacity: 0;
-    pointer-events: none;
-    width: 0;
-    display: none;
 }
 
 .brand-title {
-    color: var(--text-light);
-    font-size: 12.5px;
+    font-size: 0.72rem;
     font-weight: 700;
-    line-height: 1.35;
-    white-space: normal;
-    word-break: break-word;
+    line-height: 1.2;
+    color: #ffffff;
 }
 
 .brand-badge {
-    color: var(--sunset-gold);
-    font-size: 10px;
-    font-weight: 600;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--cris-primary);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.5px;
     margin-top: 2px;
 }
 
 .toggle-btn {
-    position: absolute !important;
-    top: 32px !important;
-    right: -16px !important;
-    transform: translateY(-50%) !important;
-    width: 32px;
-    height: 32px;
-    background: #111625;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    position: absolute;
+    right: -24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    background-color: var(--cris-navy-dark);
+    border: 1px solid var(--cris-navy-border);
     border-radius: 50%;
-    color: var(--text-light);
-    cursor: pointer;
+    color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
-    z-index: 9999 !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.2s ease;
 }
 
 .toggle-btn:hover {
-    background: var(--sunset-orange);
-    border-color: var(--sunset-orange);
-    transform: translateY(-50%) scale(1.08) !important;
-}
-
-.sidebar.collapsed .chevron-icon {
-    transform: rotate(180deg);
+    background-color: var(--cris-primary);
 }
 
 .chevron-icon {
-    width: 18px;
-    height: 18px;
-    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+    width: 14px;
+    height: 14px;
 }
 
 .sidebar-nav {
@@ -154,23 +127,21 @@ body {
     flex-direction: column;
     gap: 16px;
     overflow-y: auto;
-    overflow-x: hidden;
+}
+
+.nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .nav-label {
-    font-size: 11px;
+    font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 0.08em;
-    padding: 0 10px;
-    margin-bottom: 6px;
-    display: block;
-    white-space: nowrap;
-}
-
-.sidebar.collapsed .nav-label {
-    display: none;
+    color: var(--cris-nav-label);
+    letter-spacing: 0.8px;
+    padding: 8px 12px 4px;
 }
 
 .nav-item {
@@ -178,71 +149,47 @@ body {
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
-    color: var(--text-muted);
+    color: var(--cris-nav-text-muted);
     text-decoration: none;
-    font-size: 13.5px;
-    font-weight: 500;
+    font-size: 0.88rem;
     border-radius: 8px;
-    position: relative;
-    transition: background 0.2s ease, color 0.2s ease;
-    white-space: nowrap;
+    transition: all 0.2s ease;
+    background: none;
     border: none;
-    background: transparent;
-    cursor: pointer;
     width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
+    cursor: pointer;
+    text-align: left;
 }
 
 .nav-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
 }
 
 .nav-item:hover {
-    color: var(--text-light);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.sidebar.collapsed .nav-item {
-    justify-content: center;
-    padding: 10px 0;
-}
-
-.sidebar.collapsed .nav-text {
-    display: none;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.06);
 }
 
 .nav-item.active {
-    color: var(--text-light);
-    background: rgba(234, 97, 19, 0.12);
-    font-weight: 600;
-}
-
-.nav-item.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 6px;
-    bottom: 6px;
-    width: 3.5px;
-    background-color: var(--sunset-orange);
-    border-radius: 0 4px 4px 0;
+    color: #ffffff;
+    background-color: rgba(230, 81, 0, 0.2);
+    border-left: 3px solid var(--cris-primary);
+    font-weight: 700;
 }
 
 .sidebar-footer {
     padding-top: 16px;
-    border-top: 1px solid var(--sidebar-border);
+    border-top: 1px solid var(--cris-navy-border);
     display: flex;
     flex-direction: column;
     gap: 4px;
-    overflow-x: hidden;
 }
 
 .logout-item:hover {
-    color: #F87171;
-    background: rgba(239, 68, 68, 0.1);
+    color: #ff5252;
+    background-color: rgba(255, 82, 82, 0.1);
 }
 
 /* ================= MAIN CONTENT AREA ================= */
