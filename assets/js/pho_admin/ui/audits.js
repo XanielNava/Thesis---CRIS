@@ -9,51 +9,10 @@ import { fetchAuditLogsFromDb, logoutAdmin } from '../db/audits-db.js';
     'use strict';
 
     /* ======================================================================
-       1. SIDEBAR & LOGOUT
+       1. MODAL ELEMENTS & HELPERS
        ====================================================================== */
 
-    const SIDEBAR_KEY = 'sidebarCollapsed';
-
-    const sidebar = document.getElementById('sidebar');
-    const appLayout = document.getElementById('appLayout');
-    const sidebarToggle = document.getElementById('sidebarToggle');
     const logoutModal = document.getElementById('logoutModal');
-    const logoutConfirm = document.getElementById('logoutConfirm');
-
-    function readSidebarState() {
-        try {
-            return localStorage.getItem(SIDEBAR_KEY) === 'true';
-        } catch (e) {
-            return false;
-        }
-    }
-
-    function storeSidebarState(collapsed) {
-        try {
-            localStorage.setItem(SIDEBAR_KEY, String(collapsed));
-        } catch (e) { /* storage unavailable */ }
-    }
-
-    function applySidebarState(collapsed) {
-        if (!sidebar || !appLayout) return;
-        sidebar.classList.toggle('collapsed', collapsed);
-        appLayout.classList.toggle('sidebar-collapsed', collapsed);
-        if (sidebarToggle) {
-            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
-        }
-    }
-
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function () {
-            const collapsed = !sidebar.classList.contains('collapsed');
-            applySidebarState(collapsed);
-            storeSidebarState(collapsed);
-        });
-    }
-
-    /* ======================================================================
-       2. HELPERS & MODAL UTILITIES
-       ====================================================================== */
 
     const $ = (selector) => document.querySelector(selector);
 
@@ -76,7 +35,7 @@ import { fetchAuditLogsFromDb, logoutAdmin } from '../db/audits-db.js';
     }
 
     /* ======================================================================
-       3. LIVE DATA STATE & RENDERING
+       2. LIVE DATA STATE & RENDERING
        ====================================================================== */
 
     let auditRecords = [];
@@ -135,7 +94,7 @@ import { fetchAuditLogsFromDb, logoutAdmin } from '../db/audits-db.js';
     }
 
     /* ======================================================================
-       4. EVENTS & LOGOUT
+       3. EVENTS & LOGOUT
        ====================================================================== */
 
     document.addEventListener('click', function (e) {
@@ -184,9 +143,8 @@ import { fetchAuditLogsFromDb, logoutAdmin } from '../db/audits-db.js';
     }
 
     /* ======================================================================
-       5. INITIALIZATION
+       4. INITIALIZATION
        ====================================================================== */
 
-    applySidebarState(readSidebarState());
     loadAuditLogs();
 })();

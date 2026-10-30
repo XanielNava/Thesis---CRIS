@@ -9,8 +9,9 @@
 
     <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
 
-    <script>
+  <script>
     (function () {
+        // 1. Theme application
         try {
             var s = (JSON.parse(localStorage.getItem('cris-admin-settings') || '{}').values) || {};
             var dark = s.theme === 'dark' ||
@@ -18,6 +19,11 @@
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
         } catch (e) {
             document.documentElement.setAttribute('data-theme', 'light');
+        }
+
+        // 2. Immediate zero-latency sidebar state restorer (Kills the glitch/FOUC)
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            document.documentElement.classList.add('sidebar-pre-collapsed');
         }
     })();
 </script>
@@ -214,7 +220,7 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+<script src="../../assets/js/main/sidebar.js"></script>
 <script type="module" src="../../assets/js/pho_admin/ui/user_account.js"></script>
-<script type="module" src="../../assets/js/pho_admin/db/user_account-db.js"></script>
 </body>
 </html>

@@ -287,3 +287,24 @@
 .logout-modal-actions button:hover {
     opacity: 0.85;
 }
+/* Instantly sets collapsed width before JS or DOMContentLoaded kicks in */
+html.sidebar-pre-collapsed .sidebar {
+    width: var(--sidebar-collapsed-width) !important;
+    transition: none !important;
+}
+
+html.sidebar-pre-collapsed #appLayout,
+html.sidebar-pre-collapsed .container {
+    grid-template-columns: var(--sidebar-collapsed-width) 1fr !important;
+}
+
+html.sidebar-pre-collapsed .brand-info,
+html.sidebar-pre-collapsed .nav-label,
+html.sidebar-pre-collapsed .nav-text {
+    display: none !important;
+}/* Add right around line 98 in your sidebar-master.css */
+.toggle-btn svg,
+.toggle-btn path,
+.chevron-icon {
+    pointer-events: none !important;
+}

@@ -9,51 +9,10 @@ import { fetchComplaintsFromDb, updateComplaintStatusInDb, logoutAdmin } from '.
     'use strict';
 
     /* ======================================================================
-       1. SIDEBAR & LOGOUT
+       1. MODAL ELEMENTS & HELPERS
        ====================================================================== */
 
-    const SIDEBAR_KEY = 'sidebarCollapsed';
-
-    const sidebar = document.getElementById('sidebar');
-    const appLayout = document.getElementById('appLayout');
-    const sidebarToggle = document.getElementById('sidebarToggle');
     const logoutModal = document.getElementById('logoutModal');
-    const logoutConfirm = document.getElementById('logoutConfirm');
-
-    function readSidebarState() {
-        try {
-            return localStorage.getItem(SIDEBAR_KEY) === 'true';
-        } catch (e) {
-            return false;
-        }
-    }
-
-    function storeSidebarState(collapsed) {
-        try {
-            localStorage.setItem(SIDEBAR_KEY, String(collapsed));
-        } catch (e) { /* storage unavailable */ }
-    }
-
-    function applySidebarState(collapsed) {
-        if (!sidebar || !appLayout) return;
-        sidebar.classList.toggle('collapsed', collapsed);
-        appLayout.classList.toggle('sidebar-collapsed', collapsed);
-        if (sidebarToggle) {
-            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
-        }
-    }
-
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function () {
-            const collapsed = !sidebar.classList.contains('collapsed');
-            applySidebarState(collapsed);
-            storeSidebarState(collapsed);
-        });
-    }
-
-    /* ======================================================================
-       2. HELPERS & UTILITIES
-       ====================================================================== */
 
     const $ = (selector) => document.querySelector(selector);
 
@@ -91,7 +50,7 @@ import { fetchComplaintsFromDb, updateComplaintStatusInDb, logoutAdmin } from '.
     }
 
     /* ======================================================================
-       3. DATA STATE & RENDERING
+       2. DATA STATE & RENDERING
        ====================================================================== */
 
     const STATUS_OPTIONS = ['Open', 'In Progress', 'Resolved', 'Closed'];
@@ -160,7 +119,7 @@ import { fetchComplaintsFromDb, updateComplaintStatusInDb, logoutAdmin } from '.
     }
 
     /* ======================================================================
-       4. ACTIONS & STATUS UPDATE
+       3. ACTIONS & STATUS UPDATE
        ====================================================================== */
 
     async function handleStatusChange(dropdown) {
@@ -187,7 +146,7 @@ import { fetchComplaintsFromDb, updateComplaintStatusInDb, logoutAdmin } from '.
     }
 
     /* ======================================================================
-       5. EVENTS
+       4. EVENTS
        ====================================================================== */
 
     // Status dropdown change in table
@@ -241,9 +200,8 @@ import { fetchComplaintsFromDb, updateComplaintStatusInDb, logoutAdmin } from '.
     }
 
     /* ======================================================================
-       6. INITIALIZATION
+       5. INITIALIZATION
        ====================================================================== */
 
-    applySidebarState(readSidebarState());
     loadComplaints();
 })();

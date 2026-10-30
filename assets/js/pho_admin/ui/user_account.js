@@ -1,5 +1,5 @@
 /* ==========================================================================
-   USER MANAGEMENT — page script
+   USER MANAGEMENT — PHO ADMIN PAGE CONTROLLER (user_account.js)
    UI Component (Wired to user-db.js)
    ========================================================================== */
 
@@ -17,51 +17,10 @@ import {
     'use strict';
 
     /* ======================================================================
-       1. SIDEBAR
+       1. MODAL ELEMENTS & HELPERS
        ====================================================================== */
 
-    const SIDEBAR_KEY = 'sidebarCollapsed';
-
-    const sidebar = document.getElementById('sidebar');
-    const appLayout = document.getElementById('appLayout');
-    const sidebarToggle = document.getElementById('sidebarToggle');
     const logoutModal = document.getElementById('logoutModal');
-    const logoutConfirm = document.getElementById('logoutConfirm');
-
-    function readSidebarState() {
-        try {
-            return localStorage.getItem(SIDEBAR_KEY) === 'true';
-        } catch (e) {
-            return false;
-        }
-    }
-
-    function storeSidebarState(collapsed) {
-        try {
-            localStorage.setItem(SIDEBAR_KEY, String(collapsed));
-        } catch (e) { /* storage unavailable */ }
-    }
-
-    function applySidebarState(collapsed) {
-        if (!sidebar || !appLayout) return;
-        sidebar.classList.toggle('collapsed', collapsed);
-        appLayout.classList.toggle('sidebar-collapsed', collapsed);
-        if (sidebarToggle) {
-            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
-        }
-    }
-
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function () {
-            const collapsed = !sidebar.classList.contains('collapsed');
-            applySidebarState(collapsed);
-            storeSidebarState(collapsed);
-        });
-    }
-
-    /* ======================================================================
-       2. HELPERS
-       ====================================================================== */
 
     const $ = (selector) => document.querySelector(selector);
 
@@ -99,7 +58,7 @@ import {
     }
 
     /* ======================================================================
-       3. LIVE DATA STATE (Hardcoded sample arrays removed)
+       2. LIVE DATA STATE
        ====================================================================== */
 
     const ROLES = ['Super Admin', 'Admin', 'Facility Manager', 'Viewer'];
@@ -123,7 +82,7 @@ import {
     }
 
     /* ======================================================================
-       4. ACTIONS AND BUSINESS RULES
+       3. ACTIONS AND BUSINESS RULES
        ====================================================================== */
 
     function activeSuperAdmins() {
@@ -175,7 +134,7 @@ import {
     }
 
     /* ======================================================================
-       5. RENDERING
+       4. RENDERING
        ====================================================================== */
 
     function renderUsers() {
@@ -232,7 +191,7 @@ import {
     }
 
     /* ======================================================================
-       6. MODAL (create / edit account)
+       5. MODAL (create / edit account)
        ====================================================================== */
 
     const userModal = document.getElementById('userModal');
@@ -320,7 +279,7 @@ import {
     }
 
     /* ======================================================================
-       7. EVENTS
+       6. EVENTS
        ====================================================================== */
 
     function handleRowAction(action, id) {
@@ -401,7 +360,7 @@ import {
     });
 
     /* ======================================================================
-       8. INITIALIZATION
+       7. INITIALIZATION
        ====================================================================== */
 
     listenToAuth((user) => {
@@ -409,7 +368,6 @@ import {
             window.location.href = '../pho/pho-login.html';
             return;
         }
-        applySidebarState(readSidebarState());
         loadData();
     });
 })();

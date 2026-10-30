@@ -19,48 +19,10 @@ import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
     'use strict';
 
     /* ======================================================================
-       1. SIDEBAR & SESSION NAVIGATION
+       1. SESSION & MODAL ELEMENTS
        ====================================================================== */
 
-    const SIDEBAR_KEY = 'sidebarCollapsed';
-
-    const sidebar = document.getElementById('sidebar');
-    const appLayout = document.getElementById('appLayout');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const logoutBtn = document.getElementById('logoutBtn');
     const logoutModal = document.getElementById('logoutModal');
-    const logoutConfirm = document.getElementById('logoutConfirm');
-
-    function readSidebarState() {
-        try {
-            return localStorage.getItem(SIDEBAR_KEY) === 'true';
-        } catch (e) {
-            return false;
-        }
-    }
-
-    function storeSidebarState(collapsed) {
-        try {
-            localStorage.setItem(SIDEBAR_KEY, String(collapsed));
-        } catch (e) { /* storage unavailable */ }
-    }
-
-    function applySidebarState(collapsed) {
-        if (!sidebar || !appLayout) return;
-        sidebar.classList.toggle('collapsed', collapsed);
-        appLayout.classList.toggle('sidebar-collapsed', collapsed);
-        if (sidebarToggle) {
-            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
-        }
-    }
-
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function () {
-            const collapsed = !sidebar.classList.contains('collapsed');
-            applySidebarState(collapsed);
-            storeSidebarState(collapsed);
-        });
-    }
 
     // Session Verification & Boot Entrypoint
     onAuthStateChanged(auth, async (user) => {
@@ -71,7 +33,6 @@ import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
         }
 
         console.log("Authenticated PHO Admin:", user.email);
-        applySidebarState(readSidebarState());
         await loadDashboardMetrics();
     });
 

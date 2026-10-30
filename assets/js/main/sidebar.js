@@ -1,55 +1,75 @@
 // ==========================================================================
-// sidebar.js - Universal SaaS Sidebar Toggle & Logout Controller
+// sidebar.js - Universal SaaS Sidebar Controller for PHO & ABTC Modules
 // ==========================================================================
 
-function setupSidebar() {
-    const sidebarToggle = document.getElementById("sidebarToggle");
-    const sidebar = document.getElementById("sidebar");
-    const container = document.querySelector(".container, .app-container");
+(function () {
+    'use strict';
 
-    // 1. Sidebar Toggle Setup
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.onclick = function() {
-            const isCollapsed = sidebar.classList.toggle("collapsed");
-            if (container) {
-                container.classList.toggle("collapsed", isCollapsed);
-            }
-            localStorage.setItem("sidebarCollapsed", String(isCollapsed));
-        };
+    const SIDEBAR_KEY = 'sidebarCollapsed';
 
-        // 2. Initial State Restorer
-        if (localStorage.getItem("sidebarCollapsed") === "true") {
-            sidebar.classList.add("collapsed");
-            if (container) {
-                container.classList.add("collapsed");
+    function initUniversalSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        // Support both PHO layout (#appLayout) and ABTC layout (.container)
+        const layoutWrapper = document.getElementById('appLayout') || document.querySelector('.container, .app-container');
+
+        if (!sidebar || !sidebarToggle) return;
+
+        function readState() {
+            try {
+                return localStorage.getItem(SIDEBAR_KEY) === 'true';
+            } catch (e) {
+                return false;
             }
         }
-    }
 
-    // 3. Centralized Universal Logout Handler
-    const logoutBtn = document.getElementById("logout-btn");
-    if (logoutBtn) {
-        logoutBtn.onclick = function(e) {
+        function storeState(isCollapsed) {
+            try {
+                localStorage.setItem(SIDEBAR_KEY, String(isCollapsed));
+            } catch (e) { /* Storage unavailable */ }
+        }
+
+        function applyState(isCollapsed) {
+            // 1. Toggle class on sidebar
+            sidebar.classList.toggle('collapsed', isCollapsed);
+            
+            // 2. Clear or set the pre-collapse HTML lock so CSS does not override
+            if (isCollapsed) {
+                document.documentElement.classList.add('sidebar-pre-collapsed');
+            } else {
+                document.documentElement.classList.remove('sidebar-pre-collapsed');
+            }
+
+            // 3. Toggle both classes on the main layout wrapper
+            if (layoutWrapper) {
+                layoutWrapper.classList.toggle('sidebar-collapsed', isCollapsed);
+                layoutWrapper.classList.toggle('collapsed', isCollapsed);
+            }
+
+            sidebarToggle.setAttribute('aria-expanded', String(!isCollapsed));
+        }
+
+        // Initial State Restoration
+        applyState(readState());
+
+        // Toggle Click Handler
+        sidebarToggle.addEventListener('click', function (e) {
             e.preventDefault();
+            e.stopPropagation();
 
-            const confirmLogout = confirm("Are you sure you want to log out of the PHO Surveillance Portal?");
-            if (!confirmLogout) return;
-
-            alert("You are being logged out of the portal. Redirecting to login page...");
-
-            // Clear session storage if used
-            sessionStorage.clear();
-            localStorage.removeItem("authUser");
-
-            // Redirect cleanly
-            window.location.href = "pho-login.html";
-        };
+            const isCurrentlyCollapsed = sidebar.classList.contains('collapsed') || 
+                                         document.documentElement.classList.contains('sidebar-pre-collapsed');
+            
+            const nextState = !isCurrentlyCollapsed;
+            applyState(nextState);
+            storeState(nextState);
+        });
     }
-}
 
-// Auto-initialize when the DOM is fully loaded
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", setupSidebar);
-} else {
-    setupSidebar();
-}
+    // Initialize as soon as DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initUniversalSidebar);
+    } else {
+        initUniversalSidebar();
+    }
+})();

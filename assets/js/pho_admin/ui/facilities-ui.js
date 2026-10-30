@@ -17,50 +17,11 @@ import {
     'use strict';
 
     /* ======================================================================
-       1. SIDEBAR & LOGOUT
+       1. MODAL ELEMENTS & HELPERS
        ====================================================================== */
 
-    const SIDEBAR_KEY = 'sidebarCollapsed';
-    const sidebar = document.getElementById('sidebar');
-    const appLayout = document.getElementById('appLayout');
-    const sidebarToggle = document.getElementById('sidebarToggle');
     const logoutModal = document.getElementById('logoutModal');
     const logoutConfirm = document.getElementById('logoutConfirm');
-
-    function readSidebarState() {
-        try {
-            return localStorage.getItem(SIDEBAR_KEY) === 'true';
-        } catch (e) {
-            return false;
-        }
-    }
-
-    function storeSidebarState(collapsed) {
-        try {
-            localStorage.setItem(SIDEBAR_KEY, String(collapsed));
-        } catch (e) { /* Storage unavailable */ }
-    }
-
-    function applySidebarState(collapsed) {
-        if (!sidebar || !appLayout) return;
-        sidebar.classList.toggle('collapsed', collapsed);
-        appLayout.classList.toggle('sidebar-collapsed', collapsed);
-        if (sidebarToggle) {
-            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
-        }
-    }
-
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function () {
-            const collapsed = !sidebar.classList.contains('collapsed');
-            applySidebarState(collapsed);
-            storeSidebarState(collapsed);
-        });
-    }
-
-    /* ======================================================================
-       2. HELPERS & TOAST UTILITIES
-       ====================================================================== */
 
     const $ = (selector) => document.querySelector(selector);
     const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({
@@ -93,7 +54,7 @@ import {
     }
 
     /* ======================================================================
-       3. DELETE MODAL DOM INJECTION
+       2. DELETE MODAL DOM INJECTION
        ====================================================================== */
 
     let facilityPendingDeletion = null;
@@ -220,7 +181,7 @@ import {
     }
 
     /* ======================================================================
-       4. DATA STATE & RENDERING
+       3. DATA STATE & RENDERING
        ====================================================================== */
 
     let facilities = [];
@@ -376,7 +337,7 @@ import {
     }
 
     /* ======================================================================
-       5. ACTION LISTENERS
+       4. ACTION LISTENERS
        ====================================================================== */
 
     function attachActionListeners() {
@@ -415,7 +376,7 @@ import {
             };
         });
 
-        // 🗑️ Delete Button Click: Enforce Grace Period Checks
+        // Delete Button Click: Enforce Grace Period Checks
         document.querySelectorAll(".btn-delete-facility").forEach(btn => {
             btn.onclick = () => {
                 const id = btn.getAttribute("data-id");
@@ -546,7 +507,7 @@ import {
     }
 
     /* ======================================================================
-       6. FORM SUBMISSIONS
+       5. FORM SUBMISSIONS
        ====================================================================== */
 
     if (btnApproveApp) {
@@ -631,13 +592,14 @@ import {
     }
 
     /* ======================================================================
-       7. EVENTS & MODAL CLOSE
+       6. EVENTS & MODAL CLOSE
        ====================================================================== */
 
     document.querySelectorAll("[data-close-review]").forEach(btn => btn.onclick = () => closeModal(reviewModal));
     document.querySelectorAll("[data-close-edit]").forEach(btn => btn.onclick = () => closeModal(facilityModal));
     document.querySelectorAll("[data-close-logout]").forEach(btn => btn.onclick = () => closeModal(logoutModal));
 
+    const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
         logoutBtn.addEventListener("click", () => openModal(logoutModal));
     }
@@ -667,6 +629,5 @@ import {
     });
 
     // Boot
-    applySidebarState(readSidebarState());
     loadTableData();
 })();

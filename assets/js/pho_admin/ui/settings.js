@@ -9,50 +9,11 @@ import { fetchSystemSettingsFromDb, saveSystemSettingsToDb, logoutAdmin } from '
     'use strict';
 
     /* ======================================================================
-       1. SIDEBAR & LOGOUT
+       1. MODAL ELEMENTS & HELPERS
        ====================================================================== */
 
-    const SIDEBAR_KEY = 'sidebarCollapsed';
-    const sidebar = document.getElementById('sidebar');
-    const appLayout = document.getElementById('appLayout');
-    const sidebarToggle = document.getElementById('sidebarToggle');
     const logoutModal = document.getElementById('logoutModal');
     const logoutConfirm = document.getElementById('logoutConfirm');
-
-    function readSidebarState() {
-        try {
-            return localStorage.getItem(SIDEBAR_KEY) === 'true';
-        } catch (e) {
-            return false;
-        }
-    }
-
-    function storeSidebarState(collapsed) {
-        try {
-            localStorage.setItem(SIDEBAR_KEY, String(collapsed));
-        } catch (e) { /* Storage unavailable */ }
-    }
-
-    function applySidebarState(collapsed) {
-        if (!sidebar || !appLayout) return;
-        sidebar.classList.toggle('collapsed', collapsed);
-        appLayout.classList.toggle('sidebar-collapsed', collapsed);
-        if (sidebarToggle) {
-            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
-        }
-    }
-
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function () {
-            const collapsed = !sidebar.classList.contains('collapsed');
-            applySidebarState(collapsed);
-            storeSidebarState(collapsed);
-        });
-    }
-
-    /* ======================================================================
-       2. HELPERS & UTILITIES
-       ====================================================================== */
 
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -87,7 +48,7 @@ import { fetchSystemSettingsFromDb, saveSystemSettingsToDb, logoutAdmin } from '
     }
 
     /* ======================================================================
-       3. DEFAULT SETTINGS & REFERENCE LISTS
+       2. DEFAULT SETTINGS & REFERENCE LISTS
        ====================================================================== */
 
     const LOCAL_PREF_KEY = 'cris-admin-settings';
@@ -114,7 +75,7 @@ import { fetchSystemSettingsFromDb, saveSystemSettingsToDb, logoutAdmin } from '
     const LISTS = ['animalTypes', 'biteCategories', 'facilityTypes'];
 
     /* ======================================================================
-       4. WORKSTATION APPEARANCE
+       3. WORKSTATION APPEARANCE
        ====================================================================== */
 
     const systemDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
@@ -139,7 +100,7 @@ import { fetchSystemSettingsFromDb, saveSystemSettingsToDb, logoutAdmin } from '
     }
 
     /* ======================================================================
-       5. STATE MANAGEMENT
+       4. STATE MANAGEMENT
        ====================================================================== */
 
     let saved = clone(DEFAULTS);
@@ -149,7 +110,7 @@ import { fetchSystemSettingsFromDb, saveSystemSettingsToDb, logoutAdmin } from '
     const isDirty = () => JSON.stringify(saved) !== JSON.stringify(draft);
 
     /* ======================================================================
-       6. FIELD BINDING & SAVE BAR
+       5. FIELD BINDING & SAVE BAR
        ====================================================================== */
 
     const form = document.getElementById('settingsForm');
@@ -196,7 +157,7 @@ import { fetchSystemSettingsFromDb, saveSystemSettingsToDb, logoutAdmin } from '
     }
 
     /* ======================================================================
-       7. REFERENCE CHIP EDITORS
+       6. REFERENCE CHIP EDITORS
        ====================================================================== */
 
     function renderChips(listKey) {
@@ -251,7 +212,7 @@ import { fetchSystemSettingsFromDb, saveSystemSettingsToDb, logoutAdmin } from '
     }
 
     /* ======================================================================
-       8. TAB NAVIGATION
+       7. TAB NAVIGATION
        ====================================================================== */
 
     const nav = document.querySelector('.settings-nav');
@@ -285,7 +246,7 @@ import { fetchSystemSettingsFromDb, saveSystemSettingsToDb, logoutAdmin } from '
     });
 
     /* ======================================================================
-       9. VALIDATION & SAVE
+       8. VALIDATION & SAVE
        ====================================================================== */
 
     function validate(values) {
@@ -380,7 +341,7 @@ import { fetchSystemSettingsFromDb, saveSystemSettingsToDb, logoutAdmin } from '
     }
 
     /* ======================================================================
-       10. EVENTS
+       9. EVENTS
        ====================================================================== */
 
     form.addEventListener('submit', function (e) {
@@ -455,12 +416,10 @@ import { fetchSystemSettingsFromDb, saveSystemSettingsToDb, logoutAdmin } from '
     });
 
     /* ======================================================================
-       11. INITIALIZATION & CLOUD BOOT
+       10. INITIALIZATION & CLOUD BOOT
        ====================================================================== */
 
     async function initSettings() {
-        applySidebarState(readSidebarState());
-
         // 1. Load local preferences
         let localPrefs = {};
         try {
