@@ -1,8 +1,45 @@
-/* ==========================================================================
-   SYSTEM OVERVIEW — page-specific styles
-   ========================================================================== */
+:root {
+    --header-title-size: 35px;      /* Header title size (matches PHO Dashboard) */
+    --header-subtitle-size: 13px;   /* Subtitle under the header */
+}
 
-/* Stat cards */
+/* ================= PAGE HEADER ================= */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+    padding: 15px 25px;
+    border-radius: 12px;
+    color: white;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(234, 97, 19, 0.2);
+    font-family: 'Lato', sans-serif;
+}
+
+.app-layout .main-content .page-header h1,
+.page-header h1 {
+    margin: 0 !important;
+    font-size: var(--header-title-size) !important;
+    line-height: 1.2 !important;
+    color: white !important;
+    font-family: 'Lato', sans-serif !important;
+}
+
+.page-header p {
+    margin: 0;
+    font-size: 14px;
+    color: white;
+}
+
+/* ================= SUBTITLE ================= */
+.page-subtitle {
+    margin: 0 0 16px;
+    font-size: var(--header-subtitle-size);
+    color: #64748b;
+}
+
+/* ================= STAT CARDS ================= */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -60,7 +97,7 @@
     margin-top: 2px;
 }
 
-/* Two-column overview panels */
+/* ================= TWO-COLUMN PANELS ================= */
 .two-col {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -82,7 +119,7 @@
     text-decoration: underline;
 }
 
-/* Overview lists */
+/* ================= OVERVIEW LISTS ================= */
 .simple-list {
     list-style: none;
     margin: 0;
@@ -118,7 +155,7 @@
     font-size: 12px;
 }
 
-/* Responsive stat grid */
+/* ================= RESPONSIVE ================= */
 @media (max-width: 1100px) {
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);

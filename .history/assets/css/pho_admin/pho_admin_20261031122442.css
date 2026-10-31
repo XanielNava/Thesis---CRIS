@@ -1,0 +1,168 @@
+:root {
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 76px;
+    --sidebar-bg: #111625;
+    --sidebar-border: rgba(255, 255, 255, 0.07);
+    --text-muted: #7E8B9B;
+    --text-light: #F1F5F9;
+    --sunset-orange: #EA6113;
+    --sunset-gold: #F88F22;
+    --sunset-yellow: #FBB931;
+    --sunset-cream: #FFE3B3;
+    --text-dark: #412110;
+    --main-bg: #FFFAF0;
+    --transition-smooth: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+
+    /* Sidebar tokens (matches the Animal Registry sidebar) */
+    --cris-primary: #e65100;
+    --cris-navy-dark: #0b132b;
+    --cris-navy-border: #1c2541;
+    --cris-nav-text-muted: #8d99ae;
+    --cris-nav-label: #5c6b73;
+
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+    padding: 15px 25px;
+    border-radius: 12px;
+    color: white;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(234, 97, 19, 0.2);
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 35px;
+    font
+}
+/* Stat cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+.icon-blue   { background: #e0ecff; color: #1d4ed8; }
+.icon-green  { background: #dcfce7; color: #15803d; }
+.icon-amber  { background: #fef3c7; color: #b45309; }
+.icon-red    { background: #fee2e2; color: #b91c1c; }
+.icon-orange { background: #fde9dc; color: var(--sunset-orange); }
+
+.stat-label {
+    display: block;
+    font-size: 12.5px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.stat-value {
+    display: block;
+    font-size: 26px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2px;
+}
+
+/* Two-column overview panels */
+.two-col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.two-col .panel {
+    margin-bottom: 0;
+}
+
+.link-btn {
+    color: var(--sunset-orange);
+    font-weight: 600;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.link-btn:hover {
+    text-decoration: underline;
+}
+
+/* Overview lists */
+.simple-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.simple-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.simple-list li:last-child {
+    border-bottom: none;
+}
+
+.simple-list .li-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.simple-list strong {
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.simple-list small {
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* Responsive stat grid */
+@media (max-width: 1100px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
