@@ -184,7 +184,6 @@
                         <option value="">All species</option>
                         <option value="Dog">Dog</option>
                         <option value="Cat">Cat</option>
-                        <option value="Other">Other</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -240,10 +239,17 @@
     <div class="modal-container">
         <div class="modal-header">
             <h2 id="ownerProfileModalTitle"><i class="fa-solid fa-address-card"></i> Registered Owner &amp; Pet File</h2>
-            <button type="button" class="close-modal-btn" id="closeProfileModalBtn" aria-label="Close">&times;</button>
+            <div class="modal-header-actions">
+                <button type="button" class="btn-modal btn-print-owner no-print" id="printOwnerFileBtn">
+                    <i class="fa-solid fa-print"></i> Print
+                </button>
+                <button type="button" class="close-modal-btn no-print" id="closeProfileModalBtn" aria-label="Close">&times;</button>
+            </div>
         </div>
 
         <div class="modal-body">
+            <p class="print-only owner-print-stamp">Printed: <span id="ownerPrintDate"></span></p>
+
             <div class="profile-summary">
                 <div class="profile-photo" id="profilePhoto" aria-hidden="true"></div>
                 <div class="profile-summary-text">
@@ -308,13 +314,129 @@
             </div>
         </div>
 
-        <div class="modal-footer">
+        <div class="modal-footer no-print">
             <button type="button" class="btn-modal btn-cancel" id="cancelProfileModalBtn">Close</button>
             <button type="button" class="btn-modal btn-edit-record" id="switchToEditFromViewBtn">
                 <i class="fa-solid fa-pen-to-square"></i> Edit Owner Record
             </button>
             <button type="button" class="btn-modal btn-add-animal" id="addAnimalProfileFieldBtn">
                 <i class="fa-solid fa-plus-circle"></i> Add Another Animal Profile
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== ANIMAL PROFILE MODAL (ADD / EDIT ANIMAL) ==================== -->
+<div class="modal-overlay modal-top" id="animalProfileModal" role="dialog" aria-modal="true" aria-labelledby="animalProfileModalTitle" aria-hidden="true">
+    <div class="modal-container modal-md">
+        <div class="modal-header">
+            <h2 id="animalProfileModalTitle"><i class="fa-solid fa-pen-to-square"></i> Edit Animal Profile</h2>
+            <button type="button" class="close-modal-btn" id="closeAnimalModalBtn" aria-label="Close">&times;</button>
+        </div>
+
+        <form id="animalProfileForm" class="modal-body" novalidate>
+            <div class="form-section">
+                <div class="form-grid dual-grid mb-10">
+                    <div class="input-group">
+                        <label for="apName">Animal Name <span class="required-star">*</span></label>
+                        <input type="text" id="apName" placeholder="e.g. Browny">
+                        <span class="error-msg" id="apNameError"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="apSpecies">Species <span class="required-star">*</span></label>
+                        <select id="apSpecies">
+                            <option value="Dog">Dog</option>
+                            <option value="Cat">Cat</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid dual-grid mb-10">
+                    <div class="input-group">
+                        <label for="apBreed">Breed</label>
+                        <input type="text" id="apBreed" placeholder="e.g. Aspin / Domestic">
+                    </div>
+                    <div class="input-group">
+                        <label for="apSex">Sex <span class="required-star">*</span></label>
+                        <select id="apSex">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid dual-grid">
+                    <div class="input-group">
+                        <label for="apRepro">Reproductive Status</label>
+                        <select id="apRepro">
+                            <option value="Intact">Intact</option>
+                            <option value="Castrated">Castrated</option>
+                            <option value="Spayed">Spayed</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="apMicrochip">Microchip / Tag ID</label>
+                        <input type="text" id="apMicrochip" placeholder="Optional tag ID">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" id="cancelAnimalModalBtn">Cancel</button>
+                <button type="submit" class="btn-modal btn-submit" id="saveAnimalBtn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==================== UPDATE VACCINATION MODAL ==================== -->
+<div class="modal-overlay modal-top" id="vaccinationModal" role="dialog" aria-modal="true" aria-labelledby="vaccinationModalTitle" aria-hidden="true">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h2 id="vaccinationModalTitle"><i class="fa-solid fa-syringe"></i> Update Vaccination</h2>
+            <button type="button" class="close-modal-btn" id="closeVaxModalBtn" aria-label="Close">&times;</button>
+        </div>
+
+        <form id="vaccinationForm" class="modal-body" novalidate>
+            <p class="vax-animal-context" id="vaxAnimalName"></p>
+
+            <div class="form-section">
+                <div class="form-grid mb-10">
+                    <div class="input-group">
+                        <label for="vaxStatus">Vaccination Status</label>
+                        <select id="vaxStatus">
+                            <option value="Vaccinated">Vaccinated</option>
+                            <option value="Unvaccinated">Unvaccinated</option>
+                            <option value="Overdue">Overdue</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="vaxDate">Last Vaccination Date</label>
+                        <input type="date" id="vaxDate">
+                        <span class="error-msg" id="vaxDateError"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" id="cancelVaxModalBtn">Cancel</button>
+                <button type="submit" class="btn-modal btn-submit" id="saveVaxBtn">Save Vaccination</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==================== DELETE CONFIRMATION ==================== -->
+<div class="modal-overlay modal-top" id="confirmDeleteModal" role="alertdialog" aria-modal="true" aria-labelledby="confirmDeleteTitle" aria-describedby="confirmDeleteText" aria-hidden="true">
+    <div class="modal-container modal-sm">
+        <div class="modal-body confirm-body">
+            <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h2 id="confirmDeleteTitle">Delete animal profile?</h2>
+            <p id="confirmDeleteText"></p>
+            <p class="confirm-warning">This permanently removes the animal profile from the owner's file. This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-modal btn-cancel" id="cancelDeleteBtn">Cancel</button>
+            <button type="button" class="btn-modal btn-danger-solid" id="confirmDeleteBtn">
+                <i class="fa-solid fa-trash-can"></i> Delete Profile
             </button>
         </div>
     </div>
@@ -438,7 +560,6 @@
                         <select id="species">
                             <option value="Dog">Dog</option>
                             <option value="Cat">Cat</option>
-                            <option value="Other">Other</option>
                         </select>
                     </div>
                     <div class="input-group">
@@ -452,12 +573,6 @@
                             <option value="Female">Female</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="input-group mb-10 hidden" id="otherSpeciesGroup">
-                    <label for="otherSpecies">Please specify animal species <span class="required-star">*</span></label>
-                    <input type="text" id="otherSpecies" placeholder="e.g. Rabbit, Ferret, Horse">
-                    <span class="error-msg" id="otherSpeciesError"></span>
                 </div>
 
                 <div class="form-grid quad-grid">

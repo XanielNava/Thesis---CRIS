@@ -2,19 +2,22 @@
    PVO ANIMAL REGISTRY — page script
 
    Sections
-     1. Reference data (species, statuses, municipalities, sample records)
+     1. Reference data
      2. State
      3. Helpers
      4. Sidebar, toast, and modal control
      5. Municipality dropdowns
      6. Summary statistics
      7. Registry table: filtering, sorting, rendering
-     8. Owner file (view modal) and animal profiles
-     9. Owner form (add / edit) and validation
-    10. Photo upload and camera capture
-    11. Export (Excel) and print
-    12. Event wiring
-    13. Initialization
+     8. Owner file (view modal) and animal cards
+     9. Animal profile modal (add / edit animal)
+    10. Update vaccination modal
+    11. Delete confirmation
+    12. Owner form (add / edit) and validation
+    13. Photo upload and camera capture
+    14. Export (Excel) and print
+    15. Event wiring
+    16. Initialization
    ========================================================================== */
 (function () {
     'use strict';
@@ -23,7 +26,7 @@
        1. REFERENCE DATA
        ====================================================================== */
 
-    const SPECIES = ['Dog', 'Cat', 'Other'];
+    const SPECIES = ['Dog', 'Cat'];
     const VAX_STATUSES = ['Vaccinated', 'Unvaccinated', 'Overdue'];
     const REPRO_STATUSES = ['Intact', 'Castrated', 'Spayed'];
     const SEX_OPTIONS = ['Male', 'Female'];
@@ -31,7 +34,6 @@
     const PROVINCE_LABEL = 'Iloilo';
 
     const MUNICIPALITY_GROUPS = [
-        { label: 'Highly Urbanized City', items: ['Iloilo City'] },
         { label: 'Component City', items: ['Passi City'] },
         {
             label: 'Municipalities',
@@ -66,7 +68,7 @@
             zipCode: "5002",
             photo: "",
             animals: [
-                { regId: "REG-2026-1001-A1", name: "Browny", species: "Dog", otherSpecies: "", breed: "Aspin", sex: "Male", neutered: "Castrated", status: "Vaccinated", lastVax: "2026-01-15", microchipId: "TAG-9901" }
+                { regId: "REG-2026-1001-A1", name: "Browny", species: "Dog", breed: "Aspin", sex: "Male", neutered: "Castrated", status: "Vaccinated", lastVax: "2026-01-15", microchipId: "TAG-9901" }
             ]
         },
         "OWN-002": {
@@ -82,8 +84,8 @@
             zipCode: "5001",
             photo: "",
             animals: [
-                { regId: "REG-2026-1002-A1", name: "Mimi", species: "Cat", otherSpecies: "", breed: "Persian", sex: "Female", neutered: "Spayed", status: "Vaccinated", lastVax: "2026-02-10", microchipId: "" },
-                { regId: "REG-2026-1002-A2", name: "Tiger", species: "Cat", otherSpecies: "", breed: "Domestic Shorthair", sex: "Male", neutered: "Intact", status: "Overdue", lastVax: "2025-03-12", microchipId: "" }
+                { regId: "REG-2026-1002-A1", name: "Mimi", species: "Cat", breed: "Persian", sex: "Female", neutered: "Spayed", status: "Vaccinated", lastVax: "2026-02-10", microchipId: "" },
+                { regId: "REG-2026-1002-A2", name: "Tiger", species: "Cat", breed: "Domestic Shorthair", sex: "Male", neutered: "Intact", status: "Overdue", lastVax: "2025-03-12", microchipId: "" }
             ]
         },
         "OWN-003": {
@@ -94,12 +96,12 @@
             suffix: "",
             contact: "0919-888-3411",
             street: "St. Jude Village",
-            barangay: "Mandurriao",
-            municipality: "Iloilo City",
-            zipCode: "5000",
+            barangay: "Poblacion",
+            municipality: "Oton",
+            zipCode: "5020",
             photo: "",
             animals: [
-                { regId: "REG-2026-1003-A1", name: "Coco", species: "Dog", otherSpecies: "", breed: "Poodle", sex: "Female", neutered: "Spayed", status: "Vaccinated", lastVax: "2026-04-01", microchipId: "TAG-1042" }
+                { regId: "REG-2026-1003-A1", name: "Coco", species: "Dog", breed: "Poodle", sex: "Female", neutered: "Spayed", status: "Vaccinated", lastVax: "2026-04-01", microchipId: "TAG-1042" }
             ]
         }
     };
@@ -113,7 +115,11 @@
         sortColumn: -1,
         sortAscending: true,
         formPhoto: '',
-        cameraStream: null
+        cameraStream: null,
+        animalMode: 'add',   // 'add' or 'edit' for the animal profile modal
+        animalIndex: -1,     // animal being edited
+        vaxIndex: -1,        // animal whose vaccination is being updated
+        deleteIndex: -1      // animal pending deletion
     };
 
     /* ======================================================================
@@ -132,8 +138,10 @@
     const initials = (o) =>
         `${(o.firstName || '').charAt(0)}${(o.lastName || '').charAt(0)}`.toUpperCase();
 
-    const speciesLabel = (animal) =>
-        animal.species === 'Other' ? (animal.otherSpecies || 'Other') : animal.species;
+    const hasDate = (value) => Boolean(value) && value !== 'N/A';
+
+    const VAX_CLASS = { Vaccinated: 'vax-ok', Unvaccinated: 'vax-none', Overdue: 'vax-overdue' };
+    const vaxBadge = (status) => `<span class="vax-badge ${VAX_CLASS[status] || ''}">${esc(status)}</span>`;
 
     function nextRegId() {
         const max = Object.values(ownerDatabase).reduce((m, o) => {
@@ -149,6 +157,16 @@
             return Number.isNaN(n) ? m : Math.max(m, n);
         }, 0);
         return `OWN-${String(max + 1).padStart(3, '0')}`;
+    }
+
+    // Next animal Registration ID, based on the highest existing number.
+    // Stays unique after a profile has been deleted.
+    function nextAnimalRegId(owner) {
+        const max = owner.animals.reduce((m, a) => {
+            const n = parseInt(String(a.regId).split('-A').pop(), 10);
+            return Number.isNaN(n) ? m : Math.max(m, n);
+        }, 0);
+        return `${owner.regId}-A${max + 1}`;
     }
 
     /* ======================================================================
@@ -190,8 +208,25 @@
 
     function closeOverlay(el) {
         if (el.id === 'cameraModal') stopCamera();
+        if (el.id === 'animalProfileModal') state.animalIndex = -1;
+        if (el.id === 'vaccinationModal') state.vaxIndex = -1;
+        if (el.id === 'confirmDeleteModal') state.deleteIndex = -1;
         el.classList.remove('active');
         el.setAttribute('aria-hidden', 'true');
+    }
+
+    function clearErrors(formId) {
+        document.querySelectorAll(`#${formId} .input-error`)
+            .forEach((el) => el.classList.remove('input-error'));
+        document.querySelectorAll(`#${formId} .error-msg`)
+            .forEach((el) => { el.textContent = ''; });
+    }
+
+    function showFieldError(fieldId, message) {
+        const field = $(fieldId);
+        const msg = $(`${fieldId}Error`);
+        if (field) field.classList.add('input-error');
+        if (msg) msg.textContent = message;
     }
 
     /* ======================================================================
@@ -279,7 +314,7 @@
     function rowHTML(id) {
         const o = ownerDatabase[id];
         const name = ownerName(o);
-        const species = [...new Set(o.animals.map(speciesLabel))];
+        const species = [...new Set(o.animals.map((a) => a.species))];
         const chips = species.map((s) => `<span class="species-chip">${esc(s)}</span>`).join('');
 
         return `
@@ -349,7 +384,7 @@
     }
 
     /* ======================================================================
-       8. OWNER FILE (VIEW MODAL) AND ANIMAL PROFILES
+       8. OWNER FILE (VIEW MODAL) AND ANIMAL CARDS
        ====================================================================== */
 
     function openOwnerFile(ownerId) {
@@ -382,73 +417,48 @@
     }
 
     function animalCardHTML(animal, index) {
-    const speciesOptions = SPECIES.map((s) =>
-        `<option value="${s}" ${animal.species === s ? 'selected' : ''}>${s}</option>`).join('');
-    const reproOptions = REPRO_STATUSES.map((s) =>
-        `<option value="${s}" ${animal.neutered === s ? 'selected' : ''}>${s}</option>`).join('');
-    const vaxOptions = VAX_STATUSES.map((s) =>
-        `<option value="${s}" ${animal.status === s ? 'selected' : ''}>${s}</option>`).join('');
-    const sexOptions = SEX_OPTIONS.map((s) =>
-        `<option value="${s}" ${animal.sex === s ? 'selected' : ''}>${s}</option>`).join('');
-    const otherHidden = animal.species === 'Other' ? '' : 'hidden';
-    const lastVax = animal.lastVax && animal.lastVax !== 'N/A' ? animal.lastVax : '';
+        const lastVax = hasDate(animal.lastVax) ? animal.lastVax : '—';
+        const detail = (label, value) => `
+            <div class="detail-item">
+                <span class="detail-label">${label}</span>
+                <span class="detail-value">${esc(value || '—')}</span>
+            </div>`;
 
-    return `
-        <div class="animal-profile-card">
-            <div class="animal-profile-title">
-                <span><i class="fa-solid fa-paw"></i> Animal ${index + 1}: ${esc(animal.name || 'Unnamed')}</span>
-                <div class="animal-card-tools">
-                    <span class="reg-tag">Reg ID: <strong>${esc(animal.regId)}</strong></span>
-                    <button type="button" class="btn-delete-animal" data-action="delete-animal" data-index="${index}"
-                            aria-label="Delete animal profile ${index + 1}">
-                        <i class="fa-solid fa-trash-can"></i> Delete
-                    </button>
+        return `
+            <div class="animal-profile-card">
+                <div class="animal-profile-title">
+                    <span><i class="fa-solid fa-paw"></i> Animal ${index + 1}: ${esc(animal.name || 'Unnamed')}</span>
+                    <div class="animal-card-tools no-print">
+                        <span class="reg-tag">Reg ID: <strong>${esc(animal.regId)}</strong></span>
+                        <button type="button" class="btn-animal-action btn-animal-edit" data-action="edit-animal" data-index="${index}"
+                                aria-label="Edit profile of animal ${index + 1}">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit Animal Profile
+                        </button>
+                        <button type="button" class="btn-animal-action btn-animal-vax" data-action="update-vax" data-index="${index}"
+                                aria-label="Update vaccination of animal ${index + 1}">
+                            <i class="fa-solid fa-syringe"></i> Update Vaccination
+                        </button>
+                        <button type="button" class="btn-delete-animal" data-action="delete-animal" data-index="${index}"
+                                aria-label="Delete animal profile ${index + 1}">
+                            <i class="fa-solid fa-trash-can"></i> Delete
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="form-grid quad-grid mb-10">
-                <div class="input-group">
-                    <label for="pa-name-${index}">Animal Name</label>
-                    <input id="pa-name-${index}" type="text" value="${esc(animal.name)}" data-animal-field="name" data-index="${index}">
+                <div class="animal-detail-grid">
+                    ${detail('Species', animal.species)}
+                    ${detail('Breed', animal.breed)}
+                    ${detail('Sex', animal.sex)}
+                    ${detail('Reproductive Status', animal.neutered)}
+                    ${detail('Microchip / Tag ID', animal.microchipId)}
+                    <div class="detail-item">
+                        <span class="detail-label">Vaccination Status</span>
+                        <span>${vaxBadge(animal.status)}</span>
+                    </div>
+                    ${detail('Last Vaccination Date', lastVax)}
                 </div>
-                <div class="input-group">
-                    <label for="pa-species-${index}">Species</label>
-                    <select id="pa-species-${index}" data-species-select data-index="${index}">${speciesOptions}</select>
-                </div>
-                <div class="input-group ${otherHidden}" data-other-group>
-                    <label for="pa-other-${index}">Specified Species</label>
-                    <input id="pa-other-${index}" type="text" value="${esc(animal.otherSpecies)}" placeholder="e.g. Rabbit" data-animal-field="otherSpecies" data-index="${index}">
-                </div>
-                <div class="input-group">
-                    <label for="pa-breed-${index}">Breed</label>
-                    <input id="pa-breed-${index}" type="text" value="${esc(animal.breed)}" data-animal-field="breed" data-index="${index}">
-                </div>
-                <div class="input-group">
-                    <label for="pa-sex-${index}">Sex</label>
-                    <select id="pa-sex-${index}" data-animal-field="sex" data-index="${index}">${sexOptions}</select>
-                </div>
-            </div>
-
-            <div class="form-grid quad-grid">
-                <div class="input-group">
-                    <label for="pa-repro-${index}">Reproductive Status</label>
-                    <select id="pa-repro-${index}" data-animal-field="neutered" data-index="${index}">${reproOptions}</select>
-                </div>
-                <div class="input-group">
-                    <label for="pa-vax-${index}">Vaccination Status</label>
-                    <select id="pa-vax-${index}" data-animal-field="status" data-index="${index}">${vaxOptions}</select>
-                </div>
-                <div class="input-group">
-                    <label for="pa-lastvax-${index}">Last Vaccination Date</label>
-                    <input id="pa-lastvax-${index}" type="date" value="${esc(lastVax)}" data-animal-field="lastVax" data-index="${index}">
-                </div>
-                <div class="input-group">
-                    <label for="pa-chip-${index}">Microchip / Tag ID</label>
-                    <input id="pa-chip-${index}" type="text" value="${esc(animal.microchipId)}" placeholder="Tag ID" data-animal-field="microchipId" data-index="${index}">
-                </div>
-            </div>
-        </div>`;
-}
+            </div>`;
+    }
 
     function renderAnimalCards(owner) {
         const container = $('animalProfilesListContainer');
@@ -457,126 +467,187 @@
             : '<p class="muted">No animals registered for this owner yet.</p>';
     }
 
-    function handleAnimalChange(event) {
-        const target = event.target;
+    // Routes the Edit Animal Profile, Update Vaccination, and Delete buttons.
+    function handleAnimalAction(event) {
+        const btn = event.target.closest('[data-action]');
+        if (!btn) return;
+
+        const index = Number(btn.dataset.index);
+        switch (btn.dataset.action) {
+            case 'edit-animal':
+                openAnimalProfileModal('edit', index);
+                break;
+            case 'update-vax':
+                openVaccinationModal(index);
+                break;
+            case 'delete-animal':
+                openDeleteConfirm(index);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /* ======================================================================
+       9. ANIMAL PROFILE MODAL (ADD / EDIT ANIMAL)
+       ====================================================================== */
+
+    function openAnimalProfileModal(mode, index = -1) {
         const owner = ownerDatabase[state.activeOwnerId];
         if (!owner) return;
 
-        const index = Number(target.dataset.index);
-        const animal = owner.animals[index];
-        if (!animal) return;
+        const animal = mode === 'edit' ? owner.animals[index] : null;
+        if (mode === 'edit' && !animal) return;
 
-        if (target.hasAttribute('data-species-select')) {
-            animal.species = target.value;
-            if (target.value !== 'Other') animal.otherSpecies = '';
+        state.animalMode = mode;
+        state.animalIndex = index;
 
-            const card = target.closest('.animal-profile-card');
-            const group = card.querySelector('[data-other-group]');
-            const otherInput = group.querySelector('input');
-            group.classList.toggle('hidden', target.value !== 'Other');
-            otherInput.value = animal.otherSpecies;
-        } else if (target.dataset.animalField) {
-            const field = target.dataset.animalField;
-            const value = target.value.trim();
-            animal[field] = field === 'lastVax' ? (value || 'N/A') : value;
-        } else {
+        clearErrors('animalProfileForm');
+        $('animalProfileForm').reset();
+
+        const isEdit = mode === 'edit';
+        $('animalProfileModalTitle').innerHTML = isEdit
+            ? '<i class="fa-solid fa-pen-to-square"></i> Edit Animal Profile'
+            : '<i class="fa-solid fa-plus"></i> Add Animal Profile';
+        $('saveAnimalBtn').textContent = isEdit ? 'Save Changes' : 'Add Animal';
+
+        $('apName').value = animal ? animal.name : '';
+        $('apSpecies').value = animal ? animal.species : 'Dog';
+        $('apBreed').value = animal ? animal.breed : '';
+        $('apSex').value = animal ? animal.sex : 'Male';
+        $('apRepro').value = animal ? animal.neutered : 'Intact';
+        $('apMicrochip').value = animal ? animal.microchipId : '';
+
+        openOverlay($('animalProfileModal'));
+        $('apName').focus();
+    }
+
+    function saveAnimalProfile(event) {
+        event.preventDefault();
+        clearErrors('animalProfileForm');
+
+        const owner = ownerDatabase[state.activeOwnerId];
+        if (!owner) return;
+
+        const name = $('apName').value.trim();
+        if (!name) {
+            showFieldError('apName', 'Animal name is required.');
+            $('apName').focus();
             return;
         }
 
+        const data = {
+            name,
+            species: $('apSpecies').value,
+            breed: $('apBreed').value.trim(),
+            sex: $('apSex').value,
+            neutered: $('apRepro').value,
+            microchipId: $('apMicrochip').value.trim()
+        };
+
+        if (state.animalMode === 'edit') {
+            const animal = owner.animals[state.animalIndex];
+            if (!animal) return;
+            Object.assign(animal, data);
+            showToast('Animal profile updated.');
+        } else {
+            owner.animals.push({
+                regId: nextAnimalRegId(owner),
+                ...data,
+                breed: data.breed || 'Mixed',
+                status: 'Unvaccinated',
+                lastVax: 'N/A'
+            });
+            showToast('Animal profile added.');
+        }
+
+        closeOverlay($('animalProfileModal'));
+        renderAnimalCards(owner);
         refreshRegistry();
-        showToast('Animal profile updated.');
     }
-
-    function addAnimalProfile() {
-    const owner = ownerDatabase[state.activeOwnerId];
-    if (!owner) return;
-
-    owner.animals.push({
-        regId: nextAnimalRegId(owner),
-        name: '',
-        species: 'Dog',
-        otherSpecies: '',
-        breed: '',
-        sex: 'Male',
-        neutered: 'Intact',
-        status: 'Unvaccinated',
-        lastVax: 'N/A',
-        microchipId: ''
-    });
-
-    renderAnimalCards(owner);
-    refreshRegistry();
-
-    const cards = $('animalProfilesListContainer').querySelectorAll('.animal-profile-card');
-    const newCard = cards[cards.length - 1];
-    if (newCard) {
-        newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        newCard.querySelector('input').focus();
-    }
-    showToast('New animal profile added.');
-}
-
-// Next animal Registration ID, based on the highest existing number.
-// Keeps IDs unique after a profile has been deleted.
-function nextAnimalRegId(owner) {
-    const max = owner.animals.reduce((m, a) => {
-        const n = parseInt(String(a.regId).split('-A').pop(), 10);
-        return Number.isNaN(n) ? m : Math.max(m, n);
-    }, 0);
-    return `${owner.regId}-A${max + 1}`;
-}
-
-// Delete one animal profile from the open owner file, after confirmation.
-function deleteAnimalProfile(index) {
-    const owner = ownerDatabase[state.activeOwnerId];
-    const animal = owner && owner.animals[index];
-    if (!animal) return;
-
-    const label = animal.name ? `"${animal.name}"` : `Animal ${index + 1}`;
-    const confirmed = window.confirm(`Delete ${label} from this owner's file? This cannot be undone.`);
-    if (!confirmed) return;
-
-    owner.animals.splice(index, 1);
-    renderAnimalCards(owner);
-    refreshRegistry();
-    showToast('Animal profile deleted.');
-}
-
-// Routes clicks inside the animal list (delete buttons) to their handlers.
-function handleAnimalClick(event) {
-    const btn = event.target.closest('[data-action="delete-animal"]');
-    if (!btn) return;
-    deleteAnimalProfile(Number(btn.dataset.index));
-}
 
     /* ======================================================================
-       9. OWNER FORM (ADD / EDIT) AND VALIDATION
+       10. UPDATE VACCINATION MODAL
        ====================================================================== */
 
-    function showError(fieldId, message) {
-        const field = $(fieldId);
-        const msg = $(`${fieldId}Error`);
-        if (field) field.classList.add('input-error');
-        if (msg) msg.textContent = message;
+    function openVaccinationModal(index) {
+        const owner = ownerDatabase[state.activeOwnerId];
+        const animal = owner && owner.animals[index];
+        if (!animal) return;
+
+        state.vaxIndex = index;
+        clearErrors('vaccinationForm');
+
+        $('vaxAnimalName').textContent = `${animal.name || 'Unnamed'} · Reg ID ${animal.regId} · ${animal.species}`;
+        $('vaxStatus').value = animal.status;
+        $('vaxDate').value = hasDate(animal.lastVax) ? animal.lastVax : '';
+
+        openOverlay($('vaccinationModal'));
+        $('vaxStatus').focus();
     }
 
-    function clearFormErrors() {
-        document.querySelectorAll('#ownerRegistrationForm .input-error')
-            .forEach((el) => el.classList.remove('input-error'));
-        document.querySelectorAll('#ownerRegistrationForm .error-msg')
-            .forEach((el) => { el.textContent = ''; });
+    function saveVaccination(event) {
+        event.preventDefault();
+        clearErrors('vaccinationForm');
+
+        const owner = ownerDatabase[state.activeOwnerId];
+        const animal = owner && owner.animals[state.vaxIndex];
+        if (!animal) return;
+
+        const status = $('vaxStatus').value;
+        const date = $('vaxDate').value;
+
+        if (status === 'Vaccinated' && !date) {
+            showFieldError('vaxDate', 'Enter the date of the latest vaccination.');
+            $('vaxDate').focus();
+            return;
+        }
+
+        animal.status = status;
+        animal.lastVax = date || 'N/A';
+
+        closeOverlay($('vaccinationModal'));
+        renderAnimalCards(owner);
+        refreshRegistry();
+        showToast('Vaccination record updated.');
     }
 
-    function syncOtherSpecies() {
-        const select = $('species');
-        const group = $('otherSpeciesGroup');
-        const input = $('otherSpecies');
-        const isOther = select.value === 'Other';
+    /* ======================================================================
+       11. DELETE CONFIRMATION
+       ====================================================================== */
 
-        group.classList.toggle('hidden', !isOther);
-        input.required = isOther;
-        if (!isOther) input.value = '';
+    function openDeleteConfirm(index) {
+        const owner = ownerDatabase[state.activeOwnerId];
+        const animal = owner && owner.animals[index];
+        if (!animal) return;
+
+        state.deleteIndex = index;
+
+        const label = animal.name || `Animal ${index + 1}`;
+        $('confirmDeleteText').innerHTML =
+            `Are you sure you want to delete <strong>${esc(label)}</strong> (Reg ID: ${esc(animal.regId)}) from this owner's file?`;
+
+        openOverlay($('confirmDeleteModal'));
+        $('cancelDeleteBtn').focus();
     }
+
+    function confirmDeleteAnimal() {
+        const owner = ownerDatabase[state.activeOwnerId];
+        const index = state.deleteIndex;
+        const animal = owner && owner.animals[index];
+
+        closeOverlay($('confirmDeleteModal'));
+        if (!animal) return;
+
+        owner.animals.splice(index, 1);
+        renderAnimalCards(owner);
+        refreshRegistry();
+        showToast('Animal profile deleted.');
+    }
+
+    /* ======================================================================
+       12. OWNER FORM (ADD / EDIT) AND VALIDATION
+       ====================================================================== */
 
     function setPhotoPreview(src) {
         state.formPhoto = src || '';
@@ -597,7 +668,7 @@ function handleAnimalClick(event) {
     }
 
     function openAddOwnerModal() {
-        clearFormErrors();
+        clearErrors('ownerRegistrationForm');
         $('ownerRegistrationForm').reset();
         $('editingOwnerId').value = '';
         $('addOwnerModalTitle').innerHTML = '<i class="fa-solid fa-id-card"></i> Register New Owner';
@@ -605,7 +676,6 @@ function handleAnimalClick(event) {
         $('primaryAnimalSection').hidden = false;
         $('regId').value = nextRegId();
         setPhotoPreview('');
-        syncOtherSpecies();
         openOverlay($('addOwnerModal'));
         $('contactNumber').focus();
     }
@@ -614,7 +684,7 @@ function handleAnimalClick(event) {
         const o = ownerDatabase[ownerId];
         if (!o) return;
 
-        clearFormErrors();
+        clearErrors('ownerRegistrationForm');
         $('ownerRegistrationForm').reset();
         $('editingOwnerId').value = ownerId;
         $('addOwnerModalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Registered Owner';
@@ -637,7 +707,7 @@ function handleAnimalClick(event) {
 
     function handleFormSubmit(event) {
         event.preventDefault();
-        clearFormErrors();
+        clearErrors('ownerRegistrationForm');
 
         const editingId = $('editingOwnerId').value;
         const isEditing = editingId !== '';
@@ -652,7 +722,7 @@ function handleAnimalClick(event) {
 
         let valid = true;
         const fail = (id, message) => {
-            showError(id, message);
+            showFieldError(id, message);
             valid = false;
         };
 
@@ -669,7 +739,6 @@ function handleAnimalClick(event) {
             animal = {
                 name: $('animalName').value.trim(),
                 species: $('species').value,
-                otherSpecies: $('otherSpecies').value.trim(),
                 breed: $('breed').value.trim(),
                 sex: $('sex').value,
                 neutered: $('neutered').value,
@@ -679,9 +748,6 @@ function handleAnimalClick(event) {
             };
 
             if (!animal.name) fail('animalName', 'Animal name is required.');
-            if (animal.species === 'Other' && !animal.otherSpecies) {
-                fail('otherSpecies', 'Please specify the animal species.');
-            }
         }
 
         if (!valid) {
@@ -719,7 +785,6 @@ function handleAnimalClick(event) {
                     regId: `${regId}-A1`,
                     name: animal.name,
                     species: animal.species,
-                    otherSpecies: animal.species === 'Other' ? animal.otherSpecies : '',
                     breed: animal.breed || 'Mixed',
                     sex: animal.sex,
                     neutered: animal.neutered,
@@ -736,7 +801,7 @@ function handleAnimalClick(event) {
     }
 
     /* ======================================================================
-       10. PHOTO UPLOAD AND CAMERA CAPTURE
+       13. PHOTO UPLOAD AND CAMERA CAPTURE
        ====================================================================== */
 
     function handlePhotoFile(file) {
@@ -807,7 +872,7 @@ function handleAnimalClick(event) {
     }
 
     /* ======================================================================
-       11. EXPORT (EXCEL) AND PRINT
+       14. EXPORT (EXCEL) AND PRINT
        ====================================================================== */
 
     function exportExcel() {
@@ -820,7 +885,7 @@ function handleAnimalClick(event) {
         const headers = [
             'Registration ID', 'Last Name', 'First Name', 'Middle Initial', 'Suffix',
             'Contact No.', 'Region', 'Province', 'Municipality', 'Barangay',
-            'Animal Reg. ID', 'Animal Name', 'Species', 'Other Species', 'Breed', 'Sex',
+            'Animal Reg. ID', 'Animal Name', 'Species', 'Breed', 'Sex',
             'Reproductive Status', 'Vaccination Status', 'Last Vaccination Date', 'Microchip / Tag ID'
         ];
 
@@ -833,11 +898,11 @@ function handleAnimalClick(event) {
             ];
 
             if (!o.animals.length) {
-                rows.push([...base, '', '', '', '', '', '', '', '', '', '']);
+                rows.push([...base, '', '', '', '', '', '', '', '', '']);
             }
             o.animals.forEach((a) => {
                 rows.push([
-                    ...base, a.regId, a.name, a.species, a.otherSpecies, a.breed, a.sex,
+                    ...base, a.regId, a.name, a.species, a.breed, a.sex,
                     a.neutered, a.status, a.lastVax, a.microchipId
                 ]);
             });
@@ -874,8 +939,16 @@ function handleAnimalClick(event) {
         window.print();
     }
 
+    // Prints only the open owner file (the Print button in its header).
+    function printOwnerFile() {
+        if (!state.activeOwnerId) return;
+        $('ownerPrintDate').textContent = new Date().toLocaleString();
+        document.body.classList.add('print-owner-file');
+        window.print();
+    }
+
     /* ======================================================================
-       12. EVENT WIRING
+       15. EVENT WIRING
        ====================================================================== */
 
     function bindEvents() {
@@ -924,18 +997,32 @@ function handleAnimalClick(event) {
         // Owner file modal
         $('closeProfileModalBtn').addEventListener('click', () => closeOverlay($('ownerProfileModal')));
         $('cancelProfileModalBtn').addEventListener('click', () => closeOverlay($('ownerProfileModal')));
+        $('printOwnerFileBtn').addEventListener('click', printOwnerFile);
         $('switchToEditFromViewBtn').addEventListener('click', () => {
             const id = state.activeOwnerId;
             closeOverlay($('ownerProfileModal'));
             if (id) openEditOwnerModal(id);
         });
-        $('addAnimalProfileFieldBtn').addEventListener('click', addAnimalProfile);
-        $('animalProfilesListContainer').addEventListener('change', handleAnimalChange);
+        $('addAnimalProfileFieldBtn').addEventListener('click', () => openAnimalProfileModal('add'));
+        $('animalProfilesListContainer').addEventListener('click', handleAnimalAction);
+
+        // Animal profile modal
+        $('closeAnimalModalBtn').addEventListener('click', () => closeOverlay($('animalProfileModal')));
+        $('cancelAnimalModalBtn').addEventListener('click', () => closeOverlay($('animalProfileModal')));
+        $('animalProfileForm').addEventListener('submit', saveAnimalProfile);
+
+        // Update vaccination modal
+        $('closeVaxModalBtn').addEventListener('click', () => closeOverlay($('vaccinationModal')));
+        $('cancelVaxModalBtn').addEventListener('click', () => closeOverlay($('vaccinationModal')));
+        $('vaccinationForm').addEventListener('submit', saveVaccination);
+
+        // Delete confirmation
+        $('cancelDeleteBtn').addEventListener('click', () => closeOverlay($('confirmDeleteModal')));
+        $('confirmDeleteBtn').addEventListener('click', confirmDeleteAnimal);
 
         // Add / edit owner form
         $('closeAddModalBtn').addEventListener('click', () => closeOverlay($('addOwnerModal')));
         $('cancelAddModalBtn').addEventListener('click', () => closeOverlay($('addOwnerModal')));
-        $('species').addEventListener('change', syncOtherSpecies);
         $('ownerRegistrationForm').addEventListener('submit', handleFormSubmit);
 
         // Photo controls
@@ -960,9 +1047,17 @@ function handleAnimalClick(event) {
         // Escape closes the topmost modal
         document.addEventListener('keydown', (e) => {
             if (e.key !== 'Escape') return;
-            const stack = ['cameraModal', 'addOwnerModal', 'ownerProfileModal'];
+            const stack = [
+                'confirmDeleteModal', 'cameraModal', 'vaccinationModal',
+                'animalProfileModal', 'addOwnerModal', 'ownerProfileModal'
+            ];
             const top = stack.map((id) => $(id)).find((el) => el.classList.contains('active'));
             if (top) closeOverlay(top);
+        });
+
+        // Clear the owner-file print mode after printing
+        window.addEventListener('afterprint', () => {
+            document.body.classList.remove('print-owner-file');
         });
 
         // Logout
@@ -971,10 +1066,8 @@ function handleAnimalClick(event) {
         });
     }
 
-    $('animalProfilesListContainer').addEventListener('click', handleAnimalClick);
-
     /* ======================================================================
-       13. INITIALIZATION
+       16. INITIALIZATION
        ====================================================================== */
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -982,7 +1075,6 @@ function handleAnimalClick(event) {
         populateMunicipalities();
         bindEvents();
         setPhotoPreview('');
-        syncOtherSpecies();
         refreshRegistry();
     });
 })();

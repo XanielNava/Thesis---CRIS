@@ -1,12 +1,3 @@
-/* ==========================================================================
-   PVO ANIMAL REGISTRY — stylesheet
-   Palette is unchanged. Structure is consolidated and organized by section:
-     1. Tokens       2. Base          3. Layout        4. Sidebar
-     5. Header       6. Summary cards 7. Toolbar       8. Table
-     9. Buttons     10. Modals       11. Forms        12. Photo & camera
-    13. Feedback    14. Responsive   15. Print
-   ========================================================================== */
-
 /* 1. TOKENS ------------------------------------------------------------------ */
 :root {
     --sunset-orange: #EA6113;
@@ -71,10 +62,6 @@ body {
     color: var(--text-dark);
     min-height: 100vh;
     overflow-x: hidden;
-}
-
-.hidden {
-    display: none !important;
 }
 
 .mb-10 {
@@ -772,6 +759,26 @@ th[aria-sort="descending"] .sort-icon {
     background: var(--sidebar-hover);
 }
 
+.btn-print-owner {
+    background: var(--sidebar-bg);
+    color: #ffffff;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+}
+
+.btn-print-owner:hover {
+    background: var(--sidebar-hover);
+}
+
+.btn-danger-solid {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.btn-danger-solid:hover {
+    background: #b91c1c;
+}
+
 .btn-photo-action {
     padding: 6px 12px;
     font-size: 0.78rem;
@@ -799,7 +806,6 @@ th[aria-sort="descending"] .sort-icon {
     color: #b91c1c;
 }
 
-.icon-btn-close,
 .close-modal-btn {
     background: transparent;
     border: none;
@@ -846,6 +852,10 @@ th[aria-sort="descending"] .sort-icon {
     overflow: hidden;
 }
 
+.modal-container.modal-md {
+    max-width: 640px;
+}
+
 .modal-container.modal-sm {
     max-width: 480px;
 }
@@ -856,6 +866,7 @@ th[aria-sort="descending"] .sort-icon {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
 }
 
 .modal-header h2 {
@@ -865,6 +876,12 @@ th[aria-sort="descending"] .sort-icon {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.modal-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .modal-body {
@@ -926,6 +943,59 @@ th[aria-sort="descending"] .sort-icon {
     color: var(--muted-slate);
     margin-top: 2px;
     font-family: monospace, monospace;
+}
+
+.owner-print-stamp {
+    font-size: 0.8rem;
+    color: var(--muted-slate);
+}
+
+.vax-animal-context {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--sunset-orange);
+}
+
+/* Delete confirmation */
+.confirm-body {
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    padding: 28px 24px;
+}
+
+.confirm-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #fee2e2;
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.confirm-body h2 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-dark);
+}
+
+.confirm-body p {
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    line-height: 1.5;
+}
+
+.confirm-warning {
+    font-size: 0.82rem !important;
+    color: #b91c1c !important;
+    font-weight: 700;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 10px 12px;
 }
 
 /* 11. FORMS ------------------------------------------------------------------ */
@@ -1019,6 +1089,7 @@ th[aria-sort="descending"] .sort-icon {
     min-height: 14px;
 }
 
+/* 12. ANIMAL CARDS ----------------------------------------------------------- */
 .animal-profile-card {
     background: var(--main-bg);
     border-left: 4px solid var(--sunset-orange);
@@ -1028,6 +1099,7 @@ th[aria-sort="descending"] .sort-icon {
     border-radius: 8px;
     padding: 16px;
     margin-top: 14px;
+    break-inside: avoid;
 }
 
 .animal-profile-card:first-child {
@@ -1045,14 +1117,52 @@ th[aria-sort="descending"] .sort-icon {
     flex-wrap: wrap;
 }
 
-/* ==========================================================================
-   ANIMAL PROFILE DELETE
-   ========================================================================== */
 .animal-card-tools {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     flex-wrap: wrap;
+}
+
+.reg-tag {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--muted-slate);
+    margin-right: 4px;
+}
+
+.btn-animal-action {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition);
+}
+
+.btn-animal-edit {
+    color: #0284c7;
+    border-color: #7dd3fc;
+}
+
+.btn-animal-edit:hover {
+    background: #e0f2fe;
+    border-color: #38bdf8;
+}
+
+.btn-animal-vax {
+    color: #047857;
+    border-color: #6ee7b7;
+}
+
+.btn-animal-vax:hover {
+    background: #ecfdf5;
+    border-color: #10b981;
 }
 
 .btn-delete-animal {
@@ -1075,13 +1185,63 @@ th[aria-sort="descending"] .sort-icon {
     border-color: #ef4444;
 }
 
-.reg-tag {
-    font-size: 0.8rem;
-    font-weight: 400;
+.animal-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.detail-item {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.detail-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
     color: var(--muted-slate);
 }
 
-/* 12. PHOTO & CAMERA --------------------------------------------------------- */
+.detail-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    word-break: break-word;
+}
+
+.vax-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    width: fit-content;
+}
+
+.vax-ok {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.vax-none {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.vax-overdue {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* 13. PHOTO & CAMERA --------------------------------------------------------- */
 .photo-upload-section {
     display: flex;
     flex-direction: column;
@@ -1158,7 +1318,7 @@ th[aria-sort="descending"] .sort-icon {
     min-height: 18px;
 }
 
-/* 13. FEEDBACK --------------------------------------------------------------- */
+/* 14. FEEDBACK --------------------------------------------------------------- */
 .toast {
     position: fixed;
     bottom: 24px;
@@ -1186,7 +1346,7 @@ th[aria-sort="descending"] .sort-icon {
     display: none;
 }
 
-/* 14. RESPONSIVE ------------------------------------------------------------- */
+/* 15. RESPONSIVE ------------------------------------------------------------- */
 @media (max-width: 1100px) {
     .stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1217,7 +1377,8 @@ th[aria-sort="descending"] .sort-icon {
         width: 100%;
     }
 
-    .quad-grid {
+    .quad-grid,
+    .animal-detail-grid {
         grid-template-columns: 1fr 1fr;
     }
 }
@@ -1250,12 +1411,13 @@ th[aria-sort="descending"] .sort-icon {
 
     .dual-grid,
     .quad-grid,
-    .owner-name-grid {
+    .owner-name-grid,
+    .animal-detail-grid {
         grid-template-columns: 1fr;
     }
 }
 
-/* 15. PRINT ------------------------------------------------------------------ */
+/* 16. PRINT ------------------------------------------------------------------ */
 @media print {
     body {
         background: #ffffff;
@@ -1271,11 +1433,14 @@ th[aria-sort="descending"] .sort-icon {
     .no-print,
     .toolbar-card,
     .stats-grid,
-    .modal-overlay,
     .toast,
     .sort-icon,
     .table-card th:last-child,
     .table-card td:last-child {
+        display: none !important;
+    }
+
+    .modal-overlay {
         display: none !important;
     }
 
@@ -1314,5 +1479,48 @@ th[aria-sort="descending"] .sort-icon {
 
     .data-table tbody tr:hover {
         background: none;
+    }
+
+    /* Owner file print: only the owner file is shown */
+    body.print-owner-file .container {
+        display: none !important;
+    }
+
+    body.print-owner-file #ownerProfileModal {
+        display: block !important;
+        position: static;
+        background: none;
+        backdrop-filter: none;
+        padding: 0;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    body.print-owner-file #ownerProfileModal .modal-container {
+        max-width: none;
+        max-height: none;
+        width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: visible;
+    }
+
+    body.print-owner-file #ownerProfileModal .modal-body {
+        overflow: visible;
+        padding: 0;
+    }
+
+    body.print-owner-file #ownerProfileModal .modal-header {
+        padding: 0 0 12px;
+        border-bottom: 2px solid #000000;
+    }
+
+    body.print-owner-file #ownerProfileModal .modal-header h2 {
+        color: #000000;
+    }
+
+    body.print-owner-file #ownerProfileModal .form-section,
+    body.print-owner-file #ownerProfileModal .profile-summary {
+        border-color: #cccccc;
     }
 }
