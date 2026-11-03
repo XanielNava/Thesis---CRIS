@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
     <link rel="stylesheet" href="../../assets/css/pho_admin/pho_admin.css">
     <link rel="stylesheet" href="../../assets/css/pho_admin/pho_admin2.css">
+    <!-- <link rel="stylesheet" href="../../assets/css/pho_admin/admin-modal.css"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
 
@@ -22,7 +24,7 @@
             document.documentElement.setAttribute('data-theme', 'light');
         }
 
-        // 2. Immediate zero-latency sidebar state restorer (Kills the glitch/FOUC)
+        // 2. Immediate zero-latency sidebar state restorer
         if (localStorage.getItem('sidebarCollapsed') === 'true') {
             document.documentElement.classList.add('sidebar-pre-collapsed');
         }
@@ -109,62 +111,171 @@
 
         <header class="page-header">
             <div>
-                <h1>User Accounts</h1>
-                <p class="page-subtitle">Create authorized accounts, assign roles, and manage account status.</p>
+                <h1>PHO User Accounts</h1>
+                <p class="page-subtitle">Manage authorized personnel, review self-registration requests, and oversee clinical roles.</p>
             </div>
-            <!-- <div class="admin-chip">
-                <span class="avatar">AD</span>
-                <div>
-                    <strong>System Administrator</strong>
-                    <small>Super Admin</small>
-                </div>
-            </div> -->
         </header>
 
+        <!-- ==================== PENDING VERIFICATION REQUESTS ==================== -->
+        <section class="panel" style="margin-bottom: 24px;">
+            <div class="panel-header">
+                <div>
+                    <h2><i class="fa-solid fa-user-clock" style="color: var(--sunset-orange); margin-right: 8px;"></i> Pending Registration &amp; Verification Requests</h2>
+                    <p class="panel-desc">Review submitted credentials from newly registered personnel awaiting administrative approval.</p>
+                </div>
+                <span class="badge badge-pending" id="pendingBadgeCount" style="display: none;">0 Pending</span>
+            </div>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Applicant Name</th>
+                            <th>Contact / Location</th>
+                            <th>Requested Role</th>
+                            <th>Medical License (PRC)</th>
+                            <th>Employee ID No.</th>
+                            <th class="col-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                                Loading verification requests...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="empty-state hidden" id="pendingEmpty">No pending account registrations.</p>
+        </section>
+
+        <!-- ==================== AUTHORIZED PHO ACCOUNTS ==================== -->
         <section id="users" class="dash-section active">
             <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-users" style="color: var(--sunset-orange); margin-right: 8px;"></i> Authorized Personnel Directory</h2>
+                </div>
+
                 <div class="toolbar">
                     <div class="toolbar-group">
                         <div class="search-box">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                            <input type="search" id="userSearch" placeholder="Search by name or email">
+                            <input type="search" id="userSearch" placeholder="Search by name, email, or employee ID">
                         </div>
                         <select id="userRoleFilter" aria-label="Filter by role">
-                            <option value="">All roles</option>
-                            <option value="Super Admin">Super Admin</option>
-                            <option value="Admin">Admin</option>
-                            <option value="Facility Manager">Facility Manager</option>
-                            <option value="Viewer">Viewer</option>
+                            <option value="">All Roles</option>
+                            <option value="Administrator">Administrator</option>
+                            <option value="Health Officer">Health Officer</option>
+                            <option value="Facilitating Nurse">Facilitating Nurse</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary" id="addUserBtn" type="button">+ Add Account</button>
+                    <button class="btn btn-primary" id="addUserBtn" type="button">+ Direct Add Account</button>
                 </div>
 
                 <div class="table-wrap">
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
+                                <th>Personnel</th>
+                                <th>Role / Designation</th>
+                                <th>Credentials</th>
                                 <th>Status</th>
-                                <th>Last Login</th>
+                                <th>Date Registered</th>
                                 <th class="col-actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="userTableBody"></tbody>
                     </table>
                 </div>
-                <p class="empty-state hidden" id="userEmpty">No accounts match your filters.</p>
+                <p class="empty-state hidden" id="userEmpty">No personnel match your search or filter criteria.</p>
             </div>
         </section>
 
     </main>
 </div>
 
-<!-- ==================== MODALS ==================== -->
+<!-- ==================== VIEW ACCOUNT DETAILS MODAL ==================== -->
+<div class="modal-overlay" id="viewUserModal" aria-hidden="true">
+    <div class="modal-box review-modal-box" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+        <div class="modal-header">
+            <h3 id="viewModalTitle"><i class="fa-solid fa-id-badge" style="color: var(--sunset-orange); margin-right: 8px;"></i> Personnel Account Profile</h3>
+            <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
+        </div>
 
-<!-- User create / edit -->
+        <div class="review-facility-banner">
+            <div class="banner-title" id="viewFullName">--</div>
+            <div class="banner-meta">
+                <span id="viewRoleBadge" class="badge badge-role">--</span>
+                <span id="viewStatusBadge" class="badge badge-active">--</span>
+            </div>
+            <div class="banner-sub" id="viewEmail">--</div>
+        </div>
+
+        <!-- Section 1: Professional Verification Details -->
+        <div class="review-section">
+            <div class="review-section-header">Professional &amp; Medical Verification</div>
+            <div class="review-grid">
+                <div class="review-item">
+                    <span class="label">Medical License No. (PRC)</span>
+                    <span class="value" id="viewMedicalLicense">--</span>
+                </div>
+                <div class="review-item">
+                    <span class="label">PHO / Agency Employee ID</span>
+                    <span class="value" id="viewEmployeeId">--</span>
+                </div>
+                <div class="review-item">
+                    <span class="label">Verification State</span>
+                    <span class="value" id="viewVerifiedState">--</span>
+                </div>
+                <div class="review-item">
+                    <span class="label">Verified / Approved By</span>
+                    <span class="value" id="viewVerifiedBy">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Contact & Station Location -->
+        <div class="review-section">
+            <div class="review-section-header">Contact &amp; Station Details</div>
+            <div class="review-grid">
+                <div class="review-item">
+                    <span class="label">Contact Number</span>
+                    <span class="value" id="viewContact">--</span>
+                </div>
+                <div class="review-item">
+                    <span class="label">Date of Birth</span>
+                    <span class="value" id="viewDob">--</span>
+                </div>
+                <div class="review-item" style="grid-column: span 2;">
+                    <span class="label">Complete Address / Station</span>
+                    <span class="value" id="viewAddress">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Governance & Security -->
+        <div class="review-section">
+            <div class="review-section-header">System Governance</div>
+            <div class="review-grid">
+                <div class="review-item">
+                    <span class="label">Date Registered</span>
+                    <span class="value" id="viewDateRegistered">--</span>
+                </div>
+                <div class="review-item">
+                    <span class="label">Assigned Module</span>
+                    <span class="value">Provincial Health Office (PHO)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-actions" id="viewModalActions">
+            <button type="button" class="btn btn-ghost" data-close>Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== CREATE / EDIT MODAL ==================== -->
 <div class="modal-overlay" id="userModal" aria-hidden="true">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
         <div class="modal-header">
@@ -174,21 +285,32 @@
         <form id="userForm" class="modal-form">
             <input type="hidden" id="userId">
             <div class="field">
-                <label for="userName">Full name</label>
-                <input id="userName" required>
+                <label for="userName">Full Name</label>
+                <input id="userName" placeholder="e.g. Maria Santos" required>
             </div>
             <div class="field">
-                <label for="userEmail">Email</label>
-                <input id="userEmail" type="email" required>
+                <label for="userEmail">Official Email</label>
+                <input id="userEmail" type="email" placeholder="name@iloilo.gov.ph" required>
             </div>
+            
             <div class="grid-2">
                 <div class="field">
-                    <label for="userRole">Role</label>
+                    <label for="userMedicalLicense">Medical License (PRC)</label>
+                    <input id="userMedicalLicense" placeholder="e.g. 0123456">
+                </div>
+                <div class="field">
+                    <label for="userEmployeeId">Employee ID No.</label>
+                    <input id="userEmployeeId" placeholder="e.g. PHO-2026-001" required>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="field">
+                    <label for="userRole">Role / Designation</label>
                     <select id="userRole">
-                        <option value="Super Admin">Super Admin</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Facility Manager">Facility Manager</option>
-                        <option value="Viewer" selected>Viewer</option>
+                        <option value="Administrator">Administrator</option>
+                        <option value="Health Officer">Health Officer</option>
+                        <option value="Facilitating Nurse" selected>Facilitating Nurse</option>
                     </select>
                 </div>
                 <div class="field">

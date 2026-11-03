@@ -167,3 +167,16 @@
         grid-template-columns: 1fr;
     }
 }
+.review-modal-box {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.review-item .value {
+    word-break: break-word;
+    font-size: 13.5px;
+}
+
+.badge-administrator { background: #fde9dc; color: var(--sunset-orange); }
+.badge-health-officer { background: #e0ecff; color: #1d4ed8; }
+.badge-facilitating-nurse { background: #dcfce7; color: #15803d; }
