@@ -77,8 +77,12 @@
                     </svg>
                     <span class="nav-text">Settings</span>
                 </a>
-                <button id="logout-btn" class="nav-item logout-item" onclick="window.location.href='pho-login.html'">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <button id="logoutBtn" class="nav-item logout-item" type="button" title="Logout">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
                     <span class="nav-text">Logout</span>
                 </button>
             </div>
@@ -277,7 +281,24 @@
             </div>
         </main>
     </div>
-
+<!-- ==================== LOGOUT CONFIRMATION MODAL ==================== -->
+<div class="logout-modal" id="logoutModal" aria-hidden="true">
+    <div class="logout-modal-content">
+        <div class="logout-modal-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+        </div>
+        <h3>Confirm Sign Out</h3>
+        <p>Are you sure you want to log out?.</p>
+        <div class="logout-modal-actions">
+            <button type="button" class="btn-logout-cancel" id="logoutCancelBtn">Cancel</button>
+            <button type="button" class="btn-logout-confirm" id="logoutConfirmBtn">Log Out</button>
+        </div>
+    </div>
+</div>
     <!-- Bootstrap 5 JavaScript Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 

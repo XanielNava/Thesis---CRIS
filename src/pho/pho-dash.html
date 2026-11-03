@@ -6,8 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PHO - Dashboard</title>
 
-    <link rel="stylesheet" href="../../assets/css/pho/pho-dashboard.css">
+    <!-- Synchronous zero-latency pre-collapse restorer -->
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.documentElement.classList.add("sidebar-pre-collapsed");
+        }
+    </script>
+
+    <!-- Stylesheets: Load shared master first, page-specific second -->
     <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
+    <link rel="stylesheet" href="../../assets/css/pho/pho-dashboard.css">
     <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,16 +27,10 @@
 </head>
 
 <body>
-    <div class="container">
+    <div id="appLayout">
 
         <!-- ==================== SIDEBAR ==================== -->
         <aside class="sidebar" id="sidebar">
-            <script>
-                if (localStorage.getItem("sidebarCollapsed") === "true") {
-                    document.getElementById("sidebar").classList.add("collapsed");
-                }
-            </script>
-
             <div class="sidebar-header">
                 <div class="brand-logo">
                     <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
@@ -82,7 +84,7 @@
                     </svg>
                     <span class="nav-text">Settings</span>
                 </a>
-                <button id="logout-btn" class="nav-item logout-item" type="button" title="Logout" onclick="window.location.href='pho-login.html'">
+                <button id="logoutBtn" class="nav-item logout-item" type="button" title="Logout">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                         <polyline points="16 17 21 12 16 7"/>
@@ -92,23 +94,6 @@
                 </button>
             </div>
         </aside>
-
-        <!-- Sidebar toggle (same behavior as the Animal Registry) -->
-        <script>
-            (function () {
-                var sidebar = document.getElementById("sidebar");
-                var toggle = document.getElementById("sidebarToggle");
-
-                toggle.setAttribute("aria-expanded", String(!sidebar.classList.contains("collapsed")));
-
-                toggle.addEventListener("click", function () {
-                    var collapsed = !sidebar.classList.contains("collapsed");
-                    sidebar.classList.toggle("collapsed", collapsed);
-                    toggle.setAttribute("aria-expanded", String(!collapsed));
-                    localStorage.setItem("sidebarCollapsed", String(collapsed));
-                });
-            })();
-        </script>
 
         <!-- MAIN DASHBOARD CONTENT -->
         <main class="main-content">
@@ -259,8 +244,28 @@
         </main>
     </div>
 
+    <!-- ==================== LOGOUT CONFIRMATION MODAL ==================== -->
+    <div class="logout-modal" id="logoutModal" aria-hidden="true">
+        <div class="logout-modal-content">
+            <div class="logout-modal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+            </div>
+            <h3>Confirm Sign Out</h3>
+            <p>Are you sure you want to log out? You will need to re-authenticate to access the portal.</p>
+            <div class="logout-modal-actions">
+                <button type="button" class="btn-logout-cancel" id="logoutCancelBtn">Cancel</button>
+                <button type="button" class="btn-logout-confirm" id="logoutConfirmBtn">Log Out</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Application Module Scripts -->
     <script type="module" src="../../assets/js/pho/pho-dash.js"></script>
+    <script src="../../assets/js/main/sidebar.js"></script>
 </body>
 
 </html>

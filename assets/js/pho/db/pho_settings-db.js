@@ -40,7 +40,7 @@ export async function savePhoProfile(payload) {
 }
 
 export async function fetchUserData(uid) {
-    const snap = await getDoc(doc(db, "pho-users", uid));
+    const snap = await getDoc(doc(db, "users", uid));
     return snap.exists() ? snap.data() : null;
 }
 
@@ -49,7 +49,7 @@ export async function updateUserData(uid, profilePayload, newPassword = null) {
         await updatePassword(auth.currentUser, newPassword);
     }
     profilePayload.updatedAt = serverTimestamp();
-    await setDoc(doc(db, "pho-users", uid), profilePayload, { merge: true });
+    await setDoc(doc(db, "users", uid), profilePayload, { merge: true });
     await logAudit("User Profile Updated", `Updated details for ${profilePayload.fullName || uid}`);
 }
 

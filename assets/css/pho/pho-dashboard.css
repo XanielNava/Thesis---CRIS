@@ -1,9 +1,5 @@
 /* CRIS SUNSET PALETTE & SAAS SYSTEM VARIABLES */
 :root {
-    --sidebar-width: 260px;
-    --sidebar-collapsed-width: 76px;
-    --sidebar-bg: #111625;
-    --sidebar-border: rgba(255, 255, 255, 0.07);
     --text-muted: #7E8B9B;
     --text-light: #F1F5F9;
     --sunset-orange: #EA6113;
@@ -12,14 +8,7 @@
     --sunset-cream: #FFE3B3;
     --text-dark: #412110;
     --main-bg: #FFFAF0;
-    --transition-smooth: all 0.3s cubic-bezier(0.2, 0, 0, 1);
-
-    /* Sidebar tokens (matches the Animal Registry sidebar) */
-    --cris-primary: #e65100;
-    --cris-navy-dark: #0b132b;
-    --cris-navy-border: #1c2541;
-    --cris-nav-text-muted: #8d99ae;
-    --cris-nav-label: #5c6b73;
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -35,164 +24,8 @@ body {
     overflow: hidden;
 }
 
-.container,
-.app-container {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-}
-
-/* ================= SIDEBAR (matches the Animal Registry; collapse behavior
-   is provided by sidebar-master.css via the .sidebar.collapsed class) ================= */
-.sidebar {
-    width: var(--sidebar-width);
-    background-color: var(--cris-navy-dark);
-    color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    padding: 20px 14px;
-    position: relative;
-    transition: width 0.3s ease;
-    z-index: 100;
-}
-
-.sidebar-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--cris-navy-border);
-    margin-bottom: 16px;
-    position: relative;
-}
-
-.brand-logo img {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
-}
-
-.brand-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.brand-title {
-    font-size: 0.72rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: #ffffff;
-}
-
-.brand-badge {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: var(--cris-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-top: 2px;
-}
-
-.toggle-btn {
-    position: absolute;
-    right: -24px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
-    background-color: var(--cris-navy-dark);
-    border: 1px solid var(--cris-navy-border);
-    border-radius: 50%;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.3s ease, background-color 0.2s ease;
-}
-
-.toggle-btn:hover {
-    background-color: var(--cris-primary);
-}
-
-.chevron-icon {
-    width: 14px;
-    height: 14px;
-}
-
-.sidebar-nav {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    overflow-y: auto;
-}
-
-.nav-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.nav-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--cris-nav-label);
-    letter-spacing: 0.8px;
-    padding: 8px 12px 4px;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    color: var(--cris-nav-text-muted);
-    text-decoration: none;
-    font-size: 0.88rem;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    background: none;
-    border: none;
-    width: 100%;
-    cursor: pointer;
-    text-align: left;
-}
-
-.nav-icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-}
-
-.nav-item:hover {
-    color: #ffffff;
-    background-color: rgba(255, 255, 255, 0.06);
-}
-
-.nav-item.active {
-    color: #ffffff;
-    background-color: rgba(230, 81, 0, 0.2);
-    border-left: 3px solid var(--cris-primary);
-    font-weight: 700;
-}
-
-.sidebar-footer {
-    padding-top: 16px;
-    border-top: 1px solid var(--cris-navy-border);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.logout-item:hover {
-    color: #ff5252;
-    background-color: rgba(255, 82, 82, 0.1);
-}
-
 /* ================= MAIN CONTENT AREA ================= */
+/* Sidebar geometry and transitions are completely delegated to sidebar-master.css */
 .main-content {
     flex-grow: 1;
     padding: 25px;
@@ -706,4 +539,110 @@ body {
     .statistics-container {
         grid-template-columns: 1fr;
     }
+}
+
+/* ================= LOGOUT CONFIRMATION MODAL ================= */
+.logout-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 16px;
+    animation: fadeInModal 0.2s ease forwards;
+}
+
+.logout-modal.open {
+    display: flex;
+}
+
+.logout-modal-content {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 28px 24px 24px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+}
+
+.logout-modal.open .logout-modal-content {
+    transform: scale(1);
+}
+
+.logout-modal-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #FEE2E2;
+    color: #DC2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.logout-modal-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.logout-modal-content h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+}
+
+.logout-modal-content p {
+    margin: 0 0 24px;
+    font-size: 13.5px;
+    color: #64748B;
+    line-height: 1.5;
+}
+
+.logout-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.logout-modal-actions button {
+    flex: 1;
+    height: 40px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-logout-cancel {
+    background: #F1F5F9;
+    color: #475569;
+}
+
+.btn-logout-cancel:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+}
+
+.btn-logout-confirm {
+    background: #DC2626;
+    color: #FFFFFF;
+}
+
+.btn-logout-confirm:hover {
+    background: #B91C1C;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }

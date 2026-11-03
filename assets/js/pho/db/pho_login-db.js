@@ -30,7 +30,7 @@ export async function authenticatePhoPersonnel(email, password, selectedDesignat
         const user = userCredential.user;
 
         // 2. Fetch User Profile from 'pho-users'
-        const userDocRef = doc(db, "pho-users", user.uid);
+        const userDocRef = doc(db, "users", user.uid);
         const userDocSnap = await getDoc(userDocRef);
 
         if (!userDocSnap.exists()) {
@@ -54,7 +54,7 @@ export async function authenticatePhoPersonnel(email, password, selectedDesignat
         }
 
         // 4. Role Guard: Ensure designation matches record
-        const userRole = (data.role || data.designation || '').trim();
+        const userRole = (data.designation || '').trim();
         if (selectedDesignation && userRole.toLowerCase() !== selectedDesignation.trim().toLowerCase()) {
             await signOut(auth);
             throw new Error(`Designation mismatch: You are authorized as "${userRole}". Please select the correct designation role.`);
@@ -74,11 +74,11 @@ export async function authenticatePhoPersonnel(email, password, selectedDesignat
         localStorage.setItem('userStatus', status);
 
         // 7. Determine standard redirect URL based on role
-        let redirectUrl = 'pho-dash.html';
+        let redirectUrl = 'noramlizeRole';
         const normalizedRole = userRole.toLowerCase();
 
         if (normalizedRole === 'administrator') {
-            redirectUrl = '../../pages/pho_admin/admin_dash.html';
+            redirectUrl = '../../src/pho_admin/admin_dash.html';
         } else if (normalizedRole === 'health officer') {
             redirectUrl = 'pho-dash.html';
         } else if (normalizedRole === 'facilitating nurse') {

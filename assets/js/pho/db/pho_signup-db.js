@@ -32,7 +32,7 @@ export async function registerPhoPersonnel(email, password, profile) {
         const fullName = `${profile.firstName} ${profile.middleInitial ? profile.middleInitial + '.' : ''} ${profile.lastName} ${profile.suffix || ''}`.trim();
 
         // 3. Save User Profile in Firestore
-        const userDocRef = doc(db, 'pho-users', user.uid);
+        const userDocRef = doc(db, 'users', user.uid);
         await setDoc(userDocRef, {
             uid: user.uid,
             firstName: profile.firstName,
@@ -42,7 +42,6 @@ export async function registerPhoPersonnel(email, password, profile) {
             fullName: fullName,
             email: email,
             designation: profile.designation,
-            role: profile.designation, // Synchronized with PHO role definitions
             verification: {
                 prcLicenseNumber: profile.prcLicenseNumber || '',
                 employeeIdNumber: profile.employeeIdNumber || '',

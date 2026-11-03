@@ -311,3 +311,71 @@ function formatDate(ts) {
     const d = ts.toDate ? ts.toDate() : (ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts));
     return d.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
+
+export function setupLogoutModal() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutModal = document.getElementById('logoutModal');
+    const cancelBtn = document.getElementById('logoutCancelBtn');
+    const confirmBtn = document.getElementById('logoutConfirmBtn');
+
+    if (!logoutModal) return;
+
+    const openLogout = () => {
+        logoutModal.classList.add('open');
+        logoutModal.setAttribute('aria-hidden', 'false');
+    };
+
+    const closeLogout = () => {
+        logoutModal.classList.remove('open');
+        logoutModal.setAttribute('aria-hidden', 'true');
+    };
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openLogout();
+        });
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeLogout);
+    }
+
+    // Close when clicking outside the box
+    logoutModal.addEventListener('click', (e) => {
+        if (e.target === logoutModal) closeLogout();
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && logoutModal.classList.contains('open')) {
+            closeLogout();
+        }
+    });
+
+    // Perform Sign Out
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', async () => {
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Logging out...';
+
+            try {
+                await signOut(auth);
+                localStorage.removeItem('userUid');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('userDesignation');
+                localStorage.removeItem('userStatus');
+                window.location.href = 'pho-login.html';
+            } catch (err) {
+                console.error("Logout error:", err);
+                window.location.href = 'pho-login.html';
+            }
+        });
+    }
+}
+
+// Call on DOM ready:
+document.addEventListener('DOMContentLoaded', () => {
+    setupLogoutModal();
+});
