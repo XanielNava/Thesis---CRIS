@@ -1053,7 +1053,6 @@
        ====================================================================== */
 
     document.addEventListener('DOMContentLoaded', () => {
-        initSidebar();
         populateMunicipalities();
         bindEvents();
         setPhotoPreview('');
