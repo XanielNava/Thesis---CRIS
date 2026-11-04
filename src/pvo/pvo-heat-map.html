@@ -5,37 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PVO - Heatmaps</title>
 
+    <!-- Synchronous zero-latency pre-collapse restorer -->
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.documentElement.classList.add("sidebar-pre-collapsed");
+        }
+    </script>
+
     <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="../../assets/css/pvo/pvo-heat-map.css">
+    <!-- Stylesheets: shared master first, page-specific second -->
     <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
+    <link rel="stylesheet" href="../../assets/css/pvo/pvo-heat-map.css">
     <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
 
-    <!-- Google APIs -->
+    <!-- Google APIs & Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 </head>
 
 <body>
-    <div class="container">
+    <div id="appLayout">
 
         <!-- ==================== SIDEBAR ==================== -->
         <aside class="sidebar" id="sidebar">
-            <script>
-                if (localStorage.getItem("sidebarCollapsed") === "true") {
-                    document.getElementById("sidebar").classList.add("collapsed");
-                }
-            </script>
-
             <div class="sidebar-header">
                 <div class="brand-logo">
                     <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
@@ -80,7 +79,7 @@
                     </a>
                     <a href="pvo-animal-registry.html" class="nav-item" title="Animal Registry">
                         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 3 3z"/>
+                            <path d="M12 11c1.66 0 3-1.34 3-3s-1.34-3-3-3 -3 1.34-3 3 1.34 3 3 3z"/>
                             <path d="M18 21v-2a4 4 0 0 0-4-4H10a4 4 0 0 0-4 4v2"/>
                             <circle cx="18" cy="8" r="1.5"/>
                             <circle cx="6" cy="8" r="1.5"/>
@@ -98,7 +97,7 @@
                     </svg>
                     <span class="nav-text">Settings</span>
                 </a>
-                <button id="logout-btn" class="nav-item logout-item" type="button" title="Logout" onclick="window.location.href='pvo-login.html'">
+                <button id="logout-btn" class="nav-item logout-item" type="button" title="Logout">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                         <polyline points="16 17 21 12 16 7"/>
@@ -109,46 +108,29 @@
             </div>
         </aside>
 
-        <!-- Sidebar toggle (same behavior as the Animal Registry) -->
-        <script>
-            (function () {
-                var sidebar = document.getElementById("sidebar");
-                var toggle = document.getElementById("sidebarToggle");
-
-                toggle.setAttribute("aria-expanded", String(!sidebar.classList.contains("collapsed")));
-
-                toggle.addEventListener("click", function () {
-                    var collapsed = !sidebar.classList.contains("collapsed");
-                    sidebar.classList.toggle("collapsed", collapsed);
-                    toggle.setAttribute("aria-expanded", String(!collapsed));
-                    localStorage.setItem("sidebarCollapsed", String(collapsed));
-                });
-            })();
-        </script>
-
+        <!-- Main Workspace -->
         <main class="main-content">
             <header class="header">
                 <h1>HEATMAPS</h1>
             </header>
 
-            <!-- UPLOAD DATASET AND FILTERS -->
             <div class="heatmap-toolbar">
                 <div class="toolbar-group">
-                    <label>Year</label>
+                    <label for="yearFilter">Year</label>
                     <select id="yearFilter">
                         <option value="All">All Years</option>
                     </select>
                 </div>
 
                 <div class="toolbar-group">
-                    <label>Municipality</label>
+                    <label for="municipalityFilter">Municipality</label>
                     <select id="municipalityFilter">
                         <option value="All">All Municipalities</option>
                     </select>
                 </div>
 
                 <div class="toolbar-group">
-                    <label>Heatmap Layer</label>
+                    <label for="layerFilter">Heatmap Layer</label>
                     <select id="layerFilter">
                         <option value="bite">Animal Bite Cases</option>
                         <option value="human">Human Rabies Deaths</option>
@@ -157,7 +139,6 @@
                 </div>
             </div>
 
-            <!-- STATISTICS CONTAINER -->
             <div class="statistics-container">
                 <div class="stat-card">
                     <small>Human Population</small>
@@ -177,7 +158,6 @@
                 </div>
             </div>
 
-            <!-- HEATMAP -->
             <div class="dashboard-map">
                 <div class="map-wrapper">
                     <div id="map"></div>
@@ -189,13 +169,15 @@
                     </div>
                 </div>
 
-                <!-- TOP MUNICIPALITIES -->
                 <div class="side-panel">
                     <h3>Top Municipalities</h3>
                     <div id="topMunicipalities"></div>
                 </div>
             </div>
-            <script type="module" src="../../assets/js/pvo/pvo-heat-map.js"></script>
+
+            <!-- Scripts -->
+            <script type="module" src="../../assets/js/pvo/ui/pvo-heatmap-ui.js"></script>
+            <script type="module" src="../../assets/js/main/sidebar.js"></script>
         </main>
     </div>
 </body>

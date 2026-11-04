@@ -4,42 +4,9 @@
     --sunset-yellow: #FBB931;
     --sunset-cream: #FFE3B3;
     --text-dark: #412110;
-    --sidebar-bg: #0b1329;
-    --sidebar-hover: #17233d;
-    --sidebar-active: #1b2a4a;
     --main-bg: #FFFAF0;
-    --accent-orange: #ff7a00;
     --muted-slate: #6c7d93;
     --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-
-    /* Brand Primary & Sunset Palette */
-    --cris-primary: #e65100;         /* Deep Sunset Orange */
-    --cris-primary-hover: #bf360c;   /* Darker Sunset Accent */
-    --cris-primary-light: #fff3e0;   /* Light Orange Accent Container Fill */
-    --cris-primary-gradient: linear-gradient(135deg, #e65100 0%, #f57c00 100%);
-
-    /* Universal Dark Navy Sidebar Variables */
-    --sidebar-width: 260px;
-    --sidebar-collapsed-width: 72px;
-    --cris-navy-dark: #0b132b;       /* Primary Sidebar Navy */
-    --cris-navy-border: #1c2541;     /* Border Accent */
-    --cris-nav-text-muted: #8d99ae;  /* Unselected Nav Options */
-    --cris-nav-text-subtle: #a0aab8; /* Brand Text Subtle */
-    --cris-nav-label: #5c6b73;       /* Category Group Labels */
-
-    /* Surface & Background Neutral Tokens */
-    --cris-bg-main: #f8f6f0;         /* Soft Off-White Background */
-    --cris-card-bg: #ffffff;         /* Elevated Surface Cards */
-    --cris-card-subtle-bg: #fdf8f5;  /* Secondary Subtle Warm Background */
-
-    /* Typography & Structural Colors */
-    --cris-text-dark: #2c3e50;
-    --cris-text-heading: #1a1a1a;
-    --cris-text-muted: #6c757d;
-    --cris-border-light: #f0f0f0;
-    --cris-border-input: #e0e0e0;
-    --cris-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
-    --cris-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -56,167 +23,8 @@ body {
     color: var(--text-dark);
 }
 
-/* Base App Layout Container */
-.container,
-.app-container {
-    display: flex;
-    height: 100vh;
-    width: 100%;
-    overflow: hidden;
-}
-
-/* ==========================================================================
-   UNIVERSAL SAAS SIDEBAR (matches the Animal Registry; collapse behavior
-   is provided by sidebar-master.css via the .sidebar.collapsed class)
-   ========================================================================== */
-.sidebar {
-    width: var(--sidebar-width);
-    background-color: var(--cris-navy-dark);
-    color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    padding: 20px 14px;
-    position: relative;
-    transition: width 0.3s ease;
-    z-index: 100;
-}
-
-.sidebar-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--cris-navy-border);
-    margin-bottom: 16px;
-    position: relative;
-}
-
-.brand-logo img {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
-}
-
-.brand-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.brand-title {
-    font-size: 0.72rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: #ffffff;
-}
-
-.brand-badge {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: var(--cris-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-top: 2px;
-}
-
-.toggle-btn {
-    position: absolute;
-    right: -24px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
-    background-color: var(--cris-navy-dark);
-    border: 1px solid var(--cris-navy-border);
-    border-radius: 50%;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.3s ease, background-color 0.2s ease;
-}
-
-.toggle-btn:hover {
-    background-color: var(--cris-primary);
-}
-
-.chevron-icon {
-    width: 14px;
-    height: 14px;
-}
-
-.sidebar-nav {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    overflow-y: auto;
-}
-
-.nav-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.nav-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--cris-nav-label);
-    letter-spacing: 0.8px;
-    padding: 8px 12px 4px;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    color: var(--cris-nav-text-muted);
-    text-decoration: none;
-    font-size: 0.88rem;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    background: none;
-    border: none;
-    width: 100%;
-    cursor: pointer;
-    text-align: left;
-}
-
-.nav-icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-}
-
-.nav-item:hover {
-    color: #ffffff;
-    background-color: rgba(255, 255, 255, 0.06);
-}
-
-.nav-item.active {
-    color: #ffffff;
-    background-color: rgba(230, 81, 0, 0.2);
-    border-left: 3px solid var(--cris-primary);
-    font-weight: 700;
-}
-
-.sidebar-footer {
-    padding-top: 16px;
-    border-top: 1px solid var(--cris-navy-border);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.logout-item:hover {
-    color: #ff5252;
-    background-color: rgba(255, 82, 82, 0.1);
-}
-
 /* ================= MAIN WORKSPACE ================= */
+/* Sidebar geometry, transitions, and hover states are delegated entirely to sidebar-master.css */
 .main-content {
     flex: 1;
     padding: 25px;
@@ -292,7 +100,7 @@ body {
     color: var(--sunset-orange);
 }
 
-/* ================= PROFESSIONAL EXPORT BUTTONS ================= */
+/* EXPORT BUTTONS */
 .export-buttons {
     display: flex;
     align-items: center;
@@ -337,7 +145,7 @@ body {
     transform: translateY(-1px);
 }
 
-/* ================= REFINED TABLE ================= */
+/* REFINED TABLE */
 .table-container {
     flex: 1;
     max-height: 560px;
@@ -383,15 +191,10 @@ td {
     color: #2d3748;
 }
 
-tbody tr:nth-child(even) {
-    background-color: #fcfdfd;
-}
+tbody tr:nth-child(even) { background-color: #fcfdfd; }
+tbody tr:hover { background-color: #fff6eb; }
 
-tbody tr:hover {
-    background-color: #fff6eb;
-}
-
-/* ================= PAGINATION ================= */
+/* PAGINATION */
 .pagination {
     display: flex;
     justify-content: flex-end;
@@ -430,13 +233,13 @@ tbody tr:hover {
     background: #f7fafc;
 }
 
-/* ================= PRINT ENGINE ================= */
+/* PRINT ENGINE */
 @media print {
     @page { size: A4 landscape; margin: 10mm; }
     .sidebar, .header, .topbar, .pagination, .export-buttons { display: none !important; }
     html, body { background: white !important; height: auto !important; overflow: visible !important; }
-    .container, .app-container, .main-content, .card, .table-container { display: block !important; width: 100% !important; border: none !important; }
+    #appLayout, .main-content, .card, .table-container { display: block !important; width: 100% !important; border: none !important; }
     table { width: 100% !important; border-collapse: collapse !important; font-size: 8pt !important; }
     th, td { border: 1px solid #ccc !important; padding: 5px !important; text-align: center !important; }
-    th { background-color: #EA6113 !important; color: white !important; -webkit-print-color-adjust: exact; }
+    th { background-color: #EA6113 !important; color: white !important; }
 }

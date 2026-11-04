@@ -6,27 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PVO - Animal Bite Cases</title>
 
-    <!-- Stylesheets-->
-    <link rel="stylesheet" href="../../assets/css/pvo/pvo-animal-bite-cases.css">
+    <!-- Synchronous zero-latency pre-collapse restorer -->
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.documentElement.classList.add("sidebar-pre-collapsed");
+        }
+    </script>
+
+    <!-- Stylesheets: shared master first, page-specific second -->
     <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
+    <link rel="stylesheet" href="../../assets/css/pvo/pvo-animal-bite-cases.css">
     <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
 
-    <!-- Fonts-->
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
 
 <body>
-    <div class="container">
+    <div id="appLayout">
 
         <!-- ==================== SIDEBAR ==================== -->
         <aside class="sidebar" id="sidebar">
-            <script>
-                if (localStorage.getItem("sidebarCollapsed") === "true") {
-                    document.getElementById("sidebar").classList.add("collapsed");
-                }
-            </script>
-
             <div class="sidebar-header">
                 <div class="brand-logo">
                     <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
@@ -71,7 +74,7 @@
                     </a>
                     <a href="pvo-animal-registry.html" class="nav-item" title="Animal Registry">
                         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 3 3z"/>
+                            <path d="M12 11c1.66 0 3-1.34 3-3s-1.34-3-3-3 -3 1.34-3 3 1.34 3 3 3z"/>
                             <path d="M18 21v-2a4 4 0 0 0-4-4H10a4 4 0 0 0-4 4v2"/>
                             <circle cx="18" cy="8" r="1.5"/>
                             <circle cx="6" cy="8" r="1.5"/>
@@ -82,14 +85,14 @@
             </div>
 
             <div class="sidebar-footer">
-                <a href="../../settings/html/pvo-settings.html" class="nav-item" title="Settings">
+                <a href="pvo-settings.html" class="nav-item" title="Settings">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                     </svg>
                     <span class="nav-text">Settings</span>
                 </a>
-                <button id="logout-btn" class="nav-item logout-item" type="button" title="Logout" onclick="window.location.href='pvo-login.html'">
+                <button id="logout-btn" class="nav-item logout-item" type="button" title="Logout">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                         <polyline points="16 17 21 12 16 7"/>
@@ -99,23 +102,6 @@
                 </button>
             </div>
         </aside>
-
-        <!-- Sidebar toggle (same behavior as the Animal Registry) -->
-        <script>
-            (function () {
-                var sidebar = document.getElementById("sidebar");
-                var toggle = document.getElementById("sidebarToggle");
-
-                toggle.setAttribute("aria-expanded", String(!sidebar.classList.contains("collapsed")));
-
-                toggle.addEventListener("click", function () {
-                    var collapsed = !sidebar.classList.contains("collapsed");
-                    sidebar.classList.toggle("collapsed", collapsed);
-                    toggle.setAttribute("aria-expanded", String(!collapsed));
-                    localStorage.setItem("sidebarCollapsed", String(collapsed));
-                });
-            })();
-        </script>
 
         <!-- Main Workspace -->
         <main class="main-content">
@@ -178,8 +164,10 @@
         </main>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
-    <script type="module" src="../../assets/js/pvo-animal-bite-cases.js"></script>
+    <script type="module" src="../../assets/js/pvo/ui/pvo-animal-bite-cases-ui.js"></script>
+    <script type="module" src="../../assets/js/main/sidebar.js"></script>
 </body>
 
 </html>

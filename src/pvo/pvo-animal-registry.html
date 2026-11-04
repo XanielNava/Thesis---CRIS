@@ -6,31 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PVO - Animal Registry</title>
 
-    <!-- Stylesheets-->
-    <link rel="stylesheet" href="../../assets/css/pvo/pvo-animal-registry.css">
+    <!-- Synchronous zero-latency pre-collapse restorer -->
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.documentElement.classList.add("sidebar-pre-collapsed");
+        }
+    </script>
+
+    <!-- Stylesheets: shared master first, page-specific second -->
     <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
+    <link rel="stylesheet" href="../../assets/css/pvo/pvo-animal-registry.css">
     <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
 
-    <!-- Google APIs-->
+    <!-- Google APIs & Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <!--Fonts-->
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 
 <body>
-<div class="container">
+<div id="appLayout">
 
     <!-- ==================== SIDEBAR ==================== -->
     <aside class="sidebar" id="sidebar">
-        <script>
-            if (localStorage.getItem("sidebarCollapsed") === "true") {
-                document.getElementById("sidebar").classList.add("collapsed");
-            }
-        </script>
-
         <div class="sidebar-header">
             <div class="brand-logo">
                 <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
@@ -75,7 +74,7 @@
                 </a>
                 <a href="pvo-animal-registry.html" class="nav-item active" title="Animal Registry">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 3 3z"/>
+                        <path d="M12 11c1.66 0 3-1.34 3-3s-1.34-3-3-3 -3 1.34-3 3 1.34 3 3 3z"/>
                         <path d="M18 21v-2a4 4 0 0 0-4-4H10a4 4 0 0 0-4 4v2"/>
                         <circle cx="18" cy="8" r="1.5"/>
                         <circle cx="6" cy="8" r="1.5"/>
@@ -106,7 +105,6 @@
 
     <!-- ==================== MAIN WORKSPACE ==================== -->
     <main class="main-content" id="mainContent">
-
         <!-- Shown only when printing -->
         <div class="print-only print-header">
             <h2>Provincial Animal Registry &mdash; Iloilo</h2>
@@ -227,14 +225,13 @@
                 </table>
             </div>
         </section>
-
     </main>
 </div>
 
 <!-- Toast notification -->
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<!-- ==================== OWNER FILE MODAL (VIEW / MANAGE ANIMALS) ==================== -->
+<!-- ==================== OWNER FILE MODAL ==================== -->
 <div class="modal-overlay" id="ownerProfileModal" role="dialog" aria-modal="true" aria-labelledby="ownerProfileModalTitle" aria-hidden="true">
     <div class="modal-container">
         <div class="modal-header">
@@ -326,7 +323,7 @@
     </div>
 </div>
 
-<!-- ==================== ANIMAL PROFILE MODAL (ADD / EDIT ANIMAL) ==================== -->
+<!-- ==================== ANIMAL PROFILE MODAL ==================== -->
 <div class="modal-overlay modal-top" id="animalProfileModal" role="dialog" aria-modal="true" aria-labelledby="animalProfileModalTitle" aria-hidden="true">
     <div class="modal-container modal-md">
         <div class="modal-header">
@@ -397,7 +394,6 @@
 
         <form id="vaccinationForm" class="modal-body" novalidate>
             <p class="vax-animal-context" id="vaxAnimalName"></p>
-
             <div class="form-section">
                 <div class="form-grid mb-10">
                     <div class="input-group">
@@ -453,7 +449,6 @@
         <form id="ownerRegistrationForm" class="modal-body" novalidate>
             <input type="hidden" id="editingOwnerId" value="">
 
-            <!-- OWNER PHOTO -->
             <div class="form-section photo-upload-section">
                 <span class="section-label">Owner Photo</span>
                 <div class="photo-preview-box">
@@ -475,7 +470,6 @@
                 <p class="photo-hint">JPG or PNG, up to 5 MB.</p>
             </div>
 
-            <!-- OWNER INFORMATION -->
             <div class="form-section">
                 <h3 class="form-subtitle"><i class="fa-solid fa-user-gear"></i> Owner Information</h3>
                 <div class="form-grid dual-grid mb-10">
@@ -519,7 +513,6 @@
                 </div>
             </div>
 
-            <!-- ADDRESS -->
             <div class="form-section">
                 <h3 class="form-subtitle"><i class="fa-solid fa-map-location-dot"></i> Address</h3>
                 <div class="form-grid quad-grid">
@@ -546,7 +539,6 @@
                 </div>
             </div>
 
-            <!-- PRIMARY ANIMAL (NEW OWNER ONLY) -->
             <div class="form-section" id="primaryAnimalSection">
                 <h3 class="form-subtitle"><i class="fa-solid fa-paw"></i> Primary Animal Profile</h3>
                 <div class="form-grid quad-grid mb-10">
@@ -634,7 +626,8 @@
     </div>
 </div>
 
-<script src="../../assets/js/pvo/pvo-animal-registry.js"></script>
+<!-- Scripts -->
+<script type="module" src="../../assets/js/pvo/ui/pvo-animal-registry-ui.js"></script>
+<script type="module" src="../../assets/js/main/sidebar.js"></script>
 </body>
-
 </html>

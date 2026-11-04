@@ -1,81 +1,133 @@
-// ==========================================================================
-// sidebar.js - Universal SaaS Sidebar Controller for PHO & ABTC Modules
-// ==========================================================================
-
 (function () {
     'use strict';
 
-    const SIDEBAR_KEY = 'sidebarCollapsed';
-    const PRE_COLLAPSED_CLASS = 'sidebar-pre-collapsed';
-    const READY_CLASS = 'sidebar-ready';
-
-    function initUniversalSidebar() {
+    /* ==========================================================================
+       1. ZERO-FLICKER SIDEBAR COLLAPSE ENGINE
+       ========================================================================== */
+    function initSidebar() {
         const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const layoutWrapper = document.getElementById('appLayout') || document.querySelector('.container, .app-container');
+        const toggle = document.getElementById('sidebarToggle');
+        if (!sidebar || !toggle) return;
 
-        if (!sidebar || !sidebarToggle) return;
+        // Apply saved collapse state
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        sidebar.classList.toggle('collapsed', isCollapsed);
+        toggle.setAttribute('aria-expanded', String(!isCollapsed));
 
-        function readState() {
-            try {
-                return localStorage.getItem(SIDEBAR_KEY) === 'true';
-            } catch (e) {
-                return false;
-            }
-        }
-
-        function storeState(isCollapsed) {
-            try {
-                localStorage.setItem(SIDEBAR_KEY, String(isCollapsed));
-            } catch (e) { /* storage unavailable */ }
-        }
-
-        function applyState(isCollapsed) {
-            sidebar.classList.toggle('collapsed', isCollapsed);
-
-            if (layoutWrapper) {
-                layoutWrapper.classList.toggle('sidebar-collapsed', isCollapsed);
-                layoutWrapper.classList.toggle('collapsed', isCollapsed);
-            }
-
-            sidebarToggle.setAttribute('aria-expanded', String(!isCollapsed));
-        }
-
-        // 1. Initial state restoration (the pre-collapse class keeps this paint animation-free)
-        applyState(readState());
-
-        // 2. Release the load-time locks after the first paint.
-        //    Until `sidebar-ready` exists, the CSS blocks sidebar/layout transitions, so nothing
-        //    can animate while the page settles (this works even on pages that lack the inline
-        //    pre-collapse script). The pre-collapse class is dropped too, otherwise it would keep
-        //    `transition: none` on the whole page and kill the collapse animation.
-        requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-                document.documentElement.classList.remove(PRE_COLLAPSED_CLASS);
-                document.documentElement.classList.add(READY_CLASS);
+        // Enable transitions only after layout settles (prevents initial load flashing)
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                sidebar.classList.add('sidebar-ready');
+                document.documentElement.classList.remove('sidebar-pre-collapsed');
             });
         });
 
-        // 3. Toggle click handler
-        sidebarToggle.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+        toggle.addEventListener('click', () => {
+            const willCollapse = !sidebar.classList.contains('collapsed');
+            sidebar.classList.toggle('collapsed', willCollapse);
+            toggle.setAttribute('aria-expanded', String(!willCollapse));
+            localStorage.setItem('sidebarCollapsed', String(willCollapse));
 
-            const nextState = !sidebar.classList.contains('collapsed');
-
-            applyState(nextState);
-            storeState(nextState);
-        });
-
-        // 4. Back/forward cache restores the old DOM; re-sync with the saved state
-        window.addEventListener('pageshow', function (e) {
-            if (e.persisted) applyState(readState());
+            // Inform Leaflet maps or Chart.js to resize smoothly
+            window.dispatchEvent(new Event('resize'));
         });
     }
 
+    /* ==========================================================================
+       2. UNIFIED LOGOUT MODAL ENGINE
+       ========================================================================== */
+    function ensureLogoutModalDOM() {
+        if (document.getElementById('logoutConfirmModal')) return;
+
+        const modalHTML = `
+            <div class="modal-overlay modal-top" id="logoutConfirmModal" role="alertdialog" aria-modal="true" aria-hidden="true">
+                <div class="modal-container modal-sm logout-modal-box">
+                    <div class="modal-body confirm-body">
+                        <div class="logout-icon-bubble">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        </div>
+                        <h2>Sign Out of CRIS?</h2>
+                        <p>Are you sure you want to end your current session? You will need to log in again to access the provincial ledger.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-modal btn-cancel" id="cancelLogoutBtn">Cancel</button>
+                        <button type="button" class="btn-modal btn-danger-solid" id="confirmLogoutBtn">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Yes, Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    function initLogoutFlow() {
+        ensureLogoutModalDOM();
+
+        const logoutBtn = document.getElementById('logout-btn');
+        const modal = document.getElementById('logoutConfirmModal');
+        const cancelBtn = document.getElementById('cancelLogoutBtn');
+        const confirmBtn = document.getElementById('confirmLogoutBtn');
+
+        if (!logoutBtn || !modal) return;
+
+        const openModal = () => {
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            cancelBtn?.focus();
+        };
+
+        const closeModal = () => {
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+        };
+
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal();
+        });
+
+        cancelBtn?.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                closeModal();
+            }
+        });
+
+        confirmBtn?.addEventListener('click', async () => {
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing out...';
+
+            try {
+                // Dynamically import Firebase Auth only when signing out
+                const { auth } = await import('../firebase/firebase-config.js');
+                const { signOut } = await import('https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js');
+                await signOut(auth);
+            } catch (err) {
+                console.warn('Firebase signout skipped or failed:', err);
+            } finally {
+                localStorage.removeItem('sidebarCollapsed');
+                sessionStorage.clear();
+                window.location.href = 'pvo-login.html';
+            }
+        });
+    }
+
+    /* ==========================================================================
+       3. DOM INITIALIZATION
+       ========================================================================== */
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initUniversalSidebar);
+        document.addEventListener('DOMContentLoaded', () => {
+            initSidebar();
+            initLogoutFlow();
+        });
     } else {
-        initUniversalSidebar();
+        initSidebar();
+        initLogoutFlow();
     }
 })();

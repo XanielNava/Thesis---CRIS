@@ -1,37 +1,16 @@
-/* ==========================================================================
-   PVO ANIMAL REGISTRY — page script
+import { 
+    fetchAllOwners, 
+    saveNewOwner, 
+    updateOwner, 
+    updateOwnerAnimals 
+} from '../db/pvo-AR-db.js';
 
-   Sections
-     1. Reference data
-     2. State
-     3. Helpers
-     4. Sidebar, toast, and modal control
-     5. Municipality dropdowns
-     6. Summary statistics
-     7. Registry table: filtering, sorting, rendering
-     8. Owner file (view modal) and animal cards
-     9. Animal profile modal (add / edit animal)
-    10. Update vaccination modal
-    11. Delete confirmation
-    12. Owner form (add / edit) and validation
-    13. Photo upload and camera capture
-    14. Export (Excel) and print
-    15. Event wiring
-    16. Initialization
-   ========================================================================== */
 (function () {
     'use strict';
 
     /* ======================================================================
-       1. REFERENCE DATA
+       1. REFERENCE CONSTANTS
        ====================================================================== */
-
-    const SPECIES = ['Dog', 'Cat'];
-    const VAX_STATUSES = ['Vaccinated', 'Unvaccinated', 'Overdue'];
-    const REPRO_STATUSES = ['Intact', 'Castrated', 'Spayed'];
-    const SEX_OPTIONS = ['Male', 'Female'];
-    const REGION_LABEL = 'Region VI';
-    const PROVINCE_LABEL = 'Iloilo';
 
     const MUNICIPALITY_GROUPS = [
         { label: 'Component City', items: ['Passi City'] },
@@ -52,59 +31,11 @@
 
     const PH_MOBILE_PATTERN = /^09\d{2}-?\d{3}-?\d{4}$/;
     const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+    const REGION_LABEL = 'Region VI';
+    const PROVINCE_LABEL = 'Iloilo';
 
-    // Sample records (in-memory only)
-    const ownerDatabase = {
-        "OWN-001": {
-            regId: "REG-2026-1001",
-            lastName: "Dela Cruz",
-            firstName: "Juan",
-            middleInitial: "S.",
-            suffix: "",
-            contact: "0917-123-4567",
-            street: "Block 4 Lot 12",
-            barangay: "Poblacion Zone 1",
-            municipality: "Santa Barbara",
-            zipCode: "5002",
-            photo: "",
-            animals: [
-                { regId: "REG-2026-1001-A1", name: "Browny", species: "Dog", breed: "Aspin", sex: "Male", neutered: "Castrated", status: "Vaccinated", lastVax: "2026-01-15", microchipId: "TAG-9901" }
-            ]
-        },
-        "OWN-002": {
-            regId: "REG-2026-1002",
-            lastName: "Limosnero",
-            firstName: "John Rheb",
-            middleInitial: "B.",
-            suffix: "",
-            contact: "0928-555-0192",
-            street: "Purok 3",
-            barangay: "Ungka",
-            municipality: "Pavia",
-            zipCode: "5001",
-            photo: "",
-            animals: [
-                { regId: "REG-2026-1002-A1", name: "Mimi", species: "Cat", breed: "Persian", sex: "Female", neutered: "Spayed", status: "Vaccinated", lastVax: "2026-02-10", microchipId: "" },
-                { regId: "REG-2026-1002-A2", name: "Tiger", species: "Cat", breed: "Domestic Shorthair", sex: "Male", neutered: "Intact", status: "Overdue", lastVax: "2025-03-12", microchipId: "" }
-            ]
-        },
-        "OWN-003": {
-            regId: "REG-2026-1003",
-            lastName: "Guancia",
-            firstName: "Shenna Jane",
-            middleInitial: "M.",
-            suffix: "",
-            contact: "0919-888-3411",
-            street: "St. Jude Village",
-            barangay: "Poblacion",
-            municipality: "Oton",
-            zipCode: "5020",
-            photo: "",
-            animals: [
-                { regId: "REG-2026-1003-A1", name: "Coco", species: "Dog", breed: "Poodle", sex: "Female", neutered: "Spayed", status: "Vaccinated", lastVax: "2026-04-01", microchipId: "TAG-1042" }
-            ]
-        }
-    };
+    // Live store populated dynamically from Firestore
+    let ownerDatabase = {};
 
     /* ======================================================================
        2. STATE
@@ -116,10 +47,10 @@
         sortAscending: true,
         formPhoto: '',
         cameraStream: null,
-        animalMode: 'add',   // 'add' or 'edit' for the animal profile modal
-        animalIndex: -1,     // animal being edited
-        vaxIndex: -1,        // animal whose vaccination is being updated
-        deleteIndex: -1      // animal pending deletion
+        animalMode: 'add',
+        animalIndex: -1,
+        vaxIndex: -1,
+        deleteIndex: -1
     };
 
     /* ======================================================================
@@ -127,42 +58,28 @@
        ====================================================================== */
 
     const $ = (id) => document.getElementById(id);
-
     const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[c]));
 
-    const ownerName = (o) =>
-        [`${o.lastName}, ${o.firstName}`, o.middleInitial, o.suffix].filter(Boolean).join(' ');
-
-    const initials = (o) =>
-        `${(o.firstName || '').charAt(0)}${(o.lastName || '').charAt(0)}`.toUpperCase();
-
+    const ownerName = (o) => [`${o.lastName}, ${o.firstName}`, o.middleInitial, o.suffix].filter(Boolean).join(' ');
+    const initials = (o) => `${(o.firstName || '').charAt(0)}${(o.lastName || '').charAt(0)}`.toUpperCase();
     const hasDate = (value) => Boolean(value) && value !== 'N/A';
-
     const VAX_CLASS = { Vaccinated: 'vax-ok', Unvaccinated: 'vax-none', Overdue: 'vax-overdue' };
     const vaxBadge = (status) => `<span class="vax-badge ${VAX_CLASS[status] || ''}">${esc(status)}</span>`;
 
     function nextRegId() {
         const max = Object.values(ownerDatabase).reduce((m, o) => {
-            const n = parseInt(o.regId.split('-').pop(), 10);
+            const parts = String(o.regId || '').split('-');
+            const n = parseInt(parts[parts.length - 1], 10);
             return Number.isNaN(n) ? m : Math.max(m, n);
         }, 1000);
         return `REG-${new Date().getFullYear()}-${max + 1}`;
     }
 
-    function nextOwnerKey() {
-        const max = Object.keys(ownerDatabase).reduce((m, key) => {
-            const n = parseInt(key.split('-')[1], 10);
-            return Number.isNaN(n) ? m : Math.max(m, n);
-        }, 0);
-        return `OWN-${String(max + 1).padStart(3, '0')}`;
-    }
-
-    // Next animal Registration ID, based on the highest existing number.
-    // Stays unique after a profile has been deleted.
     function nextAnimalRegId(owner) {
-        const max = owner.animals.reduce((m, a) => {
+        const animals = owner.animals || [];
+        const max = animals.reduce((m, a) => {
             const n = parseInt(String(a.regId).split('-A').pop(), 10);
             return Number.isNaN(n) ? m : Math.max(m, n);
         }, 0);
@@ -170,31 +87,13 @@
     }
 
     /* ======================================================================
-       4. SIDEBAR, TOAST, AND MODAL CONTROL
+       4. OVERLAYS, MODALS, AND TOASTS
        ====================================================================== */
 
-    function initSidebar() {
-        const sidebar = $('sidebar');
-        const toggle = $('sidebarToggle');
-
-        const apply = (collapsed) => {
-            sidebar.classList.toggle('collapsed', collapsed);
-            toggle.setAttribute('aria-expanded', String(!collapsed));
-        };
-
-        apply(localStorage.getItem('sidebarCollapsed') === 'true');
-
-        toggle.addEventListener('click', () => {
-            const collapsed = !sidebar.classList.contains('collapsed');
-            apply(collapsed);
-            localStorage.setItem('sidebarCollapsed', String(collapsed));
-        });
-    }
-
     let toastTimer = null;
-
     function showToast(message) {
         const el = $('toast');
+        if (!el) return;
         el.textContent = message;
         el.classList.add('show');
         clearTimeout(toastTimer);
@@ -202,11 +101,13 @@
     }
 
     function openOverlay(el) {
+        if (!el) return;
         el.classList.add('active');
         el.setAttribute('aria-hidden', 'false');
     }
 
     function closeOverlay(el) {
+        if (!el) return;
         if (el.id === 'cameraModal') stopCamera();
         if (el.id === 'animalProfileModal') state.animalIndex = -1;
         if (el.id === 'vaccinationModal') state.vaxIndex = -1;
@@ -216,10 +117,8 @@
     }
 
     function clearErrors(formId) {
-        document.querySelectorAll(`#${formId} .input-error`)
-            .forEach((el) => el.classList.remove('input-error'));
-        document.querySelectorAll(`#${formId} .error-msg`)
-            .forEach((el) => { el.textContent = ''; });
+        document.querySelectorAll(`#${formId} .input-error`).forEach((el) => el.classList.remove('input-error'));
+        document.querySelectorAll(`#${formId} .error-msg`).forEach((el) => { el.textContent = ''; });
     }
 
     function showFieldError(fieldId, message) {
@@ -230,12 +129,13 @@
     }
 
     /* ======================================================================
-       5. MUNICIPALITY DROPDOWNS
+       5. SUMMARY STATS & FILTERS
        ====================================================================== */
 
     function populateMunicipalities() {
         ['municipality', 'filterMunicipality'].forEach((id) => {
             const select = $(id);
+            if (!select) return;
             MUNICIPALITY_GROUPS.forEach((group) => {
                 const optgroup = document.createElement('optgroup');
                 optgroup.label = group.label;
@@ -245,52 +145,44 @@
         });
     }
 
-    /* ======================================================================
-       6. SUMMARY STATISTICS
-       ====================================================================== */
-
     function renderStats() {
         const owners = Object.values(ownerDatabase);
-        const animals = owners.flatMap((o) => o.animals);
+        const animals = owners.flatMap((o) => o.animals || []);
         const vaccinated = animals.filter((a) => a.status === 'Vaccinated').length;
 
-        $('statOwners').textContent = owners.length;
-        $('statAnimals').textContent = animals.length;
-        $('statVaccinated').textContent = vaccinated;
-        $('statAttention').textContent = animals.length - vaccinated;
+        if ($('statOwners')) $('statOwners').textContent = owners.length;
+        if ($('statAnimals')) $('statAnimals').textContent = animals.length;
+        if ($('statVaccinated')) $('statVaccinated').textContent = vaccinated;
+        if ($('statAttention')) $('statAttention').textContent = animals.length - vaccinated;
     }
 
-    /* ======================================================================
-       7. REGISTRY TABLE: FILTERING, SORTING, RENDERING
-       ====================================================================== */
-
     function matchesFilters(owner) {
-        const q = $('searchInput').value.trim().toLowerCase();
-        const muni = $('filterMunicipality').value;
-        const species = $('filterSpecies').value;
-        const vax = $('filterVaxStatus').value;
+        const q = $('searchInput') ? $('searchInput').value.trim().toLowerCase() : '';
+        const muni = $('filterMunicipality') ? $('filterMunicipality').value : '';
+        const species = $('filterSpecies') ? $('filterSpecies').value : '';
+        const vax = $('filterVaxStatus') ? $('filterVaxStatus').value : '';
 
         const searchable = [
             owner.regId, owner.lastName, owner.firstName, owner.middleInitial,
             `${owner.firstName} ${owner.lastName}`
         ].join(' ').toLowerCase();
 
+        const animals = owner.animals || [];
         return (!q || searchable.includes(q))
             && (!muni || owner.municipality === muni)
-            && (!species || owner.animals.some((a) => a.species === species))
-            && (!vax || owner.animals.some((a) => a.status === vax));
+            && (!species || animals.some((a) => a.species === species))
+            && (!vax || animals.some((a) => a.status === vax));
     }
 
     const SORT_VALUE = {
-        0: (o) => o.regId,
+        0: (o) => o.regId || '',
         1: (o) => ownerName(o).toLowerCase(),
-        2: (o) => o.municipality,
-        3: (o) => o.animals.length
+        2: (o) => o.municipality || '',
+        3: (o) => (o.animals || []).length
     };
 
     function getVisibleOwnerIds() {
         const ids = Object.keys(ownerDatabase).filter((id) => matchesFilters(ownerDatabase[id]));
-
         if (state.sortColumn !== -1) {
             const value = SORT_VALUE[state.sortColumn];
             const dir = state.sortAscending ? 1 : -1;
@@ -314,7 +206,8 @@
     function rowHTML(id) {
         const o = ownerDatabase[id];
         const name = ownerName(o);
-        const species = [...new Set(o.animals.map((a) => a.species))];
+        const animals = o.animals || [];
+        const species = [...new Set(animals.map((a) => a.species))];
         const chips = species.map((s) => `<span class="species-chip">${esc(s)}</span>`).join('');
 
         return `
@@ -331,7 +224,7 @@
                 </td>
                 <td>${esc(o.municipality)}</td>
                 <td class="col-center">
-                    <span class="badge-count">${o.animals.length} Animal(s)</span>
+                    <span class="badge-count">${animals.length} Animal(s)</span>
                     <div class="species-chips">${chips}</div>
                 </td>
                 <td class="col-center">
@@ -354,16 +247,18 @@
             const icon = btn.querySelector('i');
             const active = col === state.sortColumn;
 
-            th.setAttribute('aria-sort', active ? (state.sortAscending ? 'ascending' : 'descending') : 'none');
-
-            let iconClass = 'fa-sort';
-            if (active) iconClass = state.sortAscending ? 'fa-sort-up' : 'fa-sort-down';
-            icon.className = `fa-solid ${iconClass} sort-icon`;
+            if (th) th.setAttribute('aria-sort', active ? (state.sortAscending ? 'ascending' : 'descending') : 'none');
+            if (icon) {
+                let iconClass = 'fa-sort';
+                if (active) iconClass = state.sortAscending ? 'fa-sort-up' : 'fa-sort-down';
+                icon.className = `fa-solid ${iconClass} sort-icon`;
+            }
         });
     }
 
     function renderTable() {
         const tbody = $('registryTableBody');
+        if (!tbody) return;
         const ids = getVisibleOwnerIds();
         const total = Object.keys(ownerDatabase).length;
 
@@ -371,20 +266,31 @@
             ? ids.map(rowHTML).join('')
             : `<tr><td colspan="5" class="empty-row">
                     <i class="fa-solid fa-folder-open"></i>
-                    <span>No owner records match the current search or filters.</span>
+                    <span>No owner records found in the registry.</span>
                </td></tr>`;
 
-        $('resultCount').textContent = `Showing ${ids.length} of ${total} record(s)`;
+        if ($('resultCount')) $('resultCount').textContent = `Showing ${ids.length} of ${total} record(s)`;
         updateSortIndicators();
     }
 
-    function refreshRegistry() {
-        renderStats();
-        renderTable();
+    async function reloadFromFirestore() {
+        const tbody = $('registryTableBody');
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-row"><i class="fa-solid fa-spinner fa-spin"></i><span>Loading live records from CRIS Registry...</span></td></tr>`;
+        }
+        try {
+            ownerDatabase = await fetchAllOwners();
+            renderStats();
+            renderTable();
+        } catch (err) {
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-row error-msg"><span>Failed to load registry: ${esc(err.message)}</span></td></tr>`;
+            }
+        }
     }
 
     /* ======================================================================
-       8. OWNER FILE (VIEW MODAL) AND ANIMAL CARDS
+       6. OWNER PROFILE & ANIMAL CARDS
        ====================================================================== */
 
     function openOwnerFile(ownerId) {
@@ -392,25 +298,26 @@
         if (!o) return;
 
         state.activeOwnerId = ownerId;
-
         const photo = $('profilePhoto');
-        photo.innerHTML = o.photo
-            ? `<img src="${esc(o.photo)}" alt="Owner photo">`
-            : '<i class="fa-solid fa-user"></i>';
+        if (photo) {
+            photo.innerHTML = o.photo
+                ? `<img src="${esc(o.photo)}" alt="Owner photo">`
+                : '<i class="fa-solid fa-user"></i>';
+        }
 
-        $('profileName').textContent = ownerName(o);
-        $('profileRegId').textContent = `Registration ID: ${o.regId}`;
+        if ($('profileName')) $('profileName').textContent = ownerName(o);
+        if ($('profileRegId')) $('profileRegId').textContent = `Registration ID: ${o.regId}`;
 
-        $('viewRegId').value = o.regId;
-        $('viewContact').value = o.contact;
-        $('viewLastName').value = o.lastName;
-        $('viewFirstName').value = o.firstName;
-        $('viewMiddleInitial').value = o.middleInitial || 'N/A';
-        $('viewSuffix').value = o.suffix || 'N/A';
-        $('viewStreet').value = o.street;
-        $('viewBarangay').value = o.barangay;
-        $('viewMunicipality').value = o.municipality;
-        $('viewZipCode').value = o.zipCode;
+        if ($('viewRegId')) $('viewRegId').value = o.regId;
+        if ($('viewContact')) $('viewContact').value = o.contact;
+        if ($('viewLastName')) $('viewLastName').value = o.lastName;
+        if ($('viewFirstName')) $('viewFirstName').value = o.firstName;
+        if ($('viewMiddleInitial')) $('viewMiddleInitial').value = o.middleInitial || 'N/A';
+        if ($('viewSuffix')) $('viewSuffix').value = o.suffix || 'N/A';
+        if ($('viewStreet')) $('viewStreet').value = o.street || 'N/A';
+        if ($('viewBarangay')) $('viewBarangay').value = o.barangay;
+        if ($('viewMunicipality')) $('viewMunicipality').value = o.municipality;
+        if ($('viewZipCode')) $('viewZipCode').value = o.zipCode || '5000';
 
         renderAnimalCards(o);
         openOverlay($('ownerProfileModal'));
@@ -430,21 +337,17 @@
                     <span><i class="fa-solid fa-paw"></i> Animal ${index + 1}: ${esc(animal.name || 'Unnamed')}</span>
                     <div class="animal-card-tools no-print">
                         <span class="reg-tag">Reg ID: <strong>${esc(animal.regId)}</strong></span>
-                        <button type="button" class="btn-animal-action btn-animal-edit" data-action="edit-animal" data-index="${index}"
-                                aria-label="Edit profile of animal ${index + 1}">
-                            <i class="fa-solid fa-pen-to-square"></i> Edit Animal Profile
+                        <button type="button" class="btn-animal-action btn-animal-edit" data-action="edit-animal" data-index="${index}" aria-label="Edit profile">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit Profile
                         </button>
-                        <button type="button" class="btn-animal-action btn-animal-vax" data-action="update-vax" data-index="${index}"
-                                aria-label="Update vaccination of animal ${index + 1}">
+                        <button type="button" class="btn-animal-action btn-animal-vax" data-action="update-vax" data-index="${index}" aria-label="Update vaccination">
                             <i class="fa-solid fa-syringe"></i> Update Vaccination
                         </button>
-                        <button type="button" class="btn-delete-animal" data-action="delete-animal" data-index="${index}"
-                                aria-label="Delete animal profile ${index + 1}">
+                        <button type="button" class="btn-delete-animal" data-action="delete-animal" data-index="${index}" aria-label="Delete animal profile">
                             <i class="fa-solid fa-trash-can"></i> Delete
                         </button>
                     </div>
                 </div>
-
                 <div class="animal-detail-grid">
                     ${detail('Species', animal.species)}
                     ${detail('Breed', animal.breed)}
@@ -462,46 +365,35 @@
 
     function renderAnimalCards(owner) {
         const container = $('animalProfilesListContainer');
-        container.innerHTML = owner.animals.length
-            ? owner.animals.map(animalCardHTML).join('')
+        if (!container) return;
+        const animals = owner.animals || [];
+        container.innerHTML = animals.length
+            ? animals.map(animalCardHTML).join('')
             : '<p class="muted">No animals registered for this owner yet.</p>';
     }
 
-    // Routes the Edit Animal Profile, Update Vaccination, and Delete buttons.
     function handleAnimalAction(event) {
         const btn = event.target.closest('[data-action]');
         if (!btn) return;
-
         const index = Number(btn.dataset.index);
         switch (btn.dataset.action) {
-            case 'edit-animal':
-                openAnimalProfileModal('edit', index);
-                break;
-            case 'update-vax':
-                openVaccinationModal(index);
-                break;
-            case 'delete-animal':
-                openDeleteConfirm(index);
-                break;
-            default:
-                break;
+            case 'edit-animal': openAnimalProfileModal('edit', index); break;
+            case 'update-vax': openVaccinationModal(index); break;
+            case 'delete-animal': openDeleteConfirm(index); break;
         }
     }
 
     /* ======================================================================
-       9. ANIMAL PROFILE MODAL (ADD / EDIT ANIMAL)
+       7. ANIMAL PROFILE MODAL (ADD / EDIT)
        ====================================================================== */
 
     function openAnimalProfileModal(mode, index = -1) {
         const owner = ownerDatabase[state.activeOwnerId];
         if (!owner) return;
-
         const animal = mode === 'edit' ? owner.animals[index] : null;
-        if (mode === 'edit' && !animal) return;
 
         state.animalMode = mode;
         state.animalIndex = index;
-
         clearErrors('animalProfileForm');
         $('animalProfileForm').reset();
 
@@ -522,7 +414,7 @@
         $('apName').focus();
     }
 
-    function saveAnimalProfile(event) {
+    async function saveAnimalProfile(event) {
         event.preventDefault();
         clearErrors('animalProfileForm');
 
@@ -532,42 +424,48 @@
         const name = $('apName').value.trim();
         if (!name) {
             showFieldError('apName', 'Animal name is required.');
-            $('apName').focus();
             return;
         }
 
         const data = {
             name,
             species: $('apSpecies').value,
-            breed: $('apBreed').value.trim(),
+            breed: $('apBreed').value.trim() || 'Mixed',
             sex: $('apSex').value,
             neutered: $('apRepro').value,
             microchipId: $('apMicrochip').value.trim()
         };
 
+        const animals = [...(owner.animals || [])];
         if (state.animalMode === 'edit') {
-            const animal = owner.animals[state.animalIndex];
-            if (!animal) return;
-            Object.assign(animal, data);
-            showToast('Animal profile updated.');
+            Object.assign(animals[state.animalIndex], data);
         } else {
-            owner.animals.push({
+            animals.push({
                 regId: nextAnimalRegId(owner),
                 ...data,
-                breed: data.breed || 'Mixed',
                 status: 'Unvaccinated',
                 lastVax: 'N/A'
             });
-            showToast('Animal profile added.');
         }
 
-        closeOverlay($('animalProfileModal'));
-        renderAnimalCards(owner);
-        refreshRegistry();
+        try {
+            $('saveAnimalBtn').disabled = true;
+            await updateOwnerAnimals(state.activeOwnerId, animals);
+            owner.animals = animals;
+            closeOverlay($('animalProfileModal'));
+            renderAnimalCards(owner);
+            renderStats();
+            renderTable();
+            showToast(state.animalMode === 'edit' ? 'Animal profile updated.' : 'Animal profile added.');
+        } catch (err) {
+            showToast(`Save failed: ${err.message}`);
+        } finally {
+            $('saveAnimalBtn').disabled = false;
+        }
     }
 
     /* ======================================================================
-       10. UPDATE VACCINATION MODAL
+       8. VACCINATION & DELETE MODALS
        ====================================================================== */
 
     function openVaccinationModal(index) {
@@ -583,10 +481,9 @@
         $('vaxDate').value = hasDate(animal.lastVax) ? animal.lastVax : '';
 
         openOverlay($('vaccinationModal'));
-        $('vaxStatus').focus();
     }
 
-    function saveVaccination(event) {
+    async function saveVaccination(event) {
         event.preventDefault();
         clearErrors('vaccinationForm');
 
@@ -598,23 +495,29 @@
         const date = $('vaxDate').value;
 
         if (status === 'Vaccinated' && !date) {
-            showFieldError('vaxDate', 'Enter the date of the latest vaccination.');
-            $('vaxDate').focus();
+            showFieldError('vaxDate', 'Enter the date of vaccination.');
             return;
         }
 
-        animal.status = status;
-        animal.lastVax = date || 'N/A';
+        const animals = [...owner.animals];
+        animals[state.vaxIndex].status = status;
+        animals[state.vaxIndex].lastVax = date || 'N/A';
 
-        closeOverlay($('vaccinationModal'));
-        renderAnimalCards(owner);
-        refreshRegistry();
-        showToast('Vaccination record updated.');
+        try {
+            $('saveVaxBtn').disabled = true;
+            await updateOwnerAnimals(state.activeOwnerId, animals);
+            owner.animals = animals;
+            closeOverlay($('vaccinationModal'));
+            renderAnimalCards(owner);
+            renderStats();
+            renderTable();
+            showToast('Vaccination updated.');
+        } catch (err) {
+            showToast(`Update failed: ${err.message}`);
+        } finally {
+            $('saveVaxBtn').disabled = false;
+        }
     }
-
-    /* ======================================================================
-       11. DELETE CONFIRMATION
-       ====================================================================== */
 
     function openDeleteConfirm(index) {
         const owner = ownerDatabase[state.activeOwnerId];
@@ -622,36 +525,39 @@
         if (!animal) return;
 
         state.deleteIndex = index;
-
-        const label = animal.name || `Animal ${index + 1}`;
-        $('confirmDeleteText').innerHTML =
-            `Are you sure you want to delete <strong>${esc(label)}</strong> (Reg ID: ${esc(animal.regId)}) from this owner's file?`;
-
+        $('confirmDeleteText').innerHTML = `Are you sure you want to delete <strong>${esc(animal.name)}</strong> (${esc(animal.regId)})?`;
         openOverlay($('confirmDeleteModal'));
-        $('cancelDeleteBtn').focus();
     }
 
-    function confirmDeleteAnimal() {
+    async function confirmDeleteAnimal() {
         const owner = ownerDatabase[state.activeOwnerId];
-        const index = state.deleteIndex;
-        const animal = owner && owner.animals[index];
+        if (!owner) return;
 
-        closeOverlay($('confirmDeleteModal'));
-        if (!animal) return;
+        const animals = [...owner.animals];
+        animals.splice(state.deleteIndex, 1);
 
-        owner.animals.splice(index, 1);
-        renderAnimalCards(owner);
-        refreshRegistry();
-        showToast('Animal profile deleted.');
+        try {
+            $('confirmDeleteBtn').disabled = true;
+            await updateOwnerAnimals(state.activeOwnerId, animals);
+            owner.animals = animals;
+            closeOverlay($('confirmDeleteModal'));
+            renderAnimalCards(owner);
+            renderStats();
+            renderTable();
+            showToast('Animal profile deleted.');
+        } catch (err) {
+            showToast(`Delete failed: ${err.message}`);
+        } finally {
+            $('confirmDeleteBtn').disabled = false;
+        }
     }
 
     /* ======================================================================
-       12. OWNER FORM (ADD / EDIT) AND VALIDATION
+       9. OWNER REGISTRATION / EDIT MODAL
        ====================================================================== */
 
     function setPhotoPreview(src) {
         state.formPhoto = src || '';
-
         const img = $('photoImg');
         const placeholder = $('photoPlaceholder');
 
@@ -695,8 +601,8 @@
         $('contactNumber').value = o.contact;
         $('lastName').value = o.lastName;
         $('firstName').value = o.firstName;
-        $('middleInitial').value = o.middleInitial;
-        $('suffix').value = o.suffix;
+        $('middleInitial').value = o.middleInitial || '';
+        $('suffix').value = o.suffix || '';
         $('municipality').value = o.municipality;
         $('barangay').value = o.barangay;
 
@@ -705,7 +611,7 @@
         $('contactNumber').focus();
     }
 
-    function handleFormSubmit(event) {
+    async function handleFormSubmit(event) {
         event.preventDefault();
         clearErrors('ownerRegistrationForm');
 
@@ -721,16 +627,11 @@
         const barangay = $('barangay').value.trim();
 
         let valid = true;
-        const fail = (id, message) => {
-            showFieldError(id, message);
-            valid = false;
-        };
+        const fail = (id, message) => { showFieldError(id, message); valid = false; };
 
-        if (!contact) fail('contactNumber', 'Contact number is required.');
-        else if (!PH_MOBILE_PATTERN.test(contact)) fail('contactNumber', 'Use the format 09XX-XXX-XXXX.');
+        if (!contact || !PH_MOBILE_PATTERN.test(contact)) fail('contactNumber', 'Use format 09XX-XXX-XXXX.');
         if (!lastName) fail('lastName', 'Last name is required.');
         if (!firstName) fail('firstName', 'First name is required.');
-        if (middleInitial.length > 3) fail('middleInitial', 'Maximum of 3 characters.');
         if (!municipality) fail('municipality', 'Select a municipality.');
         if (!barangay) fail('barangay', 'Barangay is required.');
 
@@ -739,146 +640,116 @@
             animal = {
                 name: $('animalName').value.trim(),
                 species: $('species').value,
-                breed: $('breed').value.trim(),
+                breed: $('breed').value.trim() || 'Mixed',
                 sex: $('sex').value,
                 neutered: $('neutered').value,
                 status: $('vaccinationStatus').value,
                 lastVax: $('lastVaxDate').value || 'N/A',
                 microchipId: $('microchipId').value.trim()
             };
-
             if (!animal.name) fail('animalName', 'Animal name is required.');
         }
 
-        if (!valid) {
-            const firstError = document.querySelector('#ownerRegistrationForm .input-error');
-            if (firstError) firstError.focus();
-            return;
-        }
+        if (!valid) return;
 
-        if (isEditing) {
-            const o = ownerDatabase[editingId];
-            if (o) {
-                Object.assign(o, {
+        try {
+            $('saveRecordSubmitBtn').disabled = true;
+            if (isEditing) {
+                const updatedFields = {
                     contact, lastName, firstName, middleInitial, suffix,
                     municipality, barangay, photo: state.formPhoto
-                });
+                };
+                await updateOwner(editingId, updatedFields);
+                Object.assign(ownerDatabase[editingId], updatedFields);
+                showToast('Owner record updated.');
+            } else {
+                const regId = $('regId').value;
+                const newRecord = {
+                    regId,
+                    lastName,
+                    firstName,
+                    middleInitial,
+                    suffix,
+                    contact,
+                    street: 'N/A',
+                    barangay,
+                    municipality,
+                    zipCode: '5000',
+                    photo: state.formPhoto,
+                    animals: [{
+                        regId: `${regId}-A1`,
+                        ...animal
+                    }]
+                };
+                const saved = await saveNewOwner(newRecord);
+                ownerDatabase[saved.id] = saved;
+                showToast('Owner registered successfully.');
             }
-            showToast('Owner record updated.');
-        } else {
-            const key = nextOwnerKey();
-            const regId = $('regId').value;
-
-            ownerDatabase[key] = {
-                regId,
-                lastName,
-                firstName,
-                middleInitial,
-                suffix,
-                contact,
-                street: 'N/A',
-                barangay,
-                municipality,
-                zipCode: '5000',
-                photo: state.formPhoto,
-                animals: [{
-                    regId: `${regId}-A1`,
-                    name: animal.name,
-                    species: animal.species,
-                    breed: animal.breed || 'Mixed',
-                    sex: animal.sex,
-                    neutered: animal.neutered,
-                    status: animal.status,
-                    lastVax: animal.lastVax,
-                    microchipId: animal.microchipId
-                }]
-            };
-            showToast('Owner registered successfully.');
+            closeOverlay($('addOwnerModal'));
+            renderStats();
+            renderTable();
+        } catch (err) {
+            showToast(`Error: ${err.message}`);
+        } finally {
+            $('saveRecordSubmitBtn').disabled = false;
         }
-
-        closeOverlay($('addOwnerModal'));
-        refreshRegistry();
     }
 
     /* ======================================================================
-       13. PHOTO UPLOAD AND CAMERA CAPTURE
+       10. PHOTO UPLOAD & CAMERA
        ====================================================================== */
 
     function handlePhotoFile(file) {
         if (!file) return;
-
         if (!file.type.startsWith('image/')) {
             showToast('Please choose an image file.');
             return;
         }
         if (file.size > MAX_PHOTO_BYTES) {
-            showToast('The image must be 5 MB or smaller.');
+            showToast('Image must be under 5MB.');
             return;
         }
-
         const reader = new FileReader();
         reader.onload = () => setPhotoPreview(reader.result);
         reader.readAsDataURL(file);
     }
 
     async function openCamera() {
-        const errorEl = $('cameraError');
-        errorEl.textContent = '';
         openOverlay($('cameraModal'));
-
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            errorEl.textContent = 'This browser cannot access a camera here. Use Upload to add a photo instead.';
-            return;
-        }
-
         try {
-            state.cameraStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'user' },
-                audio: false
-            });
-            const video = $('cameraVideo');
-            video.srcObject = state.cameraStream;
-            await video.play();
+            state.cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            $('cameraVideo').srcObject = state.cameraStream;
         } catch (err) {
-            stopCamera();
-            errorEl.textContent = 'Camera access was denied or no camera was found. Use Upload to add a photo instead.';
+            $('cameraError').textContent = 'Camera unavailable or permission denied.';
         }
     }
 
     function captureCamera() {
         const video = $('cameraVideo');
-        if (!state.cameraStream || !video.videoWidth) {
-            showToast('The camera is not ready yet.');
-            return;
-        }
-
+        if (!video.videoWidth) return;
         const canvas = $('cameraCanvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        setPhotoPreview(canvas.toDataURL('image/jpeg', 0.92));
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        setPhotoPreview(canvas.toDataURL('image/jpeg', 0.9));
         closeOverlay($('cameraModal'));
-        showToast('Photo captured.');
     }
 
     function stopCamera() {
         if (state.cameraStream) {
-            state.cameraStream.getTracks().forEach((track) => track.stop());
+            state.cameraStream.getTracks().forEach(t => t.stop());
             state.cameraStream = null;
         }
-        const video = $('cameraVideo');
-        if (video) video.srcObject = null;
     }
 
     /* ======================================================================
-       14. EXPORT (EXCEL) AND PRINT
+       11. EXCEL EXPORT
        ====================================================================== */
 
     function exportExcel() {
         const ids = getVisibleOwnerIds();
         if (!ids.length) {
-            showToast('There are no records to export.');
+            showToast('No records to export.');
             return;
         }
 
@@ -896,69 +767,36 @@
                 o.regId, o.lastName, o.firstName, o.middleInitial, o.suffix,
                 o.contact, REGION_LABEL, PROVINCE_LABEL, o.municipality, o.barangay
             ];
-
-            if (!o.animals.length) {
-                rows.push([...base, '', '', '', '', '', '', '', '', '']);
-            }
-            o.animals.forEach((a) => {
-                rows.push([
-                    ...base, a.regId, a.name, a.species, a.breed, a.sex,
-                    a.neutered, a.status, a.lastVax, a.microchipId
-                ]);
+            const animals = o.animals || [];
+            if (!animals.length) rows.push([...base, '', '', '', '', '', '', '', '', '']);
+            animals.forEach(a => {
+                rows.push([...base, a.regId, a.name, a.species, a.breed, a.sex, a.neutered, a.status, a.lastVax, a.microchipId]);
             });
         });
 
-        const table = `
-            <table>
-                <thead><tr>${headers.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead>
-                <tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody>
-            </table>`;
-
-        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
-                xmlns:x="urn:schemas-microsoft-com:office:excel"
-                xmlns="http://www.w3.org/TR/REC-html40">
-            <head><meta charset="UTF-8">
-            <style>th { font-weight: bold; background: #FFE3B3; }</style>
-            </head><body>${table}</body></html>`;
-
-        const blob = new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+        const table = `<table><thead><tr>${headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+        const blob = new Blob(['\ufeff', table], { type: 'application/vnd.ms-excel;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `PVO_Animal_Registry_${new Date().toISOString().slice(0, 10)}.xls`;
+        link.download = `Animal_Registry_${new Date().toISOString().slice(0, 10)}.xls`;
         document.body.appendChild(link);
         link.click();
         link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 0);
-
         showToast(`Exported ${ids.length} record(s).`);
     }
 
-    function printRegistry() {
-        $('printDate').textContent = new Date().toLocaleString();
-        window.print();
-    }
-
-    // Prints only the open owner file (the Print button in its header).
-    function printOwnerFile() {
-        if (!state.activeOwnerId) return;
-        $('ownerPrintDate').textContent = new Date().toLocaleString();
-        document.body.classList.add('print-owner-file');
-        window.print();
-    }
-
     /* ======================================================================
-       15. EVENT WIRING
+       12. EVENT BINDINGS & INIT
        ====================================================================== */
 
     function bindEvents() {
-        // Search, filters, and sorting
-        $('searchInput').addEventListener('input', renderTable);
-        ['filterMunicipality', 'filterSpecies', 'filterVaxStatus'].forEach((id) => {
-            $(id).addEventListener('change', renderTable);
+        $('searchInput')?.addEventListener('input', renderTable);
+        ['filterMunicipality', 'filterSpecies', 'filterVaxStatus'].forEach(id => {
+            $(id)?.addEventListener('change', renderTable);
         });
 
-        $('clearFiltersBtn').addEventListener('click', () => {
+        $('clearFiltersBtn')?.addEventListener('click', () => {
             $('searchInput').value = '';
             $('filterMunicipality').value = '';
             $('filterSpecies').value = '';
@@ -966,115 +804,83 @@
             renderTable();
         });
 
-        document.querySelector('.data-table thead').addEventListener('click', (e) => {
+        document.querySelector('.data-table thead')?.addEventListener('click', (e) => {
             const btn = e.target.closest('.sort-btn');
             if (!btn) return;
-
             const col = Number(btn.dataset.sort);
-            if (state.sortColumn === col) {
-                state.sortAscending = !state.sortAscending;
-            } else {
-                state.sortColumn = col;
-                state.sortAscending = true;
-            }
+            if (state.sortColumn === col) state.sortAscending = !state.sortAscending;
+            else { state.sortColumn = col; state.sortAscending = true; }
             renderTable();
         });
 
-        // Table row actions
-        $('registryTableBody').addEventListener('click', (e) => {
+        $('registryTableBody')?.addEventListener('click', (e) => {
             const btn = e.target.closest('[data-action]');
             if (!btn) return;
-
             if (btn.dataset.action === 'view') openOwnerFile(btn.dataset.id);
             if (btn.dataset.action === 'edit') openEditOwnerModal(btn.dataset.id);
         });
 
-        // Toolbar actions
-        $('openAddOwnerModal').addEventListener('click', openAddOwnerModal);
-        $('exportExcel').addEventListener('click', exportExcel);
-        $('printRegistry').addEventListener('click', printRegistry);
+        $('openAddOwnerModal')?.addEventListener('click', openAddOwnerModal);
+        $('exportExcel')?.addEventListener('click', exportExcel);
+        $('printRegistry')?.addEventListener('click', () => {
+            if ($('printDate')) $('printDate').textContent = new Date().toLocaleString();
+            window.print();
+        });
 
-        // Owner file modal
-        $('closeProfileModalBtn').addEventListener('click', () => closeOverlay($('ownerProfileModal')));
-        $('cancelProfileModalBtn').addEventListener('click', () => closeOverlay($('ownerProfileModal')));
-        $('printOwnerFileBtn').addEventListener('click', printOwnerFile);
-        $('switchToEditFromViewBtn').addEventListener('click', () => {
+        $('closeProfileModalBtn')?.addEventListener('click', () => closeOverlay($('ownerProfileModal')));
+        $('cancelProfileModalBtn')?.addEventListener('click', () => closeOverlay($('ownerProfileModal')));
+        $('printOwnerFileBtn')?.addEventListener('click', () => {
+            if ($('ownerPrintDate')) $('ownerPrintDate').textContent = new Date().toLocaleString();
+            document.body.classList.add('print-owner-file');
+            window.print();
+        });
+
+        $('switchToEditFromViewBtn')?.addEventListener('click', () => {
             const id = state.activeOwnerId;
             closeOverlay($('ownerProfileModal'));
             if (id) openEditOwnerModal(id);
         });
-        $('addAnimalProfileFieldBtn').addEventListener('click', () => openAnimalProfileModal('add'));
-        $('animalProfilesListContainer').addEventListener('click', handleAnimalAction);
 
-        // Animal profile modal
-        $('closeAnimalModalBtn').addEventListener('click', () => closeOverlay($('animalProfileModal')));
-        $('cancelAnimalModalBtn').addEventListener('click', () => closeOverlay($('animalProfileModal')));
-        $('animalProfileForm').addEventListener('submit', saveAnimalProfile);
+        $('addAnimalProfileFieldBtn')?.addEventListener('click', () => openAnimalProfileModal('add'));
+        $('animalProfilesListContainer')?.addEventListener('click', handleAnimalAction);
 
-        // Update vaccination modal
-        $('closeVaxModalBtn').addEventListener('click', () => closeOverlay($('vaccinationModal')));
-        $('cancelVaxModalBtn').addEventListener('click', () => closeOverlay($('vaccinationModal')));
-        $('vaccinationForm').addEventListener('submit', saveVaccination);
+        $('closeAnimalModalBtn')?.addEventListener('click', () => closeOverlay($('animalProfileModal')));
+        $('cancelAnimalModalBtn')?.addEventListener('click', () => closeOverlay($('animalProfileModal')));
+        $('animalProfileForm')?.addEventListener('submit', saveAnimalProfile);
 
-        // Delete confirmation
-        $('cancelDeleteBtn').addEventListener('click', () => closeOverlay($('confirmDeleteModal')));
-        $('confirmDeleteBtn').addEventListener('click', confirmDeleteAnimal);
+        $('closeVaxModalBtn')?.addEventListener('click', () => closeOverlay($('vaccinationModal')));
+        $('cancelVaxModalBtn')?.addEventListener('click', () => closeOverlay($('vaccinationModal')));
+        $('vaccinationForm')?.addEventListener('submit', saveVaccination);
 
-        // Add / edit owner form
-        $('closeAddModalBtn').addEventListener('click', () => closeOverlay($('addOwnerModal')));
-        $('cancelAddModalBtn').addEventListener('click', () => closeOverlay($('addOwnerModal')));
-        $('ownerRegistrationForm').addEventListener('submit', handleFormSubmit);
+        $('cancelDeleteBtn')?.addEventListener('click', () => closeOverlay($('confirmDeleteModal')));
+        $('confirmDeleteBtn')?.addEventListener('click', confirmDeleteAnimal);
 
-        // Photo controls
-        $('uploadPhotoBtn').addEventListener('click', () => $('ownerPhotoInput').click());
-        $('ownerPhotoInput').addEventListener('change', (e) => {
+        $('closeAddModalBtn')?.addEventListener('click', () => closeOverlay($('addOwnerModal')));
+        $('cancelAddModalBtn')?.addEventListener('click', () => closeOverlay($('addOwnerModal')));
+        $('ownerRegistrationForm')?.addEventListener('submit', handleFormSubmit);
+
+        $('uploadPhotoBtn')?.addEventListener('click', () => $('ownerPhotoInput').click());
+        $('ownerPhotoInput')?.addEventListener('change', (e) => {
             handlePhotoFile(e.target.files[0]);
             e.target.value = '';
         });
-        $('removePhotoBtn').addEventListener('click', () => setPhotoPreview(''));
-        $('openCameraBtn').addEventListener('click', openCamera);
-        $('captureBtn').addEventListener('click', captureCamera);
-        $('cancelCameraBtn').addEventListener('click', () => closeOverlay($('cameraModal')));
-        $('closeCameraBtn').addEventListener('click', () => closeOverlay($('cameraModal')));
+        $('removePhotoBtn')?.addEventListener('click', () => setPhotoPreview(''));
+        $('openCameraBtn')?.addEventListener('click', openCamera);
+        $('captureBtn')?.addEventListener('click', captureCamera);
+        $('cancelCameraBtn')?.addEventListener('click', () => closeOverlay($('cameraModal')));
+        $('closeCameraBtn')?.addEventListener('click', () => closeOverlay($('cameraModal')));
 
-        // Backdrop click closes the modal
-        document.querySelectorAll('.modal-overlay').forEach((overlay) => {
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) closeOverlay(overlay);
-            });
+        document.querySelectorAll('.modal-overlay').forEach(o => {
+            o.addEventListener('click', (e) => { if (e.target === o) closeOverlay(o); });
         });
 
-        // Escape closes the topmost modal
-        document.addEventListener('keydown', (e) => {
-            if (e.key !== 'Escape') return;
-            const stack = [
-                'confirmDeleteModal', 'cameraModal', 'vaccinationModal',
-                'animalProfileModal', 'addOwnerModal', 'ownerProfileModal'
-            ];
-            const top = stack.map((id) => $(id)).find((el) => el.classList.contains('active'));
-            if (top) closeOverlay(top);
-        });
-
-        // Clear the owner-file print mode after printing
-        window.addEventListener('afterprint', () => {
-            document.body.classList.remove('print-owner-file');
-        });
-
-        // Logout
-        $('logout-btn').addEventListener('click', () => {
-            window.location.href = 'pvo-login.html';
-        });
+        window.addEventListener('afterprint', () => document.body.classList.remove('print-owner-file'));
     }
 
-    /* ======================================================================
-       16. INITIALIZATION
-       ====================================================================== */
-
     document.addEventListener('DOMContentLoaded', () => {
-        initSidebar();
         populateMunicipalities();
         bindEvents();
         setPhotoPreview('');
-        refreshRegistry();
+        reloadFromFirestore();
     });
 })();
