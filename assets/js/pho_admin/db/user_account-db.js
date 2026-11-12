@@ -24,7 +24,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 
-const PHO_USERS_COLLECTION = "users";
+const PHO_USERS_COLLECTION = "pho-users";
 
 /**
  * Real-time listener for all PHO user records (Active, Inactive, Pending).

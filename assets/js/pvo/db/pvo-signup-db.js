@@ -44,7 +44,7 @@ export async function registerPvoPersonnel(profileData, password) {
     };
 
     // 3. Write directly to master users collection
-    await setDoc(doc(db, "users", user.uid), payload);
+    await setDoc(doc(db, "pvo-users", user.uid), payload);
 
     return payload;
 }

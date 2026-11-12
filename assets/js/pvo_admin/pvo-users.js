@@ -23,23 +23,6 @@
     const CURRENT_ADMIN = 'System Administrator (Super Admin)';
 
     // PVO personnel accounts. Status: 'Active', 'Pending', or 'Inactive'.
-    const users = [
-        { id: 'U-001', name: 'Alex Morgan',        role: 'Provincial Veterinarian', status: 'Active',   registered: '2026-01-15' },
-        { id: 'U-002', name: 'Jamie Reyes',        role: 'Veterinary Technician',   status: 'Active',   registered: '2026-02-10' },
-        { id: 'U-003', name: 'Sam Lee',            role: 'Data Encoder',            status: 'Active',   registered: '2026-03-04' },
-        { id: 'U-004', name: 'Taylor Cruz',        role: 'Field Officer',           status: 'Inactive', registered: '2026-05-20' },
-        { id: 'U-005', name: 'Morgan Villanueva',  role: 'Field Officer',           status: 'Pending',  registered: '2026-10-14' },
-        { id: 'U-006', name: 'Riley Santos',       role: 'Data Encoder',            status: 'Pending',  registered: '2026-10-17' }
-    ];
-
-    const audit = [
-        { id: 'A-005', timestamp: '2026-10-17 15:20', action: 'Account Created',   affected: 'Riley Santos (U-006)',  performedBy: CURRENT_ADMIN, details: 'Role assigned: Data Encoder' },
-        { id: 'A-004', timestamp: '2026-10-16 10:02', action: 'Role Changed',      affected: 'Sam Lee (U-003)',       performedBy: CURRENT_ADMIN, details: 'Field Officer → Data Encoder' },
-        { id: 'A-003', timestamp: '2026-10-14 09:44', action: 'Account Deactivated', affected: 'Taylor Cruz (U-004)', performedBy: CURRENT_ADMIN, details: 'Status changed from Active to Inactive' },
-        { id: 'A-002', timestamp: '2026-10-10 13:31', action: 'Account Created',   affected: 'Morgan Villanueva (U-005)', performedBy: CURRENT_ADMIN, details: 'Role assigned: Field Officer' },
-        { id: 'A-001', timestamp: '2026-01-15 08:00', action: 'Account Approved',  affected: 'Alex Morgan (U-001)',   performedBy: CURRENT_ADMIN, details: 'Status changed from Pending to Active' }
-    ];
-
     /* ======================================================================
        2. HELPERS
        ====================================================================== */

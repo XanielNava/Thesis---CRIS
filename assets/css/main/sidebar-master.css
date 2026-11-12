@@ -9,8 +9,6 @@
     --sidebar-border: rgba(255, 255, 255, 0.08);
 }
 
-/* Scoped to the sidebar so these generic names don't override the page's own
-   --text-muted / --text-light / --sunset-* values (this file loads last). */
 .sidebar {
     --text-light: #ffffff;
     --text-muted: #94a3b8;
@@ -19,10 +17,9 @@
 }
 
 /* ==========================================================================
-   LAYOUT CONTAINERS & TRANSITION LOCKSTEP (FIXES LEFT GAP & TWITCH)
+   LAYOUT CONTAINERS & TRANSITION LOCKSTEP
    ========================================================================== */
 
-/* PHO Admin Grid Layout */
 #appLayout {
     display: grid;
     grid-template-columns: var(--sidebar-width) 1fr;
@@ -35,7 +32,6 @@
     grid-template-columns: var(--sidebar-collapsed-width) 1fr !important;
 }
 
-/* ABTC Flex Container */
 .container {
     display: flex !important;
     width: 100% !important;
@@ -44,10 +40,6 @@
     overflow-x: hidden;
 }
 
-/* Main Content Area:
-   - margin-left: 0 !important eliminates legacy fixed offsets (e.g. 280px)
-   - min-width: 0 !important prevents child grid/flex elements from overflowing
-   - padding gives clean spacing from the sidebar */
 .main-content {
     flex: 1 1 0% !important;
     min-width: 0 !important;
@@ -60,28 +52,18 @@
     will-change: opacity, transform;
 }
 
-/* Snug padding when the sidebar is in collapsed mode */
-.container.collapsed .main-content,
+.container.sidebar-collapsed .main-content,
 #appLayout.sidebar-collapsed .main-content {
     padding-left: 32px !important;
 }
 
 @keyframes pageContentEnter {
-    from {
-        opacity: 0;
-        transform: translateY(3px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* Accessibility: Disable entry animation for users with reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
-    .main-content {
-        animation: none !important;
-    }
+    .main-content { animation: none !important; }
 }
 
 /* ==========================================================================
@@ -150,9 +132,6 @@
 }
 
 .sidebar.collapsed .brand-info {
-    opacity: 0;
-    pointer-events: none;
-    width: 0;
     display: none;
 }
 
@@ -246,7 +225,8 @@
     overflow: hidden;
 }
 
-.sidebar.collapsed .nav-label {
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .nav-text {
     display: none;
 }
 
@@ -294,10 +274,6 @@
     padding: 10px 0;
 }
 
-.sidebar.collapsed .nav-text {
-    display: none;
-}
-
 .nav-item.active {
     color: var(--text-light);
     background: rgba(234, 97, 19, 0.12);
@@ -333,69 +309,10 @@
     background: rgba(239, 68, 68, 0.1);
 }
 
-.logout-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-.logout-modal-content {
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    width: 320px;
-    max-width: calc(100% - 40px);
-    text-align: center;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-}
-
-.logout-modal-content h3 {
-    margin-top: 0;
-    color: #412110;
-}
-
-.logout-modal-content p {
-    color: #666;
-    margin-bottom: 25px;
-}
-
-.logout-modal-actions {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-}
-
-.logout-modal-actions button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.logout-no {
-    background: #eee;
-    color: #333;
-}
-
-.logout-yes {
-    background: #EA6113;
-    color: white;
-}
-
-.logout-modal-actions button:hover {
-    opacity: 0.85;
-}
-
 /* ==========================================================================
-   ZERO-FLICKER PRE-COLLAPSE LOCK (removed by sidebar.js after first paint)
+   ZERO-FLICKER PRE-COLLAPSE LOCK
    ========================================================================== */
 
-/* Block transitions until first paint is complete */
 html:not(.sidebar-ready) .sidebar,
 html:not(.sidebar-ready) .sidebar *,
 html:not(.sidebar-ready) #appLayout,
@@ -440,9 +357,11 @@ html.sidebar-pre-collapsed .sidebar .chevron-icon {
     min-width: 294px;
     flex-shrink: 0;
 }
+
 /* ==========================================================================
    UNIVERSAL LOGOUT CONFIRMATION MODAL
    ========================================================================== */
+
 #logoutConfirmModal {
     position: fixed;
     inset: 0;

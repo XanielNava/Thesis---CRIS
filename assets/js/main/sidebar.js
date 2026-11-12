@@ -7,42 +7,53 @@
     function initSidebar() {
         const sidebar = document.getElementById('sidebar');
         const toggle = document.getElementById('sidebarToggle');
+        const layout = document.getElementById('appLayout') || document.querySelector('.container');
         if (!sidebar || !toggle) return;
 
-        // Apply saved collapse state
-        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-        sidebar.classList.toggle('collapsed', isCollapsed);
-        toggle.setAttribute('aria-expanded', String(!isCollapsed));
+        const applyState = (collapsed) => {
+            sidebar.classList.toggle('collapsed', collapsed);
+            if (layout) layout.classList.toggle('sidebar-collapsed', collapsed);
+            toggle.setAttribute('aria-expanded', String(!collapsed));
+        };
 
-        // Enable transitions only after layout settles (prevents initial load flashing)
+        // Apply saved collapse state immediately
+        applyState(localStorage.getItem('sidebarCollapsed') === 'true');
+
+        // Unlock CSS transitions on <html> after initial paint settles
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                sidebar.classList.add('sidebar-ready');
+                document.documentElement.classList.add('sidebar-ready');
                 document.documentElement.classList.remove('sidebar-pre-collapsed');
             });
         });
 
         toggle.addEventListener('click', () => {
             const willCollapse = !sidebar.classList.contains('collapsed');
-            sidebar.classList.toggle('collapsed', willCollapse);
-            toggle.setAttribute('aria-expanded', String(!willCollapse));
+            applyState(willCollapse);
             localStorage.setItem('sidebarCollapsed', String(willCollapse));
 
-            // Inform Leaflet maps or Chart.js to resize smoothly
-            window.dispatchEvent(new Event('resize'));
+            // Allow Leaflet maps / Chart.js canvases to recalculate dimensions after transition
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 310);
         });
     }
 
     /* ==========================================================================
        2. UNIFIED LOGOUT MODAL ENGINE
        ========================================================================== */
+    function resolveLoginRedirect() {
+        const path = window.location.pathname.toLowerCase();
+        if (path.includes('/pho/')) return 'pho-login.html';
+        if (path.includes('/abtc/')) return 'abtc-login.html';
+        return 'pvo-login.html';
+    }
+
     function ensureLogoutModalDOM() {
         if (document.getElementById('logoutConfirmModal')) return;
 
         const modalHTML = `
-            <div class="modal-overlay modal-top" id="logoutConfirmModal" role="alertdialog" aria-modal="true" aria-hidden="true">
-                <div class="modal-container modal-sm logout-modal-box">
-                    <div class="modal-body confirm-body">
+            <div id="logoutConfirmModal" role="alertdialog" aria-modal="true" aria-hidden="true">
+                <div class="logout-modal-box">
+                    <div class="confirm-body">
                         <div class="logout-icon-bubble">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i>
                         </div>
@@ -104,16 +115,14 @@
             confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing out...';
 
             try {
-                // Dynamically import Firebase Auth only when signing out
                 const { auth } = await import('../firebase/firebase-config.js');
                 const { signOut } = await import('https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js');
                 await signOut(auth);
             } catch (err) {
                 console.warn('Firebase signout skipped or failed:', err);
             } finally {
-                localStorage.removeItem('sidebarCollapsed');
                 sessionStorage.clear();
-                window.location.href = 'pvo-login.html';
+                window.location.href = resolveLoginRedirect();
             }
         });
     }

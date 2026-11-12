@@ -30,7 +30,7 @@ export async function authenticatePhoPersonnel(email, password, selectedDesignat
         const user = userCredential.user;
 
         // 2. Fetch User Profile from 'pho-users'
-        const userDocRef = doc(db, "users", user.uid);
+        const userDocRef = doc(db, "pho-users", user.uid);
         const userDocSnap = await getDoc(userDocRef);
 
         if (!userDocSnap.exists()) {
