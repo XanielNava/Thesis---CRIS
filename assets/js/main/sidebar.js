@@ -42,12 +42,18 @@
        ========================================================================== */
     function resolveLoginRedirect() {
         const path = window.location.pathname.toLowerCase();
-        if (path.includes('/pho/')) return 'pho-login.html';
-        if (path.includes('/abtc/')) return 'abtc-login.html';
-        return 'pvo-login.html';
+        if (path.includes('/pho/')) return '../../../src/pho/pho-login.html';
+        if (path.includes('/pvo/')) return '../../../src/pvo/pvo-login.html';
+        if (path.includes('/abtc/')) return '../../../src/abtc/abtc-login.html';
+        if (path.includes('/lgu/')) return '../../../src/lgu/lgu-login.html';
+        return '../../../index.html';
     }
 
     function ensureLogoutModalDOM() {
+        // Remove any leftover legacy hardcoded #logoutModal from older HTML templates
+        const legacyModal = document.getElementById('logoutModal');
+        if (legacyModal) legacyModal.remove();
+
         if (document.getElementById('logoutConfirmModal')) return;
 
         const modalHTML = `
@@ -75,12 +81,22 @@
     function initLogoutFlow() {
         ensureLogoutModalDOM();
 
-        const logoutBtn = document.getElementById('logout-btn');
+        const rawLogoutBtn = document.getElementById('logout-btn')
+            || document.getElementById('logoutBtn')
+            || document.querySelector('.logout-item');
         const modal = document.getElementById('logoutConfirmModal');
         const cancelBtn = document.getElementById('cancelLogoutBtn');
         const confirmBtn = document.getElementById('confirmLogoutBtn');
 
-        if (!logoutBtn || !modal) return;
+        if (!rawLogoutBtn || !modal) return;
+
+        // Standardize ID and remove inline onclick attributes
+        rawLogoutBtn.id = 'logout-btn';
+        rawLogoutBtn.removeAttribute('onclick');
+
+        // Clone node to wipe any previously attached listeners
+        const logoutBtn = rawLogoutBtn.cloneNode(true);
+        rawLogoutBtn.parentNode.replaceChild(logoutBtn, rawLogoutBtn);
 
         const openModal = () => {
             modal.classList.add('active');
@@ -93,10 +109,14 @@
             modal.setAttribute('aria-hidden', 'true');
         };
 
+        // Use capture phase (true) + stopImmediatePropagation() so deferred module scripts
+        // (like abtc-dash.js) can NEVER fire a native confirm() or alert() on this button
         logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
             openModal();
-        });
+        }, true);
 
         cancelBtn?.addEventListener('click', closeModal);
 
@@ -121,7 +141,13 @@
             } catch (err) {
                 console.warn('Firebase signout skipped or failed:', err);
             } finally {
+                // Clear user session keys while preserving UI sidebarCollapsed preference
+                const sidebarPref = localStorage.getItem('sidebarCollapsed');
                 sessionStorage.clear();
+                localStorage.clear();
+                if (sidebarPref !== null) {
+                    localStorage.setItem('sidebarCollapsed', sidebarPref);
+                }
                 window.location.href = resolveLoginRedirect();
             }
         });

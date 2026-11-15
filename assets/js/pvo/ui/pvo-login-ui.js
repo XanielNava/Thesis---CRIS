@@ -1,9 +1,9 @@
 // ==========================================================================
-// CRIS PHO MODULE - LOGIN UI CONTROLLER (pho-login.js)
+// CRIS PVO MODULE - LOGIN UI CONTROLLER (pvo-login-ui.js)
 // Handles DOM interactions, input capture, visual states, and redirection
 // ==========================================================================
 
-import { authenticatePhoPersonnel } from '../db/pvo-login-db.js';
+import { authenticatePvoPersonnel } from '../db/pvo-login-db.js';
 
 const loginForm = document.getElementById('loginForm');
 const loginBtn = document.getElementById('loginBtn');
@@ -42,7 +42,7 @@ if (loginForm) {
         try {
             setButtonLoading(true);
 
-            const result = await authenticatePhoPersonnel(email, password, designation);
+            const result = await authenticatePvoPersonnel(email, password, designation);
 
             // 4. Redirect upon successful authentication & role check
             window.location.href = result.redirectUrl;

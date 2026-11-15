@@ -17,7 +17,7 @@ import { updatePassword } from "https://www.gstatic.com/firebasejs/11.10.0/fireb
  * Retrieves officer profile from the canonical users collection
  */
 export async function getOfficerProfile(uid) {
-    const userDocRef = doc(db, "users", uid);
+    const userDocRef = doc(db, "pvo-users", uid);
     const snap = await getDoc(userDocRef);
     if (!snap.exists()) throw new Error("Officer record not found in system.");
     return snap.data();
@@ -27,7 +27,7 @@ export async function getOfficerProfile(uid) {
  * Updates officer user profile record
  */
 export async function updateOfficerProfile(uid, { firstName, lastName }) {
-    const userDocRef = doc(db, "users", uid);
+    const userDocRef = doc(db, "pvo-users", uid);
     await updateDoc(userDocRef, {
         firstName,
         lastName,

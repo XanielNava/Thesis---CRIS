@@ -407,3 +407,261 @@ html[data-theme="dark"] .btn-success {
         grid-template-columns: 1fr;
     }
 }
+/* ==========================================================================
+   ACCOUNT MANAGEMENT — PVO & LGU SCOPE BADGES & FILTER TABS
+   ========================================================================== */
+
+.scope-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.scope-pvo {
+    background: rgba(234, 97, 19, 0.14);
+    color: #ea6113;
+}
+
+.scope-lgu {
+    background: rgba(37, 99, 235, 0.14);
+    color: #2563eb;
+}
+
+.filter-tabs {
+    display: inline-flex;
+    gap: 6px;
+}
+
+.filter-tab {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: transparent;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: inherit;
+    transition: all 0.2s ease;
+}
+
+.filter-tab:hover:not(.active) {
+    border-color: #ea6113;
+    color: #ea6113;
+}
+
+.filter-tab.active {
+    background: #ea6113;
+    border-color: #ea6113;
+    color: #ffffff;
+}
+/* ==========================================================================
+   ACCOUNT MANAGEMENT — SCOPE BADGES, FILTER TABS & REVIEW MODAL
+   ========================================================================== */
+
+.scope-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.scope-pvo {
+    background: rgba(234, 97, 19, 0.14);
+    color: #ea6113;
+}
+
+.scope-lgu {
+    background: rgba(37, 99, 235, 0.14);
+    color: #2563eb;
+}
+
+.filter-tabs {
+    display: inline-flex;
+    gap: 6px;
+}
+
+.filter-tab {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: transparent;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: inherit;
+    transition: all 0.2s ease;
+}
+
+.filter-tab:hover:not(.active) {
+    border-color: #ea6113;
+    color: #ea6113;
+}
+
+.filter-tab.active {
+    background: #ea6113;
+    border-color: #ea6113;
+    color: #ffffff;
+}
+
+.pending-actions {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.btn-review {
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+    border: 1px solid rgba(37, 99, 235, 0.25);
+}
+
+.btn-review:hover {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+/* Account Review Modal */
+.review-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.review-modal-overlay.active {
+    display: flex;
+}
+
+.review-modal-card {
+    background: var(--surface, #ffffff);
+    color: var(--text-dark, #1e293b);
+    width: 100%;
+    max-width: 560px;
+    border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.review-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.review-modal-header h3 {
+    margin: 6px 0 0 0;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.review-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.review-modal-body {
+    padding: 20px 22px;
+}
+
+.review-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 18px;
+    margin-bottom: 18px;
+}
+
+.review-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.review-field-full {
+    grid-column: 1 / -1;
+}
+
+.review-label {
+    font-size: 11.5px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.review-field strong {
+    font-size: 13.5px;
+    word-break: break-word;
+}
+
+.review-reject-box {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.review-reject-box label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.review-reject-box input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.review-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 22px;
+    background: rgba(0, 0, 0, 0.02);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.review-footer-right {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-danger-outline {
+    background: transparent;
+    color: #dc2626;
+    border: 1px solid #dc2626;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-danger-outline:hover {
+    background: #dc2626;
+    color: #ffffff;
+}

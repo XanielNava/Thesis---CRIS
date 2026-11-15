@@ -1,5 +1,5 @@
 // ==========================================================================
-// CRIS PHO MODULE - LOGIN DB CONTROLLER (pho_login-db.js)
+// CRIS PVO MODULE - LOGIN DB CONTROLLER (pvo-login-db.js)
 // Handles authentication, personnel status checks, and session caching
 // ==========================================================================
 
@@ -15,27 +15,29 @@ import {
     serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+const PVO_USERS_COLLECTION = 'pvo-users';
+
 /**
- * Authenticates user credentials and checks their verification status in 'pho-users'.
+ * Authenticates user credentials and checks their verification status in 'pvo-users'.
  *
  * @param {string} email
  * @param {string} password
  * @param {string} selectedDesignation
  * @returns {Promise<Object>} Authorized user data & redirect path
  */
-export async function authenticatePhoPersonnel(email, password, selectedDesignation) {
+export async function authenticatePvoPersonnel(email, password, selectedDesignation) {
     try {
         // 1. Firebase Authentication Sign-In
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
         const user = userCredential.user;
 
-        // 2. Fetch User Profile from 'pho-users'
-        const userDocRef = doc(db, "pvo-users", user.uid);
+        // 2. Fetch User Profile from 'pvo-users'
+        const userDocRef = doc(db, PVO_USERS_COLLECTION, user.uid);
         const userDocSnap = await getDoc(userDocRef);
 
         if (!userDocSnap.exists()) {
             await signOut(auth);
-            throw new Error("User record not found in the PHO personnel registry.");
+            throw new Error("User record not found in the PVO personnel registry.");
         }
 
         const data = userDocSnap.data();
@@ -73,23 +75,21 @@ export async function authenticatePhoPersonnel(email, password, selectedDesignat
         localStorage.setItem('userDesignation', userRole);
         localStorage.setItem('userStatus', status);
 
-        // 7. Determine standard redirect URL based on role
-        let redirectUrl = 'noramlizeRole';
+        // 7. Determine standard redirect URL based on PVO role
         const normalizedRole = userRole.toLowerCase();
+        let redirectUrl = 'pvo-dash.html';
 
-        if (normalizedRole === 'administrator') {
-            redirectUrl = '../../src/pvo/pvo-dash.html';
-        } else if (normalizedRole === 'health officer') {
-            redirectUrl = '../../src/pvo/pho-dash.html';
-        } else if (normalizedRole === 'facilitating nurse') {
-            redirectUrl = '../../src/pvo/pvo-dash.html'; // Or 'pho-clinic.html' depending on your clinic view
+        if (normalizedRole === 'administrator' || normalizedRole === 'super admin') {
+            redirectUrl = 'pvo-dash.html'; // Change to 'pvo-users.html' if Admins should land on User Approvals first
+        } else if (normalizedRole === 'veterinary officer' || normalizedRole === 'provincial veterinarian') {
+            redirectUrl = 'pvo-dash.html';
         }
 
         return {
             uid: user.uid,
             email: user.email,
             role: userRole,
-            redirectUrl: redirectUrl
+            redirectUrl
         };
 
     } catch (error) {
