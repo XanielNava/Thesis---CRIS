@@ -1,46 +1,70 @@
 // ==========================================================================
 // CRIS PHO MODULE - SIGNUP DB CONTROLLER (pho_signup-db.js)
-// Handles Firebase Auth account creation and Firestore document persistence
+// Handles Firebase Auth account creation, RA 10173 consent, and persistence
 // ==========================================================================
 
 import { auth, db } from '../../firebase/firebase-config.js';
-import { 
-    createUserWithEmailAndPassword 
+import {
+    createUserWithEmailAndPassword,
+    signOut
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { 
-    doc, 
-    setDoc, 
-    serverTimestamp 
+import {
+    collection,
+    doc,
+    setDoc,
+    addDoc,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+function buildPrivacyConsentRecord(fallbackConsent) {
+    const consent = window.crisPrivacyConsent || fallbackConsent;
+    if (!consent || !consent.accepted) {
+        throw new Error('Data Privacy Act (RA 10173) consent is required before registering an account.');
+    }
+
+    return {
+        accepted: true,
+        acceptedAt: consent.acceptedAt || new Date().toISOString(),
+        serverRecordedAt: serverTimestamp(),
+        policyVersion: consent.policyVersion || 'RA-10173-v1.0',
+        lawReference: consent.lawReference || 'Republic Act No. 10173 (Data Privacy Act of 2012)',
+        consentMethod: consent.consentMethod || 'Explicit Checkbox Modal'
+    };
+}
+
 /**
- * Registers a new PHO personnel in Firebase Auth and saves their profile 
- * to Firestore with a 'Pending' verification status for Administrator review.
- *
- * @param {string} email
- * @param {string} password
- * @param {Object} profile
- * @returns {Promise<Object>} { uid, email }
+ * Registers a new PHO personnel in Firebase Auth and saves their profile
+ * with RA 10173 consent metadata to Firestore with 'Pending' status.
  */
 export async function registerPhoPersonnel(email, password, profile) {
     try {
+        const privacyConsent = buildPrivacyConsentRecord(profile.privacyConsent);
+
         // 1. Create Firebase Auth Credential
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const cleanEmail = email.toLowerCase().trim();
+        const userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, password);
         const user = userCredential.user;
 
-        // 2. Build full name format
-        const fullName = `${profile.firstName} ${profile.middleInitial ? profile.middleInitial + '.' : ''} ${profile.lastName} ${profile.suffix || ''}`.trim();
+        // 2. Build clean full name format
+        const cleanMI = profile.middleInitial ? profile.middleInitial.trim().replace(/\.$/, '').toUpperCase() : '';
+        const cleanSuffix = profile.suffix ? profile.suffix.trim() : '';
+        const fullName = [
+            profile.firstName.trim(),
+            cleanMI ? `${cleanMI}.` : '',
+            profile.lastName.trim(),
+            cleanSuffix
+        ].filter(Boolean).join(' ');
 
-        // 3. Save User Profile in Firestore
+        // 3. Save User Profile in Firestore with RA 10173 consent metadata
         const userDocRef = doc(db, 'pho-users', user.uid);
         await setDoc(userDocRef, {
             uid: user.uid,
-            firstName: profile.firstName,
-            lastName: profile.lastName,
-            middleInitial: profile.middleInitial || '',
-            suffix: profile.suffix || '',
-            fullName: fullName,
-            email: email,
+            firstName: profile.firstName.trim(),
+            lastName: profile.lastName.trim(),
+            middleInitial: cleanMI,
+            suffix: cleanSuffix,
+            fullName,
+            email: cleanEmail,
             designation: profile.designation,
             verification: {
                 prcLicenseNumber: profile.prcLicenseNumber || '',
@@ -59,14 +83,41 @@ export async function registerPhoPersonnel(email, password, profile) {
                 cityMunicipality: profile.cityMunicipality || '',
                 province: profile.province || ''
             },
+            privacyConsent,
             module: 'PHO',
-            status: 'Pending', // Held for Administrator approval
-            createdAt: serverTimestamp()
+            status: 'Pending',
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
         });
 
-        return { uid: user.uid, email: user.email };
+        // 4. Record registration in audit_logs
+        try {
+            await addDoc(collection(db, 'audit_logs'), {
+                action: 'PHO Account Registered',
+                module: 'PHO',
+                affected: `${fullName} (${user.uid})`,
+                performedBy: fullName,
+                actorUid: user.uid,
+                actorEmail: cleanEmail,
+                details: {
+                    targetUser: fullName,
+                    targetUid: user.uid,
+                    designation: profile.designation,
+                    privacyPolicyVersion: privacyConsent.policyVersion,
+                    privacyAcceptedAt: privacyConsent.acceptedAt,
+                    notes: `PHO ${profile.designation} — Pending Administrator Verification • RA 10173 Consent Recorded`
+                },
+                timestamp: serverTimestamp()
+            });
+        } catch (auditErr) {
+            console.warn('Audit log write skipped:', auditErr);
+        }
+
+        // 5. Sign out immediately so user must log in after admin approval
+        await signOut(auth);
+
+        return { uid: user.uid, email: user.email, privacyConsent };
     } catch (error) {
-        // Map common Firebase errors to readable messages
         let friendlyMessage = error.message;
 
         if (error.code === 'auth/email-already-in-use') {

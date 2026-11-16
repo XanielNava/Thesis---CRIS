@@ -423,3 +423,60 @@
     font-weight: 700;
     cursor: pointer;
 }
+/* ==========================================================================
+   DUTY PERSONNEL QR / EMAIL+PIN TABS & INPUTS
+   ========================================================================== */
+
+.duty-login-modal {
+    max-width: 420px;
+}
+
+.duty-auth-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    background: #fff4e0;
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid #f0ddb8;
+    margin-bottom: 14px;
+}
+
+.duty-tab-btn {
+    border: none;
+    background: transparent;
+    padding: 9px 10px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #8a6a52;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.duty-tab-btn.active {
+    background: #EA6113;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(234, 97, 19, 0.28);
+}
+
+#nurseVerificationForm input[type="email"],
+#nurseVerificationForm input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+#nurseVerificationForm input[type="email"]:focus,
+#nurseVerificationForm input[type="password"]:focus {
+    border-color: #EA6113;
+}

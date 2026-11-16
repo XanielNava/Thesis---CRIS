@@ -6,13 +6,13 @@
     <title>Select Profile - CRIS</title>
     <link rel="stylesheet" href="../../assets/css/main/login.css">
     <link rel="stylesheet" href="../../assets/css/abtc/abtc-profiles.css">
-    <link rel="icon" href="../../assets/images/cris-icon.jpg" type="image/x-icon">
+    <link rel="icon" href="../../assets/images/cris-icon.png?v=2" type="image/png">
     <script src="../../assets/js/main/menu.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <!-- Fast HTML5 QR Code Webcam Scanner -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
@@ -23,7 +23,7 @@
         <div class="header-content">
             <img src="../../assets/images/logo-login.png" alt="CRIS logo" class="logo header-brand-logo">
             <h1>CRIS: Community-Centric Rabies Intelligence System</h1>
-            <button class="burger" onclick="openMenu()">☰ Menu</button>
+            <button type="button" class="burger" onclick="openMenu()">☰ Menu</button>
         </div>
     </header>
 
@@ -31,7 +31,7 @@
 
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
-        <button class="close-btn" onclick="closeMenu()">✕</button>
+        <button type="button" class="close-btn" onclick="closeMenu()">✕</button>
         <nav>
             <a href="../../index.html">Home</a>
             <a href="abtc-login.html" class="active">Admin Access Portal</a>
@@ -47,8 +47,8 @@
 
         <!-- PROFILE OPTIONS GRID -->
         <div class="logo-container profile-options-container">
-            
-            <!-- 🩺 CLINIC PERSONNEL PROFILE CARD -->
+
+            <!-- CLINIC PERSONNEL PROFILE CARD -->
             <div class="logo-link profile-option profile-card-option" id="nurseProfileCard">
                 <div class="logo-box profile-box">
                     <div class="profile-logo-frame">
@@ -56,16 +56,16 @@
                     </div>
                     <p class="profile-role-title">
                         Duty Personnel<br>
-                        <span class="profile-role-subtext">Scan Badge ID or PIN Login</span>
+                        <span class="profile-role-subtext">Instant QR Scan or Email &amp; PIN</span>
                     </p>
                 </div>
             </div>
 
-            <!-- 💼 OWNER PROFILE CARD -->
+            <!-- OWNER PROFILE CARD -->
             <div class="logo-link profile-option profile-card-option" id="ownerProfileCard">
                 <div class="logo-box profile-box">
                     <div class="profile-logo-frame">
-                        <img id="ownerLogoPreview" src="../../assets/images/cris-icon-no-background.png" alt="Provincial Veterinary Office Seal" class="profile-seal-img">
+                        <img id="ownerLogoPreview" src="../../assets/images/cris-icon.png" alt="ABTC Administrator Seal" class="profile-seal-img">
                     </div>
                     <p class="profile-role-title">
                         Owner / Administrator<br>
@@ -88,48 +88,70 @@
         </div>
     </main>
 
-    <!-- 🩺 PERSONNEL DUTY QR / PIN CLOCK-IN MODAL (SCAN-ONLY) -->
+    <!-- PERSONNEL DUTY QR (DIRECT) / EMAIL + DEFAULT PIN CLOCK-IN MODAL -->
     <div class="modal-overlay" id="nurseModalOverlay">
-        <div class="password-modal" style="max-width: 420px;">
+        <div class="password-modal duty-login-modal">
             <h3>Duty Personnel Clock-In</h3>
-            <p class="modal-description">Hold your CRIS Staff ID Badge up to the scanner, then enter your security PIN.</p>
 
-            <!-- SCANNER SECTION -->
-            <div id="scannerSection">
-                <div class="qr-camera-container">
-                    <div id="qrReader"></div>
-                </div>
+            <!-- MODE SWITCHER TABS -->
+            <div class="duty-auth-tabs" role="tablist">
+                <button type="button" class="duty-tab-btn active" id="tabQrScan" data-mode="qr" role="tab" aria-selected="true">
+                    <i class="fa-solid fa-qrcode"></i> QR Badge Scan
+                </button>
+                <button type="button" class="duty-tab-btn" id="tabEmailPin" data-mode="email-pin" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-envelope"></i> Email &amp; PIN
+                </button>
             </div>
 
-            <!-- SCANNED STAFF IDENTITY SUMMARY (Appears upon scan) -->
-            <div class="scanned-identity-banner" id="scannedIdentityBanner">
-                <i class="fa-solid fa-id-badge id-badge-icon"></i>
-                <div>
-                    <span class="id-meta-name" id="scannedStaffName">Staff Member</span>
-                    <span class="id-meta-role" id="scannedStaffRole">Duty Role</span>
-                </div>
-                <button type="button" class="btn-rescan" id="btnRescan">Rescan</button>
-            </div>
+            <!-- MODE 1: INSTANT QR BADGE SCAN (ZERO PIN) -->
+            <div id="qrClockInPanel">
+                <p class="modal-description">Hold your CRIS Staff ID Badge up to the camera for direct clock-in (no PIN needed).</p>
 
-            <!-- CLOCK-IN SUBMISSION FORM -->
-            <form id="nurseVerificationForm">
-                <input type="password" id="nursePinInput" placeholder="Enter 4-Digit Security PIN" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" disabled required>
-                
-                <div class="forgot-pin-wrap">
-                    <a href="#" id="forgotPinLink" class="forgot-pin-link">Forgot Security PIN?</a>
+                <div id="scannerSection">
+                    <div class="qr-camera-container">
+                        <div id="qrReader"></div>
+                    </div>
+                </div>
+
+                <!-- SCANNED STAFF IDENTITY BANNER (Shown briefly while verifying & redirecting) -->
+                <div class="scanned-identity-banner" id="scannedIdentityBanner">
+                    <i class="fa-solid fa-id-badge id-badge-icon"></i>
+                    <div>
+                        <span class="id-meta-name" id="scannedStaffName">Staff Member</span>
+                        <span class="id-meta-role" id="scannedStaffRole">Verifying badge...</span>
+                    </div>
                 </div>
 
                 <div class="modal-buttons">
                     <button type="button" class="modal-btn btn-cancel" id="closeNurseModalBtn">Cancel</button>
-                    <button type="submit" class="modal-btn btn-submit" id="btnClockIn" disabled>Clock In</button>
+                    <button type="button" class="modal-btn btn-submit" id="switchToFallbackBtn">Use Email &amp; PIN</button>
                 </div>
-            </form>
+            </div>
+
+            <!-- MODE 2: ALTERNATIVE EMAIL + DEFAULT PIN LOGIN -->
+            <div id="emailPinClockInPanel" hidden>
+                <p class="modal-description">Enter your facility-registered email address and the default PIN provided by your administrator.</p>
+
+                <form id="nurseVerificationForm">
+                    <input type="email" id="staffEmailInput" placeholder="Enter Registered Staff Email" autocomplete="email" required>
+                    <input type="password" id="nursePinInput" placeholder="Enter Assigned PIN" maxlength="6" inputmode="numeric" autocomplete="current-password" required>
+
+                    <div class="forgot-pin-wrap">
+                        <a href="#" id="forgotPinLink" class="forgot-pin-link">Forgot Default PIN?</a>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="button" class="modal-btn btn-cancel" id="cancelEmailPinBtn">Cancel</button>
+                        <button type="submit" class="modal-btn btn-submit" id="btnClockIn">Clock In</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <footer class="footer"></footer>
 
-    <!-- Connected Controller -->
-    <script type="module" src="../../assets/js/abtc/abtc-profile.js"></script>
+    <!-- Connected Decoupled Controller -->
+    <script type="module" src="../../assets/js/abtc/ui/abtc-profiles-ui.js"></script>
 </body>
 </html>

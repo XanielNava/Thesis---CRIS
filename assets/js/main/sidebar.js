@@ -62,7 +62,7 @@
         const path = window.location.pathname.toLowerCase();
         if (path.includes('/pho/')) return '../../../src/pho/pho-login.html';
         if (path.includes('/pvo/')) return '../../../src/pvo/pvo-login.html';
-        if (path.includes('/abtc/')) return '../../../src/abtc/abtc-login.html';
+        if (path.includes('/abtc/')) return '../../../src/abtc/abtc-profiles.html';
         if (path.includes('/lgu/')) return '../../../src/lgu/lgu-login.html';
         return '../../../index.html';
     }

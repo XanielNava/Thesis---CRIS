@@ -15,14 +15,31 @@ import {
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-// Change to 'pvo-users' ONLY if you want a separate collection instead of the master 'users' collection
 const USERS_COLLECTION = 'pvo-users';
+
+function buildPrivacyConsentRecord(fallbackConsent) {
+    const consent = window.crisPrivacyConsent || fallbackConsent;
+    if (!consent || !consent.accepted) {
+        throw new Error('Data Privacy Act (RA 10173) consent is required before registering an account.');
+    }
+
+    return {
+        accepted: true,
+        acceptedAt: consent.acceptedAt || new Date().toISOString(),
+        serverRecordedAt: serverTimestamp(),
+        policyVersion: consent.policyVersion || 'RA-10173-v1.0',
+        lawReference: consent.lawReference || 'Republic Act No. 10173 (Data Privacy Act of 2012)',
+        consentMethod: consent.consentMethod || 'Explicit Checkbox Modal'
+    };
+}
 
 /**
  * Registers a new PVO officer in Firebase Authentication, stores the profile
- * in Firestore, logs to audit_logs, and signs out pending admin approval.
+ * with RA 10173 consent metadata in Firestore, logs to audit_logs, and signs out.
  */
 export async function registerPvoPersonnel(profileData, password) {
+    const privacyConsent = buildPrivacyConsentRecord(profileData.privacyConsent);
+
     const {
         email,
         firstName,
@@ -53,7 +70,7 @@ export async function registerPvoPersonnel(profileData, password) {
         cleanSuffix
     ].filter(Boolean).join(' ');
 
-    // 3. Build standardized user document payload
+    // 3. Build standardized user document payload with RA 10173 consent metadata
     const payload = {
         uid: user.uid,
         email: cleanEmail,
@@ -73,7 +90,8 @@ export async function registerPvoPersonnel(profileData, password) {
         },
         contactNumber: contactNumber || '',
         dateOfBirth: dateOfBirth || '',
-        status: 'Pending', // Shows up in pvo-users.html Pending Approvals list
+        privacyConsent,
+        status: 'Pending',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
     };
@@ -93,7 +111,9 @@ export async function registerPvoPersonnel(profileData, password) {
             details: {
                 targetUser: fullName,
                 targetUid: user.uid,
-                notes: `Registered as ${payload.designation} (Pending Approval)`
+                privacyPolicyVersion: privacyConsent.policyVersion,
+                privacyAcceptedAt: privacyConsent.acceptedAt,
+                notes: `Registered as ${payload.designation} (Pending Approval • RA 10173 Consent Recorded)`
             },
             timestamp: serverTimestamp()
         });

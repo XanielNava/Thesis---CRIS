@@ -18,11 +18,29 @@ import {
 const LGU_USERS_COLLECTION = 'lgu-users';
 const AUDIT_LOGS_COLLECTION = 'audit_logs';
 
+function buildPrivacyConsentRecord(fallbackConsent) {
+    const consent = window.crisPrivacyConsent || fallbackConsent;
+    if (!consent || !consent.accepted) {
+        throw new Error('Data Privacy Act (RA 10173) consent is required before registering an account.');
+    }
+
+    return {
+        accepted: true,
+        acceptedAt: consent.acceptedAt || new Date().toISOString(),
+        serverRecordedAt: serverTimestamp(),
+        policyVersion: consent.policyVersion || 'RA-10173-v1.0',
+        lawReference: consent.lawReference || 'Republic Act No. 10173 (Data Privacy Act of 2012)',
+        consentMethod: consent.consentMethod || 'Explicit Checkbox Modal'
+    };
+}
+
 /**
  * Registers a new LGU personnel account in Firebase Auth & Firestore (`lgu-users`)
- * with status: 'Pending' for PVO Account Management approval.
+ * with RA 10173 consent metadata and status: 'Pending' for PVO approval.
  */
 export async function registerLguPersonnel(profileData, password) {
+    const privacyConsent = buildPrivacyConsentRecord(profileData.privacyConsent);
+
     const {
         firstName,
         lastName,
@@ -53,7 +71,7 @@ export async function registerLguPersonnel(profileData, password) {
         cleanSuffix
     ].filter(Boolean).join(' ');
 
-    // 3. Construct LGU user document payload
+    // 3. Construct LGU user document payload with RA 10173 consent metadata
     const payload = {
         uid: user.uid,
         email: cleanEmail,
@@ -75,7 +93,8 @@ export async function registerLguPersonnel(profileData, password) {
         },
         contactNumber: contactNumber ? contactNumber.trim() : '',
         dateOfBirth: dateOfBirth || '',
-        status: 'Pending', // Managed & approved by PVO Account Management
+        privacyConsent,
+        status: 'Pending',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
     };
@@ -99,7 +118,9 @@ export async function registerLguPersonnel(profileData, password) {
                 district: district.trim(),
                 municipality: municipality.trim(),
                 designation: designation.trim(),
-                notes: `LGU ${designation.trim()} (${municipality.trim()}) — Pending PVO Approval`
+                privacyPolicyVersion: privacyConsent.policyVersion,
+                privacyAcceptedAt: privacyConsent.acceptedAt,
+                notes: `LGU ${designation.trim()} (${municipality.trim()}) — Pending PVO Approval • RA 10173 Consent Recorded`
             },
             timestamp: serverTimestamp()
         });
