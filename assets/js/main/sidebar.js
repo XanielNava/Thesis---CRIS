@@ -2,13 +2,31 @@
     'use strict';
 
     /* ==========================================================================
-       1. ZERO-FLICKER SIDEBAR COLLAPSE ENGINE
+       1. ZERO-FLICKER SIDEBAR COLLAPSE ENGINE & UNIVERSAL BRANDING
        ========================================================================== */
     function initSidebar() {
-        const sidebar = document.getElementById('sidebar');
+        const sidebar = document.getElementById('sidebar') || document.querySelector('.sidebar');
         const toggle = document.getElementById('sidebarToggle');
         const layout = document.getElementById('appLayout') || document.querySelector('.container');
-        if (!sidebar || !toggle) return;
+        if (!sidebar) return;
+
+        // Enforce unified CRIS logo (logo-login.png) and 35px "CRIS" title across all pages
+        const logoImg = sidebar.querySelector('.brand-logo img, .logo-image');
+        if (logoImg) {
+            logoImg.src = '../../assets/images/logo-login.png';
+            logoImg.alt = 'CRIS Logo';
+        }
+
+        const brandTitle = sidebar.querySelector('.brand-title, .logo-section-fixed p');
+        if (brandTitle) {
+            brandTitle.textContent = 'CRIS';
+            brandTitle.style.fontSize = '35px';
+            brandTitle.style.fontWeight = '400';
+            brandTitle.style.lineHeight = '1';
+            brandTitle.style.letterSpacing = '1.5px';
+        }
+
+        if (!toggle) return;
 
         const applyState = (collapsed) => {
             sidebar.classList.toggle('collapsed', collapsed);
@@ -110,7 +128,7 @@
         };
 
         // Use capture phase (true) + stopImmediatePropagation() so deferred module scripts
-        // (like abtc-dash.js) can NEVER fire a native confirm() or alert() on this button
+        // can NEVER fire a native confirm() or alert() on this button
         logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -165,4 +183,4 @@
         initSidebar();
         initLogoutFlow();
     }
-})();
+})(); 

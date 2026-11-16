@@ -19,6 +19,10 @@
                 document.documentElement.setAttribute('data-theme', 'light');
             }
         })();
+    </script>   <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.documentElement.classList.add("sidebar-pre-collapsed");
+        }
     </script>
 </head>
 <body>
@@ -29,10 +33,10 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="brand-logo">
-                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
+                <img src="../../assets/images/logo-login.png" alt="CRIS Logo">
             </div>
             <div class="brand-info">
-                <span class="brand-title">Community-Centric Rabies Information Systems</span>
+                <span class="brand-title">CRIS</span>
                 <span class="brand-badge">PVO Module</span>
             </div>
             <button id="sidebarToggle" class="toggle-btn" type="button" aria-label="Toggle Sidebar" aria-expanded="true">

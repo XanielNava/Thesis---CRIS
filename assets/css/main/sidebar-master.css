@@ -101,7 +101,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding-bottom: 20px;
+    padding-bottom: 18px;
     margin-bottom: 12px;
     border-bottom: 1px solid var(--sidebar-border);
     width: 100%;
@@ -110,11 +110,29 @@
     position: static !important;
 }
 
+.brand-logo {
+    width: 68px !important;
+    height: 68px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+}
+
 .brand-logo img {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
-    flex-shrink: 0;
+    width: 68px !important;
+    height: 68px !important;
+    max-width: none !important;
+    object-fit: contain !important;
+    transform: scale(1.18);
+    transition: width 0.25s ease, height 0.25s ease;
+}
+
+.sidebar.collapsed .brand-logo,
+.sidebar.collapsed .brand-logo img {
+    width: 46px !important;
+    height: 46px !important;
 }
 
 .brand-info {
@@ -136,21 +154,21 @@
 }
 
 .brand-title {
-    color: var(--text-light);
-    font-size: 12.5px;
-    font-weight: 700;
-    line-height: 1.35;
-    white-space: normal;
-    word-break: break-word;
+    color: var(--text-light) !important;
+    font-size: 35px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    letter-spacing: 1.5px !important;
+    white-space: nowrap !important;
 }
 
 .brand-badge {
     color: var(--sunset-gold);
     font-size: 10px;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-top: 2px;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
 }
 
 /* ==========================================================================
@@ -159,7 +177,7 @@
 
 .toggle-btn {
     position: absolute !important;
-    top: 32px !important;
+    top: 42px !important;
     right: -16px !important;
     transform: translateY(-50%) !important;
     width: 32px;
@@ -336,6 +354,12 @@ html.sidebar-pre-collapsed .sidebar {
 
 html.sidebar-pre-collapsed .sidebar .sidebar-header {
     justify-content: center;
+}
+
+html.sidebar-pre-collapsed .sidebar .brand-logo,
+html.sidebar-pre-collapsed .sidebar .brand-logo img {
+    width: 46px !important;
+    height: 46px !important;
 }
 
 html.sidebar-pre-collapsed .sidebar .brand-info,
