@@ -1,6 +1,6 @@
 /* ==========================================================================
    CRIS ABTC MODULE — FACILITY SETUP UI CONTROLLER (abtc-setup-ui.js)
-   Handles GPS/Nominatim geolocation UI, form capture, validation, & routing
+   Captures exact on-site Device Geolocation (Latitude & Longitude)
    ========================================================================== */
 
 import { submitAbtcFacilityApplication } from '../db/abtc-setup-db.js';
@@ -8,7 +8,7 @@ import { submitAbtcFacilityApplication } from '../db/abtc-setup-db.js';
 const $ = (id) => document.getElementById(id);
 
 /* ==========================================================================
-   1. AUTOMATIC GEOLOCATION & NOMINATIM FORWARD-GEOCODING ENGINE
+   1. STRICT DEVICE GEOLOCATION ENGINE
    ========================================================================== */
 
 function setGeoStatus(html) {
@@ -16,105 +16,58 @@ function setGeoStatus(html) {
     if (geoStatus) geoStatus.innerHTML = html;
 }
 
-function detectCurrentGps() {
+/**
+ * Strictly captures the current device's physical latitude and longitude.
+ * Does NOT fall back to typed address geocoding.
+ */
+function detectDeviceLocation() {
     const latInput = $('abtcLatitude');
     const lngInput = $('abtcLongitude');
 
     if (!navigator.geolocation) {
-        autoGeocodeAddress();
+        setGeoStatus(
+            `<span style="color:#b91c1c;"><i class="fa-solid fa-circle-xmark"></i> Geolocation is not supported by this browser/device.</span>`
+        );
         return;
     }
 
-    setGeoStatus(`<i class="fa-solid fa-spinner fa-spin"></i> Locking GPS satellite coordinates...`);
+    setGeoStatus(`<i class="fa-solid fa-spinner fa-spin"></i> Acquiring exact device coordinates...`);
 
     navigator.geolocation.getCurrentPosition(
         (position) => {
             const lat = position.coords.latitude.toFixed(6);
             const lng = position.coords.longitude.toFixed(6);
+            const accuracyMeters = Math.round(position.coords.accuracy || 0);
 
             if (latInput) latInput.value = lat;
             if (lngInput) lngInput.value = lng;
 
             setGeoStatus(
-                `<span style="color:#15803d; font-weight:bold;"><i class="fa-solid fa-circle-check"></i> High-accuracy GPS locked (${lat}, ${lng})</span>`
+                `<span style="color:#15803d; font-weight:bold;"><i class="fa-solid fa-location-crosshairs"></i> Device location locked: ${lat}, ${lng} (±${accuracyMeters}m)</span>`
             );
         },
         (error) => {
-            console.warn('GPS access ungranted or unavailable, falling back to address geocoder:', error.message);
-            autoGeocodeAddress();
-        },
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-    );
-}
+            console.warn('Device geolocation error:', error.code, error.message);
 
-async function autoGeocodeAddress() {
-    const latInput = $('abtcLatitude');
-    const lngInput = $('abtcLongitude');
-    const street = $('abtcStreet')?.value.trim() || '';
-    const brgy = $('abtcBarangay')?.value.trim() || '';
-    const city = $('abtcCity')?.value.trim() || '';
-    const prov = $('abtcProvince')?.value.trim() || 'Iloilo';
-
-    if (!city) return null;
-
-    const queryParts = [street, brgy, city, prov, 'Philippines'].filter((p) => p.length > 0);
-    const queryStr = queryParts.join(', ');
-
-    setGeoStatus(`<i class="fa-solid fa-spinner fa-spin"></i> Geocoding "${city}, ${prov}"...`);
-
-    try {
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryStr)}&limit=1`,
-            {
-                headers: {
-                    'Accept-Language': 'en',
-                    'User-Agent': 'CRIS-Rabies-System/1.0'
-                }
+            let reason = 'Unable to acquire device location.';
+            if (error.code === 1) {
+                reason = 'Location permission denied. Please allow Location access in your browser settings and try again.';
+            } else if (error.code === 2) {
+                reason = 'Device position unavailable. Turn ON device Location Services / GPS and Wi-Fi.';
+            } else if (error.code === 3) {
+                reason = 'Location request timed out. Ensure device GPS / Location Services is enabled and retry.';
             }
-        );
-
-        const results = await response.json();
-
-        if (results && results.length > 0) {
-            const lat = parseFloat(results[0].lat).toFixed(6);
-            const lng = parseFloat(results[0].lon).toFixed(6);
-
-            if (latInput) latInput.value = lat;
-            if (lngInput) lngInput.value = lng;
 
             setGeoStatus(
-                `<span style="color:#15803d; font-weight:bold;"><i class="fa-solid fa-circle-check"></i> Resolved from address: ${lat}, ${lng}</span>`
+                `<span style="color:#b91c1c;"><i class="fa-solid fa-triangle-exclamation"></i> ${reason}</span>`
             );
-            return { lat: parseFloat(lat), lng: parseFloat(lng) };
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 12000,
+            maximumAge: 0
         }
-
-        // Broaden search to city + province
-        const broadQuery = `${city}, ${prov}, Philippines`;
-        const broadResponse = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(broadQuery)}&limit=1`
-        );
-        const broadResults = await broadResponse.json();
-
-        if (broadResults && broadResults.length > 0) {
-            const lat = parseFloat(broadResults[0].lat).toFixed(6);
-            const lng = parseFloat(broadResults[0].lon).toFixed(6);
-
-            if (latInput) latInput.value = lat;
-            if (lngInput) lngInput.value = lng;
-
-            setGeoStatus(
-                `<span style="color:#d97706;"><i class="fa-solid fa-map-location-dot"></i> Centroid mapped for ${city}: ${lat}, ${lng}</span>`
-            );
-            return { lat: parseFloat(lat), lng: parseFloat(lng) };
-        }
-    } catch (err) {
-        console.warn('Geocoding service error:', err);
-    }
-
-    setGeoStatus(
-        `<span style="color:#b91c1c;">Could not resolve location. Please verify City / Municipality spelling.</span>`
     );
-    return null;
 }
 
 /* ==========================================================================
@@ -137,17 +90,13 @@ async function handleSetupSubmit(e) {
         return;
     }
 
-    const latInput = $('abtcLatitude');
-    const lngInput = $('abtcLongitude');
-    let finalLat = parseFloat(latInput?.value);
-    let finalLng = parseFloat(lngInput?.value);
+    const finalLat = parseFloat($('abtcLatitude')?.value);
+    const finalLng = parseFloat($('abtcLongitude')?.value);
 
     if (isNaN(finalLat) || isNaN(finalLng)) {
-        const resolved = await autoGeocodeAddress();
-        if (resolved) {
-            finalLat = resolved.lat;
-            finalLng = resolved.lng;
-        }
+        alert('Location Required: Please allow Location access and click "Auto-Detect" so the device can capture the facility\'s exact coordinates.');
+        detectDeviceLocation();
+        return;
     }
 
     const applicationData = {
@@ -178,12 +127,8 @@ async function handleSetupSubmit(e) {
     try {
         const result = await submitAbtcFacilityApplication(applicationData, password);
 
-        const coordDisplay = result.lat !== null && result.lng !== null
-            ? `${result.lat}, ${result.lng}`
-            : 'Pending GIS';
-
         alert(
-            `Registration Submitted!\nFacility: ${result.facilityName} (${result.acronym})\nCoordinates: ${coordDisplay}\n\nYour application is now pending verification by the PHO Administrator.`
+            `Registration Submitted!\nFacility: ${result.facilityName} (${result.acronym})\nDevice Coordinates: ${result.lat}, ${result.lng}\n\nYour application is now pending verification by the PHO Administrator.`
         );
         window.location.href = 'abtc-login.html';
     } catch (error) {
@@ -198,16 +143,9 @@ async function handleSetupSubmit(e) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    $('btnDetectGpsSetup')?.addEventListener('click', detectCurrentGps);
-
-    $('abtcCity')?.addEventListener('blur', () => {
-        if (!$('abtcLatitude')?.value || !$('abtcLongitude')?.value) {
-            autoGeocodeAddress();
-        }
-    });
-
+    $('btnDetectGpsSetup')?.addEventListener('click', detectDeviceLocation);
     $('abtcSetupForm')?.addEventListener('submit', handleSetupSubmit);
 
-    // Run initial GPS detection on page load
-    detectCurrentGps();
+    // Automatically capture device location as soon as the setup page opens
+    detectDeviceLocation();
 });
