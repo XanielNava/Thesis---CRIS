@@ -7,7 +7,7 @@ import {
     verifyStaffByQrBadge,
     verifyStaffByEmailAndPin,
     recordDutyClockInAudit
-} from '../db/abtc-profile-db.js';
+} from '../db/abtc-profiles-db.js';
 
 const $ = (id) => document.getElementById(id);
 
