@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PVO - Heatmaps</title>
+
+    <!-- Synchronous zero-latency pre-collapse restorer -->
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.documentElement.classList.add("sidebar-pre-collapsed");
+        }
+    </script>
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+    <!-- Stylesheets: shared master first, page-specific second -->
+    <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
+    <link rel="stylesheet" href="../../assets/css/pvo/pvo-heat-map.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/png">
+
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+<div class="app-layout" id="appLayout">
+
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-logo">
+                <img src="../../assets/images/logo-login.png" alt="CRIS Logo">
+            </div>
+            <div class="brand-info">
+                <span class="brand-title">CRIS</span>
+                <span class="brand-badge">PVO Module</span>
+            </div>
+            <button id="sidebarToggle" class="toggle-btn" type="button" aria-label="Toggle Sidebar" aria-expanded="true">
+                <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="sidebar-nav">
+            <div class="nav-group">
+                <span class="nav-label">Analytics</span>
+                <a href="pvo-dash.html" class="nav-item" title="Dashboard">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="9"/>
+                        <rect x="14" y="3" width="7" height="5"/>
+                        <rect x="14" y="12" width="7" height="9"/>
+                        <rect x="3" y="16" width="7" height="5"/>
+                    </svg>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="../pvo_admin/pvo-users.html" class="nav-item" title="User Management">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="8" r="4"/>
+                        <path d="M1 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>
+                        <path d="M17 11l2 2 4-4"/>
+                    </svg>
+                    <span class="nav-text">User Management</span>
+                </a>
+                <a href="pvo-animal-bite-cases.html" class="nav-item" title="Animal Bite Cases">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <span class="nav-text">Animal Bite Cases</span>
+                </a>
+                <a href="pvo-heat-map.html" class="nav-item active" title="Heatmap">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+                        <line x1="8" y1="2" x2="8" y2="18"/>
+                        <line x1="16" y1="6" x2="16" y2="22"/>
+                    </svg>
+                    <span class="nav-text">Heatmap</span>
+                </a>
+                <a href="pvo-animal-registry.html" class="nav-item" title="Animal Registry">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3z"/>
+                        <path d="M18 21v-2a4 4 0 0 0-4-4H10a4 4 0 0 0-4 4v2"/>
+                        <circle cx="18" cy="8" r="1.5"/>
+                        <circle cx="6" cy="8" r="1.5"/>
+                    </svg>
+                    <span class="nav-text">Animal Registry</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="pvo-settings.html" class="nav-item" title="Settings">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span class="nav-text">Settings</span>
+            </a>
+            <button type="button" id="logout-btn" class="nav-item logout-item" title="Logout">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span class="nav-text">Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ==================== MAIN WORKSPACE ==================== -->
+    <main class="main-content" id="mainContent">
+
+        <header class="header">
+            <div class="header-text">
+                <h1>HEATMAPS</h1>
+                <p>Spatial distribution of animal bite cases and rabies deaths across Iloilo Province</p>
+            </div>
+            <!-- <div class="header-chip">
+                <i class="fa-solid fa-satellite"></i>
+                <span>Satellite view</span>
+            </div> -->
+        </header>
+
+        <!-- FILTERS -->
+        <section class="heatmap-toolbar" aria-label="Map filters">
+            <div class="toolbar-group">
+                <label for="yearFilter">Year</label>
+                <select id="yearFilter">
+                    <option value="All">All Years</option>
+                </select>
+            </div>
+
+            <div class="toolbar-group">
+                <label for="municipalityFilter">Municipality</label>
+                <select id="municipalityFilter">
+                    <option value="All">All Municipalities</option>
+                </select>
+            </div>
+
+            <div class="toolbar-group">
+                <label for="layerFilter">Heatmap Layer</label>
+                <select id="layerFilter">
+                    <option value="bite">Animal Bite Cases</option>
+                    <option value="human">Human Rabies Deaths</option>
+                    <option value="animal">Animal Rabies Deaths</option>
+                </select>
+            </div>
+
+            <div class="toolbar-actions">
+                <button type="button" id="resetViewBtn" class="btn-reset">
+                    <i class="fa-solid fa-expand"></i> Fit to data
+                </button>
+            </div>
+        </section>
+
+        <!-- STATISTICS -->
+        <section class="statistics-container" aria-label="Summary statistics">
+            <article class="stat-card">
+                <div class="stat-icon icon-blue"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-body">
+                    <small>Human Population</small>
+                    <h2 id="humanPopulation">0</h2>
+                </div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-icon icon-orange"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="stat-body">
+                    <small>Prevalence Rate</small>
+                    <small
+                    <h2 id="prevalenceRate">0%</h2>
+                </div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-icon icon-amber"><i class="fa-solid fa-paw"></i></div>
+                <div class="stat-body">
+                    <small>Incidents Rate (New Cases)</small>
+                    <h2 id="incidentsRate">0%</h2>
+                </div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-icon icon-red"><i class="fa-solid fa-skull-crossbones"></i></div>
+                <div class="stat-body">
+                    <small>Mortality Rate (Death Rate)</small>
+                    <h2 id="mortalityRate">0%</h2>
+                </div>
+            </article>
+        </section>
+
+        <!-- MAP & SIDE PANEL -->
+        <section class="dashboard-map">
+            <div class="map-wrapper">
+                <div id="map" role="region" aria-label="Map of reported cases"></div>
+
+                <!-- Basemap switcher -->
+                <div class="basemap-switcher" role="group" aria-label="Map style">
+                    <button type="button" class="basemap-btn is-active" data-basemap="satellite" aria-pressed="true">
+                        <i class="fa-solid fa-satellite"></i> Satellite
+                    </button>
+                    <button type="button" class="basemap-btn" data-basemap="streets" aria-pressed="false">
+                        <i class="fa-solid fa-map"></i> Streets
+                    </button>
+                </div>
+
+                <!-- Loading state -->
+                <div class="map-state" id="mapLoading" hidden>
+                    <div class="map-state-card">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        <span>Loading case data...</span>
+                    </div>
+                </div>
+
+                <!-- Empty state -->
+                <div class="map-state map-state-empty" id="mapEmpty" hidden>
+                    <div class="map-state-card">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span id="mapEmptyText">No cases match the selected filters.</span>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="heatmap-overlay">
+                    <h3>Heatmap Legend</h3>
+                    <div class="legend-item" data-legend="bite"><span class="legend-box bite-color"></span>Animal Bite Cases</div>
+                    <div class="legend-item" data-legend="human"><span class="legend-box human-color"></span>Human Rabies Deaths</div>
+                    <div class="legend-item" data-legend="animal"><span class="legend-box animal-color"></span>Animal Rabies Deaths</div>
+                </div>
+            </div>
+
+            <aside class="side-panel">
+                <h3>Top Municipalities</h3>
+                <p class="panel-caption">Ranked by animal bite cases for the current selection</p>
+                <div id="topMunicipalities"></div>
+            </aside>
+        </section>
+
+        <!-- Scripts -->
+        <script type="module" src="../../assets/js/pvo/ui/pvo-heatmap-ui.js"></script>
+        <script type="module" src="../../assets/js/main/sidebar.js"></script>
+    </main>
+</div>
+</body>
+</html>
