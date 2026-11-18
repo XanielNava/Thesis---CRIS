@@ -372,3 +372,27 @@ input:focus, select:focus {
         padding: 24px 20px; 
     }
 }
+/* ==========================================================================
+   PROGRESSIVE DESIGNATION REVEAL (EMAIL & PASSWORD)
+   ========================================================================== */
+
+.credentials-reveal[hidden],
+#loginBtn[hidden] {
+    display: none !important;
+}
+
+.credentials-reveal {
+    width: 100%;
+    animation: revealCredentials 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes revealCredentials {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

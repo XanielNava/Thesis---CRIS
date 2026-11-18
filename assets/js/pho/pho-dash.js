@@ -64,7 +64,7 @@ async function loadUserProfile(user) {
         const userDocSnap = await getDoc(userDocRef);
 
         let displayName = user.displayName || "";
-        let role = "Administrator";
+        let role = "loadUserProfile";
 
         if (userDocSnap && userDocSnap.exists()) {
             const userData = userDocSnap.data();
@@ -772,4 +772,72 @@ document.addEventListener("DOMContentLoaded", function() {
 
     loadHumanPopulation();
     fetchAllSurveillanceRecords();
+});
+
+export function setupLogoutModal() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutModal = document.getElementById('logoutModal');
+    const cancelBtn = document.getElementById('logoutCancelBtn');
+    const confirmBtn = document.getElementById('logoutConfirmBtn');
+
+    if (!logoutModal) return;
+
+    const openLogout = () => {
+        logoutModal.classList.add('open');
+        logoutModal.setAttribute('aria-hidden', 'false');
+    };
+
+    const closeLogout = () => {
+        logoutModal.classList.remove('open');
+        logoutModal.setAttribute('aria-hidden', 'true');
+    };
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openLogout();
+        });
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeLogout);
+    }
+
+    // Close when clicking outside the box
+    logoutModal.addEventListener('click', (e) => {
+        if (e.target === logoutModal) closeLogout();
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && logoutModal.classList.contains('open')) {
+            closeLogout();
+        }
+    });
+
+    // Perform Sign Out
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', async () => {
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Logging out...';
+
+            try {
+                await signOut(auth);
+                localStorage.removeItem('userUid');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('userDesignation');
+                localStorage.removeItem('userStatus');
+                window.location.href = 'pho-login.html';
+            } catch (err) {
+                console.error("Logout error:", err);
+                window.location.href = 'pho-login.html';
+            }
+        });
+    }
+}
+
+// Call on DOM ready:
+document.addEventListener('DOMContentLoaded', () => {
+    setupLogoutModal();
 });

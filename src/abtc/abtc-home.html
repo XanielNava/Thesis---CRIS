@@ -4,10 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ABTC Module - Home Dashboard</title>
+    
+    <!-- Synchronous zero-latency pre-collapse restorer -->
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            document.documentElement.classList.add("sidebar-pre-collapsed");
+        }
+    </script>
+
     <link rel="stylesheet" href="../../assets/css/abtc/abtc-home.css">
     <link rel="stylesheet" href="../../assets/css/abtc/abtc-master.css">
     <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
-    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="icon" href="../../assets/images/cris-icon.png?v=2" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
@@ -15,63 +23,53 @@
 </head>
 <body>
     <div class="container">
-        <script>
-        if (localStorage.getItem("sidebarCollapsed") === "true") {
-            document.querySelector(".container").classList.add("collapsed");
-        }
-    </script>
-       <!-- PROFESSIONAL SAAS SIDEBAR (ABTC MODULE — HOME ACTIVE) -->
-<aside class="sidebar" id="sidebar">
-    <script>
-        if (localStorage.getItem("sidebarCollapsed") === "true") {
-            document.getElementById("sidebar").classList.add("collapsed");
-            document.querySelector(".container")?.classList.add("collapsed");
-        }
-    </script>
-    <div class="sidebar-header">
-        <div class="brand-logo">
-            <img src="../../assets/images/logo-login.png" alt="CRIS Logo">
-        </div>
-        <div class="brand-info">
-            <span class="brand-title">Community-Centric Rabies Intelligence Information Systems</span>
-            <span class="brand-badge">ABTC Module</span>
-        </div>
-        <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
-            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M15 18l-6-6 6-6"/>
-            </svg>
-        </button>
-    </div>
+        
+        <!-- PROFESSIONAL SAAS SIDEBAR (ABTC MODULE — HOME ACTIVE) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <img src="../../assets/images/logo-login.png" alt="CRIS Logo">
+                </div>
+                <div class="brand-info">
+                    <span class="brand-title">CRIS</span>
+                    <span class="brand-badge">ABTC Module</span>
+                </div>
+                <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
+            </div>
 
-    <div class="sidebar-nav">
-        <div class="nav-group">
-            <span class="nav-label">Navigation</span>
-            <a href="abtc-home.html" class="nav-item active">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                <span class="nav-text">Home</span>
-            </a>
-            <a href="abtc-reg.html" class="nav-item">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/></svg>
-                <span class="nav-text">Patient Registry</span>
-            </a>
-            <a href="abtc-calendar.html" class="nav-item">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <span class="nav-text">Dose Calendar</span>
-            </a>
-            <a href="abtc-inventory.html" class="nav-item">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                <span class="nav-text">Vaccine Inventory</span>
-            </a>
-        </div>
-    </div>
+            <div class="sidebar-nav">
+                <div class="nav-group">
+                    <span class="nav-label">Navigation</span>
+                    <a href="abtc-home.html" class="nav-item active">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        <span class="nav-text">Home</span>
+                    </a>
+                    <a href="abtc-reg.html" class="nav-item">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/></svg>
+                        <span class="nav-text">Patient Registry</span>
+                    </a>
+                    <a href="abtc-calendar.html" class="nav-item">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span class="nav-text">Dose Calendar</span>
+                    </a>
+                    <a href="abtc-inventory.html" class="nav-item">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        <span class="nav-text">Vaccine Inventory</span>
+                    </a>
+                </div>
+            </div>
 
-    <div class="sidebar-footer">
-        <button class="nav-item logout-item" onclick="showLogoutModal()">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            <span class="nav-text">Logout</span>
-        </button>
-    </div>
-</aside>
+            <div class="sidebar-footer">
+                <button type="button" id="logout-btn" class="nav-item logout-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span class="nav-text">Logout</span>
+                </button>
+            </div>
+        </aside>
 
         <!-- MAIN INTERFACE AREA -->
         <main class="main-content">
@@ -82,12 +80,18 @@
                     <h1 id="facilityTitleDisplay">Loading ABTC Facility...</h1>
                     <span>Operational Command Center</span>
                 </div>
-                <div class="user-profile-top">
-                    <div class="profile-info" id="profileInfoText">
-                        <strong>Loading...</strong><br>
-                        <span>Duty Staff</span>
+                
+                <div class="header-right-actions">
+                    <button type="button" class="btn-change-pin" id="changePinBtn" title="Change your 4-digit staff PIN">
+                        <i class="fa-solid fa-key"></i> Change PIN
+                    </button>
+                    <div class="user-profile-top">
+                        <div class="profile-info" id="profileInfoText">
+                            <strong>Loading...</strong><br>
+                            <span>Duty Staff</span>
+                        </div>
+                        <div class="profile-icon"><i class="fa-solid fa-user-doctor"></i></div>
                     </div>
-                    <div class="profile-icon"><i class="fa-solid fa-user-doctor"></i></div>
                 </div>
             </header>
 
@@ -166,7 +170,6 @@
                                     </tr>
                                 </thead>
                                 <tbody id="todayScheduleTableBody">
-                                    <!-- Dynamic Rows Injected by abtc-home.js -->
                                     <tr>
                                         <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">
                                             <i class="fa-solid fa-spinner fa-spin" style="margin-right: 6px;"></i> Loading today's schedule...
@@ -198,37 +201,56 @@
         </main>
     </div>
 
-    <script type="module" src="../../assets/js/abtc/abtc-home.js"></script>
-    <script type="module" src="../../assets/js/main/sidebar.js"></script>
-    <div id="logoutModal" class="logout-modal">
-    <div class="logout-modal-content">
-        <h3>Confirm Logout</h3>
-        <p>Are you sure you want to log out?</p>
+    <!-- CHANGE PIN MODAL WITH SINGLE "SHOW PINS" CHECKBOX -->
+    <div id="changePinModal" class="pin-modal-overlay">
+        <div class="pin-modal-card">
+            <div class="pin-modal-header">
+                <h3><i class="fa-solid fa-shield-key"></i> Update Security PIN</h3>
+                <button type="button" class="pin-modal-close" id="closePinModalBtn">&times;</button>
+            </div>
+            <p class="pin-modal-desc">Enter your current 4-digit PIN followed by your new PIN to ensure personal accountability on records.</p>
+            
+            <form id="changePinForm">
+                <div class="pin-form-group">
+                    <label for="currentPinInput">Current 4-Digit PIN</label>
+                    <input type="password" id="currentPinInput" maxlength="4" placeholder="••••" inputmode="numeric" required class="pin-field">
+                </div>
+                
+                <div class="pin-form-group">
+                    <label for="newPinInput">New 4-Digit PIN</label>
+                    <input type="password" id="newPinInput" maxlength="4" placeholder="••••" inputmode="numeric" required class="pin-field">
+                </div>
+                
+                <div class="pin-form-group">
+                    <label for="confirmPinInput">Confirm New PIN</label>
+                    <input type="password" id="confirmPinInput" maxlength="4" placeholder="••••" inputmode="numeric" required class="pin-field">
+                </div>
 
-        <div class="logout-modal-actions">
-            <button class="logout-no" onclick="closeLogoutModal()">
-                No
-            </button>
+                <!-- Unified Toggle Checkbox -->
+                <div class="show-pins-group">
+                    <label class="show-pins-label" for="showPinsCheckbox">
+                        <input type="checkbox" id="showPinsCheckbox">
+                        <span>Show PIN numbers</span>
+                    </label>
+                </div>
 
-            <button class="logout-yes" onclick="confirmLogout()">
-                Yes, Logout
-            </button>
+                <div class="pin-modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelPinBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="savePinBtn">Update PIN</button>
+                </div>
+            </form>
         </div>
     </div>
-</div>
 
-<script>
-    function showLogoutModal() {
-        document.getElementById("logoutModal").style.display = "flex";
-    }
+    <!-- Page Controller -->
+    <script type="module" src="../../assets/js/abtc/abtc-home.js"></script>
+    
+    <!-- Universal Sidebar Controller -->
+    <script src="../../assets/js/main/sidebar.js"></script>
 
-    function closeLogoutModal() {
-        document.getElementById("logoutModal").style.display = "none";
-    }
+    <!-- Logout Modal -->
+    
 
-    function confirmLogout() {
-        window.location.href = "abtc-profiles.html";
-    }
-</script>
+    
 </body>
 </html>

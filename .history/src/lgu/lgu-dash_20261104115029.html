@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LGU Dashboard | CRIS</title>
+
+    <link rel="stylesheet" href="../../assets/css/lgu/lgu-dash.css">
+    <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
+    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+<div class="container">
+
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="sidebar" id="sidebar">
+        <script>
+            if (localStorage.getItem("sidebarCollapsed") === "true") {
+                document.getElementById("sidebar").classList.add("collapsed");
+            }
+        </script>
+
+        <div class="sidebar-header">
+            <div class="brand-logo">
+                <img src="../../assets/images/cris-icon-no-background.png" alt="CRIS Logo">
+            </div>
+            <div class="brand-info">
+                <span class="brand-title">Community-Centric Rabies Information Systems</span>
+                <span class="brand-badge">LGU Module</span>
+            </div>
+            <button id="sidebarToggle" class="toggle-btn" type="button" aria-label="Toggle Sidebar" aria-expanded="true">
+                <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="sidebar-nav">
+            <div class="nav-group">
+                <span class="nav-label">Analytics</span>
+                <a href="lgu-dash.html" class="nav-item active" title="LGU Dashboard">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="9"/>
+                        <rect x="14" y="3" width="7" height="5"/>
+                        <rect x="14" y="12" width="7" height="9"/>
+                        <rect x="3" y="16" width="7" height="5"/>
+                    </svg>
+                    <span class="nav-text">LGU Dashboard</span>
+                </a>
+                <a href="lgu-reports.html" class="nav-item" title="Reports &amp; Drafts">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <span class="nav-text">Reports &amp; Drafts</span>
+                </a>
+                <a href="lgu-animal-registry.html" class="nav-item" title="Animal Registry">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 3 3z"/>
+                        <path d="M18 21v-2a4 4 0 0 0-4-4H10a4 4 0 0 0-4 4v2"/>
+                        <circle cx="18" cy="8" r="1.5"/>
+                        <circle cx="6" cy="8" r="1.5"/>
+                    </svg>
+                    <span class="nav-text">Animal Registry</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="lgu-settings.html" class="nav-item" title="Settings">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <span class="nav-text">Settings</span>
+            </a>
+            <button id="logout-btn" class="nav-item logout-item" type="button" title="Logout">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span class="nav-text">Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content" id="mainContent">
+
+        <header class="header">
+            <div class="header-title">
+                <h1 id="lguMunicipalTitle">LGU RABIES COMMAND CENTER</h1>
+                <span>Municipal / City Health &amp; Rabies Surveillance Command</span>
+            </div>
+            <div class="user-profile-top">
+                <div class="profile-info">
+                    <strong>Municipal Health Office</strong>
+                    <span>LGU Administrator</span>
+                </div>
+                <div class="profile-icon"><i class="fa-solid fa-building-user"></i></div>
+            </div>
+        </header>
+
+        <!-- CLUSTER ALERT (shown only when a barangay has 2 or more pending reports) -->
+        <section class="alert-banner" id="clusterAlert" hidden>
+            <div class="alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="alert-details">
+                <strong id="clusterAlertTitle"></strong>
+                <span id="clusterAlertText"></span>
+            </div>
+            <a href="lgu-reports.html" class="alert-action-btn">Inspect Incidents <i class="fa-solid fa-arrow-right"></i></a>
+        </section>
+
+        <!-- SUMMARY METRICS -->
+        <section class="metrics" aria-label="Summary metrics">
+            <article class="card metric-card">
+                <div class="metric-icon orange"><i class="fa-solid fa-inbox"></i></div>
+                <div class="metric-info">
+                    <h3>Barangay Intake Feed</h3>
+                    <div class="value" id="pendingIntakeCount">0</div>
+                    <span class="metric-subtitle" id="intakeSubtitle">Awaiting verification</span>
+                </div>
+            </article>
+
+            <article class="card metric-card">
+                <div class="metric-icon gold"><i class="fa-solid fa-house-medical"></i></div>
+                <div class="metric-info">
+                    <h3>Monitored Barangays</h3>
+                    <div class="value" id="totalBarangaysCount">0</div>
+                    <span class="metric-subtitle">Reporting incidents</span>
+                </div>
+            </article>
+
+            <article class="card metric-card danger-zone">
+                <div class="metric-icon red"><i class="fa-solid fa-dog"></i></div>
+                <div class="metric-info">
+                    <h3>Animals Under Watch</h3>
+                    <div class="value" id="quarantineAnimalsCount">0</div>
+                    <span class="metric-subtitle">Under quarantine</span>
+                </div>
+            </article>
+
+            <article class="card metric-card">
+                <div class="metric-icon dark"><i class="fa-solid fa-file-circle-check"></i></div>
+                <div class="metric-info">
+                    <h3>PHO Draft Reports</h3>
+                    <div class="value" id="phoDraftCount">0</div>
+                    <span class="metric-subtitle">Awaiting transmission</span>
+                </div>
+            </article>
+        </section>
+
+        <!-- WORKSPACE -->
+        <section class="dashboard-grid">
+
+            <!-- INCIDENT INTAKE TABLE -->
+            <div class="card incident-card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-clipboard-list"></i> Recent Barangay Incident Reports</h3>
+                    <a href="lgu-reports.html" class="card-link">View All Reports <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+
+                <div class="intake-toolbar">
+                    <div class="search-field">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="search" id="intakeSearchInput" placeholder="Search report ID, barangay, or incident" aria-label="Search incident reports">
+                    </div>
+
+                    <select id="statusFilterSelect" class="toolbar-select" aria-label="Filter by status">
+                        <option value="">All statuses</option>
+                        <option value="pending">Pending Review</option>
+                        <option value="verified">Verified</option>
+                        <option value="flagged">Flagged Risk</option>
+                    </select>
+
+                    <button type="button" id="exportIntakeLogBtn" class="btn-export">
+                        <i class="fa-solid fa-file-csv"></i> Export CSV
+                    </button>
+
+                    <span class="result-count" id="intakeCount" aria-live="polite"></span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Report ID</th>
+                                <th>Barangay</th>
+                                <th>Incident / Bite Type</th>
+                                <th>Animal Status</th>
+                                <th>Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lguIntakeTableBody"></tbody>
+                    </table>
+                </div>
+                <p class="empty-state" id="intakeEmpty" hidden>No incident reports match your search or filter.</p>
+            </div>
+
+            <!-- NOTICES -->
+            <aside class="side-column">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-bullhorn"></i> LGU Notices &amp; Tasks</h3>
+                    </div>
+                    <div id="noticeList"></div>
+                </div>
+            </aside>
+
+        </section>
+    </main>
+</div>
+
+<!-- ==================== CONFIRM ACTION MODAL (VERIFY / FLAG) ==================== -->
+<div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-hidden="true">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="confirmTitle"></h3>
+            <button type="button" class="close-modal-btn" data-close aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="confirmMessage"></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-modal btn-modal-cancel" id="confirmCancelBtn" data-close>Cancel</button>
+            <button type="button" class="btn-modal" id="confirmActionBtn"></button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== INCIDENT DETAILS MODAL ==================== -->
+<div class="modal-overlay" id="detailsModal" role="dialog" aria-modal="true" aria-labelledby="detailsTitle" aria-hidden="true">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="detailsTitle">Incident Report Details</h3>
+            <button type="button" class="close-modal-btn" data-close aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <dl class="details-list">
+                <dt>Report ID</dt>
+                <dd id="detailId"></dd>
+                <dt>Barangay</dt>
+                <dd id="detailBarangay"></dd>
+                <dt>Incident / Bite Type</dt>
+                <dd id="detailBiteType"></dd>
+                <dt>Animal Status</dt>
+                <dd id="detailAnimalStatus"></dd>
+                <dt>Status</dt>
+                <dd id="detailStatus"></dd>
+            </dl>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-modal btn-modal-cancel" data-close>Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== LOGOUT CONFIRMATION ==================== -->
+<div class="logout-modal" id="logoutModal" aria-hidden="true">
+    <div class="logout-modal-content">
+        <h3>Log out?</h3>
+        <p>You will be returned to the login page.</p>
+        <div class="logout-modal-actions">
+            <button type="button" class="logout-no" data-close>Cancel</button>
+            <button type="button" class="logout-yes" id="logoutConfirm">Logout</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script type="text/javascript" src="../../assets/js/main/sidebar-master.js"></script>
+<script src="../../assets/js/lgu/lgu-dash.js"></script>
+</body>
+</html>

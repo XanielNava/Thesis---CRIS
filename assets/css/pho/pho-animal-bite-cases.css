@@ -1,12 +1,5 @@
-/* ==============================================================================
-   pho-animal-bite-cases.css - PHO Animal Bite Cases Ledger Styling
-   ============================================================================== */
-
+/* CRIS SUNSET PALETTE & LEDGER VARIABLES */
 :root {
-    --sidebar-width: 260px;
-    --sidebar-collapsed-width: 76px;
-    --sidebar-bg: #111625;
-    --sidebar-border: rgba(255, 255, 255, 0.07);
     --text-muted: #7E8B9B;
     --text-light: #F1F5F9;
     --sunset-orange: #EA6113;
@@ -17,7 +10,7 @@
     --main-bg: #FFFAF0;
     --card-bg: #FFFFFF;
     --border-color: #E2E8F0;
-    --transition-smooth: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -29,214 +22,12 @@
 body {
     background-color: var(--main-bg);
     color: var(--text-dark);
-    font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow: hidden;
-}
-
-.container,
-.app-container {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-}
-
-/* ================= SIDEBAR STYLING ================= */
-.sidebar {
-    width: var(--sidebar-width);
-    height: 100vh;
-    background-color: var(--sidebar-bg);
-    border-right: 1px solid var(--sidebar-border);
-    display: flex;
-    flex-direction: column;
-    padding: 20px 14px;
-    transition: width 0.3s cubic-bezier(0.2, 0, 0, 1);
-    position: relative !important;
-    user-select: none;
-    flex-shrink: 0;
-    z-index: 1000 !important;
-}
-
-.sidebar.collapsed {
-    width: var(--sidebar-collapsed-width) !important;
-}
-
-.sidebar-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding-bottom: 20px;
-    margin-bottom: 12px;
-    border-bottom: 1px solid var(--sidebar-border);
-    width: 100%;
-}
-
-.brand-logo img {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
-    flex-shrink: 0;
-}
-
-.brand-info {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-width: 0;
-    padding-right: 12px;
-}
-
-.sidebar.collapsed .brand-info {
-    opacity: 0;
-    display: none;
-}
-
-.brand-title {
-    color: var(--text-light);
-    font-size: 12.5px;
-    font-weight: 700;
-    line-height: 1.35;
-}
-
-.brand-badge {
-    color: var(--sunset-gold);
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-top: 2px;
-}
-
-.toggle-btn {
-    position: absolute !important;
-    top: 32px !important;
-    right: -16px !important;
-    transform: translateY(-50%) !important;
-    width: 32px;
-    height: 32px;
-    background: #111625;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 50%;
-    color: var(--text-light);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition-smooth);
-    z-index: 9999 !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-}
-
-.toggle-btn:hover {
-    background: var(--sunset-orange);
-    border-color: var(--sunset-orange);
-    transform: translateY(-50%) scale(1.08) !important;
-}
-
-.sidebar.collapsed .chevron-icon {
-    transform: rotate(180deg);
-}
-
-.chevron-icon {
-    width: 18px;
-    height: 18px;
-    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
-}
-
-.sidebar-nav {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.nav-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 0.08em;
-    padding: 0 10px;
-    margin-bottom: 6px;
-    display: block;
-}
-
-.sidebar.collapsed .nav-label {
-    display: none;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 13.5px;
-    font-weight: 500;
-    border-radius: 8px;
-    position: relative;
-    transition: background 0.2s ease, color 0.2s ease;
-    white-space: nowrap;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    width: 100%;
-}
-
-.nav-icon {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-}
-
-.nav-item:hover {
-    color: var(--text-light);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.sidebar.collapsed .nav-item {
-    justify-content: center;
-    padding: 10px 0;
-}
-
-.sidebar.collapsed .nav-text {
-    display: none;
-}
-
-.nav-item.active {
-    color: var(--text-light);
-    background: rgba(234, 97, 19, 0.12);
-    font-weight: 600;
-}
-
-.nav-item.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 6px;
-    bottom: 6px;
-    width: 3.5px;
-    background-color: var(--sunset-orange);
-    border-radius: 0 4px 4px 0;
-}
-
-.sidebar-footer {
-    padding-top: 16px;
-    border-top: 1px solid var(--sidebar-border);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.logout-item:hover {
-    color: #F87171;
-    background: rgba(239, 68, 68, 0.1);
 }
 
 /* ================= MAIN CONTENT & HEADER ================= */
+/* Sidebar geometry and transitions are completely delegated to sidebar-master.css */
 .main-content {
     flex: 1;
     min-width: 0;
@@ -262,7 +53,7 @@ body {
 
 .header h1 {
     margin: 0;
-    font-size: 24px;
+    font-size: 35px;
     font-weight: 800;
     letter-spacing: -0.01em;
 }
@@ -632,7 +423,7 @@ body {
         display: none !important;
     }
 
-    .container,
+    #appLayout,
     .main-content {
         padding: 0 !important;
         margin: 0 !important;
@@ -671,4 +462,110 @@ body {
     .search-box {
         width: 100%;
     }
+}
+
+/* ================= LOGOUT CONFIRMATION MODAL ================= */
+.logout-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 16px;
+    animation: fadeInModal 0.2s ease forwards;
+}
+
+.logout-modal.open {
+    display: flex;
+}
+
+.logout-modal-content {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 28px 24px 24px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+}
+
+.logout-modal.open .logout-modal-content {
+    transform: scale(1);
+}
+
+.logout-modal-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #FEE2E2;
+    color: #DC2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.logout-modal-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.logout-modal-content h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+}
+
+.logout-modal-content p {
+    margin: 0 0 24px;
+    font-size: 13.5px;
+    color: #64748B;
+    line-height: 1.5;
+}
+
+.logout-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.logout-modal-actions button {
+    flex: 1;
+    height: 40px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-logout-cancel {
+    background: #F1F5F9;
+    color: #475569;
+}
+
+.btn-logout-cancel:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+}
+
+.btn-logout-confirm {
+    background: #DC2626;
+    color: #FFFFFF;
+}
+
+.btn-logout-confirm:hover {
+    background: #B91C1C;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }

@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="../../assets/css/abtc/abtc-inventory.css">
     <link rel="stylesheet" href="../../assets/css/abtc/abtc-master.css">
     <link rel="stylesheet" href="../../assets/css/main/sidebar-master.css">
-    <link rel="icon" href="../../assets/images/cris-icon-no-background.png" type="image/x-icon">
+    <link rel="icon" href="../../assets/images/cris-icon.png?v=2" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900&display=swap" rel="stylesheet">
@@ -19,24 +19,17 @@
 
 <div class="container">
 <script>
-        if (localStorage.getItem("sidebarCollapsed") === "true") {
-            document.querySelector(".container").classList.add("collapsed");
-        }
-    </script>
-   <!-- PROFESSIONAL SAAS SIDEBAR (ABTC MODULE — INVENTORY ACTIVE) -->
+    if (localStorage.getItem("sidebarCollapsed") === "true") {
+        document.documentElement.classList.add("sidebar-pre-collapsed");
+    }
+</script>
 <aside class="sidebar" id="sidebar">
-    <script>
-        if (localStorage.getItem("sidebarCollapsed") === "true") {
-            document.getElementById("sidebar").classList.add("collapsed");
-            document.querySelector(".container")?.classList.add("collapsed");
-        }
-    </script>
     <div class="sidebar-header">
         <div class="brand-logo">
             <img src="../../assets/images/logo-login.png" alt="CRIS Logo">
         </div>
         <div class="brand-info">
-            <span class="brand-title">Community-Centric Rabies Intelligence Information Systems</span>
+            <span class="brand-title">CRIS</span>
             <span class="brand-badge">ABTC Module</span>
         </div>
         <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle Sidebar">
@@ -69,7 +62,7 @@
     </div>
 
     <div class="sidebar-footer">
-        <button class="nav-item logout-item" onclick="showLogoutModal()">
+        <button type="button" id="logout-btn" class="nav-item logout-item">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             <span class="nav-text">Logout</span>
         </button>
@@ -223,36 +216,9 @@
 </div>
 
 <script type="module" src="../../assets/js/abtc/abtc-inventory.js"></script>
-<script type="module" src="../../assets/js/main/sidebar.js"></script>
-<div id="logoutModal" class="logout-modal">
-    <div class="logout-modal-content">
-        <h3>Confirm Logout</h3>
-        <p>Are you sure you want to log out?</p>
+<script src="../../assets/js/main/sidebar.js"></script>
 
-        <div class="logout-modal-actions">
-            <button class="logout-no" onclick="closeLogoutModal()">
-                No
-            </button>
 
-            <button class="logout-yes" onclick="confirmLogout()">
-                Yes, Logout
-            </button>
-        </div>
-    </div>
-</div>
 
-<script>
-    function showLogoutModal() {
-        document.getElementById("logoutModal").style.display = "flex";
-    }
-
-    function closeLogoutModal() {
-        document.getElementById("logoutModal").style.display = "none";
-    }
-
-    function confirmLogout() {
-        window.location.href = "abtc-profiles.html";
-    }
-</script>
 </body>
 </html>

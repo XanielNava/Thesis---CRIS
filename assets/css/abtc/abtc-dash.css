@@ -151,13 +151,14 @@ body {
 }
 
 .header-title h1 {
-  font-size: 20px;
-  font-weight: 900;
+  font-size: 25px;
+  font-weight: bold;
   letter-spacing: 0.5px;
   margin: 0;
 }
 
 .header-title span {
+  color: #ffffff;
   font-size: 12px;
   opacity: 0.9;
 }

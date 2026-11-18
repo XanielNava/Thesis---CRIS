@@ -1,6 +1,6 @@
-// abtc-inventory.js - Read-Only Nurse Inventory & Requisition Generator (Optimized Pipeline)
+// abtc-inventory.js - Nurse Inventory Monitor & Dynamic FIFO Requisition Generator
+// Conformed to CRIS Master Architecture ('facilities/{facilityId}/vaccine-inventory')
 
-// 1. Import required Firestore & Auth functions from CDN
 import { 
     collection, onSnapshot, doc, getDoc, addDoc 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
@@ -8,20 +8,12 @@ import {
     onAuthStateChanged 
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
-// 2. Import shared central instances (Managed by firebase-config.js switch)
 import { auth, db } from '../firebase/firebase-config.js';
 
-let activeFacilityId = null;
+let activeFacilityId = sessionStorage.getItem("activeFacilityId") || null;
+let currentFacilityName = sessionStorage.getItem("activeFacilityName") || null;
+let currentResolvedPersonnel = sessionStorage.getItem("activePersonnelName") || "Duty Personnel";
 let inventoryList = [];
-let currentResolvedPersonnel = "Duty Personnel";
-
-const STANDARD_VACCINES = [
-    "Verorab",
-    "Rabipur",
-    "Speeda",
-    "Abhayrab",
-    "RIG (Rabies Immunoglobulin)"
-];
 
 // DOM References
 const inventoryTableBody = document.getElementById("inventoryTableBody");
@@ -30,6 +22,7 @@ const statTotalDoses = document.getElementById("statTotalDoses");
 const statLowStockCount = document.getElementById("statLowStockCount");
 const searchInventoryInput = document.getElementById("searchInventoryInput");
 const profileContainer = document.getElementById("profileInfoText");
+const dashboardTitle = document.getElementById("dashboardTitle");
 
 // Modal References
 const requisitionModal = document.getElementById("requisitionModal");
@@ -40,41 +33,44 @@ const requisitionForm = document.getElementById("requisitionForm");
 const reqVaccineBrand = document.getElementById("reqVaccineBrand");
 
 /* --------------------
-    1. Dynamic Dropdown Stock Indicator Population
+    1. Dynamic Requisition Dropdown (FIFO Integrated)
 -------------------- */
 function populateRequisitionDropdown() {
     if (!reqVaccineBrand) return;
 
-    reqVaccineBrand.innerHTML = `<option value="" disabled selected>-- Select Vaccine --</option>`;
+    reqVaccineBrand.innerHTML = `<option value="" disabled selected>-- Select Vaccine from Active Stock --</option>`;
 
-    const brandStockMap = {};
-    STANDARD_VACCINES.forEach(v => brandStockMap[v] = 0);
+    if (inventoryList.length === 0) {
+        reqVaccineBrand.innerHTML += `<option value="" disabled>No vaccines registered in facility inventory</option>`;
+        return;
+    }
+
+    const brandSummaryMap = {};
 
     inventoryList.forEach(item => {
-        const brand = item.brandName;
+        const brand = item.brandName ? item.brandName.trim() : "Unknown Vaccine";
         const vials = Number(item.vialsLeft) || 0;
-        
-        if (brandStockMap[brand] !== undefined) {
-            brandStockMap[brand] += vials;
-        } else {
-            brandStockMap[brand] = vials;
+
+        if (!brandSummaryMap[brand]) {
+            brandSummaryMap[brand] = { totalVials: 0, earliestExp: item.expDate || "N/A" };
         }
+        brandSummaryMap[brand].totalVials += vials;
     });
 
-    STANDARD_VACCINES.forEach(brand => {
-        const count = brandStockMap[brand] || 0;
+    Object.keys(brandSummaryMap).sort().forEach(brand => {
+        const summary = brandSummaryMap[brand];
         const option = document.createElement("option");
         option.value = brand;
 
-        if (count === 0) {
+        if (summary.totalVials === 0) {
             option.textContent = `${brand} (0 vials — OUT OF STOCK)`;
             option.disabled = true;
             option.className = "opt-out-of-stock";
-        } else if (count <= 5) {
-            option.textContent = `${brand} (${count} vial[s] left — LOW STOCK)`;
+        } else if (summary.totalVials <= 5) {
+            option.textContent = `${brand} (${summary.totalVials} vial[s] left — LOW STOCK)`;
             option.className = "opt-low-stock";
         } else {
-            option.textContent = `${brand} (${count} vials available)`;
+            option.textContent = `${brand} (${summary.totalVials} vials available • FIFO Active)`;
             option.className = "opt-in-stock";
         }
 
@@ -105,45 +101,64 @@ if (requisitionModal) {
 }
 
 /* --------------------
-    3. Session Observer & Caching
+    3. Session & Facility Branding Resolution
 -------------------- */
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        activeFacilityId = user.uid;
-        
-        try {
-            const userRole = sessionStorage.getItem("activeDesignation") || localStorage.getItem("activeDesignation") || "Nurse";
-            let activePersonnel = sessionStorage.getItem("activePersonnelName") || localStorage.getItem("activePersonnelName");
+async function initInventorySession() {
+    const userRole = sessionStorage.getItem("activeDesignation") || "Nurse";
+    const displayRoleLabel = userRole === "Owner" ? "Administrator / Owner" : "Personnel";
 
-            if (!activePersonnel) {
-                const facilitySnapshot = await getDoc(doc(db, "facilities", user.uid));
-                if (facilitySnapshot.exists()) {
-                    const facilityData = facilitySnapshot.data();
-                    activePersonnel = userRole === "Owner" ? facilityData.contactInfo?.contactPerson : "Attending Personnel";
-                    sessionStorage.setItem("activePersonnelName", activePersonnel);
+    if (profileContainer) {
+        profileContainer.innerHTML = `<strong>${currentResolvedPersonnel}</strong><br><span>${displayRoleLabel}</span>`;
+    }
+
+    if (activeFacilityId) {
+        if (!currentFacilityName) {
+            try {
+                const facSnap = await getDoc(doc(db, "facilities", activeFacilityId));
+                if (facSnap.exists()) {
+                    const facData = facSnap.data();
+                    const name = facData.facilityName || facData.name || "ABTC Facility";
+                    const acronym = facData.acronym || facData.code || "ABTC";
+                    currentFacilityName = `${name} (${acronym.toUpperCase()})`;
+                    sessionStorage.setItem("activeFacilityName", name);
+                    sessionStorage.setItem("activeFacilityAcronym", acronym);
                 }
+            } catch (err) {
+                console.warn("Facility branding resolution skipped:", err);
             }
-
-            const activeStaffMember = activePersonnel || "Duty Personnel";
-            const displayRoleLabel = userRole === "Owner" ? "Administrator / Owner" : "Personnel";
-
-            currentResolvedPersonnel = activeStaffMember;
-
-            if (profileContainer) {
-                profileContainer.innerHTML = `<strong>${activeStaffMember}</strong><br><span>${displayRoleLabel}</span>`;
-            }
-        } catch (e) {
-            console.error("Inventory session error:", e);
         }
 
-        streamInventory(user.uid);
-    } else {
-        window.location.href = "abtc-login.html";
+        if (dashboardTitle && currentFacilityName) {
+            dashboardTitle.innerText = `${currentFacilityName.toUpperCase()} INVENTORY`;
+        }
+
+        streamInventory(activeFacilityId);
     }
-});
+}
+
+initInventorySession();
+
+if (auth) {
+    onAuthStateChanged(auth, async (user) => {
+        if (user && !activeFacilityId) {
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists() && userDoc.data().facilityId) {
+                    activeFacilityId = userDoc.data().facilityId;
+                } else {
+                    activeFacilityId = user.uid;
+                }
+            } catch (e) {
+                activeFacilityId = user.uid;
+            }
+            sessionStorage.setItem("activeFacilityId", activeFacilityId);
+            initInventorySession();
+        }
+    });
+}
 
 /* --------------------
-    4. Stream Subcollection Inventory Records
+    4. Real-time Inventory Subcollection Stream (FIFO Ordered)
 -------------------- */
 function streamInventory(facilityId) {
     const invColRef = collection(db, "facilities", facilityId, "vaccine-inventory");
@@ -165,8 +180,21 @@ function streamInventory(facilityId) {
 
             inventoryList.push({
                 docId: docSnap.id,
-                ...data
+                ...data,
+                vialsLeft: vials,
+                dosesPerVial: dosesPerVial
             });
+        });
+
+        // FIFO/FEFO: Sort by expiration date, then arrival date
+        inventoryList.sort((a, b) => {
+            const expA = a.expDate ? new Date(a.expDate).getTime() : Infinity;
+            const expB = b.expDate ? new Date(b.expDate).getTime() : Infinity;
+            if (expA !== expB) return expA - expB;
+
+            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return timeA - timeB;
         });
 
         if (statTotalVials) statTotalVials.innerText = totalVials;
@@ -193,11 +221,13 @@ function streamInventory(facilityId) {
 
             setTimeout(() => { openReqModal(); }, 250);
         }
+    }, (error) => {
+        console.error("Inventory real-time stream error:", error);
     });
 }
 
 /* --------------------
-    5. Render Table
+    5. Render Live Stock Table with Priority Indicators
 -------------------- */
 function renderInventoryTable() {
     if (!inventoryTableBody) return;
@@ -214,16 +244,26 @@ function renderInventoryTable() {
         return;
     }
 
+    const nextFifoBrandMap = {};
+    inventoryList.forEach(item => {
+        if (item.vialsLeft > 0 && !nextFifoBrandMap[item.brandName]) {
+            nextFifoBrandMap[item.brandName] = item.docId;
+        }
+    });
+
     filtered.forEach(item => {
         const row = document.createElement("tr");
 
         let statusClass = "status-in-stock";
-        let statusText = "In Stock";
-        const vials = Number(item.vialsLeft) || 0;
+        let statusText = "Ready for Duty";
+        const vials = item.vialsLeft;
 
         if (vials === 0) {
             statusClass = "status-out-of-stock";
-            statusText = "Out of Stock";
+            statusText = "Depleted";
+        } else if (item.docId === nextFifoBrandMap[item.brandName]) {
+            statusClass = "status-fifo-next";
+            statusText = "Next Up (FIFO)";
         } else if (vials <= 5) {
             statusClass = "status-low-stock";
             statusText = "Low Stock";
@@ -234,11 +274,11 @@ function renderInventoryTable() {
             <td>${item.batchNo}</td>
             <td><strong>${item.vialsLeft}</strong> vials</td>
             <td>${item.dosesPerVial} doses/vial</td>
-            <td>${item.expDate}</td>
+            <td>${item.expDate || 'N/A'}</td>
             <td><span class="stock-status-badge ${statusClass}">${statusText}</span></td>
             <td style="text-align: center;">
                 ${vials > 0 ? 
-                    `<span style="color:#2b8a3e; font-weight:bold; font-size:12px;"><i class="fa-solid fa-circle-check"></i> Ready for Duty</span>` : 
+                    `<span style="color:#2b8a3e; font-weight:bold; font-size:12px;"><i class="fa-solid fa-circle-check"></i> Available</span>` : 
                     `<span style="color:#e03131; font-weight:bold; font-size:12px;"><i class="fa-solid fa-circle-xmark"></i> Depleted</span>`
                 }
             </td>
@@ -251,7 +291,7 @@ function renderInventoryTable() {
 if (searchInventoryInput) searchInventoryInput.addEventListener("input", renderInventoryTable);
 
 /* --------------------
-    6. Form Submission & Ticket Printer
+    6. Requisition Ticket Generation & Printing
 -------------------- */
 if (requisitionForm) {
     requisitionForm.addEventListener("submit", async (e) => {
@@ -266,6 +306,7 @@ if (requisitionForm) {
         const reqTicketId = "REQ-" + Date.now().toString().slice(-6);
 
         if (!brand) return alert("Please select a valid vaccine brand.");
+        if (!activeFacilityId) return alert("Session Error: Facility identification missing. Please re-authenticate.");
 
         try {
             await addDoc(collection(db, "facilities", activeFacilityId, "vaccine-requisitions"), {
@@ -276,6 +317,7 @@ if (requisitionForm) {
                 patientName: patient,
                 remarks: remarks,
                 status: "Pending Release",
+                policy: "FIFO / FEFO Priority",
                 timestamp: new Date().toISOString()
             });
 
@@ -304,7 +346,8 @@ if (requisitionForm) {
                     <div class="ticket-card">
                         <div class="header">
                             <h2>CRIS | VIAL REQUISITION TICKET</h2>
-                            <p>Community-Centric Rabies Intelligence System — ABTC Module</p>
+                            <p>${currentFacilityName || 'Animal Bite Treatment Center'}</p>
+                            <small style="color: #2563eb; font-weight: bold;">[DISPENSE VIA FIRST-IN FIRST-OUT (FIFO)]</small>
                         </div>
                         <div class="row"><span class="label">Ticket No:</span><span class="value">${reqTicketId}</span></div>
                         <div class="row"><span class="label">Date & Time:</span><span class="value">${new Date().toLocaleString()}</span></div>
@@ -320,7 +363,7 @@ if (requisitionForm) {
                         <div class="pharmacy-section">
                             <strong>PHARMACY RELEASE VERIFICATION (OFFICIAL USE ONLY)</strong>
                             <p style="margin: 6px 0;">[ ] Approved & Released &nbsp;&nbsp;&nbsp;&nbsp; [ ] Unavailable</p>
-                            <p style="margin: 6px 0;">Lot / Batch No. Released: _______________________</p>
+                            <p style="margin: 6px 0;">FIFO Lot(s) Released: _______________________</p>
                             <div class="sig-line">Pharmacist Signature & Date</div>
                         </div>
                     </div>
@@ -338,7 +381,6 @@ if (requisitionForm) {
     });
 }
 
-// Logout
 document.getElementById("logout-btn")?.addEventListener("click", (e) => {
     e.preventDefault();
     if (confirm("Are you sure you want to exit your session?")) {
