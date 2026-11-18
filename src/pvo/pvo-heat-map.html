@@ -124,10 +124,6 @@
                 <h1>HEATMAPS</h1>
                 <p>Spatial distribution of animal bite cases and rabies deaths across Iloilo Province</p>
             </div>
-            <!-- <div class="header-chip">
-                <i class="fa-solid fa-satellite"></i>
-                <span>Satellite view</span>
-            </div> -->
         </header>
 
         <!-- FILTERS -->
@@ -162,7 +158,7 @@
             </div>
         </section>
 
-        <!-- STATISTICS -->
+        <!-- PVO STATISTICS (Animal Bite Incidence & Bite Exposure Rate) -->
         <section class="statistics-container" aria-label="Summary statistics">
             <article class="stat-card">
                 <div class="stat-icon icon-blue"><i class="fa-solid fa-users"></i></div>
@@ -172,24 +168,24 @@
                 </div>
             </article>
             <article class="stat-card">
-                <div class="stat-icon icon-orange"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="stat-icon icon-amber"><i class="fa-solid fa-paw"></i></div>
                 <div class="stat-body">
-                    <small>Prevalence Rate (per 1.5 million population)</small>
-                    <h2 id="prevalenceRate">0%</h2>
+                    <small>Animal Bite Incidence</small>
+                    <h2 id="incidentsRate">0.00%</h2>
                 </div>
             </article>
             <article class="stat-card">
-                <div class="stat-icon icon-amber"><i class="fa-solid fa-paw"></i></div>
+                <div class="stat-icon icon-orange"><i class="fa-solid fa-chart-line"></i></div>
                 <div class="stat-body">
-                    <small>Incidents Rate (New Cases)</small>
-                    <h2 id="incidentsRate">0%</h2>
+                    <small>Bite Exposure Rate</small>
+                    <h2 id="prevalenceRate">0.00%</h2>
                 </div>
             </article>
             <article class="stat-card">
                 <div class="stat-icon icon-red"><i class="fa-solid fa-skull-crossbones"></i></div>
                 <div class="stat-body">
                     <small>Mortality Rate (Death Rate)</small>
-                    <h2 id="mortalityRate">0%</h2>
+                    <h2 id="mortalityRate">0.00%</h2>
                 </div>
             </article>
         </section>
@@ -199,7 +195,6 @@
             <div class="map-wrapper">
                 <div id="map" role="region" aria-label="Map of reported cases"></div>
 
-                <!-- Basemap switcher -->
                 <div class="basemap-switcher" role="group" aria-label="Map style">
                     <button type="button" class="basemap-btn is-active" data-basemap="satellite" aria-pressed="true">
                         <i class="fa-solid fa-satellite"></i> Satellite
@@ -209,7 +204,6 @@
                     </button>
                 </div>
 
-                <!-- Loading state -->
                 <div class="map-state" id="mapLoading" hidden>
                     <div class="map-state-card">
                         <i class="fa-solid fa-spinner fa-spin"></i>
@@ -217,7 +211,6 @@
                     </div>
                 </div>
 
-                <!-- Empty state -->
                 <div class="map-state map-state-empty" id="mapEmpty" hidden>
                     <div class="map-state-card">
                         <i class="fa-solid fa-circle-info"></i>
@@ -225,7 +218,6 @@
                     </div>
                 </div>
 
-                <!-- Legend -->
                 <div class="heatmap-overlay">
                     <h3>Heatmap Legend</h3>
                     <div class="legend-item" data-legend="bite"><span class="legend-box bite-color"></span>Animal Bite Cases</div>

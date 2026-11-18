@@ -218,7 +218,6 @@ async function loadCases() {
                 </td>
             </tr>
         `;
-        updateKpiSummary({ total: 0, tcv: 0, hr: 0, compII: 0, compIII: 0 });
     }
 }
 
@@ -300,7 +299,6 @@ function renderTable() {
                 </td>
             </tr>
         `;
-        updateKpiSummary({ total: 0, tcv: 0, hr: 0, compII: 0, compIII: 0 });
         createPagination(0);
         return;
     }
@@ -411,27 +409,7 @@ function renderTable() {
     `);
 
     tbody.innerHTML = tableRows.join("\n");
-    updateKpiSummary(totals);
     createPagination(totalPages);
-}
-
-/* 8. UPDATE TOP KPI SUMMARY MINI-CARDS */
-function updateKpiSummary(totals) {
-    const kpiBites = document.getElementById("kpiTotalBites");
-    const kpiTcv = document.getElementById("kpiTotalTcv");
-    const kpiHr = document.getElementById("kpiTotalHr");
-    const kpiPep = document.getElementById("kpiPepRate");
-
-    if (kpiBites) kpiBites.textContent = (totals.total || 0).toLocaleString();
-    if (kpiTcv) kpiTcv.textContent = (totals.tcv || 0).toLocaleString();
-    if (kpiHr) kpiHr.textContent = (totals.hr || 0).toLocaleString();
-    
-    if (kpiPep) {
-        const completed = (totals.compII || 0) + (totals.compIII || 0);
-        const totalBites = totals.total || 0;
-        const rate = totalBites > 0 ? ((completed / totalBites) * 100).toFixed(1) : "0.0";
-        kpiPep.textContent = `${rate}%`;
-    }
 }
 
 /* SEARCH EVENT LISTENER */
@@ -560,19 +538,16 @@ export function setupLogoutModal() {
         cancelBtn.addEventListener('click', closeLogout);
     }
 
-    // Close when clicking outside the box
     logoutModal.addEventListener('click', (e) => {
         if (e.target === logoutModal) closeLogout();
     });
 
-    // Close on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && logoutModal.classList.contains('open')) {
             closeLogout();
         }
     });
 
-    // Perform Sign Out
     if (confirmBtn) {
         confirmBtn.addEventListener('click', async () => {
             confirmBtn.disabled = true;
@@ -594,7 +569,6 @@ export function setupLogoutModal() {
     }
 }
 
-// Call on DOM ready:
 document.addEventListener('DOMContentLoaded', () => {
     setupLogoutModal();
 });
