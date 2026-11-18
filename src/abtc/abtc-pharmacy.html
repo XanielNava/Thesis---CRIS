@@ -110,73 +110,102 @@
             </div>
         </div>
 
-        <!-- SECTION 1: PENDING NURSE REQUISITION TICKETS -->
-        <div class="card full-width card-spacing">
-            <div class="section-title-bar">
-                <h3><i class="fa-solid fa-file-prescription icon-requisition"></i> Pending Nurse Requisition Tickets</h3>
-                <span class="subtext-muted">Live queue of vaccine release requests from duty stations (Click any row to inspect details)</span>
-            </div>
+        <!-- 2-COLUMN WORKSPACE: LEFT TABLES + RIGHT FACILITY CALENDAR -->
+        <div class="pharmacy-workspace-grid">
+            <div class="pharmacy-left-col">
+                <!-- SECTION 1: PENDING NURSE REQUISITION TICKETS -->
+                <div class="card full-width card-spacing">
+                    <div class="section-title-bar">
+                        <h3><i class="fa-solid fa-file-prescription icon-requisition"></i> Pending Nurse Requisition Tickets</h3>
+                        <span class="subtext-muted">Live queue of vaccine release requests from duty stations (Click any row to inspect details)</span>
+                    </div>
 
-            <div class="table-container">
-                <table class="dashboard-table">
-                    <thead>
-                        <tr>
-                            <th>Ticket ID</th>
-                            <th>Requested By</th>
-                            <th>Target Patient</th>
-                            <th>Item & Quantity</th>
-                            <th>Remarks</th>
-                            <th>Date / Time</th>
-                            <th class="text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="requisitionTableBody">
-                        <tr>
-                            <td colspan="7" class="table-empty-notice">
-                                <i class="fa-solid fa-spinner fa-spin"></i> Loading live requisitions queue...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- SECTION 2: BATCH INVENTORY LEDGER -->
-        <div class="card full-width">
-            
-            <div class="inventory-action-bar">
-                <div class="search-input-wrapper">
-                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    <input type="text" id="searchInventoryInput" class="search-inventory-input" placeholder="Search brand or batch no...">
+                    <div class="table-container">
+                        <table class="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Ticket ID</th>
+                                    <th>Requested By</th>
+                                    <th>Target Patient</th>
+                                    <th>Item & Quantity</th>
+                                    <th>Remarks</th>
+                                    <th>Date / Time</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="requisitionTableBody">
+                                <tr>
+                                    <td colspan="7" class="table-empty-notice">
+                                        <i class="fa-solid fa-spinner fa-spin"></i> Loading live requisitions queue...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <button id="btnOpenAddModal" class="btn-primary-action">
-                    <i class="fa-solid fa-plus"></i> Register Incoming Stock Batch
-                </button>
+
+                <!-- SECTION 2: BATCH INVENTORY LEDGER -->
+                <div class="card full-width">
+                    <div class="inventory-action-bar">
+                        <div class="search-input-wrapper">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" id="searchInventoryInput" class="search-inventory-input" placeholder="Search brand or batch no...">
+                        </div>
+                        <button id="btnOpenAddModal" class="btn-primary-action">
+                            <i class="fa-solid fa-plus"></i> Register Incoming Stock Batch
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Brand / Vaccine Name</th>
+                                    <th>Batch No.</th>
+                                    <th>Vials Left</th>
+                                    <th>Doses Per Vial</th>
+                                    <th>Expiration Date</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <tr>
+                                    <td colspan="7" class="table-loading-notice">
+                                        <i class="fa-solid fa-spinner fa-spin"></i> Loading stock records...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
-            <div class="table-container">
-                <table class="dashboard-table">
-                    <thead>
-                        <tr>
-                            <th>Brand / Vaccine Name</th>
-                            <th>Batch No.</th>
-                            <th>Vials Left</th>
-                            <th>Doses Per Vial</th>
-                            <th>Expiration Date</th>
-                            <th>Status</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventoryTableBody">
-                        <tr>
-                            <td colspan="7" class="table-loading-notice">
-                                <i class="fa-solid fa-spinner fa-spin"></i> Loading stock records...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <!-- RIGHT COLUMN: FACILITY CALENDAR & ADMIN ANNOUNCEMENTS -->
+            <aside class="pharmacy-side-panel">
+                <div class="card pharm-calendar-card">
+                    <div class="pharm-cal-header">
+                        <button type="button" id="pharmCalPrevBtn" class="pharm-cal-nav" aria-label="Previous Month">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <span id="pharmCalMonthLabel" class="pharm-cal-month">November 2026</span>
+                        <button type="button" id="pharmCalNextBtn" class="pharm-cal-nav" aria-label="Next Month">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
 
+                    <div class="pharm-cal-weekdays">
+                        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                    </div>
+
+                    <div id="pharmCalDaysGrid" class="pharm-cal-days"></div>
+                </div>
+
+                <div class="card pharm-notice-card">
+                    <h3 id="pharmSelectedDateLabel" class="pharm-selected-date">Today</h3>
+                    <div id="pharmDateAnnouncementsList"></div>
+                </div>
+            </aside>
         </div>
 
     </main>
@@ -289,10 +318,7 @@
     </div>
 </div>
 
-<script type="module" src="../../assets/js/abtc/abtc-pharmacy.js"></script>
-
-
-
-
+<script type="module" src="../../assets/js/abtc/ui/abtc-pharmacy-ui.js"></script>
+<script src="../../assets/js/main/sidebar.js"></script>
 </body>
 </html>

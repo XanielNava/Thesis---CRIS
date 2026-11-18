@@ -135,9 +135,7 @@
                         </div>
                         <div class="dashboard-filter-group">
                             <select id="yearFilter" class="filter-select">
-                                <option value="2026" selected>2026</option>
-                                <option value="2025">2025</option>
-                                <option value="2024">2024</option>
+                                <option value="all" selected>All Years</option>
                             </select>
                             <select id="monthFilter" class="filter-select">
                                 <option value="all" selected>All Months</option>
@@ -157,8 +155,22 @@
                         </div>
                     </div>
 
-                    <!-- STATISTICS CONTAINER (4 KPI CARDS) -->
-                    <div class="statistics-container">
+                    <!-- PHO-CONFIRMED HUMAN RABIES OUTBREAK ALERT BANNER -->
+                    <div id="pvoOutbreakAlertBanner" style="display:none; background:#fef2f2; border:1px solid #fecaca; border-left:4px solid #dc2626; border-radius:10px; padding:12px 16px; margin-bottom:16px; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <i class="fa-solid fa-shield-dog" style="color:#dc2626; font-size:18px;"></i>
+                            <div>
+                                <strong style="color:#991b1b; font-size:13.5px;">PHO Rabies Outbreak Trace-Back Alerts (<span id="pvoOutbreakAlertCount">0</span>)</strong>
+                                <div id="pvoOutbreakAlertDetails" style="font-size:12px; color:#7f1d1d;">Awaiting field dispatch</div>
+                            </div>
+                        </div>
+                        <button type="button" id="btnAcknowledgePvoAlert" style="background:#dc2626; color:#fff; border:none; padding:8px 14px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer;">
+                            Dispatch Trace-Back &amp; Acknowledge
+                        </button>
+                    </div>
+
+                    <!-- STATISTICS CONTAINER (5 KPI CARDS INCLUDING HUMAN POPULATION) -->
+                    <div class="statistics-container" style="grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));">
                         <div class="stat-card">
                             <small>TOTAL ANIMAL BITE CASES</small>
                             <h2 id="totalBiteCases">0</h2>
@@ -221,65 +233,6 @@
                                     </thead>
                                     <tbody id="incidentLogTableBody"></tbody>
                                 </table>
-                            </div>
-                        </div>
-
-                        <div class="dashboard-card epi-summary-card">
-                            <div class="card-header">
-                                <h3>Epidemiological Summary</h3>
-                            </div>
-
-                            <div class="epi-section">
-                                <div class="epi-section-title">
-                                    <span>Exposure Stratification</span>
-                                    <small>WHO/DOH Risk</small>
-                                </div>
-                                <div class="progress-stacked">
-                                    <div class="bar bar-cat3" style="width: 55%;">55%</div>
-                                    <div class="bar bar-cat2" style="width: 35%;">35%</div>
-                                    <div class="bar bar-cat1" style="width: 10%;">10%</div>
-                                </div>
-                                <div class="epi-legend">
-                                    <span><i class="dot cat3-dot"></i> Cat III</span>
-                                    <span><i class="dot cat2-dot"></i> Cat II</span>
-                                    <span><i class="dot cat1-dot"></i> Cat I</span>
-                                </div>
-                            </div>
-
-                            <div class="epi-section">
-                                <div class="epi-section-title">
-                                    <span>Reservoir Host Dynamics</span>
-                                </div>
-                                <div class="metric-row">
-                                    <div class="metric-box">
-                                        <small>Stray / Unknown</small>
-                                        <strong class="text-orange">42%</strong>
-                                    </div>
-                                    <div class="metric-box">
-                                        <small>Domestic Owned</small>
-                                        <strong>58%</strong>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="epi-section">
-                                <div class="epi-section-title">
-                                    <span>14-Day Animal Observation</span>
-                                </div>
-                                <ul class="quarantine-list">
-                                    <li>
-                                        <span>Under Active Observation</span>
-                                        <span class="count-badge warning">12</span>
-                                    </li>
-                                    <li>
-                                        <span>Completed &amp; Cleared</span>
-                                        <span class="count-badge success">48</span>
-                                    </li>
-                                    <li>
-                                        <span>Died / Symptomatic</span>
-                                        <span class="count-badge danger">2</span>
-                                    </li>
-                                </ul>
                             </div>
                         </div>
                     </div>

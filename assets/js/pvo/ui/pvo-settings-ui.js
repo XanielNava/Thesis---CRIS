@@ -158,12 +158,13 @@ function initFileUploaders() {
             const buffer = await file.arrayBuffer();
             const workbook = XLSX.read(buffer, { type: 'array' });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet);
+            // Use header: 1 or default with header search range to robustly capture PSA tables
+            const json = XLSX.utils.sheet_to_json(sheet, { range: 3 });
 
             if (!json.length) throw new Error('File contains no records.');
 
             await batchSavePopulationData(json, file.name);
-            showToast(`Updated population records for ${json.length} municipalities.`);
+            showToast(`Successfully synchronized municipality population records.`);
             popInput.value = '';
             document.getElementById('popFileName').textContent = 'Click to upload population data (Max 10MB)';
             loadAuditHistory();

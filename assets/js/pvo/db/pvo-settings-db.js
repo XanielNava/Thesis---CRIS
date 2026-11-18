@@ -74,19 +74,56 @@ export async function batchSaveRabiesCases(records, fileName) {
 }
 
 /**
- * Batches uploaded population records to Firestore
+ * Batches uploaded population records to Firestore with robust row filtering & normalization
  */
 export async function batchSavePopulationData(records, fileName) {
     const batch = writeBatch(db);
+    let validRecordsCount = 0;
 
     records.forEach((record) => {
-        const docId = record.municipality.toUpperCase().replace(/\s+/g, '_');
+        // Find municipality key dynamically across potential column name variations
+        const muniKey = Object.keys(record).find(k => 
+            /municipality|city|province|barangay/i.test(k)
+        );
+        const popKey = Object.keys(record).find(k => 
+            /total\s*pop|population/i.test(k)
+        );
+
+        const rawMuni = muniKey ? record[muniKey] : (record.municipality || record.City || record.MUNICIPALITY);
+        const rawPop = popKey ? record[popKey] : (record.totalPopulation || record.population || record.POPULATION);
+
+        if (!rawMuni || typeof rawMuni !== 'string') return;
+
+        const cleanMuni = rawMuni.trim();
+        // Skip metadata headers, total summary rows, or empty lines
+        if (
+            !cleanMuni || 
+            cleanMuni.toUpperCase().includes('TABLE') || 
+            cleanMuni.toUpperCase().includes('PROVINCE, CITY') || 
+            cleanMuni.toUpperCase().includes('ILOILO *') ||
+            cleanMuni.toUpperCase().includes('TOTAL')
+        ) {
+            return;
+        }
+
+        const popValue = Number(String(rawPop).replace(/,/g, '')) || 0;
+        if (popValue <= 0) return;
+
+        const docId = cleanMuni.toUpperCase().replace(/[^A-Z0-9_]+/g, '_');
         const docRef = doc(db, "population_data", docId);
+        
         batch.set(docRef, {
-            ...record,
+            municipality: cleanMuni,
+            totalPopulation: popValue,
             updatedAt: serverTimestamp()
         }, { merge: true });
+
+        validRecordsCount++;
     });
+
+    if (validRecordsCount === 0) {
+        throw new Error("No valid municipality population records could be extracted from the uploaded spreadsheet.");
+    }
 
     await batch.commit();
 
@@ -94,7 +131,7 @@ export async function batchSavePopulationData(records, fileName) {
     await setDoc(doc(collection(db, "import_history")), {
         dataset: "Iloilo Population",
         fileName,
-        recordsCount: records.length,
+        recordsCount: validRecordsCount,
         status: "Completed",
         uploadedAt: serverTimestamp()
     });

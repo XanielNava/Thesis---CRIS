@@ -818,6 +818,7 @@ body {
     padding: 18px;
   }
 }
+
 /* ===== Drawer additions: ITR-aligned sections (append to your registry CSS) ===== */
 
 .drawer-subtitle {
@@ -875,13 +876,15 @@ body {
 /* Vaccination schedule */
 .drawer-schedule-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
     gap: 8px;
     margin-bottom: 10px;
 }
 .drawer-schedule-card {
     display: grid;
     gap: 4px;
+    min-width: 0;
+    overflow: hidden;
     padding: 8px 10px;
     border: 1px solid #f0e2cf;
     border-radius: 8px;
@@ -889,6 +892,14 @@ body {
     text-align: center;
 }
 .drawer-schedule-card .day-title { font-size: 11px; font-weight: 700; color: #EA6113; }
+.drawer-schedule-card input.edit-val {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 6px 6px;
+    font-size: 12px;
+    box-sizing: border-box;
+}
 .drawer-schedule-card.disabled { opacity: 0.45; }
 
 /* Photo block (replaces the old inline styles) */
@@ -907,3 +918,330 @@ body {
 .edit-val.edit-flex { flex-wrap: wrap; gap: 6px; }
 .edit-val.edit-flex > input,
 .edit-val.edit-flex > select { flex: 1 1 120px; min-width: 0; }
+
+/* ================= QR PRE-FILL QUEUE & FACILITY QR POSTER MODALS ================= */
+.btn-secondary-action {
+  background-color: var(--sidebar-bg);
+  color: #ffffff;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  font-family: 'Lato', sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition-smooth);
+  box-shadow: 0 4px 10px rgba(26, 35, 78, 0.16);
+}
+
+.btn-secondary-action:hover {
+  background-color: var(--sunset-orange);
+  color: #ffffff;
+}
+
+.btn-outline-action {
+  background-color: #ffffff;
+  color: var(--sidebar-bg);
+  padding: 10px 16px;
+  border: 1.5px solid var(--border-tint);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  font-family: 'Lato', sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition-smooth);
+}
+
+.btn-outline-action:hover {
+  border-color: var(--sunset-orange);
+  background-color: #fffcf5;
+  color: var(--sunset-orange);
+}
+
+.btn-outline-action i {
+  color: var(--sunset-orange);
+}
+
+.qr-queue-badge {
+  background-color: var(--sunset-yellow);
+  color: var(--text-dark);
+  font-size: 11px;
+  font-weight: 900;
+  padding: 2px 7px;
+  border-radius: 999px;
+  line-height: 1.2;
+}
+
+.qr-queue-badge[hidden] {
+  display: none;
+}
+
+/* Shared CRIS Modal Overlay & Dialog */
+.cris-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 35, 78, 0.65);
+  backdrop-filter: blur(3px);
+  z-index: 2800;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.cris-modal-overlay.open {
+  display: flex;
+}
+
+.cris-modal-card {
+  background: var(--surface);
+  width: 100%;
+  max-width: 660px;
+  max-height: 85vh;
+  border-radius: 14px;
+  border: 1px solid var(--border-tint);
+  box-shadow: 0 20px 35px rgba(26, 35, 78, 0.28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cris-modal-card.cris-modal-sm {
+  max-width: 440px;
+}
+
+.cris-modal-header {
+  background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+  color: #ffffff;
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.cris-modal-header h3 {
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cris-modal-header p {
+  font-size: 12px;
+  opacity: 0.92;
+  margin: 3px 0 0;
+}
+
+.cris-modal-close {
+  background: rgba(255, 255, 255, 0.22);
+  border: none;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--transition-smooth);
+}
+
+.cris-modal-close:hover {
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.cris-modal-body {
+  padding: 18px 22px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: var(--main-bg);
+}
+
+.cris-modal-footer {
+  padding: 14px 22px;
+  border-top: 1px solid var(--border-tint);
+  background: var(--surface);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Pending QR Pre-Fill Cards */
+.qr-prefill-empty {
+  text-align: center;
+  padding: 36px 16px;
+  color: var(--text-muted);
+}
+
+.qr-prefill-empty i {
+  font-size: 32px;
+  color: var(--sunset-gold);
+  margin-bottom: 10px;
+}
+
+.qr-prefill-empty p {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.qr-prefill-empty span {
+  font-size: 12px;
+}
+
+.qr-prefill-item {
+  background: var(--surface);
+  border: 1px solid var(--border-tint);
+  border-left: 4px solid var(--sunset-orange);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 6px rgba(65, 33, 16, 0.04);
+}
+
+.qr-prefill-info {
+  flex: 1;
+  min-width: 220px;
+}
+
+.qr-prefill-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--sidebar-bg);
+  margin-bottom: 4px;
+}
+
+.qr-prefill-meta {
+  font-size: 12.5px;
+  color: var(--text-dark);
+  margin-top: 2px;
+}
+
+.qr-prefill-meta strong {
+  color: var(--text-muted);
+}
+
+.qr-prefill-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-qr-accept {
+  background-color: #15803d;
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Lato', sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition-smooth);
+}
+
+.btn-qr-accept:hover {
+  background-color: #166534;
+}
+
+.btn-qr-delete {
+  background-color: #dc3545;
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Lato', sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition-smooth);
+}
+
+.btn-qr-delete:hover {
+  background-color: #bd2130;
+}
+
+/* Printable Facility QR Poster */
+.facility-qr-poster {
+  border: 2px solid var(--sidebar-bg);
+  border-radius: 14px;
+  padding: 22px 18px;
+  text-align: center;
+  background: #ffffff;
+}
+
+.facility-qr-kicker {
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  color: var(--sunset-orange);
+  text-transform: uppercase;
+}
+
+.facility-qr-title {
+  margin: 8px 0 4px;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--sidebar-bg);
+}
+
+.facility-qr-id {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.facility-qr-box {
+  display: inline-block;
+  padding: 12px;
+  border: 1.5px solid var(--border-tint);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.facility-qr-box img {
+  display: block;
+  width: 210px;
+  height: 210px;
+}
+
+.facility-qr-caption {
+  margin: 14px 0 4px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+.facility-qr-sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
