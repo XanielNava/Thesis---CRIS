@@ -1,16 +1,18 @@
-// itr.js - Individual Treatment Record Registration Controller
-// Conformed to CRIS Master 13-Collection Architecture
+/* ==========================================================================
+   CRIS ABTC MODULE — ITR UI CONTROLLER (itr-ui.js)
+   Handles ITR Form Interactions, PEP Schedule Auto-Calculation, Mobile QR
+   Pre-Fill Population, Photo Preview, and Form Submission.
+   ========================================================================== */
 
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { 
-    doc, getDoc, deleteDoc, collection, addDoc, runTransaction, serverTimestamp 
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import {
+    resolveItrFacilitySession,
+    fetchPreviewRecordNumber,
+    fetchPrefillPatientRecord,
+    saveItrPatientRecord
+} from '../db/itr-db.js';
 
-import { auth, db } from '../firebase/firebase-config.js';
-
-// Session credentials derived from QR badge verification
 let activeFacilityUid = sessionStorage.getItem("activeFacilityId") || null;
-let activePersonnelName = sessionStorage.getItem("activePersonnelName") || "Duty Staff";
+const activePersonnelName = sessionStorage.getItem("activePersonnelName") || "Duty Staff";
 let currentPrefillDocId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -43,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let capturedBase64Photo = null;
 
     // -------------------------------------------------------------------------
-    // 2. HELPER FUNCTIONS
+    // 2. UI HELPER FUNCTIONS
     // -------------------------------------------------------------------------
     function setDefaultConsultTime() {
         if (consultDateTimeInput && !consultDateTimeInput.value) {
@@ -69,6 +71,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     function getPillValue(name) {
         const active = document.querySelector(`.pill-group[data-name="${name}"] .pill.active`);
         return active ? active.dataset.value : '';
+    }
+
+    function setPillValue(name, value) {
+        if (!value) return;
+        const group = document.querySelector(`.pill-group[data-name="${name}"]`);
+        if (!group) return;
+        group.querySelectorAll('.pill').forEach((p) => {
+            p.classList.toggle('active', p.dataset.value.toLowerCase() === String(value).toLowerCase());
+        });
     }
 
     function syncCheckRow(row) {
@@ -138,42 +149,114 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function previewRecordNumber(facilityId) {
+    async function updateRecordNoPreview(facilityId) {
         const recordNoField = document.getElementById('recordNo');
         if (!recordNoField) return;
+        recordNoField.value = await fetchPreviewRecordNumber(facilityId);
+    }
 
-        try {
-            let facilityAcronym = sessionStorage.getItem("activeFacilityAcronym");
-            
-            if (!facilityAcronym && facilityId) {
-                const facilitySnap = await getDoc(doc(db, "facilities", facilityId));
-                if (facilitySnap.exists()) {
-                    const facilityData = facilitySnap.data();
-                    facilityAcronym = facilityData.acronym || facilityData.code || "ABTC";
-                    sessionStorage.setItem("activeFacilityAcronym", facilityAcronym);
-                } else {
-                    facilityAcronym = "ABTC";
-                }
+    /**
+     * Populates ITR inputs from a mobile QR pre-fill document (`patients/{prefillId}`),
+     * supporting both the Flutter app's `patient.*` / `philHealthMembership.*` schema
+     * and the standardized top-level web ITR schema.
+     */
+    function applyPrefillToForm(data) {
+        const p = data.patient || data.patientInfo || {};
+        const addr = data.address || {};
+        const phicData = data.phic || {};
+        const appPhic = data.philHealthMembership || {};
+
+        // 1. Personal Information
+        setVal('lastName', data.lastName || p.lastName);
+        setVal('firstName', data.firstName || p.firstName || data.name);
+        setVal('middleName', data.middleName || p.middleName);
+        setVal('suffix', data.suffix || p.suffix);
+
+        const dob = data.birthday || p.dateOfBirth || '';
+        setVal('birthday', dob);
+
+        const rawAge = data.age ?? p.age;
+        if (rawAge !== undefined && rawAge !== null && rawAge !== '') {
+            setVal('age', rawAge);
+        } else if (dob) {
+            const [y, m, d] = dob.split('-').map(Number);
+            if (y && m && d) {
+                const today = new Date();
+                let years = today.getFullYear() - y;
+                const hadBirthday =
+                    (today.getMonth() + 1 > m) ||
+                    (today.getMonth() + 1 === m && today.getDate() >= d);
+                if (!hadBirthday) years--;
+                setVal('age', Math.max(years, 0));
             }
+        }
 
-            const safeAcronym = (facilityAcronym || "ABTC").toUpperCase();
+        setVal('sex', data.sex || p.sex);
+        setVal('civilStatus', data.civilStatus || p.civilStatus);
+        setVal('religion', data.religion || p.religion);
+        setVal('contactNo', data.contactNo || data.mobileNumber || p.contactNumber || p.contactNo);
+        setVal('spouseName', data.spouseName || p.husbandOrWife);
+        setVal('parentName', data.parentName || p.fatherOrMotherName || p.guardianName);
 
-            let nextIndex = 1;
-            try {
-                const counterSnap = await getDoc(doc(db, "facility_counters", facilityId));
-                if (counterSnap.exists()) {
-                    nextIndex = (counterSnap.data().currentSequence || 0) + 1;
+        // 2. Address
+        setVal('houseStreet', addr.houseStreet || p.streetAddress || data.houseStreet || data.street);
+        setVal('barangay', addr.barangay || p.barangay || data.barangay);
+        setVal('cityMunicipality', addr.cityMunicipality || p.municipality || data.cityMunicipality || data.municipality);
+        setVal('province', addr.province || p.province || data.province || 'Iloilo');
+
+        // 3. PhilHealth Categories
+        if (phicData.categories && typeof phicData.categories === 'object') {
+            Object.entries(phicData.categories).forEach(([key, fields]) => {
+                setCheckRow('phic', key, true, fields || {});
+            });
+        }
+
+        if (Array.isArray(appPhic.selections)) {
+            const labelToKey = {
+                'nhts': 'nhts',
+                '4ps': 'fourPs',
+                'senior citizen': 'seniorCitizen',
+                'lgu sponsored': 'lguSponsored',
+                'others': 'others'
+            };
+
+            appPhic.selections.forEach((label) => {
+                const key = labelToKey[String(label).toLowerCase().trim()];
+                if (key) {
+                    const extraFields =
+                        key === 'others' && appPhic.otherSpecify
+                            ? { details: appPhic.otherSpecify }
+                            : {};
+                    setCheckRow('phic', key, true, extraFields);
                 }
-            } catch (ce) {
-                console.warn("Facility counter fallback:", ce);
-            }
+            });
+        }
 
-            const paddedSeq = String(nextIndex).padStart(3, '0');
-            const year = new Date().getFullYear();
-            recordNoField.value = `${safeAcronym} - ${year} - ${paddedSeq}`;
-        } catch (err) {
-            console.error("Counter preview error:", err);
-            recordNoField.value = `ABTC - 2026 - 001`;
+        if (phicData.membership) {
+            setPillValue('phicMembership', phicData.membership);
+        }
+
+        // 4. Optional Exposure / Animal Fields (if present)
+        const animalObj = data.animal || {};
+        const rawAnimal = data.animalType || animalObj.species || animalObj.type || '';
+        if (rawAnimal && animalType) {
+            const knownOption = Array.from(animalType.options).some(
+                (opt) => opt.value.toLowerCase() === rawAnimal.toLowerCase()
+            );
+            if (knownOption) {
+                animalType.value = rawAnimal;
+            } else {
+                animalType.value = 'Other';
+                setVal('animalOther', rawAnimal);
+            }
+            toggleAnimalOther();
+        }
+
+        if (data.animalStatus || animalObj.ownership) {
+            setVal('animalStatus', data.animalStatus || animalObj.ownership);
+        }
+        if (data.biteArea) {
+            setVal('biteArea', Array.isArray(data.biteArea) ? data.biteArea.join(', ') : data.biteArea);
         }
     }
 
@@ -184,47 +267,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     setDefaultConsultTime();
 
     if (activeFacilityUid) {
-        await previewRecordNumber(activeFacilityUid);
+        await updateRecordNoPreview(activeFacilityUid);
     }
 
-    if (auth) {
-        onAuthStateChanged(auth, async (user) => {
-            if (user && !activeFacilityUid) {
-                try {
-                    const userSnap = await getDoc(doc(db, "users", user.uid));
-                    if (userSnap.exists() && userSnap.data().facilityId) {
-                        activeFacilityUid = userSnap.data().facilityId;
-                    } else {
-                        activeFacilityUid = user.uid;
-                    }
-                } catch (e) {
-                    activeFacilityUid = user.uid;
-                }
-                sessionStorage.setItem("activeFacilityId", activeFacilityUid);
-                await previewRecordNumber(activeFacilityUid);
-            }
-        });
-    }
+    resolveItrFacilitySession(async (resolvedId) => {
+        if (resolvedId) {
+            activeFacilityUid = resolvedId;
+            await updateRecordNoPreview(activeFacilityUid);
+        }
+    });
 
     const urlParams = new URLSearchParams(window.location.search);
     currentPrefillDocId = urlParams.get("prefillId");
     if (currentPrefillDocId) {
         try {
-            const docRef = doc(db, "patient-database", currentPrefillDocId);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                setVal('lastName', data.lastName);
-                setVal('firstName', data.firstName || data.name);
-                setVal('middleName', data.middleName);
-                setVal('age', data.age);
-                setVal('sex', data.sex);
-                setVal('contactNo', data.contactNo || data.mobileNumber);
-                setVal('houseStreet', data.houseStreet || data.street);
-                setVal('barangay', data.barangay);
-                setVal('cityMunicipality', data.cityMunicipality || data.municipality);
-                setVal('province', data.province || 'Iloilo');
-                setVal('biteArea', Array.isArray(data.biteArea) ? data.biteArea[0] : (data.biteArea || ''));
+            const prefillData = await fetchPrefillPatientRecord(currentPrefillDocId);
+            if (prefillData) {
+                applyPrefillToForm(prefillData);
+            } else {
+                console.warn("Pre-fill document not found in patients:", currentPrefillDocId);
             }
         } catch (err) {
             console.warn("Intake prefill error:", err);
@@ -242,10 +303,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const [y, m, d] = birthdayInput.value.split('-').map(Number);
             const today = new Date();
             let years = today.getFullYear() - y;
-            const hasHadBirthday = 
-                (today.getMonth() + 1 > m) || 
+            const hasHadBirthday =
+                (today.getMonth() + 1 > m) ||
                 (today.getMonth() + 1 === m && today.getDate() >= d);
-            if (!hasHadBirthday) years--;
+            if (!hadBirthday) years--;
             ageInput.value = Math.max(years, 0);
         });
 
@@ -333,7 +394,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // -------------------------------------------------------------------------
-    // 5. SCHEMA-CONFORMED PERSISTENCE ENGINE
+    // 5. FORM COLLECTION & SUBMISSION HANDLER
     // -------------------------------------------------------------------------
     async function handleTreatmentRecordSave(e) {
         if (e) {
@@ -365,30 +426,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            let acronym = (sessionStorage.getItem("activeFacilityAcronym") || "ABTC").toUpperCase();
-            let generatedCustomId = "";
-
-            // 1. Transactional Counter Management
-            try {
-                const counterDocRef = doc(db, "facility_counters", resolvedFacilityId);
-                await runTransaction(db, async (transaction) => {
-                    const counterDoc = await transaction.get(counterDocRef);
-                    let currentSeq = counterDoc.exists() ? (counterDoc.data().currentSequence || 0) : 0;
-                    const nextIndex = currentSeq + 1;
-                    generatedCustomId = `${acronym}-${String(nextIndex).padStart(3, '0')}`;
-                    transaction.set(counterDocRef, { 
-                        currentSequence: nextIndex,
-                        lastUpdated: serverTimestamp() 
-                    }, { merge: true });
-                });
-            } catch (counterError) {
-                console.warn("Counter transaction bypassed, using fallback timestamp ID:", counterError);
-                generatedCustomId = `${acronym}-${Date.now().toString().slice(-4)}`;
-            }
-
             const selectedAnimal = animalType.value === 'Other' ? getVal('animalOther') : animalType.value;
             const exposureCatValue = getPillValue('exposureCategory');
-            const fullItrDisplayString = getVal('recordNo') || generatedCustomId;
 
             const mName = getVal('middleName');
             const suffix = getVal('suffix');
@@ -410,17 +449,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .filter(Boolean)
                 .join(' + ');
 
-            // 2. Exact Architecture Schema Mapping
-            const patientDataPayload = {
-                // Identity & Relational Keys
-                recordNo: generatedCustomId,
-                caseId: generatedCustomId,
-                patientId: generatedCustomId,
-                itrDisplayNo: fullItrDisplayString,
-                facilityId: resolvedFacilityId,
-                facilityAcronym: acronym,
-                status: "Active",
-                currentDayDose: "Day 0",
+            const formPayload = {
+                itrDisplayNo: getVal('recordNo'),
 
                 // Demographics
                 lastName: lName,
@@ -465,7 +495,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     woundTypes: getCheckedMap('woundType')
                 },
 
-                // Backward-compatibility top-level fields for existing queries
+                // Top-level convenience fields
                 exposureType: selectedAnimal ? `${selectedAnimal} Exposure` : "Animal Exposure",
                 classification: exposureCatValue ? `Category ${exposureCatValue}` : "Unclassified",
                 exposureDate: getVal('exposureDate'),
@@ -476,7 +506,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 physician: getVal('physician') || activePersonnelName,
                 recordedBy: activePersonnelName,
 
-                // Vitals (Cast to numeric types)
+                // Vitals
                 vitalSigns: {
                     bp: getVal('bp') || null,
                     weightKg: parseFloat(getVal('weight')) || null,
@@ -512,37 +542,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 completedDoses: ["day0"],
 
                 // Photo Guard
-                woundPhotoData: (capturedBase64Photo && capturedBase64Photo.length < 800000) 
-                    ? capturedBase64Photo 
-                    : null,
-
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
-
-                // Audit History Sub-array
-                historyLogs: [
-                    {
-                        action: "Record Registered",
-                        timestamp: new Date().toISOString(),
-                        personnel: activePersonnelName,
-                        details: `Initial consultation completed under ITR No. ${fullItrDisplayString}. Day 0 administered.`
-                    }
-                ]
+                woundPhotoData: (capturedBase64Photo && capturedBase64Photo.length < 800000)
+                    ? capturedBase64Photo
+                    : null
             };
 
-            // 3. Write to primary patient collection
-            await addDoc(collection(db, "patients"), patientDataPayload);
+            const saved = await saveItrPatientRecord({
+                facilityId: resolvedFacilityId,
+                personnelName: activePersonnelName,
+                prefillDocId: currentPrefillDocId,
+                formPayload
+            });
 
-            // 4. Remove intake queue item if coming from prefill
-            if (currentPrefillDocId) {
-                try {
-                    await deleteDoc(doc(db, "patients", currentPrefillDocId));
-                } catch (cleanupErr) {
-                    console.warn("Intake queue cleanup bypassed:", cleanupErr);
-                }
-            }
-
-            alert(`Record Saved Successfully!\nITR No: ${fullItrDisplayString}\nPatient: ${parsedFullName}`);
+            alert(`Record Saved Successfully!\nITR No: ${saved.itrDisplayNo}\nCase ID: ${saved.caseId}\nPatient: ${saved.fullName}`);
             window.location.href = "abtc-reg.html";
 
         } catch (error) {

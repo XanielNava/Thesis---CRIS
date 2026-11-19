@@ -119,6 +119,16 @@
                         <option value="Category III">Category III</option>
                     </select>
 
+                    <button type="button" id="btnOpenQrPrefillModal" class="btn-secondary-action">
+                        <i class="fa-solid fa-file-import"></i>
+                        <span>QR Pre-Fill Forms</span>
+                        <span id="qrPrefillBadge" class="qr-queue-badge" hidden>0</span>
+                    </button>
+
+                    <button type="button" id="btnOpenFacilityQrPoster" class="btn-outline-action">
+                        <i class="fa-solid fa-qrcode"></i>
+                        <span>Facility QR Code</span>
+                    </button>
                     <button id="openPatientModalBtn" class="btn-primary-action" onclick="window.location.href='itr.html'">
                         <i class="fa-solid fa-user-plus"></i> Add New Patient
                     </button>
@@ -143,7 +153,7 @@
                                 </tr>
                             </thead>
                             <tbody id="patientRegistryTableBody">
-                                <!-- Dynamically streamed rows via abtc-reg.js -->
+                                <!-- Dynamically streamed rows via abtc-reg-ui.js -->
                             </tbody>
                         </table>
                     </div>
@@ -176,7 +186,7 @@
 
     <div class="drawer-print-heading">
         <h1>Individual Treatment Record</h1>
-        <p>Western Visayas Medical Center &mdash; Animal Bite Treatment Center</p>
+        <p id="drawerPrintFacility">Animal Bite Treatment Center</p>
     </div>
 
     <form id="drawerEditForm" onsubmit="return false;">
@@ -284,7 +294,7 @@
             <label>Membership</label>
             <span class="view-val" id="lblPhicMembership">N/A</span>
             <select class="edit-val" id="editPhicMembership">
-                <option value="">Select</option>
+                <option value="None">None</option>
                 <option value="Member">Member</option>
                 <option value="Dependent">Dependent</option>
             </select>
@@ -460,7 +470,7 @@
             <span id="lblCompletedDoses">None</span>
         </div>
     </div>
-
+    
     <!-- 7. Wound Photo -->
     <div class="drawer-section-title"><i class="fa-solid fa-camera"></i> Photo Documentation of Wound</div>
     <div class="drawer-photo-frame" id="lblPhotoFrame">
@@ -471,7 +481,7 @@
     <!-- 8. Case Revision & Activity History -->
     <div class="drawer-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Case Revision &amp; Activity History</div>
     <div class="history-timeline" id="lblHistoryTimeline">
-        <!-- Dynamically populated via abtc-reg.js -->
+        <!-- Dynamically populated via abtc-reg-ui.js -->
     </div>
 
     <div class="drawer-sig-row">
@@ -500,12 +510,52 @@
     </div>
 </div>
 
-<!-- INLINE SCRIPT FOR SIDEBAR TOGGLE TESTING -->
+<!-- ================= INCOMING QR PRE-FILL QUEUE MODAL ================= -->
+<div id="qrPrefillModal" class="cris-modal-overlay">
+    <div class="cris-modal-card">
+        <div class="cris-modal-header">
+            <div>
+                <h3><i class="fa-solid fa-file-import"></i> Incoming QR Patient Pre-Fill Forms</h3>
+                <p>Selecting Add Patient opens the ITR with the patient's personal details pre-filled.</p>
+            </div>
+            <button type="button" id="btnCloseQrPrefillModal" class="cris-modal-close" aria-label="Close">&times;</button>
+        </div>
+        <div id="qrPrefillListContainer" class="cris-modal-body"></div>
+    </div>
+</div>
 
-<script type="module" src="../../assets/js/abtc/abtc-reg.js"></script>
+<!-- ================= PRINTABLE FACILITY QR POSTER MODAL ================= -->
+<div id="facilityQrPosterModal" class="cris-modal-overlay">
+    <div class="cris-modal-card cris-modal-sm">
+        <div class="cris-modal-header">
+            <div>
+                <h3><i class="fa-solid fa-qrcode"></i> Facility ITR QR Code</h3>
+                <p>Post at your triage desk for mobile patient pre-fill.</p>
+            </div>
+            <button type="button" id="btnCloseFacilityQrPoster" class="cris-modal-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="cris-modal-body">
+            <div id="printableFacilityQrPoster" class="facility-qr-poster">
+                <div class="facility-qr-kicker">Community-Centric Rabies Intelligence System</div>
+                <h2 id="qrPosterFacilityName" class="facility-qr-title">ABTC Facility</h2>
+                <div id="qrPosterFacilityId" class="facility-qr-id">Facility ID: ---</div>
+                <div id="facilityQrImageBox" class="facility-qr-box"></div>
+                <p class="facility-qr-caption">Scan with the CRIS Mobile App</p>
+                <p class="facility-qr-sub">
+                    Automatically links your personal information to this clinic's Individual Treatment Record (ITR).
+                </p>
+            </div>
+        </div>
+        <div class="cris-modal-footer">
+            <button type="button" class="btn-outline-action" id="btnCloseFacilityQrFooter">Close</button>
+            <button type="button" class="btn-primary-action" id="btnPrintFacilityQrPoster">
+                <i class="fa-solid fa-print"></i> Print Poster
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="../../assets/js/abtc/ui/abtc-reg-ui.js"></script>
 <script type="module" src="../../assets/js/main/sidebar.js"></script>
-
-
-
 </body>
 </html>

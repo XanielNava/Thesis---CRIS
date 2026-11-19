@@ -181,17 +181,29 @@
                     </section>
 
                     <!-- RIGHT COLUMN: SYSTEM NOTICES & QUICK VACCINE TRACKER -->
+                   <!-- RIGHT COLUMN: FACILITY CALENDAR & ADMIN ANNOUNCEMENTS -->
                     <aside class="side-panel">
+                        <div class="card home-calendar-card">
+                            <div class="home-cal-header">
+                                <button type="button" id="homeCalPrevBtn" class="home-cal-nav" aria-label="Previous Month">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <span id="homeCalMonthLabel" class="home-cal-month">November 2026</span>
+                                <button type="button" id="homeCalNextBtn" class="home-cal-nav" aria-label="Next Month">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+
+                            <div class="home-cal-weekdays">
+                                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                            </div>
+
+                            <div id="homeCalDaysGrid" class="home-cal-days"></div>
+                        </div>
+
                         <div class="card notice-card">
-                            <h3><i class="fa-solid fa-bullhorn"></i> ABTC Announcements</h3>
-                            <div class="notice-item warning">
-                                <strong><i class="fa-solid fa-box-archive"></i> Vaccine Inventory Notice</strong>
-                                <p>Check active cold-chain stock expiration dates routinely and prioritize older batches.</p>
-                            </div>
-                            <div class="notice-item info">
-                                <strong><i class="fa-solid fa-shield-cat"></i> PHO Coordination</strong>
-                                <p>Ensure all Category III exposure cases and immunoglobulin dosages are logged promptly.</p>
-                            </div>
+                            <h3 id="homeSelectedDateLabel" class="home-selected-date">Today</h3>
+                            <div id="homeDateAnnouncementsList"></div>
                         </div>
                     </aside>
 
@@ -243,8 +255,8 @@
     </div>
 
     <!-- Page Controller -->
-    <script type="module" src="../../assets/js/abtc/abtc-home.js"></script>
-    
+<!-- Page Controller -->
+    <script type="module" src="../../assets/js/abtc/ui/abtc-home-ui.js"></script>    
     <!-- Universal Sidebar Controller -->
     <script src="../../assets/js/main/sidebar.js"></script>
 

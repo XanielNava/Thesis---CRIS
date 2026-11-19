@@ -107,10 +107,6 @@
                 <h1>HEATMAPS</h1>
                 <p>Spatial distribution of animal bite cases and rabies deaths across Iloilo Province</p>
             </div>
-            <!-- <div class="header-chip">
-                <i class="fa-solid fa-satellite"></i>
-                <span>Satellite view</span>
-            </div> -->
         </header>
 
         <!-- FILTERS -->
@@ -145,7 +141,7 @@
             </div>
         </section>
 
-        <!-- STATISTICS -->
+        <!-- PHO STATISTICS (Prevalence Rate & Incidents Rate) -->
         <section class="statistics-container" aria-label="Summary statistics">
             <article class="stat-card">
                 <div class="stat-icon icon-blue"><i class="fa-solid fa-users"></i></div>
@@ -155,24 +151,24 @@
                 </div>
             </article>
             <article class="stat-card">
-                <div class="stat-icon icon-amber"><i class="fa-solid fa-paw"></i></div>
+                <div class="stat-icon icon-orange"><i class="fa-solid fa-chart-line"></i></div>
                 <div class="stat-body">
-                    <small>Animal Bite Incidence (per 100k Pop.)</small>
-                    <h2 id="incidentsRate">0.0 /100k</h2>
+                    <small>Prevalence Rate</small>
+                    <h2 id="prevalenceRate">0.00%</h2>
                 </div>
             </article>
             <article class="stat-card">
-                <div class="stat-icon icon-orange"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="stat-icon icon-amber"><i class="fa-solid fa-paw"></i></div>
                 <div class="stat-body">
-                    <small>Bite Exposure Rate (% of Pop.)</small>
-                    <h2 id="prevalenceRate">0.000%</h2>
+                    <small>Incidents Rate</small>
+                    <h2 id="incidentsRate">0.00%</h2>
                 </div>
             </article>
             <article class="stat-card">
                 <div class="stat-icon icon-red"><i class="fa-solid fa-skull-crossbones"></i></div>
                 <div class="stat-body">
-                    <small>Human Rabies Mortality (per 100k Pop.)</small>
-                    <h2 id="mortalityRate">0.00 /100k</h2>
+                    <small>Mortality Rate</small>
+                    <h2 id="mortalityRate">0.00%</h2>
                 </div>
             </article>
         </section>
@@ -182,7 +178,6 @@
             <div class="map-wrapper">
                 <div id="map" role="region" aria-label="Map of reported cases"></div>
 
-                <!-- Basemap switcher -->
                 <div class="basemap-switcher" role="group" aria-label="Map style">
                     <button type="button" class="basemap-btn is-active" data-basemap="satellite" aria-pressed="true">
                         <i class="fa-solid fa-satellite"></i> Satellite
@@ -192,7 +187,6 @@
                     </button>
                 </div>
 
-                <!-- Loading state -->
                 <div class="map-state" id="mapLoading" hidden>
                     <div class="map-state-card">
                         <i class="fa-solid fa-spinner fa-spin"></i>
@@ -200,7 +194,6 @@
                     </div>
                 </div>
 
-                <!-- Empty / error state -->
                 <div class="map-state map-state-empty" id="mapEmpty" hidden>
                     <div class="map-state-card">
                         <i class="fa-solid fa-circle-info"></i>
@@ -208,7 +201,6 @@
                     </div>
                 </div>
 
-                <!-- Legend -->
                 <div class="heatmap-overlay">
                     <h3>Heatmap Legend</h3>
                     <div class="legend-item" data-legend="bite"><span class="legend-box bite-color"></span>Animal Bite Cases</div>
@@ -240,7 +232,7 @@
 </div>
 
 <!-- Scripts -->
-<script type="module" src="../../assets/js/pho/pho-heat-map.js"></script>
+<script type="module" src="../../assets/js/pho/ui/pho-heatmap-ui.js"></script>
 <script src="../../assets/js/main/sidebar.js"></script>
 </body>
 </html>

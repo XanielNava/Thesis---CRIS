@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHO - Animal Bite Cases Registry</title>
+    <title>PHO - Animal Bite Cases</title>
 
     <!-- Synchronous zero-latency pre-collapse restorer -->
     <script>
@@ -103,30 +103,10 @@
         <main class="main-content">
             <header class="header">
                 <div>
-                    <h1>ANIMAL BITE CASES REGISTRY</h1>
-                    <p class="header-subtitle">Provincial Report of Animal/Rabies Cases &amp; Post-Exposure Prophylaxis Master Ledger</p>
+                    <h1>ANIMAL BITE CASES</h1>
+                    <p class="header-subtitle">Provincial Report of Animal/Rabies Cases per ABTC and Health Facility</p>
                 </div>
             </header>
-
-            <!-- KPI SUMMARY MINI-CARDS -->
-            <div class="ledger-stats-grid">
-                <div class="ledger-stat-card">
-                    <span class="stat-label">Total Bite Exposures</span>
-                    <strong class="stat-value" id="kpiTotalBites">0</strong>
-                </div>
-                <div class="ledger-stat-card">
-                    <span class="stat-label">Vaccinated (TCV)</span>
-                    <strong class="stat-value" id="kpiTotalTcv">0</strong>
-                </div>
-                <div class="ledger-stat-card">
-                    <span class="stat-label">Human Rabies (HR) Deaths</span>
-                    <strong class="stat-value text-danger" id="kpiTotalHr">0</strong>
-                </div>
-                <div class="ledger-stat-card">
-                    <span class="stat-label">PEP Completion Rate</span>
-                    <strong class="stat-value text-success" id="kpiPepRate">0.0%</strong>
-                </div>
-            </div>
 
             <div class="ledger-container">
                 <!-- LEDGER TOOLBAR -->
@@ -233,11 +213,8 @@
         
     </div>
 
-    <!-- ==================== LOGOUT CONFIRMATION MODAL ==================== -->
-    
-
     <!-- Application Module Scripts -->
-    <script type="module" src="../../assets/js/pho/pho-animal-bite-cases.js"></script>
+    <script type="module" src="../../assets/js/pho/ui/pho-abc-ui.js"></script>
     <script src="../../assets/js/main/sidebar.js"></script>
 </body>
 
